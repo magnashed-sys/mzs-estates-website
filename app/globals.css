@@ -743,3 +743,163 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   MZS GROUP — CINEMATIC HOMEPAGE
+   Background image and dark overlay
+   ========================================================= */
+
+.mzs-home.mzs-home-image {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+
+  background-color: #0b0b0a;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(7, 8, 9, 0.82) 0%,
+      rgba(7, 8, 9, 0.68) 35%,
+      rgba(7, 8, 9, 0.32) 72%,
+      rgba(7, 8, 9, 0.42) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(7, 8, 9, 0.72) 0%,
+      transparent 30%,
+      rgba(7, 8, 9, 0.20) 100%
+    ),
+    url("/mzs-hero.png");
+
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* Keep all content above the background */
+
+.mzs-home-image > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Refined headline */
+
+.mzs-home-image .mzs-hero {
+  max-width: 1200px;
+}
+
+.mzs-home-image .mzs-hero h1 {
+  color: #f4f0e7;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Supporting text */
+
+.mzs-home-image .mzs-intro {
+  color: #d0cbc1;
+  max-width: 510px;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mzs-home-image .mzs-kicker {
+  color: #d5c09a;
+}
+
+.mzs-home-image .mzs-selective {
+  color: #bcb3a5;
+}
+
+/* Login buttons */
+
+.mzs-home-image .mzs-button {
+  border-color: rgba(230, 222, 207, 0.58);
+  background: rgba(10, 10, 10, 0.22);
+  color: #f4f0e7;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mzs-home-image .mzs-button:hover {
+  border-color: #f4f0e7;
+  background: #f4f0e7;
+  color: #10100f;
+}
+
+/* Request Access remains more discreet */
+
+.mzs-home-image .mzs-button-subtle {
+  border-color: transparent;
+  background: transparent;
+  color: #e0c69c;
+}
+
+.mzs-home-image .mzs-button-subtle:hover {
+  border-color: rgba(224, 198, 156, 0.5);
+  background: rgba(10, 10, 10, 0.25);
+  color: #f2d9af;
+}
+
+/* Header and footer */
+
+.mzs-home-image .mzs-monogram {
+  color: #e4cfaa;
+}
+
+.mzs-home-image .mzs-group-label,
+.mzs-home-image .mzs-private-label {
+  color: #c1b9a9;
+}
+
+.mzs-home-image .mzs-home-footer {
+  border-top-color: rgba(235, 225, 210, 0.24);
+  color: #c0b8aa;
+}
+
+/* =========================================================
+   MOBILE BACKGROUND OPTIMIZATION
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .mzs-home.mzs-home-image {
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(7, 8, 9, 0.58) 0%,
+        rgba(7, 8, 9, 0.78) 42%,
+        rgba(7, 8, 9, 0.88) 100%
+      ),
+      url("/mzs-hero.png");
+
+    background-position: 60% center;
+    background-attachment: scroll;
+  }
+
+  .mzs-home-image .mzs-hero {
+    padding: 10vh 0 8vh;
+  }
+
+  .mzs-home-image .mzs-hero h1 {
+    font-size: clamp(48px, 14vw, 82px);
+    line-height: 0.94;
+    overflow-wrap: anywhere;
+  }
+
+  .mzs-home-image .mzs-intro {
+    color: #ded7cc;
+  }
+
+  .mzs-home-image .mzs-button {
+    background: rgba(10, 10, 10, 0.40);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mzs-home-image .mzs-button {
+    transition: none;
+  }
+}
+
