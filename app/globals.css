@@ -354,3 +354,184 @@ footer {
     gap: 30px;
   }
 }
+/* MZS GROUP — PUBLIC HOMEPAGE */
+
+.mzs-home {
+  min-height: 100vh;
+  padding: 38px 4.5vw 34px;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(
+      circle at 75% 42%,
+      rgba(184, 151, 93, 0.055),
+      transparent 32%
+    ),
+    #0b0b0a;
+}
+
+.mzs-home-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.mzs-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mzs-monogram {
+  color: #d5c09a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 0.9;
+  letter-spacing: 0.16em;
+}
+
+.mzs-group-label {
+  padding-left: 2px;
+  color: #77736b;
+  font-size: 7px;
+  letter-spacing: 0.52em;
+}
+
+.mzs-private-label {
+  color: #706d66;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mzs-hero {
+  width: 100%;
+  max-width: 1120px;
+  margin: auto;
+  padding: 8vh 0;
+}
+
+.mzs-kicker {
+  margin: 0 0 24px;
+  color: #a99167;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.mzs-hero h1 {
+  margin: 0;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(64px, 8.4vw, 132px);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+}
+
+.mzs-intro {
+  max-width: 540px;
+  margin: 44px 0 0;
+  color: #8f8b82;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.mzs-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 42px;
+}
+
+.mzs-button {
+  min-width: 142px;
+  padding: 15px 19px;
+  border: 1px solid #4b4944;
+  color: #d8d4ca;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.mzs-button:hover {
+  border-color: #d8d4ca;
+  background: #e5e0d5;
+  color: #0b0b0a;
+}
+
+.mzs-button-subtle {
+  border-color: transparent;
+  color: #9f8b68;
+}
+
+.mzs-button-subtle:hover {
+  border-color: #665a45;
+  background: transparent;
+  color: #d5c09a;
+}
+
+.mzs-selective {
+  margin: 22px 0 0;
+  color: #625f59;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.mzs-home-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  padding-top: 24px;
+  border-top: 1px solid #242321;
+  color: #55524d;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 700px) {
+  .mzs-home {
+    padding: 28px 24px 24px;
+  }
+
+  .mzs-private-label {
+    display: none;
+  }
+
+  .mzs-hero {
+    padding: 12vh 0 9vh;
+  }
+
+  .mzs-hero h1 {
+    font-size: 16vw;
+  }
+
+  .mzs-intro {
+    margin-top: 34px;
+    font-size: 12px;
+  }
+
+  .mzs-actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mzs-button {
+    width: 100%;
+  }
+
+  .mzs-home-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    line-height: 1.8;
+  }
+}
