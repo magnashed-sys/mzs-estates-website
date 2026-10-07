@@ -225,4 +225,132 @@ footer {
   }
 }
 
+/* PRIVATE CLIENT AREA */
 
+.private-page {
+  min-height: 100vh;
+  padding: 42px 5vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.private-header {
+  display: flex;
+  justify-content: space-between;
+  color: #9d9a92;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.private-brand {
+  color: #f2f0e9;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+.private-content {
+  width: 100%;
+  max-width: 1050px;
+  margin: 15vh auto auto;
+}
+
+.private-content h1 {
+  max-width: 800px;
+  margin: 15px 0 20px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.private-intro {
+  max-width: 520px;
+  margin: 0 0 70px;
+  color: #8c8982;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.opportunity-card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 34px 0;
+  border-top: 1px solid #484640;
+  border-bottom: 1px solid #484640;
+}
+
+.opportunity-location {
+  margin: 0 0 14px;
+  color: #77746d;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.opportunity-card h2 {
+  margin: 0 0 20px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+}
+
+.offering-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.offering-tags span {
+  padding: 8px 11px;
+  border: 1px solid #484640;
+  color: #aaa79e;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.opportunity-link {
+  flex-shrink: 0;
+  padding-bottom: 4px;
+  color: #d8d5cc;
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.private-footer {
+  margin-top: 80px;
+  color: #77746d;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 700px) {
+  .private-page {
+    padding: 30px 24px;
+  }
+
+  .private-header span {
+    display: none;
+  }
+
+  .private-content {
+    margin-top: 14vh;
+  }
+
+  .private-intro {
+    margin-bottom: 50px;
+  }
+
+  .opportunity-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 30px;
+  }
+}
