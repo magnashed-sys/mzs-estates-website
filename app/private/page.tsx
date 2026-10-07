@@ -1,142 +1,73 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { createClient } from "../../lib/supabase/client";
 
-type Opportunity = {
-  projectId: string;
-  title: string;
-  location: string | null;
-  offerings: string[];
-};
-
-function formatOffering(type: string) {
-  const labels: Record<string, string> = {
-    investment: "Investment Opportunity",
-    financing: "Financing Opportunity",
-    rental: "Private Rental",
-    sale: "Private Sale",
-  };
-
-  return labels[type] ?? type;
-}
-
-export default function PrivatePage() {
-  const router = useRouter();
-
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadPrivateEnvironment() {
-      const supabase = createClient();
-
-      // Check which user is currently authenticated
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // No valid session: return to Client Login
-      if (!user) {
-        router.replace("/login?role=client");
-        return;
-      }
-
-      // Retrieve only projects and offerings assigned
-      // to the currently authenticated user
-      const { data, error } = await supabase.rpc(
-        "get_my_private_opportunities"
-      );
-
-      if (error) {
-        console.error("Unable to load private opportunities:", error);
-        setLoading(false);
-        return;
-      }
-
-      const result: Opportunity[] = (data ?? []).map((project: any) => ({
-        projectId: project.project_id,
-        title: project.title,
-        location: project.location,
-        offerings: (project.offering_types ?? []).map((type: string) =>
-          formatOffering(type)
-        ),
-      }));
-
-      setOpportunities(result);
-      setLoading(false);
-    }
-
-    loadPrivateEnvironment();
-  }, [router]);
-
+export default function Home() {
   return (
-    <main className="private-page">
-      <header className="private-header">
-        <Link href="/" className="private-brand">
-          MZS GROUP
+    <main className="mzs-home">
+      <header className="mzs-home-header">
+        <Link href="/" className="mzs-wordmark">
+          <span className="mzs-monogram">MZS</span>
+          <span className="mzs-group-label">GROUP</span>
         </Link>
 
-        <span>Private Access</span>
+        <span className="mzs-private-label">
+          Private Access
+        </span>
       </header>
 
-      <section className="private-content">
-        <p className="eyebrow">Selected for you</p>
-
-        <h1>Your private opportunities.</h1>
-
-        <p className="private-intro">
-          A curated selection of opportunities available exclusively
-          through MZS Group.
+      <section className="mzs-hero">
+        <p className="mzs-kicker">
+          MZS GROUP
         </p>
 
-        {loading && (
-          <p className="private-intro">
-            Loading your private environment...
-          </p>
-        )}
+        <h1>
+          Private.
+          <br />
+          Independent.
+          <br />
+          International.
+        </h1>
 
-        {!loading && opportunities.length === 0 && (
-          <p className="private-intro">
-            No opportunities are currently assigned to your account.
-          </p>
-        )}
+        <p className="mzs-intro">
+          A private platform connecting selected clients
+          and partners with opportunities across real estate,
+          investment and capital.
+        </p>
 
-        {!loading &&
-          opportunities.map((project) => (
-            <div
-              className="opportunity-card"
-              key={project.projectId}
-            >
-              <div>
-                {project.location && (
-                  <p className="opportunity-location">
-                    {project.location}
-                  </p>
-                )}
+        <div className="mzs-actions">
+          <Link
+            href="/login?role=client"
+            className="mzs-button"
+          >
+            Client Login
+          </Link>
 
-                <h2>{project.title}</h2>
+          <Link
+            href="/login?role=partner"
+            className="mzs-button"
+          >
+            Partner Login
+          </Link>
 
-                <div className="offering-tags">
-                  {project.offerings.map((offering) => (
-                    <span key={offering}>
-                      {offering}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          <Link
+            href="/request-access"
+            className="mzs-button mzs-button-subtle"
+          >
+            Request Access
+          </Link>
+        </div>
 
-              <span className="opportunity-link">
-                View opportunity →
-              </span>
-            </div>
-          ))}
+        <p className="mzs-selective">
+          New relationships are considered on a selective basis.
+        </p>
       </section>
 
-      <footer className="private-footer">
-        Private. Independent. International.
+      <footer className="mzs-home-footer">
+        <span>
+          Amsterdam · Ibiza · Mallorca · Madrid · Alicante ·
+          Dubai · Abu Dhabi
+        </span>
+
+        <span>By invitation only.</span>
       </footer>
     </main>
   );
