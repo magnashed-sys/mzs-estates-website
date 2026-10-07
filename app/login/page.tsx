@@ -1,13 +1,44 @@
 "use client";
 
-import { Suspense } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "../../lib/supabase/client";
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const role =
     searchParams.get("role") === "partner" ? "Partner" : "Private Client";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError("Invalid email or password.");
+      setLoading(false);
+      return;
+    }
+
+    router.push("/private");
+    router.refresh();
+  }
 
   return (
     <main className="login-page">
@@ -28,14 +59,16 @@ function LoginForm() {
           Access your private MZS environment.
         </p>
 
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleLogin}>
           <label>
             Email
             <input
               type="email"
               name="email"
               autoComplete="email"
-              placeholder="name@email.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
             />
           </label>
 
@@ -45,11 +78,17 @@ function LoginForm() {
               type="password"
               name="password"
               autoComplete="current-password"
-              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
             />
           </label>
 
-          <button type="button">Login →</button>
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Login →"}
+          </button>
         </form>
 
         <p className="login-note">
