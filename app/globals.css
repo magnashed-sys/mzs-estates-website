@@ -43,7 +43,7 @@ button {
 
 
 /* =========================================================
-   SHARED ELEMENTS
+   SHARED
    ========================================================= */
 
 .eyebrow {
@@ -160,9 +160,7 @@ button {
   min-width: 142px;
   padding: 15px 19px;
   border: 1px solid #4b4944;
-
   color: #d8d4ca;
-
   font-size: 8px;
   letter-spacing: 0.2em;
   text-align: center;
@@ -193,9 +191,7 @@ button {
 
 .mzs-selective {
   margin: 22px 0 0;
-
   color: #625f59;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: 11px;
   font-style: italic;
@@ -205,13 +201,9 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 30px;
-
   padding-top: 24px;
-
   border-top: 1px solid #242321;
-
   color: #55524d;
-
   font-size: 7px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -225,19 +217,15 @@ button {
 .login-page {
   min-height: 100vh;
   padding: 38px 4.5vw;
-
   display: flex;
   flex-direction: column;
-
   background: #0b0b0a;
 }
 
 .login-header {
   display: flex;
   justify-content: space-between;
-
   color: #706d66;
-
   font-size: 8px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -245,7 +233,6 @@ button {
 
 .login-brand {
   color: #d5c09a;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
   letter-spacing: 0.15em;
@@ -259,9 +246,7 @@ button {
 
 .login-container h1 {
   margin: 15px 0 12px;
-
   color: #ece8df;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(48px, 6vw, 76px);
   font-weight: 400;
@@ -271,9 +256,7 @@ button {
 
 .login-intro {
   margin: 0 0 50px;
-
   color: #8f8b82;
-
   font-size: 13px;
   line-height: 1.8;
 }
@@ -285,7 +268,6 @@ button {
 
 .login-form label {
   color: #8f8b82;
-
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -293,20 +275,14 @@ button {
 
 .login-form input {
   display: block;
-
   width: 100%;
-
   margin-top: 10px;
   padding: 14px 0;
-
   border: 0;
   border-bottom: 1px solid #46443f;
-
   outline: none;
-
   background: transparent;
   color: #ece8df;
-
   font-size: 15px;
 }
 
@@ -316,17 +292,12 @@ button {
 
 .login-form button {
   width: fit-content;
-
   margin-top: 10px;
   padding: 15px 22px;
-
   border: 1px solid #665a45;
-
   background: transparent;
   color: #d5c09a;
-
   cursor: pointer;
-
   font-size: 8px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -348,16 +319,13 @@ button {
 
 .login-note {
   margin-top: 35px;
-
   color: #625f59;
-
   font-size: 11px;
   line-height: 1.7;
 }
 
 .login-footer {
   color: #55524d;
-
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -371,19 +339,15 @@ button {
 .private-page {
   min-height: 100vh;
   padding: 38px 4.5vw;
-
   display: flex;
   flex-direction: column;
-
   background: #0b0b0a;
 }
 
 .private-header {
   display: flex;
   justify-content: space-between;
-
   color: #706d66;
-
   font-size: 8px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -391,7 +355,6 @@ button {
 
 .private-brand {
   color: #d5c09a;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
   letter-spacing: 0.15em;
@@ -400,17 +363,13 @@ button {
 .private-content {
   width: 100%;
   max-width: 1050px;
-
   margin: 15vh auto auto;
 }
 
 .private-content h1 {
   max-width: 800px;
-
   margin: 15px 0 20px;
-
   color: #ece8df;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(52px, 7vw, 96px);
   font-weight: 400;
@@ -420,11 +379,8 @@ button {
 
 .private-intro {
   max-width: 520px;
-
   margin: 0 0 70px;
-
   color: #8c8982;
-
   font-size: 13px;
   line-height: 1.8;
 }
@@ -433,11 +389,8 @@ button {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-
   gap: 40px;
-
   padding: 34px 0;
-
   border-top: 1px solid #3d3b37;
   border-bottom: 1px solid #3d3b37;
 }
@@ -448,9 +401,7 @@ button {
 
 .opportunity-location {
   margin: 0 0 14px;
-
   color: #77746d;
-
   font-size: 8px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -458,9 +409,7 @@ button {
 
 .opportunity-card h2 {
   margin: 0 0 20px;
-
   color: #ece8df;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(32px, 4vw, 52px);
   font-weight: 400;
@@ -474,11 +423,8 @@ button {
 
 .offering-tags span {
   padding: 8px 11px;
-
   border: 1px solid #484640;
-
   color: #aaa79e;
-
   font-size: 8px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -486,11 +432,8 @@ button {
 
 .opportunity-link {
   flex-shrink: 0;
-
   padding-bottom: 4px;
-
   color: #d5c09a;
-
   font-size: 8px;
   letter-spacing: 0.17em;
   text-transform: uppercase;
@@ -498,9 +441,7 @@ button {
 
 .private-footer {
   margin-top: 80px;
-
   color: #55524d;
-
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -513,7 +454,6 @@ button {
 
 .request-page {
   min-height: 100vh;
-
   padding: 38px 4.5vw;
 
   background:
@@ -528,9 +468,7 @@ button {
 .request-header {
   display: flex;
   justify-content: space-between;
-
   color: #706d66;
-
   font-size: 8px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -538,7 +476,6 @@ button {
 
 .request-brand {
   color: #d5c09a;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
   letter-spacing: 0.15em;
@@ -548,16 +485,13 @@ button {
 .request-success {
   width: 100%;
   max-width: 780px;
-
   margin: 13vh auto 0;
 }
 
 .request-container h1,
 .request-success h1 {
   margin: 14px 0 20px;
-
   color: #ece8df;
-
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(52px, 7vw, 90px);
   font-weight: 400;
@@ -568,9 +502,7 @@ button {
 .request-intro,
 .request-success p {
   max-width: 540px;
-
   color: #8f8b82;
-
   font-size: 13px;
   line-height: 1.8;
 }
@@ -578,21 +510,18 @@ button {
 .request-form {
   display: grid;
   gap: 38px;
-
   margin-top: 55px;
 }
 
 .request-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-
   gap: 28px 40px;
 }
 
 .request-form label,
 .request-interests legend {
   color: #8f8b82;
-
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -601,20 +530,14 @@ button {
 .request-form input,
 .request-form textarea {
   display: block;
-
   width: 100%;
-
   margin-top: 10px;
   padding: 13px 0;
-
   border: 0;
   border-bottom: 1px solid #46443f;
-
   outline: none;
-
   background: transparent;
   color: #ece8df;
-
   font-family: inherit;
   font-size: 15px;
 }
@@ -631,7 +554,6 @@ button {
 .request-interests {
   margin: 0;
   padding: 0;
-
   border: 0;
 }
 
@@ -639,17 +561,13 @@ button {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-
   margin-top: 15px;
 }
 
 .interest-option {
   padding: 11px 14px;
-
   border: 1px solid #3e3c38;
-
   color: #8f8b82;
-
   cursor: pointer;
 
   transition:
@@ -679,16 +597,11 @@ button {
 
 .request-form button {
   width: fit-content;
-
   padding: 15px 22px;
-
   border: 1px solid #665a45;
-
   background: transparent;
   color: #d5c09a;
-
   cursor: pointer;
-
   font-size: 8px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -710,20 +623,15 @@ button {
 
 .request-success-note {
   margin-top: 20px;
-
   color: #625f59 !important;
-
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
 }
 
 .request-return {
   display: inline-block;
-
   margin-top: 35px;
-
   color: #d5c09a;
-
   font-size: 8px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -762,7 +670,6 @@ button {
   .mzs-actions {
     align-items: stretch;
     flex-direction: column;
-
     width: 100%;
   }
 
@@ -773,7 +680,6 @@ button {
   .mzs-home-footer {
     align-items: flex-start;
     flex-direction: column;
-
     line-height: 1.8;
   }
 
@@ -814,7 +720,6 @@ button {
   .opportunity-card {
     align-items: flex-start;
     flex-direction: column;
-
     gap: 30px;
   }
 
@@ -831,4 +736,11 @@ button {
 
   .request-container,
   .request-success {
-    margin-top: 11vh
+    margin-top: 11vh;
+  }
+
+  .request-grid {
+    grid-template-columns: 1fr;
+  }
+}
+``
