@@ -33,71 +33,37 @@ export default function PrivatePage() {
     async function loadPrivateEnvironment() {
       const supabase = createClient();
 
+      // Check which user is currently authenticated
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      // No valid session: return to Client Login
       if (!user) {
         router.replace("/login?role=client");
         return;
       }
 
-      const { data: projectAccess, error: projectError } = await supabase
-        .from("project_access")
-        .select(`
-          project_id,
-          projects (
-            id,
-            title,
-            location
-          )
-        `)
-        .eq("user_id", user.id);
+      // Retrieve only projects and offerings assigned
+      // to the currently authenticated user
+      const { data, error } = await supabase.rpc(
+        "get_my_private_opportunities"
+      );
 
-      if (projectError) {
-        console.error(projectError);
+      if (error) {
+        console.error("Unable to load private opportunities:", error);
         setLoading(false);
         return;
       }
 
-      const { data: offeringAccess, error: offeringError } = await supabase
-        .from("offering_access")
-        .select(`
-          offering_id,
-          offerings (
-            id,
-            project_id,
-            offering_type
-          )
-        `)
-        .eq("user_id", user.id);
-
-      if (offeringError) {
-        console.error(offeringError);
-        setLoading(false);
-        return;
-      }
-
-      const result: Opportunity[] = (projectAccess ?? []).map((access: any) => {
-        const project = access.projects;
-
-        const offerings = (offeringAccess ?? [])
-          .map((item: any) => item.offerings)
-          .filter(
-            (offering: any) =>
-              offering && offering.project_id === access.project_id
-          )
-          .map((offering: any) =>
-            formatOffering(offering.offering_type)
-          );
-
-        return {
-          projectId: access.project_id,
-          title: project?.title ?? "Private Opportunity",
-          location: project?.location ?? null,
-          offerings,
-        };
-      });
+      const result: Opportunity[] = (data ?? []).map((project: any) => ({
+        projectId: project.project_id,
+        title: project.title,
+        location: project.location,
+        offerings: (project.offering_types ?? []).map((type: string) =>
+          formatOffering(type)
+        ),
+      }));
 
       setOpportunities(result);
       setLoading(false);
@@ -127,7 +93,9 @@ export default function PrivatePage() {
         </p>
 
         {loading && (
-          <p className="private-intro">Loading your private environment...</p>
+          <p className="private-intro">
+            Loading your private environment...
+          </p>
         )}
 
         {!loading && opportunities.length === 0 && (
@@ -138,7 +106,10 @@ export default function PrivatePage() {
 
         {!loading &&
           opportunities.map((project) => (
-            <div className="opportunity-card" key={project.projectId}>
+            <div
+              className="opportunity-card"
+              key={project.projectId}
+            >
               <div>
                 {project.location && (
                   <p className="opportunity-location">
@@ -150,7 +121,9 @@ export default function PrivatePage() {
 
                 <div className="offering-tags">
                   {project.offerings.map((offering) => (
-                    <span key={offering}>{offering}</span>
+                    <span key={offering}>
+                      {offering}
+                    </span>
                   ))}
                 </div>
               </div>
