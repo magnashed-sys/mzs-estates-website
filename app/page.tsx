@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="mzs-home">
+    <main className="mzs-home mzs-home-image">
       <header className="mzs-home-header">
         <Link href="/" className="mzs-wordmark">
           <span className="mzs-monogram">MZS</span>
@@ -16,9 +16,7 @@ export default function Home() {
       </header>
 
       <section className="mzs-hero">
-        <p className="mzs-kicker">
-          MZS GROUP
-        </p>
+        <p className="mzs-kicker">MZS GROUP</p>
 
         <h1>
           Private.
@@ -53,7 +51,7 @@ export default function Home() {
             href="/request-access"
             className="mzs-button mzs-button-subtle"
           >
-            Request Access
+            Request Access →
           </Link>
         </div>
 
@@ -63,11 +61,7 @@ export default function Home() {
       </section>
 
       <footer className="mzs-home-footer">
-        <span>
-          Amsterdam · Ibiza · Mallorca · Madrid · Alicante ·
-          Dubai · Abu Dhabi
-        </span>
-
+        <span>Amsterdam · Ibiza · International</span>
         <span>By invitation only.</span>
       </footer>
     </main>
