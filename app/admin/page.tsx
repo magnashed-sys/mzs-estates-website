@@ -1,6 +1,8 @@
 
 "use client";
 
+import "./admin.css";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -121,7 +123,9 @@ export default function AdminPage() {
           <p className="eyebrow">MZS GROUP</p>
           <h1>Access restricted.</h1>
           <p>This area is reserved for MZS administrators.</p>
-          <Link href="/private">Return to private environment →</Link>
+          <Link href="/private">
+            Return to private environment →
+          </Link>
         </div>
       </main>
     );
@@ -151,7 +155,9 @@ export default function AdminPage() {
 
         <div className="admin-header-actions">
           <span>Administration</span>
-          <button onClick={handleLogout}>Sign Out</button>
+          <button type="button" onClick={handleLogout}>
+            Sign Out
+          </button>
         </div>
       </header>
 
@@ -182,6 +188,7 @@ export default function AdminPage() {
             <p className="eyebrow">Relationships</p>
             <h2>Access requests</h2>
           </div>
+
           <span>{requests.length} requests</span>
         </div>
 
@@ -192,7 +199,10 @@ export default function AdminPage() {
         ) : (
           <div className="admin-requests">
             {requests.map((request) => (
-              <article className="admin-request" key={request.id}>
+              <article
+                className="admin-request"
+                key={request.id}
+              >
                 <div className="admin-request-top">
                   <div>
                     <h3>{request.full_name}</h3>
@@ -215,9 +225,9 @@ export default function AdminPage() {
 
                   <p>
                     Received:{" "}
-                    {new Date(request.created_at).toLocaleDateString(
-                      "en-GB"
-                    )}
+                    {new Date(
+                      request.created_at
+                    ).toLocaleDateString("en-GB")}
                   </p>
                 </div>
 
