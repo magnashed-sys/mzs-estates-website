@@ -107,7 +107,19 @@ export default function RequestAccessPage() {
       </header>
       <section className="request-container" style={contentStyle}>
         <p className="eyebrow">Private Access</p>
-        <h1>Your private journey begins here.</h1>
+        
+<h1
+  style={{
+    fontSize: "clamp(38px, 4.5vw, 68px)",
+    lineHeight: 1.08,
+    letterSpacing: "-0.025em",
+    maxWidth: "850px",
+    margin: "18px 0 24px",
+  }}
+>
+  Your private journey begins here.
+</h1>
+
         <p className="request-intro">
           New relationships are considered on a selective basis.
           Please provide a few details below.
