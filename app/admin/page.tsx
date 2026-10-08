@@ -29,9 +29,18 @@ type Invitation = {
   invited_at: string;
 };
 
+type Relationship = {
+  id: string;
+  full_name: string | null;
+  email: string;
+  role: "client" | "partner";
+  is_active: boolean;
+  created_at: string;
+};
+
 type PageState = "loading" | "ready" | "denied" | "error";
-type Decision = "approved" | "declined";
 type InviteRole = "client" | "partner";
+type Decision = "approved" | "declined";
 
 const offeringLabels: Record<string, string> = {
   investment: "Investment",
@@ -40,33 +49,16 @@ const offeringLabels: Record<string, string> = {
   sale: "Private Sale",
 };
 
-const actionButtonStyle = {
-  padding: "13px 22px",
-  border: "1px solid #665a45",
-  background: "transparent",
-  color: "#d5c09a",
-  cursor: "pointer",
-  fontSize: "11px",
-  letterSpacing: "0.12em",
-  textTransform: "uppercase" as const,
-};
-
 export default function AdminPage() {
   const router = useRouter();
 
-  const [pageState, setPageState] =
-    useState<PageState>("loading");
-
-  const [requests, setRequests] =
-    useState<AccessRequest[]>([]);
-
-  const [invitations, setInvitations] =
-    useState<Invitation[]>([]);
-
+  const [pageState, setPageState] = useState<PageState>("loading");
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
-  const [processingId, setProcessingId] =
-    useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -86,66 +78,46 @@ export default function AdminPage() {
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("role, is_active")
-          .eq("id", user.id)
-          .single();
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role, is_active")
+        .eq("id", user.id)
+        .single();
 
       if (!active) return;
 
       if (profileError) {
-        setErrorMessage(
-          "Unable to verify administrator access."
-        );
+        setErrorMessage("Unable to verify administrator access.");
         setPageState("error");
         return;
       }
 
-      if (
-        profile?.role !== "admin" ||
-        !profile.is_active
-      ) {
+      if (profile?.role !== "admin" || !profile.is_active) {
         setPageState("denied");
         return;
       }
 
-      const [requestsResult, invitationsResult] =
-        await Promise.all([
-          supabase
-            .from("access_requests")
-            .select(
-              "id, full_name, email, company, country, interests, message, status, created_at"
-            )
-            .order("created_at", { ascending: false }),
-
-          supabase
-            .from("access_invitations")
-            .select(
-              "id, request_id, email, requested_role, status, invited_at"
-            )
-            .order("invited_at", { ascending: false }),
-        ]);
-
+      const [requestsResult, invitationsResult, relationshipsResult] = await Promise.all([
+        supabase.from("access_requests")
+          .select("id, full_name, email, company, country, interests, message, status, created_at")
+          .order("created_at", { ascending: false }),
+        supabase.from("access_invitations")
+          .select("id, request_id, email, requested_role, status, invited_at")
+          .order("invited_at", { ascending: false }),
+        supabase.from("profiles")
+          .select("id, full_name, email, role, is_active, created_at")
+          .in("role", ["client", "partner"])
+          .order("created_at", { ascending: false }),
+      ]);
       if (!active) return;
-
-      if (requestsResult.error || invitationsResult.error) {
-        setErrorMessage(
-          "Unable to retrieve administration records."
-        );
+      if (requestsResult.error || invitationsResult.error || relationshipsResult.error) {
+        setErrorMessage("Unable to retrieve administration records.");
         setPageState("error");
         return;
       }
-
-      setRequests(
-        (requestsResult.data ?? []) as AccessRequest[]
-      );
-
-      setInvitations(
-        (invitationsResult.data ?? []) as Invitation[]
-      );
-
+      setRequests((requestsResult.data ?? []) as AccessRequest[]);
+      setInvitations((invitationsResult.data ?? []) as Invitation[]);
+      setRelationships((relationshipsResult.data ?? []) as Relationship[]);
       setPageState("ready");
     }
 
@@ -160,9 +132,7 @@ export default function AdminPage() {
     request: AccessRequest,
     decision: Decision
   ) {
-    if (processingId || request.status !== "pending") {
-      return;
-    }
+    if (processingId || request.status !== "pending") return;
 
     const confirmed = window.confirm(
       decision === "approved"
@@ -217,86 +187,67 @@ export default function AdminPage() {
     }
   }
 
-  async function handleInvite(
-    request: AccessRequest,
-    role: InviteRole
-  ) {
-    if (processingId || request.status !== "approved") {
+  async function handleInvite(request: AccessRequest, role: InviteRole) {
+    if (processingId || request.status !== "approved") return;
+    if (invitations.some((item) => item.request_id === request.id)) {
+      setNotice("An invitation record already exists for this request.");
       return;
     }
-
-    if (
-      invitations.some(
-        (item) => item.request_id === request.id
-      )
-    ) {
-      setNotice(
-        "An invitation record already exists for this request."
-      );
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Send a ${role.toUpperCase()} invitation to ${request.full_name} (${request.email})?\n\nThe account will remain inactive until MZS approves activation.`
-    );
-
-    if (!confirmed) return;
-
+    if (!window.confirm(`Send a ${role.toUpperCase()} invitation to ${request.full_name} (${request.email})?\n\nThe account will remain inactive until MZS approves activation.`)) return;
     setProcessingId(request.id);
     setNotice("");
-
     try {
       const supabase = createClient();
-
-      const { data, error } =
-        await supabase.functions.invoke(
-          "invite-approved-relationship",
-          {
-            body: {
-              request_id: request.id,
-              role,
-            },
-          }
-        );
-
+      const { data, error } = await supabase.functions.invoke("invite-approved-relationship", {
+        body: { request_id: request.id, role },
+      });
       if (error || data?.ok !== true) {
-        setNotice(
-          "Invitation could not be confirmed. Check the invitation status in Supabase before retrying."
-        );
+        setNotice("Invitation could not be confirmed. Check Supabase before retrying.");
         return;
       }
-
-      // Reload the invitation record from Supabase.
-      const { data: updated, error: reloadError } =
-        await supabase
-          .from("access_invitations")
-          .select(
-            "id, request_id, email, requested_role, status, invited_at"
-          )
-          .eq("request_id", request.id)
-          .single();
-
+      const { data: updated, error: reloadError } = await supabase.from("access_invitations")
+        .select("id, request_id, email, requested_role, status, invited_at")
+        .eq("request_id", request.id).single();
       if (reloadError || !updated) {
-        setNotice(
-          "Invitation sent, but the dashboard could not refresh its status. Reload the page."
-        );
+        setNotice("Invitation sent, but its status could not be refreshed. Reload the page.");
         return;
       }
-
-      setInvitations((current) => [
-        updated as Invitation,
-        ...current.filter(
-          (item) => item.request_id !== request.id
-        ),
-      ]);
-
-      setNotice(
-        `Invitation sent to ${request.email}. The account remains inactive.`
-      );
+      setInvitations((current) => [updated as Invitation, ...current.filter((item) => item.request_id !== request.id)]);
+      const { data: accounts } = await supabase.from("profiles")
+        .select("id, full_name, email, role, is_active, created_at")
+        .in("role", ["client", "partner"]).order("created_at", { ascending: false });
+      if (accounts) setRelationships(accounts as Relationship[]);
+      setNotice(`Invitation sent to ${request.email}. The account remains inactive.`);
     } catch {
-      setNotice(
-        "Unable to confirm the invitation outcome. Review Supabase before attempting again."
-      );
+      setNotice("Unable to confirm invitation outcome. Review Supabase before attempting again.");
+    } finally {
+      setProcessingId(null);
+    }
+  }
+
+  async function handleAccountStatus(account: Relationship, activate: boolean) {
+    if (processingId || account.is_active === activate) return;
+    const action = activate ? "ACTIVATE" : "DEACTIVATE";
+    if (!window.confirm(`${action} ${account.full_name || account.email} (${account.email})?\n\n${activate ? "This permits private sign-in, but does not assign projects." : "This blocks private access."}`)) return;
+    setProcessingId(account.id);
+    setNotice("");
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("set_relationship_active", {
+        p_user_id: account.id, p_active: activate,
+      });
+      if (error || data !== true) throw error ?? new Error("Update not confirmed");
+      const { data: verified, error: verifyError } = await supabase.from("profiles")
+        .select("is_active").eq("id", account.id).single();
+      if (verifyError || !verified || verified.is_active !== activate) {
+        setNotice("Account status could not be verified. Refresh before another action.");
+        return;
+      }
+      setRelationships((current) => current.map((item) =>
+        item.id === account.id ? { ...item, is_active: activate } : item));
+      setNotice(`${account.email} is now ${activate ? "active" : "inactive"}.`);
+    } catch {
+      setNotice("Unable to change account status. Please check and try again.");
     } finally {
       setProcessingId(null);
     }
@@ -325,9 +276,7 @@ export default function AdminPage() {
         <div className="admin-message">
           <p className="eyebrow">MZS GROUP</p>
           <h1>Access restricted.</h1>
-          <p>
-            This area is reserved for MZS administrators.
-          </p>
+          <p>This area is reserved for MZS administrators.</p>
           <Link href="/private">
             Return to private environment →
           </Link>
@@ -351,9 +300,8 @@ export default function AdminPage() {
     (request) => request.status === "pending"
   ).length;
 
-  const sentCount = invitations.filter(
-    (invitation) => invitation.status === "sent"
-  ).length;
+  const sentCount = invitations.filter((item) => item.status === "sent").length;
+  const activeCount = relationships.filter((item) => item.is_active).length;
 
   return (
     <main className="admin-page">
@@ -364,25 +312,20 @@ export default function AdminPage() {
 
         <div className="admin-header-actions">
           <span>Administration</span>
-          <button
-            type="button"
-            onClick={handleLogout}
-          >
+          <button type="button" onClick={handleLogout}>
             Sign Out
           </button>
         </div>
       </header>
 
       <section className="admin-content">
-        <p className="eyebrow">
-          MZS Administration
-        </p>
+        <p className="eyebrow">MZS Administration</p>
 
         <h1>Private management.</h1>
 
         <p className="admin-intro">
-          Manage selected relationships and access
-          to private MZS opportunities.
+          Manage selected relationships and access to private
+          MZS opportunities.
         </p>
 
         <div className="admin-stats">
@@ -403,21 +346,16 @@ export default function AdminPage() {
             <h2>Access requests</h2>
           </div>
 
-          <span>
-            {sentCount} invitations sent
-          </span>
+          <span>{sentCount} invitations sent</span>
         </div>
 
         {notice && (
-          <p
-            role="status"
-            style={{
-              color: "#d5c09a",
-              fontSize: "13px",
-              marginBottom: "24px",
-              lineHeight: 1.7,
-            }}
-          >
+          <p role="status" style={{
+            color: "#d5c09a",
+            fontSize: "12px",
+            marginBottom: "24px",
+            lineHeight: 1.7,
+          }}>
             {notice}
           </p>
         )}
@@ -429,189 +367,163 @@ export default function AdminPage() {
         ) : (
           <div className="admin-requests">
             {requests.map((request) => {
-              const invitation = invitations.find(
-                (item) =>
-                  item.request_id === request.id
-              );
-
+              const invitation = invitations.find((item) => item.request_id === request.id);
               return (
-                <article
-                  className="admin-request"
-                  key={request.id}
-                >
-                  <div className="admin-request-top">
-                    <div>
-                      <h3>{request.full_name}</h3>
-                      <p>{request.email}</p>
-                    </div>
+              <article
+                className="admin-request"
+                key={request.id}
+              >
+                <div className="admin-request-top">
+                  <div>
+                    <h3>{request.full_name}</h3>
+                    <p>{request.email}</p>
+                  </div>
 
-                    <span className="admin-status">
-                      {invitation?.status === "sent"
-                        ? "Invited"
-                        : invitation?.status ===
-                          "needs_review"
-                        ? "Needs Review"
-                        : invitation
-                        ? "Invitation Reserved"
-                        : request.status}
+                  <span className="admin-status">
+                    {invitation?.status === "sent" ? "Invited"
+                      : invitation?.status === "needs_review" ? "Needs Review"
+                      : invitation ? "Invitation Reserved" : request.status}
+                  </span>
+                </div>
+
+                <div className="admin-request-details">
+                  {request.company && (
+                    <p>Company: {request.company}</p>
+                  )}
+
+                  {request.country && (
+                    <p>Country: {request.country}</p>
+                  )}
+
+                  <p>
+                    Received:{" "}
+                    {new Date(
+                      request.created_at
+                    ).toLocaleDateString("en-GB")}
+                  </p>
+                </div>
+
+                <div className="admin-interests">
+                  {(request.interests ?? []).map((interest) => (
+                    <span key={interest}>
+                      {offeringLabels[interest] ?? interest}
                     </span>
-                  </div>
+                  ))}
+                </div>
 
-                  <div className="admin-request-details">
-                    {request.company && (
-                      <p>
-                        Company: {request.company}
-                      </p>
-                    )}
+                {request.message && (
+                  <p className="admin-request-message">
+                    {request.message}
+                  </p>
+                )}
 
-                    {request.country && (
-                      <p>
-                        Country: {request.country}
-                      </p>
-                    )}
-
-                    <p>
-                      Received:{" "}
-                      {new Date(
-                        request.created_at
-                      ).toLocaleDateString("en-GB")}
-                    </p>
-
-                    {invitation && (
-                      <p>
-                        Invitation role:{" "}
-                        {invitation.requested_role}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="admin-interests">
-                    {(request.interests ?? []).map(
-                      (interest) => (
-                        <span key={interest}>
-                          {offeringLabels[interest] ??
-                            interest}
-                        </span>
-                      )
-                    )}
-                  </div>
-
-                  {request.message && (
-                    <p className="admin-request-message">
-                      {request.message}
-                    </p>
-                  )}
-
-                  {request.status === "pending" && (
-                    <div
+                {request.status === "pending" && (
+                  <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "12px",
+                    marginTop: "28px",
+                  }}>
+                    <button
+                      type="button"
+                      disabled={processingId !== null}
+                      onClick={() =>
+                        handleReview(request, "approved")
+                      }
                       style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "12px",
-                        marginTop: "28px",
+                        padding: "13px 22px",
+                        background: "#d5c09a",
+                        border: "1px solid #d5c09a",
+                        color: "#0b0b0a",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
                       }}
                     >
-                      <button
-                        type="button"
-                        disabled={processingId !== null}
-                        onClick={() =>
-                          handleReview(
-                            request,
-                            "approved"
-                          )
-                        }
-                        style={{
-                          ...actionButtonStyle,
-                          background: "#d5c09a",
-                          borderColor: "#d5c09a",
-                          color: "#0b0b0a",
-                        }}
-                      >
-                        {processingId === request.id
-                          ? "Processing..."
-                          : "Approve"}
-                      </button>
+                      {processingId === request.id
+                        ? "Processing..."
+                        : "Approve"}
+                    </button>
 
-                      <button
-                        type="button"
-                        disabled={processingId !== null}
-                        onClick={() =>
-                          handleReview(
-                            request,
-                            "declined"
-                          )
-                        }
-                        style={actionButtonStyle}
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  )}
-
-                  {request.status === "approved" &&
-                    !invitation && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "12px",
-                          marginTop: "28px",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          disabled={processingId !== null}
-                          onClick={() =>
-                            handleInvite(
-                              request,
-                              "client"
-                            )
-                          }
-                          style={{
-                            ...actionButtonStyle,
-                            background: "#d5c09a",
-                            borderColor: "#d5c09a",
-                            color: "#0b0b0a",
-                          }}
-                        >
-                          {processingId === request.id
-                            ? "Processing..."
-                            : "Invite Client"}
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={processingId !== null}
-                          onClick={() =>
-                            handleInvite(
-                              request,
-                              "partner"
-                            )
-                          }
-                          style={actionButtonStyle}
-                        >
-                          Invite Partner
-                        </button>
-                      </div>
-                    )}
-
-                  {invitation && (
-                    <p
+                    <button
+                      type="button"
+                      disabled={processingId !== null}
+                      onClick={() =>
+                        handleReview(request, "declined")
+                      }
                       style={{
-                        color: "#a9a398",
-                        fontSize: "12px",
-                        lineHeight: 1.7,
-                        marginTop: "24px",
+                        padding: "13px 22px",
+                        background: "transparent",
+                        border: "1px solid #665a45",
+                        color: "#d5c09a",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
                       }}
                     >
-                      {invitation.status === "sent"
-                        ? "Invitation sent. Account activation and project permissions are managed separately."
-                        : "This invitation requires administrator review before another attempt."}
-                    </p>
-                  )}
-                </article>
+                      Decline
+                    </button>
+                  </div>
+                )}
+                {request.status === "approved" && !invitation && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "28px" }}>
+                    <button type="button" disabled={processingId !== null}
+                      onClick={() => handleInvite(request, "client")}
+                      style={{ padding: "13px 22px", background: "#d5c09a", border: "1px solid #d5c09a", color: "#0b0b0a", cursor: "pointer", fontSize: "10px", letterSpacing: "0.12em" }}>
+                      {processingId === request.id ? "Processing..." : "Invite Client"}
+                    </button>
+                    <button type="button" disabled={processingId !== null}
+                      onClick={() => handleInvite(request, "partner")}
+                      style={{ padding: "13px 22px", background: "transparent", border: "1px solid #665a45", color: "#d5c09a", cursor: "pointer", fontSize: "10px", letterSpacing: "0.12em" }}>
+                      Invite Partner
+                    </button>
+                  </div>
+                )}
+                {invitation && (
+                  <p style={{ color: "#a9a398", fontSize: "12px", lineHeight: 1.7, marginTop: "24px" }}>
+                    {invitation.status === "sent"
+                      ? "Invitation sent. Account activation and project permissions are managed separately."
+                      : "This invitation requires administrator review before another attempt."}
+                  </p>
+                )}
+              </article>
               );
             })}
+          </div>
+        )}
+        <div className="admin-section-heading" style={{ marginTop: "72px" }}>
+          <div><p className="eyebrow">Relationships</p><h2>Account management</h2></div>
+          <span>{activeCount} active / {relationships.length} accounts</span>
+        </div>
+
+        {relationships.length === 0 ? (
+          <p className="admin-empty">No client or partner accounts found.</p>
+        ) : (
+          <div className="admin-requests">
+            {relationships.map((account) => (
+              <article className="admin-request" key={account.id}>
+                <div className="admin-request-top">
+                  <div>
+                    <h3>{account.full_name || "Unnamed relationship"}</h3>
+                    <p>{account.email}</p>
+                  </div>
+                  <span className="admin-status">{account.is_active ? "Active" : "Inactive"}</span>
+                </div>
+                <div className="admin-request-details">
+                  <p>Role: {account.role === "partner" ? "Partner" : "Client"}</p>
+                  <p>Created: {new Date(account.created_at).toLocaleDateString("en-GB")}</p>
+                </div>
+                <div style={{ marginTop: "28px" }}>
+                  <button type="button" disabled={processingId !== null}
+                    onClick={() => handleAccountStatus(account, !account.is_active)}
+                    style={{ padding: "13px 22px", background: account.is_active ? "transparent" : "#d5c09a", border: "1px solid #d5c09a", color: account.is_active ? "#d5c09a" : "#0b0b0a", cursor: "pointer", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    {processingId === account.id ? "Processing..." : account.is_active ? "Deactivate" : "Activate"}
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </section>
