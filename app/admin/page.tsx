@@ -20,8 +20,18 @@ type AccessRequest = {
   created_at: string;
 };
 
+type Invitation = {
+  id: string;
+  request_id: string;
+  email: string;
+  requested_role: "client" | "partner";
+  status: string;
+  invited_at: string;
+};
+
 type PageState = "loading" | "ready" | "denied" | "error";
 type Decision = "approved" | "declined";
+type InviteRole = "client" | "partner";
 
 const offeringLabels: Record<string, string> = {
   investment: "Investment",
@@ -30,14 +40,33 @@ const offeringLabels: Record<string, string> = {
   sale: "Private Sale",
 };
 
+const actionButtonStyle = {
+  padding: "13px 22px",
+  border: "1px solid #665a45",
+  background: "transparent",
+  color: "#d5c09a",
+  cursor: "pointer",
+  fontSize: "11px",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase" as const,
+};
+
 export default function AdminPage() {
   const router = useRouter();
 
-  const [pageState, setPageState] = useState<PageState>("loading");
-  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [pageState, setPageState] =
+    useState<PageState>("loading");
+
+  const [requests, setRequests] =
+    useState<AccessRequest[]>([]);
+
+  const [invitations, setInvitations] =
+    useState<Invitation[]>([]);
+
   const [errorMessage, setErrorMessage] = useState("");
-  const [processingId, setProcessingId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const [processingId, setProcessingId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -57,41 +86,66 @@ export default function AdminPage() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role, is_active")
-        .eq("id", user.id)
-        .single();
+      const { data: profile, error: profileError } =
+        await supabase
+          .from("profiles")
+          .select("role, is_active")
+          .eq("id", user.id)
+          .single();
 
       if (!active) return;
 
       if (profileError) {
-        setErrorMessage("Unable to verify administrator access.");
+        setErrorMessage(
+          "Unable to verify administrator access."
+        );
         setPageState("error");
         return;
       }
 
-      if (profile?.role !== "admin" || !profile.is_active) {
+      if (
+        profile?.role !== "admin" ||
+        !profile.is_active
+      ) {
         setPageState("denied");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("access_requests")
-        .select(
-          "id, full_name, email, company, country, interests, message, status, created_at"
-        )
-        .order("created_at", { ascending: false });
+      const [requestsResult, invitationsResult] =
+        await Promise.all([
+          supabase
+            .from("access_requests")
+            .select(
+              "id, full_name, email, company, country, interests, message, status, created_at"
+            )
+            .order("created_at", { ascending: false }),
+
+          supabase
+            .from("access_invitations")
+            .select(
+              "id, request_id, email, requested_role, status, invited_at"
+            )
+            .order("invited_at", { ascending: false }),
+        ]);
 
       if (!active) return;
 
-      if (error) {
-        setErrorMessage("Unable to retrieve access requests.");
+      if (requestsResult.error || invitationsResult.error) {
+        setErrorMessage(
+          "Unable to retrieve administration records."
+        );
         setPageState("error");
         return;
       }
 
-      setRequests((data ?? []) as AccessRequest[]);
+      setRequests(
+        (requestsResult.data ?? []) as AccessRequest[]
+      );
+
+      setInvitations(
+        (invitationsResult.data ?? []) as Invitation[]
+      );
+
       setPageState("ready");
     }
 
@@ -106,7 +160,9 @@ export default function AdminPage() {
     request: AccessRequest,
     decision: Decision
   ) {
-    if (processingId || request.status !== "pending") return;
+    if (processingId || request.status !== "pending") {
+      return;
+    }
 
     const confirmed = window.confirm(
       decision === "approved"
@@ -161,6 +217,91 @@ export default function AdminPage() {
     }
   }
 
+  async function handleInvite(
+    request: AccessRequest,
+    role: InviteRole
+  ) {
+    if (processingId || request.status !== "approved") {
+      return;
+    }
+
+    if (
+      invitations.some(
+        (item) => item.request_id === request.id
+      )
+    ) {
+      setNotice(
+        "An invitation record already exists for this request."
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Send a ${role.toUpperCase()} invitation to ${request.full_name} (${request.email})?\n\nThe account will remain inactive until MZS approves activation.`
+    );
+
+    if (!confirmed) return;
+
+    setProcessingId(request.id);
+    setNotice("");
+
+    try {
+      const supabase = createClient();
+
+      const { data, error } =
+        await supabase.functions.invoke(
+          "invite-approved-relationship",
+          {
+            body: {
+              request_id: request.id,
+              role,
+            },
+          }
+        );
+
+      if (error || data?.ok !== true) {
+        setNotice(
+          "Invitation could not be confirmed. Check the invitation status in Supabase before retrying."
+        );
+        return;
+      }
+
+      // Reload the invitation record from Supabase.
+      const { data: updated, error: reloadError } =
+        await supabase
+          .from("access_invitations")
+          .select(
+            "id, request_id, email, requested_role, status, invited_at"
+          )
+          .eq("request_id", request.id)
+          .single();
+
+      if (reloadError || !updated) {
+        setNotice(
+          "Invitation sent, but the dashboard could not refresh its status. Reload the page."
+        );
+        return;
+      }
+
+      setInvitations((current) => [
+        updated as Invitation,
+        ...current.filter(
+          (item) => item.request_id !== request.id
+        ),
+      ]);
+
+      setNotice(
+        `Invitation sent to ${request.email}. The account remains inactive.`
+      );
+    } catch {
+      setNotice(
+        "Unable to confirm the invitation outcome. Review Supabase before attempting again."
+      );
+    } finally {
+      setProcessingId(null);
+    }
+  }
+
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -184,7 +325,9 @@ export default function AdminPage() {
         <div className="admin-message">
           <p className="eyebrow">MZS GROUP</p>
           <h1>Access restricted.</h1>
-          <p>This area is reserved for MZS administrators.</p>
+          <p>
+            This area is reserved for MZS administrators.
+          </p>
           <Link href="/private">
             Return to private environment →
           </Link>
@@ -208,6 +351,10 @@ export default function AdminPage() {
     (request) => request.status === "pending"
   ).length;
 
+  const sentCount = invitations.filter(
+    (invitation) => invitation.status === "sent"
+  ).length;
+
   return (
     <main className="admin-page">
       <header className="admin-header">
@@ -217,20 +364,25 @@ export default function AdminPage() {
 
         <div className="admin-header-actions">
           <span>Administration</span>
-          <button type="button" onClick={handleLogout}>
+          <button
+            type="button"
+            onClick={handleLogout}
+          >
             Sign Out
           </button>
         </div>
       </header>
 
       <section className="admin-content">
-        <p className="eyebrow">MZS Administration</p>
+        <p className="eyebrow">
+          MZS Administration
+        </p>
 
         <h1>Private management.</h1>
 
         <p className="admin-intro">
-          Manage selected relationships and access to private
-          MZS opportunities.
+          Manage selected relationships and access
+          to private MZS opportunities.
         </p>
 
         <div className="admin-stats">
@@ -251,16 +403,21 @@ export default function AdminPage() {
             <h2>Access requests</h2>
           </div>
 
-          <span>{requests.length} requests</span>
+          <span>
+            {sentCount} invitations sent
+          </span>
         </div>
 
         {notice && (
-          <p role="status" style={{
-            color: "#d5c09a",
-            fontSize: "12px",
-            marginBottom: "24px",
-            lineHeight: 1.7,
-          }}>
+          <p
+            role="status"
+            style={{
+              color: "#d5c09a",
+              fontSize: "13px",
+              marginBottom: "24px",
+              lineHeight: 1.7,
+            }}
+          >
             {notice}
           </p>
         )}
@@ -271,105 +428,190 @@ export default function AdminPage() {
           </p>
         ) : (
           <div className="admin-requests">
-            {requests.map((request) => (
-              <article
-                className="admin-request"
-                key={request.id}
-              >
-                <div className="admin-request-top">
-                  <div>
-                    <h3>{request.full_name}</h3>
-                    <p>{request.email}</p>
-                  </div>
+            {requests.map((request) => {
+              const invitation = invitations.find(
+                (item) =>
+                  item.request_id === request.id
+              );
 
-                  <span className="admin-status">
-                    {request.status}
-                  </span>
-                </div>
+              return (
+                <article
+                  className="admin-request"
+                  key={request.id}
+                >
+                  <div className="admin-request-top">
+                    <div>
+                      <h3>{request.full_name}</h3>
+                      <p>{request.email}</p>
+                    </div>
 
-                <div className="admin-request-details">
-                  {request.company && (
-                    <p>Company: {request.company}</p>
-                  )}
-
-                  {request.country && (
-                    <p>Country: {request.country}</p>
-                  )}
-
-                  <p>
-                    Received:{" "}
-                    {new Date(
-                      request.created_at
-                    ).toLocaleDateString("en-GB")}
-                  </p>
-                </div>
-
-                <div className="admin-interests">
-                  {(request.interests ?? []).map((interest) => (
-                    <span key={interest}>
-                      {offeringLabels[interest] ?? interest}
+                    <span className="admin-status">
+                      {invitation?.status === "sent"
+                        ? "Invited"
+                        : invitation?.status ===
+                          "needs_review"
+                        ? "Needs Review"
+                        : invitation
+                        ? "Invitation Reserved"
+                        : request.status}
                     </span>
-                  ))}
-                </div>
-
-                {request.message && (
-                  <p className="admin-request-message">
-                    {request.message}
-                  </p>
-                )}
-
-                {request.status === "pending" && (
-                  <div style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    marginTop: "28px",
-                  }}>
-                    <button
-                      type="button"
-                      disabled={processingId !== null}
-                      onClick={() =>
-                        handleReview(request, "approved")
-                      }
-                      style={{
-                        padding: "13px 22px",
-                        background: "#d5c09a",
-                        border: "1px solid #d5c09a",
-                        color: "#0b0b0a",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {processingId === request.id
-                        ? "Processing..."
-                        : "Approve"}
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={processingId !== null}
-                      onClick={() =>
-                        handleReview(request, "declined")
-                      }
-                      style={{
-                        padding: "13px 22px",
-                        background: "transparent",
-                        border: "1px solid #665a45",
-                        color: "#d5c09a",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Decline
-                    </button>
                   </div>
-                )}
-              </article>
-            ))}
+
+                  <div className="admin-request-details">
+                    {request.company && (
+                      <p>
+                        Company: {request.company}
+                      </p>
+                    )}
+
+                    {request.country && (
+                      <p>
+                        Country: {request.country}
+                      </p>
+                    )}
+
+                    <p>
+                      Received:{" "}
+                      {new Date(
+                        request.created_at
+                      ).toLocaleDateString("en-GB")}
+                    </p>
+
+                    {invitation && (
+                      <p>
+                        Invitation role:{" "}
+                        {invitation.requested_role}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="admin-interests">
+                    {(request.interests ?? []).map(
+                      (interest) => (
+                        <span key={interest}>
+                          {offeringLabels[interest] ??
+                            interest}
+                        </span>
+                      )
+                    )}
+                  </div>
+
+                  {request.message && (
+                    <p className="admin-request-message">
+                      {request.message}
+                    </p>
+                  )}
+
+                  {request.status === "pending" && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                        marginTop: "28px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        disabled={processingId !== null}
+                        onClick={() =>
+                          handleReview(
+                            request,
+                            "approved"
+                          )
+                        }
+                        style={{
+                          ...actionButtonStyle,
+                          background: "#d5c09a",
+                          borderColor: "#d5c09a",
+                          color: "#0b0b0a",
+                        }}
+                      >
+                        {processingId === request.id
+                          ? "Processing..."
+                          : "Approve"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={processingId !== null}
+                        onClick={() =>
+                          handleReview(
+                            request,
+                            "declined"
+                          )
+                        }
+                        style={actionButtonStyle}
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
+
+                  {request.status === "approved" &&
+                    !invitation && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "12px",
+                          marginTop: "28px",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          disabled={processingId !== null}
+                          onClick={() =>
+                            handleInvite(
+                              request,
+                              "client"
+                            )
+                          }
+                          style={{
+                            ...actionButtonStyle,
+                            background: "#d5c09a",
+                            borderColor: "#d5c09a",
+                            color: "#0b0b0a",
+                          }}
+                        >
+                          {processingId === request.id
+                            ? "Processing..."
+                            : "Invite Client"}
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={processingId !== null}
+                          onClick={() =>
+                            handleInvite(
+                              request,
+                              "partner"
+                            )
+                          }
+                          style={actionButtonStyle}
+                        >
+                          Invite Partner
+                        </button>
+                      </div>
+                    )}
+
+                  {invitation && (
+                    <p
+                      style={{
+                        color: "#a9a398",
+                        fontSize: "12px",
+                        lineHeight: 1.7,
+                        marginTop: "24px",
+                      }}
+                    >
+                      {invitation.status === "sent"
+                        ? "Invitation sent. Account activation and project permissions are managed separately."
+                        : "This invitation requires administrator review before another attempt."}
+                    </p>
+                  )}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
