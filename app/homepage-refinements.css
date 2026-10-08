@@ -1,0 +1,113 @@
+
+/* =========================================================
+   MZS GROUP — HOMEPAGE REFINEMENTS
+   Typography, spacing and readability
+   ========================================================= */
+
+.mzs-home-refined .mzs-hero {
+  max-width: 1200px;
+  width: 100%;
+}
+
+.mzs-home-refined .mzs-hero h1 {
+  font-size: clamp(52px, 6.9vw, 108px);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+.mzs-home-refined .mzs-separator {
+  width: 115px;
+  height: 1px;
+  margin-top: 34px;
+  background: #d5c09a;
+  opacity: 0.8;
+}
+
+.mzs-home-refined .mzs-intro {
+  max-width: 590px;
+  margin-top: 30px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #e0d9ce;
+}
+
+.mzs-home-refined .mzs-actions {
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.mzs-home-refined .mzs-button {
+  min-width: 168px;
+  padding: 17px 23px;
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+}
+
+.mzs-home-refined .mzs-selective {
+  margin-top: 25px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #d0c6b8;
+}
+
+.mzs-home-refined .mzs-monogram {
+  font-size: 32px;
+}
+
+.mzs-home-refined .mzs-group-label {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+}
+
+.mzs-home-refined .mzs-private-label {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+
+.mzs-home-refined .mzs-home-footer {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  line-height: 1.7;
+  color: #d0c6b8;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .mzs-home-refined .mzs-hero {
+    padding: 9vh 0 8vh;
+  }
+
+  .mzs-home-refined .mzs-hero h1 {
+    font-size: clamp(43px, 11vw, 70px);
+    line-height: 0.98;
+    overflow-wrap: normal;
+  }
+
+  .mzs-home-refined .mzs-separator {
+    margin-top: 28px;
+  }
+
+  .mzs-home-refined .mzs-intro {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .mzs-home-refined .mzs-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mzs-home-refined .mzs-button {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .mzs-home-refined .mzs-home-footer {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+}
