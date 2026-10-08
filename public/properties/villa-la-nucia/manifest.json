@@ -1,0 +1,110 @@
+[
+  {
+    "file": "hero-pool.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 64706
+  },
+  {
+    "file": "pool-panorama.webp",
+    "width": 1600,
+    "height": 527,
+    "bytes": 118000
+  },
+  {
+    "file": "pool-mountain-view.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 50348
+  },
+  {
+    "file": "pool-evening.webp",
+    "width": 1086,
+    "height": 724,
+    "bytes": 77826
+  },
+  {
+    "file": "pool-terrace.webp",
+    "width": 1182,
+    "height": 665,
+    "bytes": 113488
+  },
+  {
+    "file": "outdoor-shower.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 186192
+  },
+  {
+    "file": "villa-front.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 97092
+  },
+  {
+    "file": "private-entrance.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 80460
+  },
+  {
+    "file": "living-room.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 39456
+  },
+  {
+    "file": "living-dining.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 64740
+  },
+  {
+    "file": "dining-room.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 113476
+  },
+  {
+    "file": "kitchen.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 56464
+  },
+  {
+    "file": "bedroom-double.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 47196
+  },
+  {
+    "file": "bedroom-twin-setup.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 50736
+  },
+  {
+    "file": "bathroom-shower.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 84988
+  },
+  {
+    "file": "bathroom-vanity.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 84744
+  },
+  {
+    "file": "hallway.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 59622
+  },
+  {
+    "file": "garden.webp",
+    "width": 1024,
+    "height": 768,
+    "bytes": 164986
+  }
+]
