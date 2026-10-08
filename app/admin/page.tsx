@@ -40,6 +40,7 @@ type Relationship = {
 
 type PageState = "loading" | "ready" | "denied" | "error";
 type InviteRole = "client" | "partner";
+type AdminTab = "overview" | "relationships" | "projects" | "bookings";
 type Decision = "approved" | "declined";
 
 const offeringLabels: Record<string, string> = {
@@ -59,6 +60,7 @@ export default function AdminPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
 
   useEffect(() => {
     let active = true;
@@ -193,7 +195,7 @@ export default function AdminPage() {
       setNotice("An invitation record already exists for this request.");
       return;
     }
-    if (!window.confirm(`Send a ${role.toUpperCase()} invitation to ${request.full_name} (${request.email})?\n\nThe account will remain inactive until MZS approves activation.`)) return;
+    if (!window.confirm(`Send a ${role.toUpperCase()} invitation to ${request.full_name} (${request.email})?\n\nAccount activation follows completion of the approved invitation registration.`)) return;
     setProcessingId(request.id);
     setNotice("");
     try {
@@ -217,7 +219,7 @@ export default function AdminPage() {
         .select("id, full_name, email, role, is_active, created_at")
         .in("role", ["client", "partner"]).order("created_at", { ascending: false });
       if (accounts) setRelationships(accounts as Relationship[]);
-      setNotice(`Invitation sent to ${request.email}. The account remains inactive.`);
+      setNotice(`Invitation sent to ${request.email}. Activation is completed through the approved registration flow.`);
     } catch {
       setNotice("Unable to confirm invitation outcome. Review Supabase before attempting again.");
     } finally {
@@ -328,6 +330,33 @@ export default function AdminPage() {
           MZS opportunities.
         </p>
 
+        <nav aria-label="Administration sections" style={{display:"flex",gap:10,flexWrap:"wrap",margin:"32px 0",borderBottom:"1px solid #40392d",paddingBottom:20}}>
+          {([ ["overview","Overview"], ["relationships","Relationships"], ["projects","Projects"], ["bookings","Bookings"] ] as const).map(([key,label]) => (
+            <button key={key} type="button" onClick={() => setActiveTab(key)} aria-current={activeTab === key ? "page" : undefined}
+              style={{padding:"13px 18px",border:"1px solid #665a45",background:activeTab===key?"#d5c09a":"transparent",color:activeTab===key?"#0b0b0a":"#d5c09a",cursor:"pointer",letterSpacing:".1em",fontSize:11}}>{label}</button>
+          ))}
+        </nav>
+
+        {notice && <p role="status" style={{color:"#d5c09a",lineHeight:1.7}}>{notice}</p>}
+
+        {activeTab === "overview" && <div>
+          <div className="admin-stats"><div><span>Access Requests</span><strong>{requests.length}</strong></div><div><span>Pending Review</span><strong>{pendingCount}</strong></div></div>
+          <div className="admin-stats" style={{marginTop:18}}><div><span>Active Accounts</span><strong>{activeCount}</strong></div><div><span>Invitations Sent</span><strong>{sentCount}</strong></div></div>
+          <p className="admin-intro" style={{marginTop:30}}>Choose a section above to manage relationships, project access or rental bookings.</p>
+        </div>}
+
+        {activeTab === "projects" && <div>
+          <div className="admin-section-heading"><div><p className="eyebrow">Private collection</p><h2>Projects & access</h2></div></div>
+          <p className="admin-intro">Manage individual property and offering permissions in the existing secure administration pages.</p>
+          <p><Link href="/admin/project-access" style={{color:"#d5c09a"}}>Open Project Access Management →</Link></p>
+        </div>}
+
+        {activeTab === "bookings" && <div>
+          <div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Booking management</h2></div></div>
+          <p className="admin-intro">Booking requests are stored securely. The administrator review screen is the next development step; no booking approval action is enabled here yet.</p>
+        </div>}
+
+        {activeTab === "relationships" && <>
         <div className="admin-stats">
           <div>
             <span>Access Requests</span>
@@ -348,17 +377,6 @@ export default function AdminPage() {
 
           <span>{sentCount} invitations sent</span>
         </div>
-
-        {notice && (
-          <p role="status" style={{
-            color: "#d5c09a",
-            fontSize: "12px",
-            marginBottom: "24px",
-            lineHeight: 1.7,
-          }}>
-            {notice}
-          </p>
-        )}
 
         {requests.length === 0 ? (
           <p className="admin-empty">
@@ -484,7 +502,7 @@ export default function AdminPage() {
                 {invitation && (
                   <p style={{ color: "#a9a398", fontSize: "12px", lineHeight: 1.7, marginTop: "24px" }}>
                     {invitation.status === "sent"
-                      ? "Invitation sent. Account activation and project permissions are managed separately."
+                      ? "Invitation sent. The recipient completes registration; project permissions are managed separately."
                       : "This invitation requires administrator review before another attempt."}
                   </p>
                 )}
@@ -526,6 +544,7 @@ export default function AdminPage() {
             ))}
           </div>
         )}
+        </>}
       </section>
 
       <footer className="admin-footer">
