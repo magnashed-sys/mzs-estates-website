@@ -1,218 +1,904 @@
-
 /* =========================================================
-   MZS GROUP — GLOBAL READABILITY UPGRADE
-   Applies across public and private environments
+   MZS GROUP
+   Global Design System
    ========================================================= */
 
-/* Small headings and labels */
-
-.eyebrow,
-.mzs-kicker,
-.mzs-private-label,
-.mzs-group-label,
-.login-form label,
-.request-form label,
-.request-interests legend,
-.opportunity-location,
-.admin-stats span,
-.admin-header-actions span {
-  font-size: 12px;
+* {
+  box-sizing: border-box;
 }
 
-/* Main descriptive text */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: #0b0b0a;
+  color: #ece8df;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
-.mzs-intro,
-.login-intro,
-.private-intro,
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border-radius: 0;
+}
+
+::selection {
+  background: #d5c09a;
+  color: #0b0b0a;
+}
+
+
+/* =========================================================
+   SHARED
+   ========================================================= */
+
+.eyebrow {
+  margin: 0 0 24px;
+  color: #a99167;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.login-error {
+  margin: -5px 0 0;
+  color: #b98f82;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   PUBLIC HOMEPAGE
+   ========================================================= */
+
+.mzs-home {
+  min-height: 100vh;
+  padding: 38px 4.5vw 34px;
+  display: flex;
+  flex-direction: column;
+
+  background:
+    radial-gradient(
+      circle at 75% 42%,
+      rgba(184, 151, 93, 0.055),
+      transparent 32%
+    ),
+    #0b0b0a;
+}
+
+.mzs-home-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.mzs-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mzs-monogram {
+  color: #d5c09a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 0.9;
+  letter-spacing: 0.16em;
+}
+
+.mzs-group-label {
+  padding-left: 2px;
+  color: #77736b;
+  font-size: 7px;
+  letter-spacing: 0.52em;
+}
+
+.mzs-private-label {
+  color: #706d66;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mzs-hero {
+  width: 100%;
+  max-width: 1120px;
+  margin: auto;
+  padding: 8vh 0;
+}
+
+.mzs-kicker {
+  margin: 0 0 24px;
+  color: #a99167;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.mzs-hero h1 {
+  margin: 0;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(64px, 8.4vw, 132px);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+}
+
+.mzs-intro {
+  max-width: 540px;
+  margin: 44px 0 0;
+  color: #8f8b82;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.mzs-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 42px;
+}
+
+.mzs-button {
+  min-width: 142px;
+  padding: 15px 19px;
+  border: 1px solid #4b4944;
+  color: #d8d4ca;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.mzs-button:hover {
+  border-color: #d8d4ca;
+  background: #e5e0d5;
+  color: #0b0b0a;
+}
+
+.mzs-button-subtle {
+  border-color: transparent;
+  color: #9f8b68;
+}
+
+.mzs-button-subtle:hover {
+  border-color: #665a45;
+  background: transparent;
+  color: #d5c09a;
+}
+
+.mzs-selective {
+  margin: 22px 0 0;
+  color: #625f59;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.mzs-home-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  padding-top: 24px;
+  border-top: 1px solid #242321;
+  color: #55524d;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-page {
+  min-height: 100vh;
+  padding: 38px 4.5vw;
+  display: flex;
+  flex-direction: column;
+  background: #0b0b0a;
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  color: #706d66;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.login-brand {
+  color: #d5c09a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  letter-spacing: 0.15em;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+}
+
+.login-container h1 {
+  margin: 15px 0 12px;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(48px, 6vw, 76px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.login-intro {
+  margin: 0 0 50px;
+  color: #8f8b82;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.login-form {
+  display: grid;
+  gap: 28px;
+}
+
+.login-form label {
+  color: #8f8b82;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.login-form input {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid #46443f;
+  outline: none;
+  background: transparent;
+  color: #ece8df;
+  font-size: 15px;
+}
+
+.login-form input:focus {
+  border-bottom-color: #a99167;
+}
+
+.login-form button {
+  width: fit-content;
+  margin-top: 10px;
+  padding: 15px 22px;
+  border: 1px solid #665a45;
+  background: transparent;
+  color: #d5c09a;
+  cursor: pointer;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.login-form button:hover {
+  background: #e5e0d5;
+  color: #0b0b0a;
+}
+
+.login-form button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.login-note {
+  margin-top: 35px;
+  color: #625f59;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.login-footer {
+  color: #55524d;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   PRIVATE CLIENT / PARTNER AREA
+   ========================================================= */
+
+.private-page {
+  min-height: 100vh;
+  padding: 38px 4.5vw;
+  display: flex;
+  flex-direction: column;
+  background: #0b0b0a;
+}
+
+.private-header {
+  display: flex;
+  justify-content: space-between;
+  color: #706d66;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.private-brand {
+  color: #d5c09a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  letter-spacing: 0.15em;
+}
+
+.private-content {
+  width: 100%;
+  max-width: 1050px;
+  margin: 15vh auto auto;
+}
+
+.private-content h1 {
+  max-width: 800px;
+  margin: 15px 0 20px;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.private-intro {
+  max-width: 520px;
+  margin: 0 0 70px;
+  color: #8c8982;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.opportunity-card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 34px 0;
+  border-top: 1px solid #3d3b37;
+  border-bottom: 1px solid #3d3b37;
+}
+
+.opportunity-card + .opportunity-card {
+  border-top: 0;
+}
+
+.opportunity-location {
+  margin: 0 0 14px;
+  color: #77746d;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.opportunity-card h2 {
+  margin: 0 0 20px;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+}
+
+.offering-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.offering-tags span {
+  padding: 8px 11px;
+  border: 1px solid #484640;
+  color: #aaa79e;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.opportunity-link {
+  flex-shrink: 0;
+  padding-bottom: 4px;
+  color: #d5c09a;
+  font-size: 8px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.private-footer {
+  margin-top: 80px;
+  color: #55524d;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   REQUEST ACCESS
+   ========================================================= */
+
+.request-page {
+  min-height: 100vh;
+  padding: 38px 4.5vw;
+
+  background:
+    radial-gradient(
+      circle at 76% 35%,
+      rgba(184, 151, 93, 0.04),
+      transparent 30%
+    ),
+    #0b0b0a;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  color: #706d66;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.request-brand {
+  color: #d5c09a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  letter-spacing: 0.15em;
+}
+
+.request-container,
+.request-success {
+  width: 100%;
+  max-width: 780px;
+  margin: 13vh auto 0;
+}
+
+.request-container h1,
+.request-success h1 {
+  margin: 14px 0 20px;
+  color: #ece8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(52px, 7vw, 90px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
 .request-intro,
-.admin-intro,
-.admin-request-message {
-  font-size: 16px;
-  line-height: 1.75;
+.request-success p {
+  max-width: 540px;
+  color: #8f8b82;
+  font-size: 13px;
+  line-height: 1.8;
 }
 
-/* Buttons and action links */
-
-.mzs-button,
-.login-form button,
-.request-form button,
-.request-return,
-.opportunity-link,
-.admin-header-actions button,
-.admin-message a {
-  font-size: 12px;
-  letter-spacing: 0.12em;
+.request-form {
+  display: grid;
+  gap: 38px;
+  margin-top: 55px;
 }
 
-/* Form inputs */
+.request-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 40px;
+}
 
-.login-form input,
+.request-form label,
+.request-interests legend {
+  color: #8f8b82;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .request-form input,
 .request-form textarea {
-  font-size: 17px;
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px 0;
+  border: 0;
+  border-bottom: 1px solid #46443f;
+  outline: none;
+  background: transparent;
+  color: #ece8df;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.request-form textarea {
+  resize: vertical;
+}
+
+.request-form input:focus,
+.request-form textarea:focus {
+  border-bottom-color: #a99167;
+}
+
+.request-interests {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.interest-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.interest-option {
+  padding: 11px 14px;
+  border: 1px solid #3e3c38;
+  color: #8f8b82;
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.interest-option:hover {
+  border-color: #665a45;
+  color: #c8b48f;
+}
+
+.interest-option input {
+  display: none;
+}
+
+.interest-option.selected {
+  border-color: #9f8b68;
+  background: rgba(169, 145, 103, 0.05);
+  color: #d5c09a;
+}
+
+.request-message {
+  display: block;
+}
+
+.request-form button {
+  width: fit-content;
+  padding: 15px 22px;
+  border: 1px solid #665a45;
+  background: transparent;
+  color: #d5c09a;
+  cursor: pointer;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.request-form button:hover {
+  background: #e5e0d5;
+  color: #0b0b0a;
+}
+
+.request-form button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.request-success-note {
+  margin-top: 20px;
+  color: #625f59 !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+}
+
+.request-return {
+  display: inline-block;
+  margin-top: 35px;
+  color: #d5c09a;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  /* Homepage */
+
+  .mzs-home {
+    padding: 28px 24px 24px;
+  }
+
+  .mzs-private-label {
+    display: none;
+  }
+
+  .mzs-hero {
+    padding: 12vh 0 9vh;
+  }
+
+  .mzs-hero h1 {
+    font-size: 16vw;
+  }
+
+  .mzs-intro {
+    margin-top: 34px;
+    font-size: 12px;
+  }
+
+  .mzs-actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mzs-button {
+    width: 100%;
+  }
+
+  .mzs-home-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    line-height: 1.8;
+  }
+
+
+  /* Login */
+
+  .login-page {
+    padding: 28px 24px;
+  }
+
+  .login-header span {
+    display: none;
+  }
+
+  .login-container {
+    margin: 14vh 0 auto;
+  }
+
+
+  /* Private */
+
+  .private-page {
+    padding: 28px 24px;
+  }
+
+  .private-header span {
+    display: none;
+  }
+
+  .private-content {
+    margin-top: 14vh;
+  }
+
+  .private-intro {
+    margin-bottom: 50px;
+  }
+
+  .opportunity-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+
+  /* Request Access */
+
+  .request-page {
+    padding: 28px 24px;
+  }
+
+  .request-header span {
+    display: none;
+  }
+
+  .request-container,
+  .request-success {
+    margin-top: 11vh;
+  }
+
+  .request-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   MZS GROUP — CINEMATIC HOMEPAGE
+   Background image and dark overlay
+   ========================================================= */
+
+.mzs-home.mzs-home-image {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+
+  background-color: #0b0b0a;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(7, 8, 9, 0.82) 0%,
+      rgba(7, 8, 9, 0.68) 35%,
+      rgba(7, 8, 9, 0.32) 72%,
+      rgba(7, 8, 9, 0.42) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(7, 8, 9, 0.72) 0%,
+      transparent 30%,
+      rgba(7, 8, 9, 0.20) 100%
+    ),
+    url("/mzs-hero.png");
+
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* Keep all content above the background */
+
+.mzs-home-image > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Refined headline */
+
+.mzs-home-image .mzs-hero {
+  max-width: 1200px;
+}
+
+.mzs-home-image .mzs-hero h1 {
+  color: #f4f0e7;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.18);
 }
 
 /* Supporting text */
 
-.mzs-selective,
-.login-note,
-.opportunity-card .offering-tags span,
-.admin-request-details p,
-.admin-request-top p,
-.admin-interests span,
-.admin-status,
-.admin-section-heading > span {
-  font-size: 13px;
+.mzs-home-image .mzs-intro {
+  color: #d0cbc1;
+  max-width: 510px;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Footer text */
-
-.mzs-home-footer,
-.login-footer,
-.private-footer,
-.admin-footer {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  line-height: 1.6;
+.mzs-home-image .mzs-kicker {
+  color: #d5c09a;
 }
 
-/* Admin request counts and messages */
-
-.admin-empty,
-.admin-message {
-  font-size: 15px;
+.mzs-home-image .mzs-selective {
+  color: #bcb3a5;
 }
 
-/* Responsive adjustments */
+/* Login buttons */
 
-@media (max-width: 700px) {
-  .mzs-intro,
-  .login-intro,
-  .private-intro,
-  .request-intro,
-  .admin-intro {
-    font-size: 15px;
-  }
+.mzs-home-image .mzs-button {
+  border-color: rgba(230, 222, 207, 0.58);
+  background: rgba(10, 10, 10, 0.22);
+  color: #f4f0e7;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 
-  .mzs-button,
-  .login-form button,
-  .request-form button {
-    font-size: 12px;
-  }
+.mzs-home-image .mzs-button:hover {
+  border-color: #f4f0e7;
+  background: #f4f0e7;
+  color: #10100f;
+}
 
-  .mzs-home-footer,
-  .login-footer,
-  .private-footer,
-  .admin-footer {
-    font-size: 11px;
-  }
+/* Request Access remains more discreet */
+
+.mzs-home-image .mzs-button-subtle {
+  border-color: transparent;
+  background: transparent;
+  color: #e0c69c;
+}
+
+.mzs-home-image .mzs-button-subtle:hover {
+  border-color: rgba(224, 198, 156, 0.5);
+  background: rgba(10, 10, 10, 0.25);
+  color: #f2d9af;
+}
+
+/* Header and footer */
+
+.mzs-home-image .mzs-monogram {
+  color: #e4cfaa;
+}
+
+.mzs-home-image .mzs-group-label,
+.mzs-home-image .mzs-private-label {
+  color: #c1b9a9;
+}
+
+.mzs-home-image .mzs-home-footer {
+  border-top-color: rgba(235, 225, 210, 0.24);
+  color: #c0b8aa;
 }
 
 /* =========================================================
-   MZS GROUP — GLOBAL READABILITY UPGRADE
-   Applies across public and private environments
+   MOBILE BACKGROUND OPTIMIZATION
    ========================================================= */
 
-/* Small headings and labels */
-
-.eyebrow,
-.mzs-kicker,
-.mzs-private-label,
-.mzs-group-label,
-.login-form label,
-.request-form label,
-.request-interests legend,
-.opportunity-location,
-.admin-stats span,
-.admin-header-actions span {
-  font-size: 12px;
-}
-
-/* Main descriptive text */
-
-.mzs-intro,
-.login-intro,
-.private-intro,
-.request-intro,
-.admin-intro,
-.admin-request-message {
-  font-size: 16px;
-  line-height: 1.75;
-}
-
-/* Buttons and action links */
-
-.mzs-button,
-.login-form button,
-.request-form button,
-.request-return,
-.opportunity-link,
-.admin-header-actions button,
-.admin-message a {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-}
-
-/* Form inputs */
-
-.login-form input,
-.request-form input,
-.request-form textarea {
-  font-size: 17px;
-}
-
-/* Supporting text */
-
-.mzs-selective,
-.login-note,
-.opportunity-card .offering-tags span,
-.admin-request-details p,
-.admin-request-top p,
-.admin-interests span,
-.admin-status,
-.admin-section-heading > span {
-  font-size: 13px;
-}
-
-/* Footer text */
-
-.mzs-home-footer,
-.login-footer,
-.private-footer,
-.admin-footer {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  line-height: 1.6;
-}
-
-/* Admin request counts and messages */
-
-.admin-empty,
-.admin-message {
-  font-size: 15px;
-}
-
-/* Responsive adjustments */
-
 @media (max-width: 700px) {
-  .mzs-intro,
-  .login-intro,
-  .private-intro,
-  .request-intro,
-  .admin-intro {
-    font-size: 15px;
+  .mzs-home.mzs-home-image {
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(7, 8, 9, 0.58) 0%,
+        rgba(7, 8, 9, 0.78) 42%,
+        rgba(7, 8, 9, 0.88) 100%
+      ),
+      url("/mzs-hero.png");
+
+    background-position: 60% center;
+    background-attachment: scroll;
   }
 
-  .mzs-button,
-  .login-form button,
-  .request-form button {
-    font-size: 12px;
+  .mzs-home-image .mzs-hero {
+    padding: 10vh 0 8vh;
   }
 
-  .mzs-home-footer,
-  .login-footer,
-  .private-footer,
-  .admin-footer {
-    font-size: 11px;
+  .mzs-home-image .mzs-hero h1 {
+    font-size: clamp(48px, 14vw, 82px);
+    line-height: 0.94;
+    overflow-wrap: anywhere;
+  }
+
+  .mzs-home-image .mzs-intro {
+    color: #ded7cc;
+  }
+
+  .mzs-home-image .mzs-button {
+    background: rgba(10, 10, 10, 0.40);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mzs-home-image .mzs-button {
+    transition: none;
   }
 }
