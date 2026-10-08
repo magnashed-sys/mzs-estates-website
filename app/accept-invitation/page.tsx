@@ -1,7 +1,12 @@
 
 "use client";
 
-import { FormEvent, Suspense, useEffect, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
@@ -19,8 +24,11 @@ function InvitationForm() {
   const [pageState, setPageState] =
     useState<PageState>("checking");
 
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -44,23 +52,28 @@ function InvitationForm() {
       const { data: profile, error: profileError } =
         await supabase
           .from("profiles")
-          .select("role, is_active")
+          .select("role, is_active, full_name")
           .eq("id", user.id)
           .single();
 
       if (!active) return;
 
-      if (profileError || !profile) {
+      if (
+        profileError ||
+        !profile ||
+        !["client", "partner"].includes(profile.role)
+      ) {
         setPageState("invalid");
         return;
       }
 
-      // Invitation accounts must still be inactive.
       if (profile.is_active) {
         router.replace("/login?role=client");
         return;
       }
 
+      // Prefill the name from the original invitation.
+      setFullName(profile.full_name || "");
       setPageState("ready");
     }
 
@@ -75,7 +88,25 @@ function InvitationForm() {
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
+    if (pageState !== "ready") return;
+
     setError("");
+
+    const normalizedName = fullName
+      .trim()
+      .replace(/\s+/g, " ");
+
+    if (
+      normalizedName.length < 3 ||
+      normalizedName.length > 120 ||
+      normalizedName.split(" ").length < 2
+    ) {
+      setError(
+        "Please enter your full first and last name."
+      );
+      return;
+    }
 
     if (password.length < 12) {
       setError("Please use at least 12 characters.");
@@ -91,6 +122,39 @@ function InvitationForm() {
 
     const supabase = createClient();
 
+    // Verify the authenticated invitation session.
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      setError(
+        "Your invitation session has expired. Please request a new invitation."
+      );
+      setPageState("invalid");
+      return;
+    }
+
+    // Store the full name without allowing changes
+    // to the account role or activation status.
+    const { data: nameSaved, error: nameError } =
+      await supabase.rpc(
+        "complete_invitation_name",
+        {
+          p_full_name: normalizedName,
+        }
+      );
+
+    if (nameError || nameSaved !== true) {
+      setError(
+        "Unable to save your name. Please try again."
+      );
+      setPageState("ready");
+      return;
+    }
+
+    // Set the account password.
     const { error: updateError } =
       await supabase.auth.updateUser({
         password,
@@ -98,15 +162,26 @@ function InvitationForm() {
 
     if (updateError) {
       setError(
-        "Unable to set your password. Please try again."
+        "Your name was saved, but the password could not be set. Please try again."
       );
       setPageState("ready");
       return;
     }
 
-    // Profile activation is handled separately by MZS.
-    await supabase.auth.signOut();
+    // Activation remains exclusively controlled by MZS.
+    const { error: signOutError } =
+      await supabase.auth.signOut();
 
+    if (signOutError) {
+      setError(
+        "Your details were saved. Please sign out manually before continuing."
+      );
+      setPageState("ready");
+      return;
+    }
+
+    setPassword("");
+    setConfirmPassword("");
     setPageState("success");
   }
 
@@ -121,7 +196,9 @@ function InvitationForm() {
       </header>
 
       <section className="login-container">
-        <p className="eyebrow">By invitation only</p>
+        <p className="eyebrow">
+          By invitation only
+        </p>
 
         {pageState === "checking" && (
           <>
@@ -136,8 +213,9 @@ function InvitationForm() {
           <>
             <h1>Invitation unavailable.</h1>
             <p className="login-intro">
-              This invitation is invalid, expired or has
-              already been used. Please contact MZS Group.
+              This invitation is invalid, expired or
+              no longer available. Please contact
+              MZS Group.
             </p>
           </>
         )}
@@ -148,14 +226,31 @@ function InvitationForm() {
             <h1>Welcome to MZS.</h1>
 
             <p className="login-intro">
-              Create your password to complete the
-              first step of your account activation.
+              Complete your personal details and
+              create a secure password to begin
+              your private MZS experience.
             </p>
 
             <form
               className="login-form"
               onSubmit={handleActivation}
             >
+              <label>
+                Full Name
+                <input
+                  type="text"
+                  autoComplete="name"
+                  placeholder="First name and last name"
+                  value={fullName}
+                  onChange={(event) =>
+                    setFullName(event.target.value)
+                  }
+                  maxLength={120}
+                  required
+                  disabled={pageState === "saving"}
+                />
+              </label>
+
               <label>
                 New Password
                 <input
@@ -187,7 +282,10 @@ function InvitationForm() {
               </label>
 
               {error && (
-                <p className="login-error" role="alert">
+                <p
+                  className="login-error"
+                  role="alert"
+                >
                   {error}
                 </p>
               )}
@@ -198,7 +296,7 @@ function InvitationForm() {
               >
                 {pageState === "saving"
                   ? "Saving..."
-                  : "Set Password →"}
+                  : "Complete Registration →"}
               </button>
             </form>
           </>
@@ -206,16 +304,21 @@ function InvitationForm() {
 
         {pageState === "success" && (
           <>
-            <h1>Password created.</h1>
+            <h1>Registration complete.</h1>
 
             <p className="login-intro">
-              Your password has been saved.
+              Thank you, {fullName.trim().split(/\s+/)[0]}.
+              Your personal details and password
+              have been saved successfully.
+
               MZS Group will activate your private
-              access once your account is approved
-              for use.
+              access once your account has been approved.
             </p>
 
-            <Link href="/" className="request-return">
+            <Link
+              href="/"
+              className="request-return"
+            >
               Return to MZS Group →
             </Link>
           </>
