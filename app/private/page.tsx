@@ -29,10 +29,69 @@ const offeringLabels: Record<string, string> = {
   financing: "Financing",
 };
 
+function SignOutButton() {
+  return (
+    <form action="/auth/signout" method="POST">
+      <button
+        type="submit"
+        style={{
+          background: "transparent",
+          border: "1px solid #665a45",
+          color: "#d5c09a",
+          padding: "11px 18px",
+          fontSize: "12px",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          cursor: "pointer",
+        }}
+      >
+        Sign Out →
+      </button>
+    </form>
+  );
+}
+
+function PrivateHeader({
+  role,
+}: {
+  role: string;
+}) {
+  return (
+    <header className="private-header">
+      <Link href="/" className="private-brand">
+        MZS GROUP
+      </Link>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "22px",
+        }}
+      >
+        <span>
+          {role === "partner"
+            ? "Partner Access"
+            : "Private Client"}
+        </span>
+
+        <SignOutButton />
+      </div>
+    </header>
+  );
+}
+
+function PrivateFooter() {
+  return (
+    <footer className="private-footer">
+      Private. Independent. International.
+    </footer>
+  );
+}
+
 export default async function PrivatePage() {
   const supabase = await createClient();
 
-  // Verify the authenticated session on the server.
   const {
     data: { user },
     error: authError,
@@ -42,7 +101,6 @@ export default async function PrivatePage() {
     redirect("/login?role=client");
   }
 
-  // Verify the user's role and active status.
   const { data: profile, error: profileError } =
     await supabase
       .from("profiles")
@@ -54,18 +112,23 @@ export default async function PrivatePage() {
     redirect("/login?role=client");
   }
 
+  if (profile.role === "admin") {
+    redirect("/admin");
+  }
+
+  if (!["client", "partner"].includes(profile.role)) {
+    redirect("/");
+  }
+
   if (!profile.is_active) {
     return (
       <main className="private-page">
-        <header className="private-header">
-          <Link href="/" className="private-brand">
-            MZS GROUP
-          </Link>
-          <span>Private Access</span>
-        </header>
+        <PrivateHeader role={profile.role} />
 
         <section className="private-content">
-          <p className="eyebrow">Account Verification</p>
+          <p className="eyebrow">
+            Account Verification
+          </p>
 
           <h1>Access pending.</h1>
 
@@ -81,29 +144,17 @@ export default async function PrivatePage() {
           </Link>
         </section>
 
-        <footer className="private-footer">
-          Private. Independent. International.
-        </footer>
+        <PrivateFooter />
       </main>
     );
   }
 
-  if (profile.role === "admin") {
-    redirect("/admin");
-  }
-
-  if (!["client", "partner"].includes(profile.role)) {
-    redirect("/");
-  }
-
-  // Retrieve project assignments.
   const { data: projectAccess, error: projectAccessError } =
     await supabase
       .from("project_access")
       .select("project_id")
       .eq("user_id", user.id);
 
-  // Retrieve offering assignments.
   const { data: offeringAccess, error: offeringAccessError } =
     await supabase
       .from("offering_access")
@@ -113,14 +164,19 @@ export default async function PrivatePage() {
   if (projectAccessError || offeringAccessError) {
     return (
       <main className="private-page">
+        <PrivateHeader role={profile.role} />
+
         <section className="private-content">
           <p className="eyebrow">MZS GROUP</p>
           <h1>Unable to load access.</h1>
+
           <p className="private-intro">
             Your private opportunities are temporarily
             unavailable. Please try again later.
           </p>
         </section>
+
+        <PrivateFooter />
       </main>
     );
   }
@@ -156,12 +212,16 @@ export default async function PrivatePage() {
     if (error) {
       return (
         <main className="private-page">
+          <PrivateHeader role={profile.role} />
+
           <section className="private-content">
             <h1>Unable to load projects.</h1>
             <p className="private-intro">
               Please try again later.
             </p>
           </section>
+
+          <PrivateFooter />
         </main>
       );
     }
@@ -182,12 +242,16 @@ export default async function PrivatePage() {
     if (error) {
       return (
         <main className="private-page">
+          <PrivateHeader role={profile.role} />
+
           <section className="private-content">
             <h1>Unable to load offerings.</h1>
             <p className="private-intro">
               Please try again later.
             </p>
           </section>
+
+          <PrivateFooter />
         </main>
       );
     }
@@ -195,8 +259,6 @@ export default async function PrivatePage() {
     offerings = (data ?? []) as Offering[];
   }
 
-  // Only display projects with at least one
-  // offering explicitly assigned to this user.
   const visibleProjects = projects
     .map((project) => ({
       ...project,
@@ -212,17 +274,7 @@ export default async function PrivatePage() {
 
   return (
     <main className="private-page">
-      <header className="private-header">
-        <Link href="/" className="private-brand">
-          MZS GROUP
-        </Link>
-
-        <span>
-          {profile.role === "partner"
-            ? "Partner Access"
-            : "Private Client"}
-        </span>
-      </header>
+      <PrivateHeader role={profile.role} />
 
       <section className="private-content">
         <p className="eyebrow">
@@ -291,9 +343,7 @@ export default async function PrivatePage() {
         )}
       </section>
 
-      <footer className="private-footer">
-        Private. Independent. International.
-      </footer>
+      <PrivateFooter />
     </main>
   );
 }
