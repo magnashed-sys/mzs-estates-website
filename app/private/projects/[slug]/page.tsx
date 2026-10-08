@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
 import RentalCalendar from "./RentalCalendar";
+import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 
 export const dynamic = "force-dynamic";
 
@@ -309,6 +310,19 @@ export default async function PrivateProjectPage({ params }: Props) {
             </div>
             <p style={{ color: muted, lineHeight: 1.8, marginTop: 30, maxWidth: 850 }}>Both rental configurations are exclusive-use stays and share the same availability. Online booking requests for this apartment will open after the two-rate calendar has been tested. No reservation can be made from this page yet.</p>
           </section>
+
+    
+<section
+  id="marina-availability"
+  style={{
+    padding: "60px clamp(22px,7vw,110px)",
+    background: "#0b0b0a",
+  }}
+>
+  <ConfiguredRentalCalendar projectId={property.id} />
+</section>
+
+          
           <section style={{ padding: "65px clamp(22px,7vw,110px)", background: "#151411" }}>
             <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>LOCATION & SURROUNDINGS</p>
             <h2 style={sectionTitle}>Marina Botafoch, Ibiza.</h2>
