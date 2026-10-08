@@ -107,3 +107,112 @@
     font-size: 11px;
   }
 }
+
+/* =========================================================
+   MZS GROUP — GLOBAL READABILITY UPGRADE
+   Applies across public and private environments
+   ========================================================= */
+
+/* Small headings and labels */
+
+.eyebrow,
+.mzs-kicker,
+.mzs-private-label,
+.mzs-group-label,
+.login-form label,
+.request-form label,
+.request-interests legend,
+.opportunity-location,
+.admin-stats span,
+.admin-header-actions span {
+  font-size: 12px;
+}
+
+/* Main descriptive text */
+
+.mzs-intro,
+.login-intro,
+.private-intro,
+.request-intro,
+.admin-intro,
+.admin-request-message {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+/* Buttons and action links */
+
+.mzs-button,
+.login-form button,
+.request-form button,
+.request-return,
+.opportunity-link,
+.admin-header-actions button,
+.admin-message a {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+/* Form inputs */
+
+.login-form input,
+.request-form input,
+.request-form textarea {
+  font-size: 17px;
+}
+
+/* Supporting text */
+
+.mzs-selective,
+.login-note,
+.opportunity-card .offering-tags span,
+.admin-request-details p,
+.admin-request-top p,
+.admin-interests span,
+.admin-status,
+.admin-section-heading > span {
+  font-size: 13px;
+}
+
+/* Footer text */
+
+.mzs-home-footer,
+.login-footer,
+.private-footer,
+.admin-footer {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  line-height: 1.6;
+}
+
+/* Admin request counts and messages */
+
+.admin-empty,
+.admin-message {
+  font-size: 15px;
+}
+
+/* Responsive adjustments */
+
+@media (max-width: 700px) {
+  .mzs-intro,
+  .login-intro,
+  .private-intro,
+  .request-intro,
+  .admin-intro {
+    font-size: 15px;
+  }
+
+  .mzs-button,
+  .login-form button,
+  .request-form button {
+    font-size: 12px;
+  }
+
+  .mzs-home-footer,
+  .login-footer,
+  .private-footer,
+  .admin-footer {
+    font-size: 11px;
+  }
+}
