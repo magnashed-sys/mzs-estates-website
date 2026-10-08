@@ -1,73 +1,298 @@
-import Link from "next/link";
 
-export default function Home() {
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "../../lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+type Project = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  location: string | null;
+  status: string;
+};
+
+type Offering = {
+  id: string;
+  project_id: string;
+  offering_type: string;
+  title: string;
+  status: string;
+};
+
+const offeringLabels: Record<string, string> = {
+  sale: "Private Sale",
+  rental: "Private Rental",
+  investment: "Investment",
+  financing: "Financing",
+};
+
+export default async function PrivatePage() {
+  const supabase = await createClient();
+
+  // Verify the authenticated session on the server.
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login?role=client");
+  }
+
+  // Verify the user's role and active status.
+  const { data: profile, error: profileError } =
+    await supabase
+      .from("profiles")
+      .select("role, is_active, full_name")
+      .eq("id", user.id)
+      .single();
+
+  if (profileError || !profile) {
+    redirect("/login?role=client");
+  }
+
+  if (!profile.is_active) {
+    return (
+      <main className="private-page">
+        <header className="private-header">
+          <Link href="/" className="private-brand">
+            MZS GROUP
+          </Link>
+          <span>Private Access</span>
+        </header>
+
+        <section className="private-content">
+          <p className="eyebrow">Account Verification</p>
+
+          <h1>Access pending.</h1>
+
+          <p className="private-intro">
+            Your account has not yet been activated
+            by MZS Group. You will receive further
+            information once your private access
+            has been approved.
+          </p>
+
+          <Link href="/" className="opportunity-link">
+            Return to MZS Group →
+          </Link>
+        </section>
+
+        <footer className="private-footer">
+          Private. Independent. International.
+        </footer>
+      </main>
+    );
+  }
+
+  if (profile.role === "admin") {
+    redirect("/admin");
+  }
+
+  if (!["client", "partner"].includes(profile.role)) {
+    redirect("/");
+  }
+
+  // Retrieve project assignments.
+  const { data: projectAccess, error: projectAccessError } =
+    await supabase
+      .from("project_access")
+      .select("project_id")
+      .eq("user_id", user.id);
+
+  // Retrieve offering assignments.
+  const { data: offeringAccess, error: offeringAccessError } =
+    await supabase
+      .from("offering_access")
+      .select("offering_id")
+      .eq("user_id", user.id);
+
+  if (projectAccessError || offeringAccessError) {
+    return (
+      <main className="private-page">
+        <section className="private-content">
+          <p className="eyebrow">MZS GROUP</p>
+          <h1>Unable to load access.</h1>
+          <p className="private-intro">
+            Your private opportunities are temporarily
+            unavailable. Please try again later.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  const projectIds = [
+    ...new Set(
+      (projectAccess ?? []).map(
+        (item) => item.project_id as string
+      )
+    ),
+  ];
+
+  const offeringIds = [
+    ...new Set(
+      (offeringAccess ?? []).map(
+        (item) => item.offering_id as string
+      )
+    ),
+  ];
+
+  let projects: Project[] = [];
+  let offerings: Offering[] = [];
+
+  if (projectIds.length > 0) {
+    const { data, error } = await supabase
+      .from("projects")
+      .select(
+        "id, slug, title, subtitle, location, status"
+      )
+      .in("id", projectIds)
+      .eq("status", "active");
+
+    if (error) {
+      return (
+        <main className="private-page">
+          <section className="private-content">
+            <h1>Unable to load projects.</h1>
+            <p className="private-intro">
+              Please try again later.
+            </p>
+          </section>
+        </main>
+      );
+    }
+
+    projects = (data ?? []) as Project[];
+  }
+
+  if (offeringIds.length > 0 && projectIds.length > 0) {
+    const { data, error } = await supabase
+      .from("offerings")
+      .select(
+        "id, project_id, offering_type, title, status"
+      )
+      .in("id", offeringIds)
+      .in("project_id", projectIds)
+      .eq("status", "active");
+
+    if (error) {
+      return (
+        <main className="private-page">
+          <section className="private-content">
+            <h1>Unable to load offerings.</h1>
+            <p className="private-intro">
+              Please try again later.
+            </p>
+          </section>
+        </main>
+      );
+    }
+
+    offerings = (data ?? []) as Offering[];
+  }
+
+  // Only display projects with at least one
+  // offering explicitly assigned to this user.
+  const visibleProjects = projects
+    .map((project) => ({
+      ...project,
+      offerings: offerings.filter(
+        (offering) => offering.project_id === project.id
+      ),
+    }))
+    .filter((project) => project.offerings.length > 0);
+
+  const firstName =
+    profile.full_name?.trim().split(/\s+/)[0] ||
+    "Member";
+
   return (
-    <main className="mzs-home">
-      <header className="mzs-home-header">
-        <Link href="/" className="mzs-wordmark">
-          <span className="mzs-monogram">MZS</span>
-          <span className="mzs-group-label">GROUP</span>
+    <main className="private-page">
+      <header className="private-header">
+        <Link href="/" className="private-brand">
+          MZS GROUP
         </Link>
 
-        <span className="mzs-private-label">
-          Private Access
+        <span>
+          {profile.role === "partner"
+            ? "Partner Access"
+            : "Private Client"}
         </span>
       </header>
 
-      <section className="mzs-hero">
-        <p className="mzs-kicker">
-          MZS GROUP
+      <section className="private-content">
+        <p className="eyebrow">
+          By invitation only
         </p>
 
-        <h1>
-          Private.
-          <br />
-          Independent.
-          <br />
-          International.
-        </h1>
+        <h1>Welcome, {firstName}.</h1>
 
-        <p className="mzs-intro">
-          A private platform connecting selected clients
-          and partners with opportunities across real estate,
-          investment and capital.
+        <p className="private-intro">
+          Your private MZS environment.
+          Explore selected real estate and investment
+          opportunities available exclusively
+          to your account.
         </p>
 
-        <div className="mzs-actions">
-          <Link
-            href="/login?role=client"
-            className="mzs-button"
-          >
-            Client Login
-          </Link>
+        {visibleProjects.length === 0 ? (
+          <article className="opportunity-card">
+            <div>
+              <p className="opportunity-location">
+                Private Opportunities
+              </p>
 
-          <Link
-            href="/login?role=partner"
-            className="mzs-button"
-          >
-            Partner Login
-          </Link>
+              <h2>No opportunities assigned yet.</h2>
 
-          <Link
-            href="/request-access"
-            className="mzs-button mzs-button-subtle"
-          >
-            Request Access
-          </Link>
-        </div>
+              <p className="private-intro">
+                Your relationship manager will
+                notify you when new opportunities
+                become available.
+              </p>
+            </div>
+          </article>
+        ) : (
+          visibleProjects.map((project) => (
+            <article
+              className="opportunity-card"
+              key={project.id}
+            >
+              <div>
+                <p className="opportunity-location">
+                  {project.location || "International"}
+                </p>
 
-        <p className="mzs-selective">
-          New relationships are considered on a selective basis.
-        </p>
+                <h2>{project.title}</h2>
+
+                {project.subtitle && (
+                  <p className="private-intro">
+                    {project.subtitle}
+                  </p>
+                )}
+
+                <div className="offering-tags">
+                  {project.offerings.map((offering) => (
+                    <span key={offering.id}>
+                      {offeringLabels[offering.offering_type] ??
+                        offering.title}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <span className="opportunity-link">
+                Selected Opportunity
+              </span>
+            </article>
+          ))
+        )}
       </section>
 
-      <footer className="mzs-home-footer">
-        <span>
-          Amsterdam · Ibiza · Mallorca · Madrid · Alicante ·
-          Dubai · Abu Dhabi
-        </span>
-
-        <span>By invitation only.</span>
+      <footer className="private-footer">
+        Private. Independent. International.
       </footer>
     </main>
   );
