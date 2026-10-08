@@ -37,6 +37,21 @@ const gallery = [
   { file: "pool-evening.webp", label: "Pool at night" },
 ];
 
+const featuredPhotos = [
+  { file: "pool-panorama.webp", label: "Private swimming pool" },
+  { file: "pool-mountain-view.webp", label: "Mountain views" },
+  { file: "living-room.webp", label: "Main residence · lounge" },
+  { file: "living-dining.webp", label: "Main residence · living and dining" },
+  { file: "kitchen.webp", label: "Main residence · kitchen" },
+  { file: "bedroom-double.webp", label: "Main residence · bedroom" },
+];
+
+const photoCard: React.CSSProperties = {
+  margin: 0,
+  background: "#171613",
+  minWidth: 0,
+};
+
 const tag: React.CSSProperties = {
   border: "1px solid #675b48",
   color: "#d5c09a",
@@ -114,9 +129,9 @@ export default async function PrivateProjectPage({ params }: Props) {
 
       {isVilla && hasRental ? (
         <>
-          <section style={{ position: "relative", minHeight: "min(76vh,760px)", display: "flex", alignItems: "end", isolation: "isolate" }}>
-            <Image src={`${base}/hero-pool.webp`} alt="Villa La Nucia swimming pool and Mediterranean terrace" fill priority sizes="100vw" style={{ objectFit: "cover", zIndex: -2 }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg,rgba(0,0,0,.86),rgba(0,0,0,.05) 70%)", zIndex: -1 }} />
+          <section style={{ position: "relative", minHeight: "min(88vh,880px)", display: "flex", alignItems: "end", isolation: "isolate" }}>
+            <Image src={`${base}/pool-panorama.webp`} alt="Villa La Nucia swimming pool and Mediterranean terrace" fill priority sizes="100vw" style={{ objectFit: "cover", zIndex: -2 }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(0,0,0,.64),rgba(0,0,0,.08) 75%),linear-gradient(0deg,rgba(0,0,0,.68),transparent 70%)", zIndex: -1 }} />
             <div style={{ padding: "clamp(35px,7vw,100px)", maxWidth: 1000 }}>
               <p style={{ color: gold, letterSpacing: "0.25em", fontSize: 12 }}>MZS PRIVATE COLLECTION · COSTA BLANCA</p>
               <h1 style={{ fontFamily: "Georgia, serif", fontWeight: 400, fontSize: "clamp(54px,9vw,124px)", lineHeight: 1, margin: "20px 0" }}>Villa La Nucia</h1>
@@ -125,28 +140,66 @@ export default async function PrivateProjectPage({ params }: Props) {
             </div>
           </section>
 
-          <section style={{ padding: "60px clamp(22px,7vw,110px)", borderBottom: "1px solid #34302b" }}>
-            <p style={{ color: gold, letterSpacing: ".22em", fontSize: 12 }}>THE PROPERTY</p>
-            <h2 style={sectionTitle}>Space to be together. Privacy to unwind.</h2>
-            <p style={{ color: muted, lineHeight: 1.9, fontSize: 16, maxWidth: 830 }}>Villa La Nucia combines a welcoming main residence with two separate guest accommodations. The main house offers two double bedrooms, one bathroom, a comfortable living and dining area, and a kitchen. One independent guest accommodation is situated near the main entrance; the other is located near the pool at the rear. Each has a double bedroom and its own bathroom.</p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 30 }}>
-              <span style={tag}>4 bedrooms</span><span style={tag}>3 bathrooms</span><span style={tag}>Up to 8 guests*</span><span style={tag}>Private pool</span><span style={tag}>2 separate guest accommodations</span>
+          <section style={{ padding: "clamp(65px,9vw,130px) clamp(22px,7vw,110px)", borderBottom: "1px solid #34302b" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "clamp(30px,6vw,90px)", alignItems: "center" }}>
+              <div>
+                <p style={{ color: gold, letterSpacing: ".22em", fontSize: 12 }}>THE PROPERTY</p>
+                <h2 style={sectionTitle}>Space to be together. Privacy to unwind.</h2>
+                <p style={{ color: muted, lineHeight: 1.9, fontSize: 16 }}>Villa La Nucia combines a welcoming main residence with two separate guest accommodations. The main house offers two double bedrooms, one bathroom, a comfortable living and dining area, and a kitchen.</p>
+                <p style={{ color: muted, lineHeight: 1.9, fontSize: 16 }}>One independent guest accommodation is situated near the main entrance; the other is located near the pool at the rear. Each has a double bedroom and its own bathroom.</p>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 30 }}>
+                  <span style={tag}>4 bedrooms</span><span style={tag}>3 bathrooms</span><span style={tag}>Up to 8 guests*</span><span style={tag}>Private pool</span>
+                </div>
+                <p style={{ color: muted, fontSize: 12, marginTop: 20 }}>*Subject to confirmation of permitted rental occupancy.</p>
+              </div>
+              <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: 320 }}>
+                <Image src={`${base}/living-dining.webp`} alt="Living and dining area in the main residence" fill sizes="(max-width: 850px) 100vw, 45vw" style={{ objectFit: "cover" }} />
+              </div>
             </div>
-            <p style={{ color: muted, fontSize: 12, marginTop: 20 }}>*Subject to confirmation of permitted rental occupancy.</p>
           </section>
 
-          <section id="gallery" style={{ padding: "80px clamp(22px,7vw,110px)" }}>
+          <section id="gallery" style={{ padding: "clamp(65px,8vw,110px) clamp(22px,7vw,110px)" }}>
             <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>EXPLORE THE VILLA</p>
             <h2 style={sectionTitle}>A closer look.</h2>
-            <p style={{ color: muted, lineHeight: 1.7, maxWidth: 800, marginBottom: 32 }}>The interior photographs below show the main residence. Photographs of the two independent guest accommodations will be added separately.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,310px),1fr))", gap: 16 }}>
-              {gallery.map((photo) => (
-                <figure key={photo.file} style={{ margin: 0, background: "#171613" }}>
+            <p style={{ color: muted, lineHeight: 1.7, maxWidth: 800, marginBottom: 36 }}>Discover the main residence and its outdoor spaces. Interior photographs of the two independent guest accommodations will be added separately.</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,340px),1fr))", gap: 18 }}>
+              {featuredPhotos.map((photo) => (
+                <figure key={photo.file} style={photoCard}>
                   <div style={{ position: "relative", aspectRatio: "4/3" }}>
-                    <Image src={`${base}/${photo.file}`} alt={photo.label} fill sizes="(max-width: 720px) 100vw, 50vw" style={{ objectFit: "cover" }} />
+                    <Image src={`${base}/${photo.file}`} alt={photo.label} fill sizes="(max-width: 760px) 100vw, 45vw" style={{ objectFit: "cover" }} />
                   </div>
-                  <figcaption style={{ padding: "14px 16px", fontSize: 12, color: muted, letterSpacing: ".04em" }}>{photo.label}</figcaption>
+                  <figcaption style={{ padding: "15px 18px", fontSize: 12, color: muted }}>{photo.label}</figcaption>
                 </figure>
+              ))}
+            </div>
+            <details style={{ marginTop: 38, borderTop: "1px solid #34302b", paddingTop: 26 }}>
+              <summary style={{ display: "inline-block", cursor: "pointer", border: `1px solid ${gold}`, padding: "17px 28px", color: gold, fontSize: 12, letterSpacing: ".14em", listStyle: "none" }}>VIEW ALL PHOTOS ↓</summary>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,290px),1fr))", gap: 16, marginTop: 32 }}>
+                {gallery.map((photo) => (
+                  <figure key={photo.file} style={photoCard}>
+                    <div style={{ position: "relative", aspectRatio: "4/3" }}>
+                      <Image src={`${base}/${photo.file}`} alt={photo.label} fill sizes="(max-width: 760px) 100vw, 33vw" style={{ objectFit: "cover" }} />
+                    </div>
+                    <figcaption style={{ padding: "13px 15px", fontSize: 12, color: muted }}>{photo.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </details>
+          </section>
+
+          <section style={{ padding: "70px clamp(22px,7vw,110px)", borderTop: "1px solid #34302b" }}>
+            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>PRIVATE ACCOMMODATION</p>
+            <h2 style={sectionTitle}>Together, with room for privacy.</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,270px),1fr))", gap: 20 }}>
+              {[
+                ["THE MAIN RESIDENCE", "Two double bedrooms, one bathroom, living and dining room, and kitchen."],
+                ["GUEST ACCOMMODATION 01", "Independent accommodation near the main entrance, with a double bedroom and private bathroom."],
+                ["GUEST ACCOMMODATION 02", "Independent accommodation beside the pool at the rear, with a double bedroom and private bathroom."],
+              ].map(([heading, description]) => (
+                <article key={heading} style={{ borderTop: `1px solid ${gold}`, paddingTop: 22 }}>
+                  <h3 style={{ fontSize: 12, color: gold, letterSpacing: ".15em", fontWeight: 400 }}>{heading}</h3>
+                  <p style={{ color: muted, lineHeight: 1.8, fontSize: 15 }}>{description}</p>
+                </article>
               ))}
             </div>
           </section>
