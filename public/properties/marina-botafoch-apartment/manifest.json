@@ -1,0 +1,59 @@
+{
+  "project": "Marina Botafoch Apartment",
+  "property_slug": "marina-botafoch-apartment",
+  "images": [
+    {
+      "filename": "bathroom-detail.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "bathroom-two.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "bedroom-one.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "bedroom-view.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "building-entrance.webp",
+      "source": "supplied photograph"
+    },
+    {
+      "filename": "building-exterior.webp",
+      "source": "supplied photograph"
+    },
+    {
+      "filename": "hero-living-kitchen.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "living-terrace.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "private-terrace.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "residence-gym.webp",
+      "source": "supplied photograph"
+    },
+    {
+      "filename": "residence-pool.webp",
+      "source": "supplied photograph"
+    },
+    {
+      "filename": "terrace-pool-view.webp",
+      "source": "video frame"
+    },
+    {
+      "filename": "underground-parking.webp",
+      "source": "supplied photograph"
+    }
+  ],
+  "note": "Video stills from supplied Valor Real(1).mp4; verify frame quality before publishing. Original video intentionally excluded. No assumptions about which bedroom is closed for 2-bedroom configuration."
+}
