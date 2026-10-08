@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
+import RentalCalendar from "./RentalCalendar";
 
 export const dynamic = "force-dynamic";
 
@@ -214,6 +215,16 @@ export default async function PrivateProjectPage({ params }: Props) {
             </div>
             <p style={{ color: muted, lineHeight: 1.8, maxWidth: 760 }}>Flexible arrival and departure days. Guests may request preferred check-in and check-out times. All bookings require personal approval by MZS Group. The live availability calendar and booking requests will be introduced in the next release.</p>
           </section>
+
+<section
+  id="availability"
+  style={{
+    padding: "60px clamp(22px,7vw,110px)",
+    background: "#0b0b0a",
+  }}
+>
+  <RentalCalendar projectId={property.id} />
+</section>
 
           <section style={{ padding: "70px clamp(22px,7vw,110px)" }}>
             <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>LOCATION & SURROUNDINGS</p>
