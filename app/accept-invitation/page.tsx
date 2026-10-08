@@ -49,12 +49,14 @@ function InvitationForm() {
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("role, is_active, full_name")
-          .eq("id", user.id)
-          .single();
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("role, is_active, full_name")
+        .eq("id", user.id)
+        .single();
 
       if (!active) return;
 
@@ -68,11 +70,15 @@ function InvitationForm() {
       }
 
       if (profile.is_active) {
-        router.replace("/login?role=client");
+        router.replace(
+          profile.role === "partner"
+            ? "/login?role=partner"
+            : "/login?role=client"
+        );
         return;
       }
 
-      // Prefill the name from the original invitation.
+      // Prefill the name from the invitation.
       setFullName(profile.full_name || "");
       setPageState("ready");
     }
@@ -109,7 +115,9 @@ function InvitationForm() {
     }
 
     if (password.length < 12) {
-      setError("Please use at least 12 characters.");
+      setError(
+        "Please use at least 12 characters."
+      );
       return;
     }
 
@@ -122,68 +130,107 @@ function InvitationForm() {
 
     const supabase = createClient();
 
-    // Verify the authenticated invitation session.
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    try {
+      // Revalidate the authenticated user.
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      setError(
-        "Your invitation session has expired. Please request a new invitation."
-      );
-      setPageState("invalid");
-      return;
-    }
+      if (authError || !user) {
+        setError(
+          "Your session has expired. Please open your invitation again."
+        );
+        setPageState("invalid");
+        return;
+      }
 
-    // Store the full name without allowing changes
-    // to the account role or activation status.
-    const { data: nameSaved, error: nameError } =
-      await supabase.rpc(
+      // Save the full name without changing
+      // account role or activation status.
+      const {
+        data: nameSaved,
+        error: nameError,
+      } = await supabase.rpc(
         "complete_invitation_name",
         {
           p_full_name: normalizedName,
         }
       );
 
-    if (nameError || nameSaved !== true) {
-      setError(
-        "Unable to save your name. Please try again."
+      if (nameError || nameSaved !== true) {
+        setError(
+          "Unable to save your full name. Please try again."
+        );
+        setPageState("ready");
+        return;
+      }
+
+      // Set the password.
+      const { error: passwordError } =
+        await supabase.auth.updateUser({
+          password,
+        });
+
+      if (passwordError) {
+        setError(
+          "Your name was saved, but the password could not be updated. Please try again."
+        );
+        setPageState("ready");
+        return;
+      }
+
+      // Complete the approved invitation.
+      // The database function validates the
+      // invitation before activating the account.
+      const {
+        data: activated,
+        error: activationError,
+      } = await supabase.rpc(
+        "finalize_invited_registration"
       );
-      setPageState("ready");
-      return;
-    }
 
-    // Set the account password.
-    const { error: updateError } =
-      await supabase.auth.updateUser({
-        password,
-      });
+      if (activationError || activated !== true) {
+        setPassword("");
+        setConfirmPassword("");
 
-    if (updateError) {
+        setError(
+          "Your password was saved, but automatic activation could not be completed. Please contact MZS Group. Do not create another account."
+        );
+
+        setPageState("invalid");
+        return;
+      }
+
+      // End the registration session.
+      const { error: signOutError } =
+        await supabase.auth.signOut();
+
+      setPassword("");
+      setConfirmPassword("");
+
+      if (signOutError) {
+        setError(
+          "Your account is active, but automatic sign out failed. Please sign out before logging in again."
+        );
+        setPageState("invalid");
+        return;
+      }
+
+      setPageState("success");
+    } catch {
+      setPassword("");
+      setConfirmPassword("");
+
       setError(
-        "Your name was saved, but the password could not be set. Please try again."
+        "Unable to complete registration. Please contact MZS Group before trying again."
       );
-      setPageState("ready");
-      return;
+
+      setPageState("invalid");
     }
-
-    // Activation remains exclusively controlled by MZS.
-    const { error: signOutError } =
-      await supabase.auth.signOut();
-
-    if (signOutError) {
-      setError(
-        "Your details were saved. Please sign out manually before continuing."
-      );
-      setPageState("ready");
-      return;
-    }
-
-    setPassword("");
-    setConfirmPassword("");
-    setPageState("success");
   }
+
+  const firstName =
+    fullName.trim().split(/\s+/)[0] || "Member";
 
   return (
     <main className="login-page">
@@ -203,20 +250,39 @@ function InvitationForm() {
         {pageState === "checking" && (
           <>
             <h1>Verifying invitation.</h1>
+
             <p className="login-intro">
-              Please wait while we verify your access.
+              Please wait while we verify
+              your personal invitation.
             </p>
           </>
         )}
 
         {pageState === "invalid" && (
           <>
-            <h1>Invitation unavailable.</h1>
+            <h1>Registration unavailable.</h1>
+
             <p className="login-intro">
-              This invitation is invalid, expired or
-              no longer available. Please contact
-              MZS Group.
+              Your registration could not be
+              completed or your invitation
+              is no longer available.
             </p>
+
+            {error && (
+              <p
+                className="login-error"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
+
+            <Link
+              href="/"
+              className="request-return"
+            >
+              Return to MZS Group →
+            </Link>
           </>
         )}
 
@@ -226,9 +292,9 @@ function InvitationForm() {
             <h1>Welcome to MZS.</h1>
 
             <p className="login-intro">
-              Complete your personal details and
-              create a secure password to begin
-              your private MZS experience.
+              Complete your personal details
+              and create a secure password
+              to activate your private account.
             </p>
 
             <form
@@ -260,8 +326,8 @@ function InvitationForm() {
                   onChange={(event) =>
                     setPassword(event.target.value)
                   }
-                  required
                   minLength={12}
+                  required
                   disabled={pageState === "saving"}
                 />
               </label>
@@ -275,8 +341,8 @@ function InvitationForm() {
                   onChange={(event) =>
                     setConfirmPassword(event.target.value)
                   }
-                  required
                   minLength={12}
+                  required
                   disabled={pageState === "saving"}
                 />
               </label>
@@ -295,8 +361,8 @@ function InvitationForm() {
                 disabled={pageState === "saving"}
               >
                 {pageState === "saving"
-                  ? "Saving..."
-                  : "Complete Registration →"}
+                  ? "Activating..."
+                  : "Activate My Account →"}
               </button>
             </form>
           </>
@@ -304,22 +370,27 @@ function InvitationForm() {
 
         {pageState === "success" && (
           <>
-            <h1>Registration complete.</h1>
+            <h1>Welcome, {firstName}.</h1>
 
             <p className="login-intro">
-              Thank you, {fullName.trim().split(/\s+/)[0]}.
-              Your personal details and password
-              have been saved successfully.
+              Your personal MZS account
+              has been successfully activated.
+            </p>
 
-              MZS Group will activate your private
-              access once your account has been approved.
+            <p className="login-intro">
+              You can now sign in to your
+              private environment.
+
+              Selected opportunities will
+              become available when MZS Group
+              assigns them to your account.
             </p>
 
             <Link
-              href="/"
+              href="/login?role=client"
               className="request-return"
             >
-              Return to MZS Group →
+              Continue to Private Login →
             </Link>
           </>
         )}
