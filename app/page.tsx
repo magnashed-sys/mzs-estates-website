@@ -1,11 +1,16 @@
 
 import Link from "next/link";
+import "./homepage-refinements.css";
 
 export default function Home() {
   return (
-    <main className="mzs-home mzs-home-image">
+    <main className="mzs-home mzs-home-image mzs-home-refined">
       <header className="mzs-home-header">
-        <Link href="/" className="mzs-wordmark">
+        <Link
+          href="/"
+          className="mzs-wordmark"
+          aria-label="MZS Group — Home"
+        >
           <span className="mzs-monogram">MZS</span>
           <span className="mzs-group-label">GROUP</span>
         </Link>
@@ -16,8 +21,6 @@ export default function Home() {
       </header>
 
       <section className="mzs-hero">
-        <p className="mzs-kicker">MZS GROUP</p>
-
         <h1>
           Private.
           <br />
@@ -26,10 +29,14 @@ export default function Home() {
           International.
         </h1>
 
+        <div className="mzs-separator" />
+
         <p className="mzs-intro">
-          A private platform connecting selected clients
-          and partners with opportunities across real estate,
-          investment and capital.
+          MZS Group is an independent international real
+          estate and investment group, providing selected
+          clients and partners with access to private
+          opportunities across Amsterdam, Ibiza, Dubai
+          and beyond.
         </p>
 
         <div className="mzs-actions">
@@ -56,12 +63,15 @@ export default function Home() {
         </div>
 
         <p className="mzs-selective">
-          New relationships are considered on a selective basis.
+          New relationships are considered on a selective
+          basis.
         </p>
       </section>
 
       <footer className="mzs-home-footer">
-        <span>Amsterdam · Ibiza · International</span>
+        <span>
+          Amsterdam · Ibiza · Dubai - International
+        </span>
         <span>By invitation only.</span>
       </footer>
     </main>
