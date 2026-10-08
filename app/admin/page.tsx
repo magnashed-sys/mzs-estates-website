@@ -2,6 +2,7 @@
 "use client";
 
 import "./admin.css";
+import BookingManagement from "./BookingManagement";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -353,7 +354,7 @@ export default function AdminPage() {
 
         {activeTab === "bookings" && <div>
           <div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Booking management</h2></div></div>
-          <p className="admin-intro">Booking requests are stored securely. The administrator review screen is the next development step; no booking approval action is enabled here yet.</p>
+          <BookingManagement />
         </div>}
 
         {activeTab === "relationships" && <>
