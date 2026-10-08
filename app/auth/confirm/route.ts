@@ -6,17 +6,30 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 export async function GET(request: NextRequest) {
   const origin = request.nextUrl.origin;
 
-  const tokenHash = request.nextUrl.searchParams.get("token_hash");
-  const type = request.nextUrl.searchParams.get("type");
+  const tokenHash =
+    request.nextUrl.searchParams.get("token_hash");
 
-  if (!tokenHash || type !== "invite") {
+  const type =
+    request.nextUrl.searchParams.get("type");
+
+  // Only invitation and password recovery are supported.
+  if (
+    !tokenHash ||
+    (type !== "invite" && type !== "recovery")
+  ) {
     return NextResponse.redirect(
-      new URL("/login?error=invalid-invitation", origin)
+      new URL("/login?error=invalid-link", origin)
     );
   }
 
+  // Redirect to the appropriate MZS page.
+  const destination =
+    type === "invite"
+      ? "/accept-invitation"
+      : "/reset-password";
+
   const response = NextResponse.redirect(
-    new URL("/accept-invitation", origin)
+    new URL(destination, origin)
   );
 
   const supabase = createServerClient(
@@ -27,10 +40,14 @@ export async function GET(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
+
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
+          cookiesToSet.forEach(
+            ({ name, value, options }) => {
+              request.cookies.set(name, value);
+              response.cookies.set(name, value, options);
+            }
+          );
         },
       },
     }
@@ -43,7 +60,7 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL("/login?error=invitation-expired", origin)
+      new URL("/login?error=link-expired", origin)
     );
   }
 
