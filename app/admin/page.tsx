@@ -21,6 +21,7 @@ type AccessRequest = {
 };
 
 type PageState = "loading" | "ready" | "denied" | "error";
+type Decision = "approved" | "declined";
 
 const offeringLabels: Record<string, string> = {
   investment: "Investment",
@@ -35,6 +36,8 @@ export default function AdminPage() {
   const [pageState, setPageState] = useState<PageState>("loading");
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -63,8 +66,8 @@ export default function AdminPage() {
       if (!active) return;
 
       if (profileError) {
-        setPageState("error");
         setErrorMessage("Unable to verify administrator access.");
+        setPageState("error");
         return;
       }
 
@@ -83,8 +86,8 @@ export default function AdminPage() {
       if (!active) return;
 
       if (error) {
-        setPageState("error");
         setErrorMessage("Unable to retrieve access requests.");
+        setPageState("error");
         return;
       }
 
@@ -92,12 +95,71 @@ export default function AdminPage() {
       setPageState("ready");
     }
 
-    loadAdmin();
+    void loadAdmin();
 
     return () => {
       active = false;
     };
   }, [router]);
+
+  async function handleReview(
+    request: AccessRequest,
+    decision: Decision
+  ) {
+    if (processingId || request.status !== "pending") return;
+
+    const confirmed = window.confirm(
+      decision === "approved"
+        ? `Approve the access request from ${request.full_name}? This does not create an account or grant access.`
+        : `Decline the access request from ${request.full_name}?`
+    );
+
+    if (!confirmed) return;
+
+    setProcessingId(request.id);
+    setNotice("");
+
+    try {
+      const supabase = createClient();
+
+      const { data, error } = await supabase.rpc(
+        "review_access_request",
+        {
+          p_request_id: request.id,
+          p_decision: decision,
+        }
+      );
+
+      if (error) throw error;
+
+      if (data !== true) {
+        setNotice(
+          "This request was already processed or is no longer pending. Refresh the page."
+        );
+        return;
+      }
+
+      setRequests((current) =>
+        current.map((item) =>
+          item.id === request.id
+            ? { ...item, status: decision }
+            : item
+        )
+      );
+
+      setNotice(
+        decision === "approved"
+          ? "Request approved. No account or access has been created."
+          : "Request declined."
+      );
+    } catch {
+      setNotice(
+        "Unable to update this request. Please try again."
+      );
+    } finally {
+      setProcessingId(null);
+    }
+  }
 
   async function handleLogout() {
     const supabase = createClient();
@@ -192,6 +254,17 @@ export default function AdminPage() {
           <span>{requests.length} requests</span>
         </div>
 
+        {notice && (
+          <p role="status" style={{
+            color: "#d5c09a",
+            fontSize: "12px",
+            marginBottom: "24px",
+            lineHeight: 1.7,
+          }}>
+            {notice}
+          </p>
+        )}
+
         {requests.length === 0 ? (
           <p className="admin-empty">
             No access requests have been received.
@@ -243,6 +316,57 @@ export default function AdminPage() {
                   <p className="admin-request-message">
                     {request.message}
                   </p>
+                )}
+
+                {request.status === "pending" && (
+                  <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "12px",
+                    marginTop: "28px",
+                  }}>
+                    <button
+                      type="button"
+                      disabled={processingId !== null}
+                      onClick={() =>
+                        handleReview(request, "approved")
+                      }
+                      style={{
+                        padding: "13px 22px",
+                        background: "#d5c09a",
+                        border: "1px solid #d5c09a",
+                        color: "#0b0b0a",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {processingId === request.id
+                        ? "Processing..."
+                        : "Approve"}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={processingId !== null}
+                      onClick={() =>
+                        handleReview(request, "declined")
+                      }
+                      style={{
+                        padding: "13px 22px",
+                        background: "transparent",
+                        border: "1px solid #665a45",
+                        color: "#d5c09a",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Decline
+                    </button>
+                  </div>
                 )}
               </article>
             ))}
