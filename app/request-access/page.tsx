@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "../public-access-refresh.module.css";
+
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/client";
@@ -83,7 +85,7 @@ export default function RequestAccessPage() {
 
   if (submitted) {
     return (
-      <main className="request-page" style={pageStyle}>
+      <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
         <header className="request-header" style={contentStyle}>
           <Link href="/" className="request-brand">MZS GROUP</Link>
           <span>Private Access</span>
@@ -100,38 +102,22 @@ export default function RequestAccessPage() {
   }
 
   return (
-    <main className="request-page" style={pageStyle}>
+    <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
       <header className="request-header" style={contentStyle}>
         <Link href="/" className="request-brand">MZS GROUP</Link>
         <span>Request Access</span>
       </header>
       <section className="request-container" style={contentStyle}>
         <p className="eyebrow">Private Access</p>
-        
-
-<h1
-  style={{
-    fontFamily: "Georgia, 'Times New Roman', serif",
-    fontSize: "clamp(32px, 3.2vw, 48px)",
-    fontWeight: 400,
-    lineHeight: 1.15,
-    letterSpacing: "-0.015em",
-    maxWidth: "700px",
-    margin: "16px 0 24px",
-  }}
->
-  Your private journey begins here.
-</h1>
-
-
+        <h1>Your private journey begins here.</h1>
         <p className="request-intro">
           New relationships are considered on a selective basis.
           Please provide a few details below.
         </p>
-        <form className="request-form" onSubmit={handleSubmit}>
+        <form className="request-form" onSubmit={handleSubmit} aria-busy={loading}>
           <div className="request-grid">
             <label>
-              Name
+              Full name
               <input type="text" autoComplete="name" value={fullName}
                 onChange={(event) => setFullName(event.target.value)} required disabled={loading} />
             </label>
@@ -141,12 +127,12 @@ export default function RequestAccessPage() {
                 onChange={(event) => setEmail(event.target.value)} required disabled={loading} />
             </label>
             <label>
-              Company
+              Company (optional)
               <input type="text" autoComplete="organization" value={company}
                 onChange={(event) => setCompany(event.target.value)} disabled={loading} />
             </label>
             <label>
-              Country
+              Country (optional)
               <input type="text" autoComplete="country-name" value={country}
                 onChange={(event) => setCountry(event.target.value)} disabled={loading} />
             </label>
@@ -167,7 +153,7 @@ export default function RequestAccessPage() {
             </div>
           </fieldset>
           <label className="request-message">
-            How can MZS assist you?
+            How can MZS assist you? (optional)
             <textarea rows={4} value={message}
               onChange={(event) => setMessage(event.target.value)} disabled={loading} />
           </label>
