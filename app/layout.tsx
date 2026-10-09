@@ -1,11 +1,11 @@
-
 import type { Metadata } from "next";
+import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
 
 const siteUrl = "https://www.mzsgroup.eu";
 
 const siteDescription =
-  "MZS Group is an independent international real estate and investment group, connecting selected clients and partners with private opportunities in Amsterdam, Ibiza, Dubai and beyond.";
+  "MZS Group is an independent international real estate and investment group, connecting selected clients and partners with private opportunities in Europe and the UAE";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -58,7 +58,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <PublicWebAnalytics />
+      </body>
     </html>
   );
 }
