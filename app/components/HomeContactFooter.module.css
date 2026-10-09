@@ -1,0 +1,8 @@
+/* Prepared footer: centred independently of unequal left/right captions. */
+.footer { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 12px 24px; border-top: 1px solid #625745; padding-top: 12px; color: #c4bdae; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 1.6; letter-spacing: .12em; }
+.locations { text-align: left; overflow-wrap: break-word; }
+.invitation { text-align: right; }
+.contact { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; color: #d5c09a; font-size: 12px; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; padding: 6px 10px; }
+.contact:hover { text-decoration: underline; text-underline-offset: 5px; }
+.contact:focus-visible { outline: 2px solid #d5c09a; outline-offset: 3px; }
+@media(max-width:700px) { .footer { grid-template-columns: minmax(0,1fr); gap: 4px; justify-items: center; } .locations,.invitation { text-align: center; } }
