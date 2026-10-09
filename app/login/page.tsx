@@ -5,6 +5,8 @@ import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 
 import { FormEvent, Suspense, useState } from "react";
+import Link from "next/link";
+import recoveryStyles from "../account-recovery.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 
@@ -126,6 +128,14 @@ function LoginForm() {
               value={password} onChange={(event) => setPassword(event.target.value)}
               required disabled={loading} />
           </label>
+          <div className={recoveryStyles.forgotLinkRow}>
+            <Link
+              href={`/forgot-password?role=${isPartner ? "partner" : "client"}`}
+              className={recoveryStyles.textLink}
+            >
+              Forgot your password? →
+            </Link>
+          </div>
           {error && <p className="login-error" role="alert">{error}</p>}
           <button type="submit" disabled={loading}>
             {loading ? "Signing in..." : "Login →"}
