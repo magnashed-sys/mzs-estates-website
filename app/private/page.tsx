@@ -58,7 +58,7 @@ function categoryFor(type: string): Category | null {
 
 // Images are already public assets in this MZS project; no new assets required.
 function imageFor(slug: string): string | null {
-  if (slug === "villa-la-nucia") return "/properties/villa-la-nucia/pool-panorama.webp";
+  if (slug === "villa-la-nucia") return "/properties/villa-la-nucia/pool-mountain-view.webp";
   if (slug === "marina-botafoch-apartment") return "/properties/marina-botafoch-apartment/hero-living-kitchen.webp";
   return null;
 }
