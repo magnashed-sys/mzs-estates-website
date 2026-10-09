@@ -167,7 +167,38 @@ export default function PrivatePage() {
         {state === "pending" && <><h1 style={heading}>Access pending.</h1><p style={{ color: muted }}>Your private account is awaiting activation.</p></>}
         {state === "error" && <><h1 style={heading}>Unable to continue.</h1><p role="alert" style={{ color: muted }}>{error}</p></>}
         {state === "ready" && <>
-          <h1 style={heading}>Welcome, {name}.</h1>
+
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 24,
+    flexWrap: "wrap",
+  }}
+>
+  <h1 style={heading}>Welcome {name}.</h1>
+
+  <Link
+    href="/private/reservations"
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      color: gold,
+      border: `1px solid ${edge}`,
+      padding: "14px 20px",
+      textDecoration: "none",
+      fontSize: 12,
+      letterSpacing: ".12em",
+      whiteSpace: "nowrap",
+    }}
+  >
+    MY RESERVATIONS →
+  </Link>
+</div>
+
+          
           <p style={{ color: muted, lineHeight: 1.8, maxWidth: 690, marginBottom: 45 }}>Explore opportunities selected exclusively for your account. Choose a collection below to view your available properties and offerings.</p>
 
           <div role="tablist" aria-label="Private opportunity categories" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,230px),1fr))", gap: 16 }}>
