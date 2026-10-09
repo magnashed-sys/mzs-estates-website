@@ -1,0 +1,243 @@
+/* MZS Public Access — prepared against the supplied public page sources.
+   Imported by login/page.tsx and request-access/page.tsx only.
+   No selectors affect Admin, Private Collection, reset-password or invitation pages.
+   Logo: the supplied .login-brand/.request-brand font size is 18px; now 27px (+50%). */
+
+.page:global(.login-page),
+.page:global(.request-page) {
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 24px clamp(18px, 4.5vw, 80px);
+  color: #f1ede6;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.page :global(*) { box-sizing: border-box; }
+.page.loginPage { display: flex; flex-direction: column; gap: 24px; }
+.page.requestPage { display: flex; flex-direction: column; gap: 0; }
+
+.page :global(.login-header),
+.page :global(.request-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 12px 24px;
+  min-width: 0;
+}
+.page :global(.login-brand),
+.page :global(.request-brand) {
+  display: inline-block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.15;
+  letter-spacing: .15em;
+  color: #d5c09a;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.page :global(.login-header > span),
+.page :global(.request-header > span) {
+  display: block;
+  color: #ddd2bd;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.page :global(.login-container),
+.page :global(.request-container),
+.page :global(.request-success) {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(24px, 3.5vw, 40px);
+  background: rgba(10, 12, 13, .94);
+  border: 1px solid #776952;
+  border-radius: 6px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+}
+.page :global(.login-container) { max-width: 520px; margin: auto; }
+.page :global(.request-container),
+.page :global(.request-success) { max-width: 860px; margin: 36px auto 12px; }
+
+.page :global(.eyebrow) {
+  color: #d5c09a;
+  font-size: 12px;
+  letter-spacing: .2em;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+.page :global(.login-container h1),
+.page :global(.request-container h1),
+.page :global(.request-success h1) {
+  color: #f1ede6;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 3.2vw, 48px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+  max-width: 700px;
+  margin: 16px 0 20px;
+  overflow-wrap: break-word;
+}
+.page :global(.login-intro),
+.page :global(.request-intro),
+.page :global(.request-success > p:not(.eyebrow)) {
+  max-width: 680px;
+  color: #d2cec6;
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+.page :global(.login-form), .page :global(.request-form) {
+  display: grid;
+  gap: 22px;
+  margin: 0;
+}
+.page :global(.request-form) { margin-top: 28px; }
+.page :global(.request-grid) {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 20px 24px;
+}
+.page :global(.login-form label),
+.page :global(.request-form label),
+.page :global(.request-interests legend) {
+  color: #e2ddd4;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: .015em;
+  line-height: 1.55;
+  text-transform: none;
+  min-width: 0;
+}
+.page :global(.login-form input),
+.page :global(.request-form input:not([type="checkbox"])),
+.page :global(.request-form textarea) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 8px 0 0;
+  padding: 13px 14px;
+  border: 1px solid #93826a;
+  border-radius: 4px;
+  background: #111619;
+  color: #f6f2eb;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  color-scheme: dark;
+}
+.page :global(.request-form textarea) { min-height: 124px; resize: vertical; }
+.page :global(input::placeholder), .page :global(textarea::placeholder) { color: #c2bdb2; opacity: 1; }
+.page :global(input:focus), .page :global(textarea:focus) {
+  border-color: #d5c09a;
+  outline: 2px solid #d5c09a;
+  outline-offset: 3px;
+}
+.page :global(a:focus-visible), .page :global(button:focus-visible) {
+  outline: 3px solid #d5c09a;
+  outline-offset: 4px;
+}
+.page :global(input:disabled), .page :global(textarea:disabled) { opacity: .65; cursor: not-allowed; }
+.page :global(input:-webkit-autofill) {
+  -webkit-text-fill-color: #f6f2eb;
+  box-shadow: 0 0 0 1000px #111619 inset;
+  caret-color: #f6f2eb;
+}
+.page :global(.request-interests) { border: 0; padding: 0; margin: 0; min-width: 0; }
+.page :global(.interest-options) { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.page :global(.interest-option) {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #93826a;
+  border-radius: 4px;
+  background: #111619;
+  color: #e2ddd4;
+  cursor: pointer;
+}
+.page :global(.interest-option input[type="checkbox"]) {
+  display: inline-block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  margin: 0;
+  border: initial;
+  appearance: auto;
+  accent-color: #d5c09a;
+  color-scheme: dark;
+  cursor: pointer;
+}
+.page :global(.interest-option.selected) { color: #f1e1c5; border-color: #d5c09a; background: #2c271e; }
+.page :global(.interest-option:hover) { color: #f1e1c5; border-color: #d5c09a; }
+.page :global(.interest-option:focus-within) { outline: 2px solid #d5c09a; outline-offset: 3px; }
+.page :global(.interest-option input[type="checkbox"]:focus) { outline-offset: 2px; }
+
+.page :global(.login-form button[type="submit"]),
+.page :global(.request-form button[type="submit"]) {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50px;
+  width: 100%;
+  margin: 2px 0 0;
+  padding: 14px 20px;
+  border: 1px solid #d5c09a;
+  border-radius: 4px;
+  background: #d5c09a;
+  color: #10100e;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.page :global(.request-form button[type="submit"]) { max-width: 300px; }
+.page :global(.login-form button[type="submit"]:hover:not(:disabled)),
+.page :global(.request-form button[type="submit"]:hover:not(:disabled)) { background: #e3d0ad; }
+.page :global(.login-form button:disabled),
+.page :global(.request-form button:disabled) { opacity: .65; cursor: wait; }
+.page :global(.login-error) {
+  margin: 0;
+  padding: 13px 14px;
+  border-left: 3px solid #f4b09a;
+  background: #291c19;
+  color: #ffd5c9;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.page :global(.login-note) { margin: 24px 0 0; color: #c5c0b6; font-size: 14px; line-height: 1.65; }
+.page :global(.login-footer) { flex-shrink: 0; color: #e2d8c4; font-size: 11px; line-height: 1.7; letter-spacing: .13em; }
+.page :global(.request-success-note) { color: #d2cec6 !important; }
+.page :global(.request-return) {
+  display: inline-flex; align-items: center; min-height: 48px; padding: 12px 18px;
+  margin: 12px 0 0; color: #d5c09a; border: 1px solid #d5c09a;
+  font-size: 14px; letter-spacing: .06em; line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .page:global(.login-page), .page:global(.request-page) { padding: 20px 18px; }
+  .page :global(.request-grid) { grid-template-columns: minmax(0, 1fr); }
+  .page :global(.request-container), .page :global(.request-success) { margin-top: 24px; }
+  .page :global(.login-container) { margin: auto; }
+  .page :global(.request-form button[type="submit"]) { max-width: none; }
+  .page :global(.interest-options) { display: grid; grid-template-columns: minmax(0,1fr); }
+}
+@media (max-height: 650px) {
+  .page.loginPage { gap: 20px; }
+  .page :global(.login-container) { margin: 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page :global(*) { transition: none; }
+}
