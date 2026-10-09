@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PublicHeader from "./components/PublicHeader";
 import HomeContactFooter from "./components/HomeContactFooter";
 import polish from "./homepage-polish.module.css";
 import "./homepage-refinements.css";
@@ -6,13 +7,7 @@ import "./homepage-refinements.css";
 export default function Home() {
   return (
     <main className={`mzs-home mzs-home-image mzs-home-refined ${polish.home}`}>
-      <header className="mzs-home-header">
-        <Link href="/" className="mzs-wordmark" aria-label="MZS Group — Home">
-          <span className="mzs-monogram">MZS</span>
-          <span className="mzs-group-label">GROUP</span>
-        </Link>
-        <span className="mzs-private-label">Private Access</span>
-      </header>
+      <PublicHeader />
 
       <section className="mzs-hero">
         <h1>
