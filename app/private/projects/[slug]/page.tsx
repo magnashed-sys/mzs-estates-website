@@ -4,10 +4,13 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
 import RentalCalendar from "./RentalCalendar";
 import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
+import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
+import styles from "./propertyPresentation.module.css";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
+
 type Project = {
   id: string;
   slug: string;
@@ -16,6 +19,7 @@ type Project = {
   location: string | null;
   hero_image_url: string | null;
 };
+
 type Offering = {
   id: string;
   title: string | null;
@@ -23,53 +27,142 @@ type Offering = {
   summary: string | null;
 };
 
-const base = "/properties/villa-la-nucia";
-const gallery = [
-  { file: "pool-panorama.webp", label: "Private pool and outdoor terraces" },
-  { file: "pool-mountain-view.webp", label: "Pool and mountain views" },
-  { file: "living-room.webp", label: "Main residence · living room" },
-  { file: "living-dining.webp", label: "Main residence · open living and dining" },
-  { file: "kitchen.webp", label: "Main residence · kitchen" },
-  { file: "dining-room.webp", label: "Main residence · dining room" },
-  { file: "bedroom-double.webp", label: "Main residence · double bedroom" },
-  { file: "bedroom-twin-setup.webp", label: "Main residence · bedroom with double-bed configuration" },
-  { file: "bathroom-shower.webp", label: "Main residence · bathroom" },
-  { file: "pool-terrace.webp", label: "Pool terrace" },
-  { file: "outdoor-shower.webp", label: "Outdoor shower" },
-  { file: "pool-evening.webp", label: "Pool at night" },
-];
-
-const featuredPhotos = [
-  { file: "pool-panorama.webp", label: "Private swimming pool" },
-  { file: "pool-mountain-view.webp", label: "Mountain views" },
-  { file: "living-room.webp", label: "Main residence · lounge" },
-  { file: "living-dining.webp", label: "Main residence · living and dining" },
-  { file: "kitchen.webp", label: "Main residence · kitchen" },
-  { file: "bedroom-double.webp", label: "Main residence · bedroom" },
-];
-
-const photoCard: React.CSSProperties = {
-  margin: 0,
-  background: "#171613",
-  minWidth: 0,
+type Fact = { number: string; label: string };
+type Feature = { number: string; title: string; description: string };
+type RentalOption = { title: string; price: string; details: string; description: string };
+type Presentation = {
+  label: string;
+  destination: string;
+  title: string;
+  introduction: string;
+  hero: string;
+  heroAlt: string;
+  facts: Fact[];
+  gallery: PropertyPhoto[];
+  storyKicker: string;
+  storyTitle: string;
+  storyParagraphs: string[];
+  features: Feature[];
+  featuresTitle: string;
+  bookingKicker: string;
+  bookingTitle: string;
+  bookingIntro: string;
+  rentalOptions?: RentalOption[];
+  locationHeading: string;
+  locationDescription: string;
+  locationDetail: string;
 };
 
-const tag: React.CSSProperties = {
-  border: "1px solid #675b48",
-  color: "#d5c09a",
-  padding: "9px 13px",
-  letterSpacing: "0.12em",
-  fontSize: 11,
-  textTransform: "uppercase",
-};
-const gold = "#d5c09a";
-const muted = "#a7a29a";
-const sectionTitle: React.CSSProperties = {
-  fontFamily: "Georgia, 'Times New Roman', serif",
-  fontWeight: 400,
-  fontSize: "clamp(32px, 5vw, 60px)",
-  lineHeight: 1.12,
-  margin: "14px 0 24px",
+const villaBase = "/properties/villa-la-nucia";
+const marinaBase = "/properties/marina-botafoch-apartment";
+
+// Labels refer to the photo contents, not the original (sometimes misleading)
+// filename. This allows the existing media files to remain untouched.
+const villaGallery: PropertyPhoto[] = [
+  { src: `${villaBase}/pool-panorama.webp`, alt: "Private swimming pool, sun loungers and stone arches", caption: "The private pool" },
+  { src: `${villaBase}/hero-pool.webp`, alt: "Main residence with open-plan dining and living room", caption: "Living & dining" },
+  { src: `${villaBase}/pool-evening.webp`, alt: "The private swimming pool lit up in the evening", caption: "The pool after dark" },
+  { src: `${villaBase}/living-dining.webp`, alt: "Dining table and lounge seating in the main residence", caption: "The main residence" },
+  { src: `${villaBase}/pool-terrace.webp`, alt: "Shaded terrace overlooking the swimming pool and mountains", caption: "The outdoor terrace" },
+  { src: `${villaBase}/pool-mountain-view.webp`, alt: "Main residence living room with seating and fireplace", caption: "Living room" },
+  { src: `${villaBase}/kitchen.webp`, alt: "White fitted kitchen in the main residence", caption: "Kitchen" },
+  { src: `${villaBase}/bedroom-double.webp`, alt: "Bedroom with a double bed", caption: "Double bedroom" },
+  { src: `${villaBase}/bathroom-shower.webp`, alt: "Main residence walk-in shower", caption: "Bathroom" },
+  { src: `${villaBase}/outdoor-shower.webp`, alt: "Outdoor shower near the swimming pool", caption: "Poolside shower" },
+  { src: `${villaBase}/villa-front.webp`, alt: "Entrance to the private villa", caption: "Villa approach" },
+  { src: `${villaBase}/private-entrance.webp`, alt: "Private terrace and entrance", caption: "Private entrance" },
+  { src: `${villaBase}/living-room.webp`, alt: "Compact kitchenette beside the outdoor terrace", caption: "Indoor-outdoor kitchen" },
+  { src: `${villaBase}/dining-room.webp`, alt: "Hallway and sideboard in the main residence", caption: "Interior details" },
+  { src: `${villaBase}/bedroom-twin-setup.webp`, alt: "Exterior terrace beside the villa", caption: "Villa terrace" },
+];
+
+const marinaGallery: PropertyPhoto[] = [
+  { src: `${marinaBase}/residence-pool.webp`, alt: "Swimming pool in the Marina Botafoch residential complex", caption: "Residence pool" },
+  { src: `${marinaBase}/living-terrace.webp`, alt: "Bright living room opening onto the terrace", caption: "Living & terrace" },
+  { src: `${marinaBase}/terrace-pool-view.webp`, alt: "Private terrace overlooking the neighbourhood and pool", caption: "Views from the terrace" },
+  { src: `${marinaBase}/hero-living-kitchen.webp`, alt: "Contemporary fitted kitchen and living space", caption: "Contemporary kitchen" },
+  { src: `${marinaBase}/building-exterior.webp`, alt: "Exterior of the Marina Botafoch residence", caption: "The residence" },
+  { src: `${marinaBase}/private-terrace.webp`, alt: "Terrace doors and exterior seating area", caption: "Private terrace" },
+  { src: `${marinaBase}/bedroom-one.webp`, alt: "Light double bedroom with a window", caption: "Bedroom" },
+  { src: `${marinaBase}/bedroom-view.webp`, alt: "View from a bedroom window", caption: "Bedroom view" },
+  { src: `${marinaBase}/bathroom-two.webp`, alt: "Contemporary bathroom with shower", caption: "Bathroom" },
+  { src: `${marinaBase}/bathroom-detail.webp`, alt: "Bathroom detail in the apartment", caption: "Bathroom details" },
+  { src: `${marinaBase}/residence-gym.webp`, alt: "Shared gym with fitness machines", caption: "Residence gym" },
+  { src: `${marinaBase}/underground-parking.webp`, alt: "Underground car parking area", caption: "Parking" },
+  { src: `${marinaBase}/building-entrance.webp`, alt: "Entrance to the Benizamid 8 residence", caption: "Residence entrance" },
+];
+
+const presentations: Record<string, Presentation> = {
+  "villa-la-nucia": {
+    label: "COSTA BLANCA · PRIVATE RENTAL",
+    destination: "La Nucía · Costa Blanca, Spain",
+    title: "Villa La Nucia",
+    introduction: "A Mediterranean hideaway made for unhurried days, private gatherings and the freedom to unwind.",
+    hero: `${villaBase}/pool-terrace.webp`,
+    heroAlt: "Villa La Nucia shaded terrace overlooking the swimming pool and mountains",
+    facts: [
+      { number: "04", label: "Bedrooms" },
+      { number: "03", label: "Bathrooms" },
+      { number: "08", label: "Maximum guests*" },
+      { number: "01", label: "Private pool" },
+    ],
+    gallery: villaGallery,
+    storyKicker: "THE VILLA",
+    storyTitle: "Together, with space to make it your own.",
+    storyParagraphs: [
+      "Set around a private pool and spacious terraces, Villa La Nucia balances an easy-going Mediterranean atmosphere with the privacy of separate living spaces.",
+      "The main residence has two double bedrooms, a bathroom, an inviting lounge and dining area, and a kitchen. Two independent guest accommodations each provide a double bedroom and their own bathroom — ideal for those who appreciate being together without sharing every moment.",
+    ],
+    featuresTitle: "The art of staying together, privately.",
+    features: [
+      { number: "01", title: "Main residence", description: "Two double bedrooms, a bathroom, living and dining space, and a fitted kitchen." },
+      { number: "02", title: "Guest accommodation", description: "Two independent guest spaces, each with a double bedroom and private bathroom. Separate interior photographs will be added when available." },
+      { number: "03", title: "Outdoors, all day", description: "A private swimming pool, sun terraces and an outdoor shower, with a quieter atmosphere after dark." },
+    ],
+    bookingKicker: "PRIVATE RENTAL",
+    bookingTitle: "Stay a little longer.",
+    bookingIntro: "Entire villa from €400 per night, with a minimum stay of seven nights. Optional pool heating is available at €50 per day. Arrival and departure preferences can be included in your request; every booking is personally reviewed by MZS Group.",
+    locationHeading: "Your place on the Costa Blanca.",
+    locationDescription: "Enjoy the Costa Blanca's mountain scenery and Mediterranean towns from a private base in La Nucía.",
+    locationDetail: "Carrer Serra del Ferrer 3 · 03530 La Nucía · Alicante, Spain",
+  },
+  "marina-botafoch-apartment": {
+    label: "IBIZA · PRIVATE RENTAL",
+    destination: "Marina Botafoch · Ibiza, Spain",
+    title: "Marina Botafoch Apartment",
+    introduction: "A contemporary private residence, where bright interiors, a personal terrace and Ibiza's marina lifestyle come together.",
+    hero: `${marinaBase}/hero-living-kitchen.webp`,
+    heroAlt: "Sunlit kitchen and living area of Marina Botafoch Apartment",
+    facts: [
+      { number: "02–03", label: "Bedrooms" },
+      { number: "01–02", label: "Bathrooms" },
+      { number: "04–06", label: "Guests" },
+      { number: "01", label: "Residence pool" },
+    ],
+    gallery: marinaGallery,
+    storyKicker: "THE RESIDENCE",
+    storyTitle: "A quiet address, moments from the marina.",
+    storyParagraphs: [
+      "Step inside a light-filled apartment with an open living space, contemporary kitchen and private terrace. Its position within the Marina Botafoch area offers a comfortable starting point for an Ibiza stay.",
+      "The residential complex provides a swimming pool, fitness area and dedicated parking. Inside, the apartment can be reserved in either a two-bedroom or full three-bedroom configuration — always as a private, exclusive-use stay.",
+    ],
+    featuresTitle: "The ease of a private Ibiza residence.",
+    features: [
+      { number: "01", title: "Private terrace", description: "An extension of the living space, ideal for taking time outside without leaving home." },
+      { number: "02", title: "Residence amenities", description: "Access to the shared residence swimming pool, fitness room and a dedicated parking space." },
+      { number: "03", title: "Flexible configuration", description: "Choose two or three bedrooms. Both options refer to the same apartment and share one availability calendar." },
+    ],
+    bookingKicker: "YOUR IBIZA STAY",
+    bookingTitle: "Choose how you stay.",
+    bookingIntro: "Both options offer exclusive use of the apartment for a minimum of seven nights. Select the configuration in the live calendar below to request your preferred dates.",
+    rentalOptions: [
+      { title: "Two-bedroom residence", price: "€400", details: "2 bedrooms · 1 bathroom · Up to 4 guests", description: "Third bedroom and second bathroom remain closed." },
+      { title: "Three-bedroom residence", price: "€600", details: "3 bedrooms · 2 bathrooms · Up to 6 guests", description: "Full apartment configuration, for a larger party." },
+    ],
+    locationHeading: "Marina Botafoch, Ibiza.",
+    locationDescription: "An appealing contemporary address with the marina, the waterfront and Ibiza Town within reach.",
+    locationDetail: "Carrer de Benizamid 8, apartment 17 · 07800 Eivissa · Ibiza, Spain",
+  },
 };
 
 export default async function PrivateProjectPage({ params }: Props) {
@@ -78,6 +171,8 @@ export default async function PrivateProjectPage({ params }: Props) {
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) redirect("/login?role=client");
 
+  // Keep the same existing security checks; never expose property detail to
+  // someone without both project and offering access.
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role,is_active")
@@ -119,235 +214,193 @@ export default async function PrivateProjectPage({ params }: Props) {
     .in("id", offeringIds);
   if (offeringError || !offerings?.length) notFound();
   const visibleOfferings = offerings as Offering[];
-  const isMarina = slug === "marina-botafoch-apartment";
-  const isVilla = slug === "villa-la-nucia";
   const hasRental = visibleOfferings.some((o) => o.offering_type === "rental");
+  const presentation = hasRental ? presentations[slug] : undefined;
 
   return (
-    <main style={{ background: "#0b0b0a", color: "#eeeae2", minHeight: "100vh", fontFamily: "Arial, Helvetica, sans-serif" }}>
-      <header style={{ padding: "25px clamp(22px,5vw,80px)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20, borderBottom: "1px solid #34302b" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: 22, letterSpacing: "0.13em", color: gold, textDecoration: "none" }}>MZS GROUP</Link>
-        <Link href="/private" style={{ color: gold, textDecoration: "none", fontSize: 11, letterSpacing: "0.13em", textAlign: "right" }}>← PRIVATE COLLECTION</Link>
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <Link href="/" className={styles.brand} aria-label="MZS Group — homepage">
+          <span className={styles.brandMain}>MZS</span>
+          <span className={styles.brandSub}>GROUP</span>
+        </Link>
+        <Link href="/private" className={styles.headerBack}>← BACK TO PRIVATE COLLECTION</Link>
       </header>
 
-      {isVilla && hasRental ? (
+      {presentation ? (
         <>
-          <section style={{ position: "relative", minHeight: "min(88vh,880px)", display: "flex", alignItems: "end", isolation: "isolate" }}>
-            <Image src={`${base}/pool-panorama.webp`} alt="Villa La Nucia swimming pool and Mediterranean terrace" fill priority sizes="100vw" style={{ objectFit: "cover", zIndex: -2 }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(0,0,0,.64),rgba(0,0,0,.08) 75%),linear-gradient(0deg,rgba(0,0,0,.68),transparent 70%)", zIndex: -1 }} />
-            <div style={{ padding: "clamp(35px,7vw,100px)", maxWidth: 1000 }}>
-              <p style={{ color: gold, letterSpacing: "0.25em", fontSize: 12 }}>MZS PRIVATE COLLECTION · COSTA BLANCA</p>
-              <h1 style={{ fontFamily: "Georgia, serif", fontWeight: 400, fontSize: "clamp(54px,9vw,124px)", lineHeight: 1, margin: "20px 0" }}>Villa La Nucia</h1>
-              <p style={{ fontSize: 18, lineHeight: 1.65, maxWidth: 650 }}>A private Mediterranean retreat with independent guest accommodation, a swimming pool and mountain views.</p>
-              <a href="#gallery" style={{ display: "inline-block", marginTop: 20, padding: "15px 25px", background: gold, color: "#10100e", textDecoration: "none", fontSize: 12, letterSpacing: ".12em" }}>EXPLORE THE VILLA ↓</a>
+          <section className={styles.hero} aria-label={`${presentation.title} introduction`}>
+            <div className={styles.heroImage}>
+              <Image src={presentation.hero} alt={presentation.heroAlt} fill priority sizes="100vw" className={styles.heroPhoto} />
             </div>
+            <div className={styles.heroShade} aria-hidden="true" />
+            <div className={styles.heroContent}>
+              <p className={styles.kicker}>{presentation.label}</p>
+              <h1>{presentation.title}</h1>
+              <p className={styles.heroIntro}>{presentation.introduction}</p>
+              <div className={styles.heroActions}>
+                <a href="#availability" className={styles.primaryButton}>CHECK AVAILABILITY <span aria-hidden="true">↗</span></a>
+                <a href="#gallery" className={styles.secondaryButton}>EXPLORE THE PROPERTY <span aria-hidden="true">↓</span></a>
+              </div>
+            </div>
+            <div className={styles.heroIndex} aria-hidden="true">MZS PRIVATE COLLECTION&nbsp; / &nbsp;{presentation.destination}</div>
           </section>
 
-          <section style={{ padding: "clamp(65px,9vw,130px) clamp(22px,7vw,110px)", borderBottom: "1px solid #34302b" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "clamp(30px,6vw,90px)", alignItems: "center" }}>
+          <nav className={styles.anchorNav} aria-label="Explore this property">
+            <span className={styles.anchorName}>{presentation.title}</span>
+            <div className={styles.anchorLinks}>
+              <a href="#gallery">PHOTOGRAPHY</a>
+              <a href="#experience">THE RESIDENCE</a>
+              <a href="#stay">THE STAY</a>
+              <a href="#availability" className={styles.anchorBook}>CHECK DATES ↗</a>
+            </div>
+          </nav>
+
+          <section className={styles.facts} aria-label="Property highlights">
+            {presentation.facts.map((fact) => (
+              <div className={styles.fact} key={fact.label}>
+                <span className={styles.factNumber}>{fact.number}</span>
+                <span className={styles.factLabel}>{fact.label}</span>
+              </div>
+            ))}
+          </section>
+
+          <section id="gallery" className={styles.gallerySection}>
+            <div className={styles.sectionHeader}>
               <div>
-                <p style={{ color: gold, letterSpacing: ".22em", fontSize: 12 }}>THE PROPERTY</p>
-                <h2 style={sectionTitle}>Space to be together. Privacy to unwind.</h2>
-                <p style={{ color: muted, lineHeight: 1.9, fontSize: 16 }}>Villa La Nucia combines a welcoming main residence with two separate guest accommodations. The main house offers two double bedrooms, one bathroom, a comfortable living and dining area, and a kitchen.</p>
-                <p style={{ color: muted, lineHeight: 1.9, fontSize: 16 }}>One independent guest accommodation is situated near the main entrance; the other is located near the pool at the rear. Each has a double bedroom and its own bathroom.</p>
-                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 30 }}>
-                  <span style={tag}>4 bedrooms</span><span style={tag}>3 bathrooms</span><span style={tag}>Up to 8 guests*</span><span style={tag}>Private pool</span>
-                </div>
-                <p style={{ color: muted, fontSize: 12, marginTop: 20 }}>*Subject to confirmation of permitted rental occupancy.</p>
+                <p className={styles.kicker}>THE PRIVATE COLLECTION</p>
+                <h2>A closer look.</h2>
               </div>
-              <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: 320 }}>
-                <Image src={`${base}/living-dining.webp`} alt="Living and dining area in the main residence" fill sizes="(max-width: 850px) 100vw, 45vw" style={{ objectFit: "cover" }} />
-              </div>
+              <p className={styles.sectionAside}>A considered selection of photographs of the property and its surroundings.</p>
+            </div>
+            <PropertyGallery photos={presentation.gallery} title={presentation.title} />
+          </section>
+
+          <section id="experience" className={styles.storySection}>
+            <div className={styles.storyCopy}>
+              <p className={styles.kicker}>{presentation.storyKicker}</p>
+              <h2>{presentation.storyTitle}</h2>
+              {presentation.storyParagraphs.map((text) => (
+                <p className={styles.bodyCopy} key={text}>{text}</p>
+              ))}
+              {slug === "villa-la-nucia" && (
+                <p className={styles.disclaimer}>*Maximum occupancy is subject to confirmation of permitted rental use.</p>
+              )}
+            </div>
+            <div className={styles.storyVisual}>
+              <Image
+                src={slug === "villa-la-nucia" ? `${villaBase}/living-dining.webp` : `${marinaBase}/residence-pool.webp`}
+                alt={slug === "villa-la-nucia" ? "Villa La Nucia main residence interior" : "Shared pool at Marina Botafoch residence"}
+                fill
+                sizes="(max-width: 900px) 100vw, 44vw"
+                className={styles.storyPhoto}
+              />
+              <span className={styles.photoCredit}>{slug === "villa-la-nucia" ? "THE MAIN RESIDENCE" : "RESIDENCE AMENITIES"}</span>
             </div>
           </section>
 
-          <section id="gallery" style={{ padding: "clamp(65px,8vw,110px) clamp(22px,7vw,110px)" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>EXPLORE THE VILLA</p>
-            <h2 style={sectionTitle}>A closer look.</h2>
-            <p style={{ color: muted, lineHeight: 1.7, maxWidth: 800, marginBottom: 36 }}>Discover the main residence and its outdoor spaces. Interior photographs of the two independent guest accommodations will be added separately.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,340px),1fr))", gap: 18 }}>
-              {featuredPhotos.map((photo) => (
-                <figure key={photo.file} style={photoCard}>
-                  <div style={{ position: "relative", aspectRatio: "4/3" }}>
-                    <Image src={`${base}/${photo.file}`} alt={photo.label} fill sizes="(max-width: 760px) 100vw, 45vw" style={{ objectFit: "cover" }} />
-                  </div>
-                  <figcaption style={{ padding: "15px 18px", fontSize: 12, color: muted }}>{photo.label}</figcaption>
-                </figure>
+          <section className={styles.experienceSection}>
+            <div className={styles.experienceHeading}>
+              <p className={styles.kicker}>THE EXPERIENCE</p>
+              <h2>{presentation.featuresTitle}</h2>
+            </div>
+            <div className={styles.experienceGrid}>
+              {presentation.features.map((feature) => (
+                <article className={styles.experienceItem} key={feature.number}>
+                  <span className={styles.featureNumber}>{feature.number}</span>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
+                </article>
               ))}
             </div>
-            <details style={{ marginTop: 38, borderTop: "1px solid #34302b", paddingTop: 26 }}>
-              <summary style={{ display: "inline-block", cursor: "pointer", border: `1px solid ${gold}`, padding: "17px 28px", color: gold, fontSize: 12, letterSpacing: ".14em", listStyle: "none" }}>VIEW ALL PHOTOS ↓</summary>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,290px),1fr))", gap: 16, marginTop: 32 }}>
-                {gallery.map((photo) => (
-                  <figure key={photo.file} style={photoCard}>
-                    <div style={{ position: "relative", aspectRatio: "4/3" }}>
-                      <Image src={`${base}/${photo.file}`} alt={photo.label} fill sizes="(max-width: 760px) 100vw, 33vw" style={{ objectFit: "cover" }} />
+          </section>
+
+          <section id="stay" className={styles.staySection}>
+            <div className={styles.stayTop}>
+              <div>
+                <p className={styles.kicker}>{presentation.bookingKicker}</p>
+                <h2>{presentation.bookingTitle}</h2>
+                <p className={styles.bodyCopy}>{presentation.bookingIntro}</p>
+              </div>
+              <div className={styles.stayPrice}>
+                <span>FROM</span>
+                <strong>€400</strong>
+                <small>PER NIGHT · MINIMUM 7 NIGHTS</small>
+                <a href="#availability">SELECT YOUR DATES ↗</a>
+              </div>
+            </div>
+
+            {presentation.rentalOptions ? (
+              <div className={styles.rentalOptions}>
+                {presentation.rentalOptions.map((option) => (
+                  <article className={styles.rentalOption} key={option.title}>
+                    <div className={styles.optionTop}>
+                      <h3>{option.title}</h3>
+                      <strong>{option.price}<span> / night</span></strong>
                     </div>
-                    <figcaption style={{ padding: "13px 15px", fontSize: 12, color: muted }}>{photo.label}</figcaption>
-                  </figure>
+                    <p className={styles.optionDetail}>{option.details}</p>
+                    <p className={styles.optionNote}>{option.description}</p>
+                    <a href="#availability">CHECK THIS STAY ↗</a>
+                  </article>
                 ))}
               </div>
-            </details>
-          </section>
-
-          <section style={{ padding: "70px clamp(22px,7vw,110px)", borderTop: "1px solid #34302b" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>PRIVATE ACCOMMODATION</p>
-            <h2 style={sectionTitle}>Together, with room for privacy.</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,270px),1fr))", gap: 20 }}>
-              {[
-                ["THE MAIN RESIDENCE", "Two double bedrooms, one bathroom, living and dining room, and kitchen."],
-                ["GUEST ACCOMMODATION 01", "Independent accommodation near the main entrance, with a double bedroom and private bathroom."],
-                ["GUEST ACCOMMODATION 02", "Independent accommodation beside the pool at the rear, with a double bedroom and private bathroom."],
-              ].map(([heading, description]) => (
-                <article key={heading} style={{ borderTop: `1px solid ${gold}`, paddingTop: 22 }}>
-                  <h3 style={{ fontSize: 12, color: gold, letterSpacing: ".15em", fontWeight: 400 }}>{heading}</h3>
-                  <p style={{ color: muted, lineHeight: 1.8, fontSize: 15 }}>{description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section style={{ padding: "65px clamp(22px,7vw,110px)", background: "#151411" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>PRIVATE RENTAL</p>
-            <h2 style={sectionTitle}>Your stay, your pace.</h2>
-            <div style={{ display: "flex", gap: "28px 70px", flexWrap: "wrap", margin: "30px 0" }}>
-              <div><div style={{ fontFamily: "Georgia, serif", fontSize: 44 }}>€400</div><div style={{ color: muted, fontSize: 13 }}>Per night · entire villa</div></div>
-              <div><div style={{ fontFamily: "Georgia, serif", fontSize: 44 }}>7</div><div style={{ color: muted, fontSize: 13 }}>Minimum nights</div></div>
-              <div><div style={{ fontFamily: "Georgia, serif", fontSize: 44 }}>€50</div><div style={{ color: muted, fontSize: 13 }}>Optional pool heating per day</div></div>
-            </div>
-            <p style={{ color: muted, lineHeight: 1.8, maxWidth: 760 }}>Flexible arrival and departure days. Guests may request preferred check-in and check-out times. All bookings require personal approval by MZS Group. The live availability calendar and booking requests will be introduced in the next release.</p>
-          </section>
-
-<section
-  id="availability"
-  style={{
-    padding: "60px clamp(22px,7vw,110px)",
-    background: "#0b0b0a",
-  }}
->
-  <RentalCalendar projectId={property.id} />
-</section>
-
-          <section style={{ padding: "70px clamp(22px,7vw,110px)" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>LOCATION & SURROUNDINGS</p>
-            <h2 style={sectionTitle}>La Nucía, Costa Blanca.</h2>
-            <p style={{ color: muted, lineHeight: 1.9 }}>Carrer Serra del Ferrer 3, 03530 La Nucía, Alicante, Spain.</p>
-            <p style={{ color: muted, lineHeight: 1.9, maxWidth: 760 }}>Discover the Costa Blanca, with mountain scenery, Mediterranean coastal towns and inviting outdoor experiences. An interactive location guide will follow.</p>
-          </section>
-        </>
-      ) : isMarina && hasRental ? (
-        <>
-          <section style={{ position: "relative", minHeight: "min(85vh,850px)", display: "flex", alignItems: "end", isolation: "isolate" }}>
-            <Image src="/properties/marina-botafoch-apartment/hero-living-kitchen.webp" alt="Marina Botafoch Apartment living area" fill priority sizes="100vw" style={{ objectFit: "cover", zIndex: -2 }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,.10)),linear-gradient(0deg,rgba(0,0,0,.7),transparent 75%)", zIndex: -1 }} />
-            <div style={{ padding: "clamp(35px,7vw,100px)", maxWidth: 1050 }}>
-              <p style={{ color: gold, letterSpacing: ".23em", fontSize: 12 }}>MZS PRIVATE COLLECTION · IBIZA</p>
-              <h1 style={{ fontFamily: "Georgia, serif", fontWeight: 400, fontSize: "clamp(48px,8vw,112px)", lineHeight: 1.03, margin: "20px 0" }}>Marina Botafoch Apartment</h1>
-              <p style={{ fontSize: 18, lineHeight: 1.7, maxWidth: 680 }}>A private contemporary retreat with its own terrace, in the heart of Ibiza's marina district.</p>
-              <a href="#marina-gallery" style={{ display: "inline-block", marginTop: 22, padding: "16px 26px", background: gold, color: "#10100e", textDecoration: "none", fontSize: 12, letterSpacing: ".12em" }}>EXPLORE THE APARTMENT ↓</a>
-            </div>
-          </section>
-          <section style={{ padding: "clamp(65px,9vw,130px) clamp(22px,7vw,110px)" }}>
-            <p style={{ color: gold, letterSpacing: ".22em", fontSize: 12 }}>THE RESIDENCE</p>
-            <h2 style={sectionTitle}>An Ibiza address. A private retreat.</h2>
-            <p style={{ color: muted, fontSize: 16, lineHeight: 1.9, maxWidth: 800 }}>Enjoy a bright contemporary apartment with an open living area and private terrace. Guests have access to the residence swimming pool, fitness room and a dedicated parking space.</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
-              {['Private terrace','Residence pool','Fitness room','Parking','Up to 6 guests'].map((item) => <span key={item} style={tag}>{item}</span>)}
-            </div>
-          </section>
-          <section id="marina-gallery" style={{ padding: "clamp(60px,8vw,110px) clamp(22px,7vw,110px)", background: "#11100f" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>EXPLORE THE APARTMENT</p>
-            <h2 style={sectionTitle}>A closer look.</h2>
-            <p style={{ color: muted, lineHeight: 1.8, maxWidth: 750 }}>Discover the apartment interiors, private terrace and residence amenities. Some interior images are selected frames from the recent walkthrough video.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: 18, marginTop: 35 }}>
-              {[
-                ['hero-living-kitchen.webp','Open living and kitchen'],
-                ['living-terrace.webp','Living area and terrace'],
-                ['private-terrace.webp','Private terrace'],
-                ['bedroom-one.webp','Bedroom'],
-                ['bedroom-view.webp','Bedroom and view'],
-                ['residence-pool.webp','Residence swimming pool'],
-              ].map(([file,label]) => (
-                <figure key={file} style={photoCard}>
-                  <div style={{ position: "relative", aspectRatio: "4/3" }}><Image src={`/properties/marina-botafoch-apartment/${file}`} alt={label} fill sizes="(max-width:760px) 100vw, 33vw" style={{ objectFit: "cover" }} /></div>
-                  <figcaption style={{ padding: "15px 18px", fontSize: 13, color: muted }}>{label}</figcaption>
-                </figure>
-              ))}
-            </div>
-            <details style={{ marginTop: 35, borderTop: "1px solid #34302b", paddingTop: 25 }}>
-              <summary style={{ display: "inline-block", cursor: "pointer", border: `1px solid ${gold}`, padding: "17px 28px", color: gold, fontSize: 12, letterSpacing: ".14em" }}>VIEW ALL PHOTOS ↓</summary>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,290px),1fr))", gap: 16, marginTop: 30 }}>
-                {[
-                  ['building-entrance.webp','Residence entrance'],['building-exterior.webp','Building exterior'],
-                  ['bathroom-detail.webp','Bathroom'],['bathroom-two.webp','Second bathroom'],
-                  ['terrace-pool-view.webp','Terrace and pool view'],['residence-gym.webp','Fitness room'],
-                  ['underground-parking.webp','Underground parking'],
-                ].map(([file,label]) => (
-                  <figure key={file} style={photoCard}>
-                    <div style={{ position: "relative", aspectRatio: "4/3" }}><Image src={`/properties/marina-botafoch-apartment/${file}`} alt={label} fill sizes="(max-width:760px) 100vw, 33vw" style={{ objectFit: "cover" }} /></div>
-                    <figcaption style={{ padding: "13px 15px", fontSize: 12, color: muted }}>{label}</figcaption>
-                  </figure>
-                ))}
+            ) : (
+              <div className={styles.villaNotes}>
+                <span>ENTIRE VILLA · EXCLUSIVE USE</span>
+                <span>POOL HEATING: €50 / DAY (OPTIONAL)</span>
+                <span>PERSONAL APPROVAL FOR EVERY REQUEST</span>
               </div>
-            </details>
+            )}
           </section>
-          <section style={{ padding: "clamp(65px,8vw,110px) clamp(22px,7vw,110px)" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>PRIVATE RENTAL</p>
-            <h2 style={sectionTitle}>Your Ibiza stay, your choice.</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,300px),1fr))", gap: 22 }}>
-              {[
-                { name: 'TWO-BEDROOM RESIDENCE', price: '€400', bedrooms: '2 bedrooms', bathrooms: '1 bathroom', guests: 'Up to 4 guests', note: 'Third bedroom and second bathroom remain closed.' },
-                { name: 'THREE-BEDROOM RESIDENCE', price: '€600', bedrooms: '3 bedrooms', bathrooms: '2 bathrooms', guests: 'Up to 6 guests', note: 'Full apartment configuration.' },
-              ].map((option) => (
-                <article key={option.name} style={{ padding: 30, background: "#171613", borderTop: `1px solid ${gold}` }}>
-                  <p style={{ color: gold, letterSpacing: ".16em", fontSize: 12 }}>{option.name}</p>
-                  <div style={{ fontFamily: "Georgia,serif", fontSize: 52, marginTop: 20 }}>{option.price}</div>
-                  <p style={{ color: muted }}>Per night · minimum 7 nights</p>
-                  <p style={{ lineHeight: 1.9 }}>{option.bedrooms} · {option.bathrooms}<br />{option.guests}</p>
-                  <p style={{ color: muted, fontSize: 13, lineHeight: 1.8 }}>{option.note}</p>
-                </article>
-              ))}
+
+          <section id="availability" className={styles.calendarSection}>
+            <div className={styles.calendarIntro}>
+              <p className={styles.kicker}>PERSONAL BOOKING REQUEST</p>
+              <h2>Plan your stay.</h2>
+              <p>Select your preferred dates below. Your request is reviewed individually by MZS Group.</p>
             </div>
-            <p style={{ color: muted, lineHeight: 1.8, marginTop: 30, maxWidth: 850 }}>Both rental configurations are exclusive-use stays and share the same availability. Online booking requests for this apartment will open after the two-rate calendar has been tested. No reservation can be made from this page yet.</p>
+            {/* Existing tested booking components: left entirely unchanged. */}
+            {slug === "villa-la-nucia" ? (
+              <RentalCalendar projectId={property.id} />
+            ) : (
+              <ConfiguredRentalCalendar projectId={property.id} />
+            )}
           </section>
 
-    
-<section
-  id="marina-availability"
-  style={{
-    padding: "60px clamp(22px,7vw,110px)",
-    background: "#0b0b0a",
-  }}
->
-  <ConfiguredRentalCalendar projectId={property.id} />
-</section>
-
-          
-          <section style={{ padding: "65px clamp(22px,7vw,110px)", background: "#151411" }}>
-            <p style={{ color: gold, fontSize: 12, letterSpacing: ".22em" }}>LOCATION & SURROUNDINGS</p>
-            <h2 style={sectionTitle}>Marina Botafoch, Ibiza.</h2>
-            <p style={{ color: muted, lineHeight: 1.9 }}>Carrer de Benizamid 8, apartment 17 · 07800 Eivissa, Ibiza, Spain.</p>
-            <p style={{ color: muted, lineHeight: 1.8 }}>A contemporary address near Ibiza's marina district, with the city and waterfront within reach.</p>
+          <section className={styles.locationSection}>
+            <div>
+              <p className={styles.kicker}>LOCATION & SURROUNDINGS</p>
+              <h2>{presentation.locationHeading}</h2>
+              <p>{presentation.locationDescription}</p>
+            </div>
+            <div className={styles.locationInfo}>
+              <span>THE ADDRESS</span>
+              <p>{presentation.locationDetail}</p>
+              <a href="mailto:info@mzsgroup.eu?subject=MZS%20Private%20Collection%20%E2%80%94%20Property%20Enquiry">ENQUIRE PRIVATELY ↗</a>
+            </div>
           </section>
         </>
       ) : (
-        <section style={{ padding: "100px clamp(22px,7vw,110px)", maxWidth: 1000 }}>
-          <p style={{ color: gold, fontSize: 12, letterSpacing: ".2em" }}>MZS PRIVATE COLLECTION</p>
-          <h1 style={sectionTitle}>{property.title}</h1>
-          <p style={{ color: muted, lineHeight: 1.8 }}>{property.subtitle}</p>
-          <p style={{ color: gold, marginTop: 20 }}>{property.location}</p>
-          <div style={{ marginTop: 60 }}>
-            {visibleOfferings.map((o) => (
-              <article key={o.id} style={{ padding: "25px 0", borderTop: "1px solid #34302b" }}>
-                <h2 style={{ fontFamily: "Georgia, serif", fontWeight: 400 }}>{o.title ?? o.offering_type}</h2>
-                <p style={{ color: muted, lineHeight: 1.7 }}>{o.summary}</p>
+        <section className={styles.fallback}>
+          <p className={styles.kicker}>MZS PRIVATE COLLECTION</p>
+          <h1>{property.title}</h1>
+          {property.subtitle && <p>{property.subtitle}</p>}
+          {property.location && <p>{property.location}</p>}
+          <div className={styles.otherOfferings}>
+            {visibleOfferings.map((offering) => (
+              <article key={offering.id}>
+                <h2>{offering.title ?? offering.offering_type}</h2>
+                {offering.summary && <p>{offering.summary}</p>}
               </article>
             ))}
           </div>
         </section>
       )}
-      <footer style={{ borderTop: "1px solid #34302b", padding: "28px clamp(22px,5vw,80px)", display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap", color: muted, fontSize: 11, letterSpacing: ".13em" }}>
-        <span>PRIVATE. INDEPENDENT. INTERNATIONAL.</span><Link href="/private" style={{ color: gold, textDecoration: "none" }}>BACK TO PRIVATE DASHBOARD →</Link>
+
+      <footer className={styles.footer}>
+        <span>PRIVATE · INDEPENDENT · INTERNATIONAL</span>
+        <a href="mailto:info@mzsgroup.eu">CONTACT MZS ↗</a>
+        <Link href="/private">BACK TO PRIVATE COLLECTION →</Link>
       </footer>
     </main>
   );
