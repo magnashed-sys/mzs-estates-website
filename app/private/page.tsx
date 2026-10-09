@@ -258,7 +258,7 @@ export default function PrivatePage() {
             <section className={styles.welcome} aria-labelledby="private-welcome">
               <div className={styles.welcomeContent}>
                 <p className={styles.welcomeKicker}>YOUR PERSONAL COLLECTION</p>
-                <h1 id="private-welcome">Welcome <em>{name}.</em></h1>
+                <h1 id="private-welcome">Welcome <em>{name}</em></h1>
                 <p className={styles.welcomeIntro}>
                   Discover a carefully selected collection of private residences, investments and opportunities,
                   reserved exclusively for your account.
