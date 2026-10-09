@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "../public-access-refresh.module.css";
+
 import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -81,7 +83,7 @@ function LoginForm() {
 
   return (
     <main
-      className="login-page"
+      className={`login-page ${styles.page} ${styles.loginPage}`}
       style={{
         position: "relative",
         isolation: "isolate",
@@ -113,7 +115,7 @@ function LoginForm() {
         <h1>Welcome back.</h1>
         <p className="login-intro">Access your private MZS environment.</p>
 
-        <form className="login-form" onSubmit={handleLogin}>
+        <form className="login-form" onSubmit={handleLogin} aria-busy={loading}>
           <label>
             Email
             <input type="email" name="email" autoComplete="email"
@@ -146,7 +148,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <main className="login-page">
+      <main className={`login-page ${styles.page} ${styles.loginPage}`}>
         <p className="login-intro">Loading private access...</p>
       </main>
     }>
