@@ -1,3 +1,4 @@
+
 "use client";
 
 import "./admin.css";
@@ -42,27 +43,6 @@ type Relationship = {
 type PageState = "loading" | "ready" | "denied" | "error";
 type AdminTab = "overview" | "relationships" | "projects" | "bookings";
 type Decision = "approved" | "declined";
-type RequestFilter = "pending" | "approved" | "invitations" | "declined" | "all";
-
-const requestFilters: { key: RequestFilter; label: string }[] = [
-  { key: "pending", label: "Pending" },
-  { key: "approved", label: "Approved" },
-  { key: "invitations", label: "Invitations" },
-  { key: "declined", label: "Declined" },
-  { key: "all", label: "All" },
-];
-
-// An invitation record takes precedence over the original request status.
-// This prevents an already-invited person from being offered a second invitation.
-function matchesRequestFilter(
-  request: AccessRequest,
-  invitation: Invitation | undefined,
-  filter: RequestFilter
-): boolean {
-  if (filter === "all") return true;
-  if (filter === "invitations") return Boolean(invitation);
-  return !invitation && request.status === filter;
-}
 
 const offeringLabels: Record<string, string> = {
   investment: "Investment",
@@ -83,14 +63,11 @@ export default function AdminPage() {
   const [notice, setNotice] = useState("");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null);
-  const [requestFilter, setRequestFilter] = useState<RequestFilter>("pending");
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let active = true;
 
     async function loadAdmin() {
-      try {
       const supabase = createClient();
 
       const {
@@ -146,12 +123,6 @@ export default function AdminPage() {
       setInvitations((invitationsResult.data ?? []) as Invitation[]);
       setRelationships((relationshipsResult.data ?? []) as Relationship[]);
       setPageState("ready");
-      } catch {
-        if (active) {
-          setErrorMessage("Unable to retrieve administration records. Please reload the page.");
-          setPageState("error");
-        }
-      }
     }
 
     void loadAdmin();
@@ -159,16 +130,13 @@ export default function AdminPage() {
     return () => {
       active = false;
     };
-  }, [router, refreshKey]);
+  }, [router]);
 
   async function handleReview(
     request: AccessRequest,
     decision: Decision
   ) {
-    if (
-      processingId || reviewingRequestId !== null || request.status !== "pending" ||
-      invitations.some(item => item.request_id === request.id)
-    ) return;
+    if (processingId || request.status !== "pending") return;
 
     const confirmed = window.confirm(
       decision === "approved"
@@ -225,27 +193,19 @@ export default function AdminPage() {
 
   function markRequestApproved(id: string) {
     setRequests(current => current.map(item => item.id === id ? { ...item, status: "approved" } : item));
-    // Keep the open panel visible after approval, so the invitation is a separate action.
-    setRequestFilter("approved");
     setNotice("Request approved. The selected opportunities are saved; send the invitation after reviewing the selection.");
   }
 
   function recordInvitation(invitation: PlannedInvitation) {
     setInvitations(current => [invitation, ...current.filter(item => item.request_id !== invitation.request_id)]);
-    setRequestFilter("invitations");
-    // The child verifies applied access after recording the invitation.
-    // Do not announce successful access assignment before that check finishes.
-    setNotice("Invitation status recorded. Check the open selection panel for verification of assigned access.");
+    setNotice(invitation.status === "sent"
+      ? "Invitation sent. The approved access selection has been attached to the new account."
+      : "Invitation recorded; check its status before any further action.");
     void (async () => {
-      try {
-        const { data, error } = await createClient().from("profiles")
-          .select("id, full_name, email, role, is_active, created_at")
-          .in("role", ["client", "partner"]).order("created_at", { ascending: false });
-        if (!error && data) setRelationships(data as Relationship[]);
-      } catch {
-        // The invitation outcome remains in the child panel; do not retry sending.
-        setNotice("The account list could not be refreshed. Check the invitation panel, then refresh requests.");
-      }
+      const { data, error } = await createClient().from("profiles")
+        .select("id, full_name, email, role, is_active, created_at")
+        .in("role", ["client", "partner"]).order("created_at", { ascending: false });
+      if (!error && data) setRelationships(data as Relationship[]);
     })();
   }
 
@@ -320,16 +280,9 @@ export default function AdminPage() {
     );
   }
 
-  const invitationByRequest = new Map(
-    invitations.map(invitation => [invitation.request_id, invitation])
-  );
-  const pendingCount = requests.filter(request =>
-    matchesRequestFilter(request, invitationByRequest.get(request.id), "pending")
+  const pendingCount = requests.filter(
+    (request) => request.status === "pending"
   ).length;
-  const visibleRequests = requests.filter(request =>
-    matchesRequestFilter(request, invitationByRequest.get(request.id), requestFilter)
-  );
-  const panelIsOpen = reviewingRequestId !== null;
 
   const sentCount = invitations.filter((item) => item.status === "sent").length;
   const activeCount = relationships.filter((item) => item.is_active).length;
@@ -350,7 +303,7 @@ export default function AdminPage() {
       </header>
 
       <section className="admin-content">
-        <p className="eyebrow">MZS Administration · Access Review V3.1</p>
+        <p className="eyebrow">MZS Administration</p>
 
         <h1>Private management.</h1>
 
@@ -361,7 +314,7 @@ export default function AdminPage() {
 
         <nav aria-label="Administration sections" style={{display:"flex",gap:10,flexWrap:"wrap",margin:"32px 0",borderBottom:"1px solid #40392d",paddingBottom:20}}>
           {([ ["overview","Overview"], ["relationships","Relationships"], ["projects","Projects"], ["bookings","Bookings"] ] as const).map(([key,label]) => (
-            <button key={key} type="button" disabled={panelIsOpen || processingId !== null} onClick={() => setActiveTab(key)} aria-current={activeTab === key ? "page" : undefined}
+            <button key={key} type="button" onClick={() => setActiveTab(key)} aria-current={activeTab === key ? "page" : undefined}
               style={{padding:"13px 18px",border:"1px solid #665a45",background:activeTab===key?"#d5c09a":"transparent",color:activeTab===key?"#0b0b0a":"#d5c09a",cursor:"pointer",letterSpacing:".1em",fontSize:11}}>{label}</button>
           ))}
         </nav>
@@ -407,53 +360,14 @@ export default function AdminPage() {
           <span>{sentCount} invitations sent</span>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center", marginBottom: 24 }}>
-          <div role="group" aria-label="Filter access requests" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {requestFilters.map(({ key, label }) => {
-              const count = requests.filter(request =>
-                matchesRequestFilter(request, invitationByRequest.get(request.id), key)
-              ).length;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  aria-pressed={requestFilter === key}
-                  disabled={panelIsOpen || processingId !== null}
-                  onClick={() => { setRequestFilter(key); setNotice(""); }}
-                  style={{ padding: "13px 18px", border: "1px solid #665a45", background: requestFilter === key ? "#d5c09a" : "transparent", color: requestFilter === key ? "#0b0b0a" : "#d5c09a", fontSize: 12, cursor: panelIsOpen ? "not-allowed" : "pointer" }}
-                >
-                  {label} ({count})
-                </button>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            disabled={panelIsOpen || processingId !== null}
-            onClick={() => { setNotice(""); setPageState("loading"); setRefreshKey(value => value + 1); }}
-            style={{ padding: "13px 18px", background: "transparent", border: "1px solid #665a45", color: "#d5c09a", fontSize: 12, cursor: panelIsOpen ? "not-allowed" : "pointer" }}
-          >
-            Refresh requests
-          </button>
-        </div>
-        <p style={{ color: "#a9a398", fontSize: 13, lineHeight: 1.8, marginBottom: 28 }}>
-          {panelIsOpen
-            ? "Close the approval panel before switching filters, refreshing, or changing accounts. Saving approval does not send an invitation."
-            : "Pending shows applications awaiting a decision. Invitations contains people already in the invitation process; later project changes are managed separately."}
-        </p>
-
-        {visibleRequests.length === 0 ? (
+        {requests.length === 0 ? (
           <p className="admin-empty">
-            {requests.length === 0
-              ? "No access requests have been received."
-              : requestFilter === "pending"
-              ? "No pending access requests. Choose All to see the complete request history."
-              : "No requests in this category. Choose All to see the complete request history."}
+            No access requests have been received.
           </p>
         ) : (
           <div className="admin-requests">
-            {visibleRequests.map((request) => {
-              const invitation = invitationByRequest.get(request.id);
+            {requests.map((request) => {
+              const invitation = invitations.find((item) => item.request_id === request.id);
               return (
               <article
                 className="admin-request"
@@ -503,7 +417,7 @@ export default function AdminPage() {
                   </p>
                 )}
 
-                {request.status === "pending" && !invitation && reviewingRequestId !== request.id && (
+                {request.status === "pending" && (
                   <div style={{
                     display: "flex",
                     flexWrap: "wrap",
@@ -512,11 +426,10 @@ export default function AdminPage() {
                   }}>
                     <button
                       type="button"
-                      disabled={processingId !== null || panelIsOpen}
-                      onClick={() => {
-                        setNotice("");
-                        setReviewingRequestId(request.id);
-                      }}
+                      disabled={processingId !== null}
+                      onClick={() =>
+                        setReviewingRequestId(request.id)
+                      }
                       style={{
                         padding: "13px 22px",
                         background: "#d5c09a",
@@ -535,7 +448,7 @@ export default function AdminPage() {
 
                     <button
                       type="button"
-                      disabled={processingId !== null || panelIsOpen}
+                      disabled={processingId !== null}
                       onClick={() =>
                         handleReview(request, "declined")
                       }
@@ -554,9 +467,9 @@ export default function AdminPage() {
                     </button>
                   </div>
                 )}
-                {request.status === "approved" && !invitation && reviewingRequestId !== request.id && (
+                {request.status === "approved" && !invitation && (
                   <div style={{ marginTop: 24 }}>
-                    <button type="button" disabled={processingId !== null || panelIsOpen}
+                    <button type="button" disabled={processingId !== null}
                       onClick={() => setReviewingRequestId(request.id)}
                       style={{ padding: "13px 22px", background: "transparent", border: "1px solid #d5c09a", color: "#d5c09a", cursor: "pointer", fontSize: 12, letterSpacing: ".08em" }}>
                       Project selection & invitation →
@@ -565,7 +478,6 @@ export default function AdminPage() {
                 )}
                 {reviewingRequestId === request.id && (
                   <RequestProjectApproval
-                    key={request.id}
                     request={request}
                     onApproved={markRequestApproved}
                     onInvited={recordInvitation}
@@ -573,28 +485,13 @@ export default function AdminPage() {
                   />
                 )}
                 {invitation && (
-                  <div style={{ marginTop: 24 }}>
-                    <p style={{ color: "#a9a398", fontSize: 13, lineHeight: 1.8 }}>
-                      {invitation.status === "completed"
-                        ? "Registration completed. This is no longer a pending application."
-                        : invitation.status === "sent"
-                        ? "An invitation has already been sent for this application. Do not approve or invite this person again here."
-                        : "This invitation requires administrator review before another attempt. Do not resend automatically."}
-                    </p>
-                    {(invitation.status === "sent" || invitation.status === "completed") && !panelIsOpen && (
-                      <>
-                        <Link
-                          href="/admin/project-access"
-                          style={{ display: "inline-block", padding: "13px 18px", border: "1px solid #665a45", color: "#d5c09a", fontSize: 12, textDecoration: "none", letterSpacing: ".07em" }}
-                        >
-                          Manage project access →
-                        </Link>
-                        <p style={{ color: "#a9a398", fontSize: 12, lineHeight: 1.8 }}>
-                          Select the matching member again on the Project Access Management page.
-                        </p>
-                      </>
-                    )}
-                  </div>
+                  <p style={{ color: "#a9a398", fontSize: "12px", lineHeight: 1.7, marginTop: "24px" }}>
+                    {invitation.status === "completed"
+                      ? "Registration completed. Manage later access changes in Project Access Management."
+                      : invitation.status === "sent"
+                      ? "Invitation sent. Any approved access selection was attached when the invitation account was created."
+                      : "This invitation requires administrator review before another attempt."}
+                  </p>
                 )}
               </article>
               );
@@ -624,7 +521,7 @@ export default function AdminPage() {
                   <p>Created: {new Date(account.created_at).toLocaleDateString("en-GB")}</p>
                 </div>
                 <div style={{ marginTop: "28px" }}>
-                  <button type="button" disabled={processingId !== null || panelIsOpen}
+                  <button type="button" disabled={processingId !== null}
                     onClick={() => handleAccountStatus(account, !account.is_active)}
                     style={{ padding: "13px 22px", background: account.is_active ? "transparent" : "#d5c09a", border: "1px solid #d5c09a", color: account.is_active ? "#d5c09a" : "#0b0b0a", cursor: "pointer", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                     {processingId === account.id ? "Processing..." : account.is_active ? "Deactivate" : "Activate"}
