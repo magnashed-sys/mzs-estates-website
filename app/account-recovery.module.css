@@ -1,0 +1,9 @@
+/* Recovery additions to the existing public access design. */
+.forgotLinkRow { display:flex; justify-content:flex-end; margin-top:-10px; min-height:34px; }
+.textLink { color:#e4cfaa; font-size:14px; line-height:1.6; letter-spacing:.02em; text-decoration:underline; text-decoration-color:rgba(228,207,170,.5); text-underline-offset:4px; }
+.textLink:hover { color:#f4e2bf; text-decoration-color:currentColor; }
+.textLink:focus-visible { outline:3px solid #d5c09a; outline-offset:4px; }
+.successMessage { color:#eee3cf; font-size:15px; line-height:1.8; margin:0 0 24px; }
+.backLink { display:inline-flex; align-items:center; min-height:44px; color:#e4cfaa; font-size:14px; text-decoration:underline; text-underline-offset:4px; }
+.backLink:focus-visible { outline:3px solid #d5c09a; outline-offset:4px; }
+.recoveryNote { color:#c5c0b6; font-size:13px; line-height:1.7; margin:14px 0 0; }
