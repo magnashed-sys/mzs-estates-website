@@ -241,3 +241,10 @@
 @media (prefers-reduced-motion: reduce) {
   .page :global(*) { transition: none; }
 }
+
+/* Shared footer placement; background images remain page-specific. */
+.publicFooter { position:relative; z-index:1; width:100%; margin-top:auto; padding-top:clamp(16px,3vh,32px); flex-shrink:0; }
+.page:global(.request-page) { display:flex; flex-direction:column; }
+.page:global(.login-page) { display:flex; flex-direction:column; }
+.page :global(.mzs-private-label) { display:block; }
+@media(max-width:700px) { .publicFooter { padding-top:20px; } }
