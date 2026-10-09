@@ -178,7 +178,7 @@ export default function PrivatePage() {
     flexWrap: "wrap",
   }}
 >
-  <h1 style={heading}>Welcome {name}.</h1>
+  <h1 style={heading}>Welcome {name}</h1>
 
   <Link
     href="/private/reservations"
