@@ -1,9 +1,10 @@
 "use client";
 
 import styles from "../public-access-refresh.module.css";
+import PublicHeader from "../components/PublicHeader";
+import HomeContactFooter from "../components/HomeContactFooter";
 
 import { FormEvent, Suspense, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 
@@ -105,10 +106,7 @@ function LoginForm() {
             "linear-gradient(90deg,rgba(8,8,8,.77),rgba(8,8,8,.44) 65%,rgba(8,8,8,.35)),linear-gradient(0deg,rgba(8,8,8,.8),transparent 45%,rgba(8,8,8,.3))",
         }}
       />
-      <header className="login-header" style={{ position: "relative" }}>
-        <Link href="/" className="login-brand">MZS GROUP</Link>
-        <span>Private Access</span>
-      </header>
+      <PublicHeader />
 
       <section className="login-container" style={{ position: "relative" }}>
         <p className="eyebrow">{role} Access</p>
@@ -138,9 +136,7 @@ function LoginForm() {
         </p>
       </section>
 
-      <footer className="login-footer" style={{ position: "relative" }}>
-        Private. Independent. International.
-      </footer>
+      <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
     </main>
   );
 }
@@ -149,7 +145,9 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <main className={`login-page ${styles.page} ${styles.loginPage}`}>
+        <PublicHeader />
         <p className="login-intro">Loading private access...</p>
+        <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
       </main>
     }>
       <LoginForm />
