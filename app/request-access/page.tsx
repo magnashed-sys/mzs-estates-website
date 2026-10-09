@@ -4,6 +4,8 @@ import styles from "../public-access-refresh.module.css";
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import PublicHeader from "../components/PublicHeader";
+import HomeContactFooter from "../components/HomeContactFooter";
 import { createClient } from "../../lib/supabase/client";
 
 const interests = [
@@ -86,10 +88,7 @@ export default function RequestAccessPage() {
   if (submitted) {
     return (
       <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
-        <header className="request-header" style={contentStyle}>
-          <Link href="/" className="request-brand">MZS GROUP</Link>
-          <span>Private Access</span>
-        </header>
+        <PublicHeader />
         <section className="request-success" style={contentStyle}>
           <p className="eyebrow">Request received</p>
           <h1>Thank you.</h1>
@@ -97,16 +96,14 @@ export default function RequestAccessPage() {
           <p className="request-success-note">Access is granted on a selective basis.</p>
           <Link href="/" className="request-return">Return to MZS Group →</Link>
         </section>
+        <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
       </main>
     );
   }
 
   return (
     <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
-      <header className="request-header" style={contentStyle}>
-        <Link href="/" className="request-brand">MZS GROUP</Link>
-        <span>Request Access</span>
-      </header>
+      <PublicHeader />
       <section className="request-container" style={contentStyle}>
         <p className="eyebrow">Private Access</p>
         <h1>Your private journey begins here.</h1>
@@ -163,6 +160,7 @@ export default function RequestAccessPage() {
           </button>
         </form>
       </section>
+      <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
     </main>
   );
 }
