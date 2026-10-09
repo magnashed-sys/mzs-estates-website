@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
       <body>
         {children}
         <PublicWebAnalytics />
+        <SpeedInsights />
       </body>
     </html>
   );
