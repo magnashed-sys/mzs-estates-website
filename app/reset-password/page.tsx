@@ -21,26 +21,20 @@ export default function ResetPasswordPage() {
     async function verifySession() {
       try {
         const supabase = createClient();
-        const { data, error: authError } = await supabase.auth.getUser();
+        const { data: auth, error: authError } = await supabase.auth.getUser();
         if (!mounted) return;
-        if (authError || !data.user) {
-          setStatus("invalid");
-          return;
-        }
-        // Only activated client/partner accounts can use this page.
-        // Inactive invitees must complete the separate invitation process.
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role,is_active")
-          .eq("id", data.user.id)
-          .single();
+        if (authError || !auth.user) throw new Error("No authenticated session");
+
+        const [profileResult, proofResult] = await Promise.all([
+          supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single(),
+          supabase.rpc("has_mzs_verified_auth_action", { p_purpose: "recovery" }),
+        ]);
         if (!mounted) return;
-        if (
-          profileError || !profile || profile.is_active !== true ||
-          (profile.role !== "client" && profile.role !== "partner")
-        ) {
-          setStatus("invalid");
-          return;
+        const profile = profileResult.data;
+        if (profileResult.error || proofResult.error || proofResult.data !== true ||
+            !profile || profile.is_active !== true ||
+            (profile.role !== "client" && profile.role !== "partner")) {
+          throw new Error("Recovery proof missing or expired");
         }
         setMemberRole(profile.role);
         setStatus("ready");
@@ -68,31 +62,35 @@ export default function ResetPasswordPage() {
     setStatus("saving");
     try {
       const supabase = createClient();
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData.user) {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError || !auth.user) {
         setStatus("invalid");
         return;
       }
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role,is_active")
-        .eq("id", userData.user.id)
-        .single();
-      if (
-        profileError || !profile || profile.is_active !== true ||
-        (profile.role !== "client" && profile.role !== "partner")
-      ) {
+
+      const [profileResult, proofResult] = await Promise.all([
+        supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single(),
+        supabase.rpc("has_mzs_verified_auth_action", { p_purpose: "recovery" }),
+      ]);
+      const profile = profileResult.data;
+      if (profileResult.error || proofResult.error || proofResult.data !== true ||
+          !profile || profile.is_active !== true ||
+          (profile.role !== "client" && profile.role !== "partner")) {
         setStatus("invalid");
+        setError("Recovery verification expired. Please request a new link.");
         return;
       }
       setMemberRole(profile.role);
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) {
-        setError("Unable to update your password. Please try again.");
+        setError(updateError.code === "same_password"
+          ? "Your new password must be different from your current password. Please choose another."
+          : "Unable to update your password. Please try again.");
         setStatus("ready");
         return;
       }
+
       setPassword("");
       setConfirmation("");
       const { error: signOutError } = await supabase.auth.signOut();
@@ -103,7 +101,7 @@ export default function ResetPasswordPage() {
     } catch {
       setPassword("");
       setConfirmation("");
-      setError("Unable to complete password recovery. Please try again.");
+      setError("Unable to complete password recovery. Please request a new link.");
       setStatus("invalid");
     }
   }
@@ -113,71 +111,44 @@ export default function ResetPasswordPage() {
     <RecoveryLayout role={memberRole}>
       <p className="eyebrow">Account Security</p>
       {status === "checking" && (
-        <>
-          <h1>Verifying access.</h1>
-          <p className="login-intro">Please wait while we verify your recovery session.</p>
-        </>
+        <><h1>Verifying access.</h1>
+          <p className="login-intro">Please wait while we verify your recovery session.</p></>
       )}
       {status === "invalid" && (
-        <>
-          <h1>Link unavailable.</h1>
-          <p className="login-intro">
-            Your recovery link may have expired, or this account is not eligible for password recovery.
-            Please request a new link or contact MZS Group.
-          </p>
+        <><h1>Link unavailable.</h1>
+          <p className="login-intro">Your recovery link may have expired or is no longer available. Please request a new link.</p>
           {error && <p className="login-error" role="alert">{error}</p>}
           <Link href="/forgot-password" className={recoveryStyles.backLink}>
             Request another recovery link →
-          </Link>
-        </>
+          </Link></>
       )}
       {(status === "ready" || status === "saving") && (
-        <>
-          <h1>Set new password.</h1>
+        <><h1>Set new password.</h1>
           <p className="login-intro">Choose a secure password for your MZS account.</p>
           <form className="login-form" onSubmit={handleSubmit} aria-busy={status === "saving"}>
-            <label>
-              New Password
-              <input
-                type="password"
-                autoComplete="new-password"
-                minLength={12}
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                disabled={status === "saving"}
-              />
+            <label>New Password
+              <input type="password" autoComplete="new-password" minLength={12} required
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                disabled={status === "saving"}/>
             </label>
-            <label>
-              Confirm Password
-              <input
-                type="password"
-                autoComplete="new-password"
-                minLength={12}
-                required
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                disabled={status === "saving"}
-              />
+            <label>Confirm Password
+              <input type="password" autoComplete="new-password" minLength={12} required
+                value={confirmation} onChange={(e) => setConfirmation(e.target.value)}
+                disabled={status === "saving"}/>
             </label>
             {error && <p className="login-error" role="alert">{error}</p>}
             <button type="submit" disabled={status === "saving"}>
               {status === "saving" ? "Saving..." : "Update Password →"}
             </button>
-          </form>
-        </>
+          </form></>
       )}
       {status === "success" && (
-        <>
-          <h1>Password updated.</h1>
-          <p className="login-intro">
-            Your password has been updated. Your project access remains unchanged.
-          </p>
+        <><h1>Password updated.</h1>
+          <p className="login-intro">Your password has been updated. Your project access remains unchanged.</p>
           {error && <p className="login-error" role="alert">{error}</p>}
           <Link href={loginHref} className={recoveryStyles.backLink}>
             Continue to {memberRole === "partner" ? "Partner" : "Client"} Login →
-          </Link>
-        </>
+          </Link></>
       )}
     </RecoveryLayout>
   );
