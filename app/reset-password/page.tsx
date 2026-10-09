@@ -6,7 +6,7 @@ import { createClient } from "../../lib/supabase/client";
 import RecoveryLayout from "../components/RecoveryLayout";
 import recoveryStyles from "../account-recovery.module.css";
 
-type Status = "checking" | "ready" | "saving" | "success" | "invalid";
+type Status = "checking" | "ready" | "saving" | "success" | "partial" | "invalid";
 type MemberRole = "client" | "partner";
 
 export default function ResetPasswordPage() {
@@ -91,11 +91,39 @@ export default function ResetPasswordPage() {
         return;
       }
 
+      // Only after Supabase Auth accepted the new password do we consume
+      // the one-time proof associated with this exact recovery session.
+      const { data: consumed, error: consumeError } = await supabase.rpc(
+        "consume_mzs_password_recovery"
+      );
+
       setPassword("");
       setConfirmation("");
+
+      // Finish this sensitive session regardless of the consumption result.
+      // A successful password change must never be reported as a failure.
       const { error: signOutError } = await supabase.auth.signOut();
+
+      if (consumeError || consumed !== true) {
+        setError(
+          "Your password was updated, but the recovery verification could not be finalized. " +
+          "Sign in with your new password. If you have trouble, contact MZS Group."
+        );
+        if (signOutError) {
+          setError(
+            "Your password was updated, but recovery verification and automatic sign out " +
+            "could not be completed. Please sign out manually and contact MZS Group."
+          );
+        }
+        setStatus("partial");
+        return;
+      }
+
       if (signOutError) {
-        setError("Your password was updated, but automatic sign out failed. Please sign out before logging in again.");
+        setError(
+          "Your password was updated, but automatic sign out failed. " +
+          "Please sign out manually before logging in again."
+        );
       }
       setStatus("success");
     } catch {
@@ -141,6 +169,19 @@ export default function ResetPasswordPage() {
               {status === "saving" ? "Saving..." : "Update Password →"}
             </button>
           </form></>
+      )}
+      {status === "partial" && (
+        <>
+          <h1>Password updated.</h1>
+          <p className="login-intro">
+            Your new password has been saved. Additional recovery verification
+            could not be completed, so please contact MZS Group if you cannot sign in.
+          </p>
+          {error && <p className="login-error" role="alert">{error}</p>}
+          <Link href={loginHref} className={recoveryStyles.backLink}>
+            Continue to {memberRole === "partner" ? "Partner" : "Client"} Login →
+          </Link>
+        </>
       )}
       {status === "success" && (
         <><h1>Password updated.</h1>
