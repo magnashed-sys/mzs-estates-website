@@ -4,20 +4,15 @@ import styles from "../public-access-refresh.module.css";
 import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 import recoveryStyles from "../account-recovery.module.css";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isPartner = searchParams.get("role") === "partner";
-  const role = isPartner ? "Partner" : "Private Client";
-  const background = isPartner
-    ? "/images/partner-login-bg.webp"
-    : "/images/client-login-bg.webp";
+  const background = "/images/client-login-bg.webp";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +22,10 @@ function LoginForm() {
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
+
     setError("");
     setLoading(true);
+
     const supabase = createClient();
 
     try {
@@ -43,22 +40,25 @@ function LoginForm() {
         return;
       }
 
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("role, is_active")
-          .eq("id", data.user.id)
-          .single();
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role, is_active")
+        .eq("id", data.user.id)
+        .single();
 
       if (profileError || !profile) {
         await supabase.auth.signOut();
-        setError("Unable to verify your account. Please contact MZS Group.");
+        setError(
+          "Unable to verify your account. Please contact MZS Group."
+        );
         return;
       }
 
       if (!profile.is_active) {
         await supabase.auth.signOut();
-        setError("Your account is currently inactive. Please contact MZS Group.");
+        setError(
+          "Your account is currently inactive. Please contact MZS Group."
+        );
         return;
       }
 
@@ -75,6 +75,7 @@ function LoginForm() {
           setError("Your account does not have a valid access role.");
           return;
       }
+
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
@@ -108,59 +109,78 @@ function LoginForm() {
             "linear-gradient(90deg,rgba(8,8,8,.77),rgba(8,8,8,.44) 65%,rgba(8,8,8,.35)),linear-gradient(0deg,rgba(8,8,8,.8),transparent 45%,rgba(8,8,8,.3))",
         }}
       />
+
       <PublicHeader />
 
-      <section className="login-container" style={{ position: "relative" }}>
-        <p className="eyebrow">{role} Access</p>
-        <h1>Welcome back.</h1>
-        <p className="login-intro">Access your private MZS environment.</p>
+      <section
+        className="login-container"
+        style={{ position: "relative" }}
+      >
+        <p className="eyebrow">Private Access</p>
+        <h1>Cliënt &amp; Partner Login</h1>
+        <p className="login-intro">
+          Access your private MZS environment.
+        </p>
 
-        <form className="login-form" onSubmit={handleLogin} aria-busy={loading}>
+        <form
+          className="login-form"
+          onSubmit={handleLogin}
+          aria-busy={loading}
+        >
           <label>
             Email
-            <input type="email" name="email" autoComplete="email"
-              value={email} onChange={(event) => setEmail(event.target.value)}
-              required disabled={loading} />
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              disabled={loading}
+            />
           </label>
+
           <label>
             Password
-            <input type="password" name="password" autoComplete="current-password"
-              value={password} onChange={(event) => setPassword(event.target.value)}
-              required disabled={loading} />
+            <input
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              disabled={loading}
+            />
           </label>
+
           <div className={recoveryStyles.forgotLinkRow}>
             <Link
-              href={`/forgot-password?role=${isPartner ? "partner" : "client"}`}
+              href="/forgot-password"
               className={recoveryStyles.textLink}
             >
               Forgot your password? →
             </Link>
           </div>
-          {error && <p className="login-error" role="alert">{error}</p>}
+
+          {error && (
+            <p className="login-error" role="alert">
+              {error}
+            </p>
+          )}
+
           <button type="submit" disabled={loading}>
             {loading ? "Signing in..." : "Login →"}
           </button>
         </form>
+
         <p className="login-note">
           Access is available to selected MZS clients and partners only.
         </p>
       </section>
 
-      <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+      <div className={styles.publicFooter}>
+        <HomeContactFooter email="info@mzsgroup.eu" />
+      </div>
     </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <main className={`login-page ${styles.page} ${styles.loginPage}`}>
-        <PublicHeader />
-        <p className="login-intro">Loading private access...</p>
-        <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
-      </main>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }
