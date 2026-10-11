@@ -27,12 +27,10 @@ export default function Home() {
         </p>
 
         <div className="mzs-actions">
-          <Link href="/login?role=client" className="mzs-button">
-            Client Login
+          <Link href="/login" className="mzs-button">
+            Cliënt &amp; Partner Login
           </Link>
-          <Link href="/login?role=partner" className="mzs-button">
-            Partner Login
-          </Link>
+
           <Link href="/request-access" className="mzs-button mzs-button-subtle">
             Request Access →
           </Link>
