@@ -3,17 +3,14 @@ import PublicHeader from "./PublicHeader";
 import HomeContactFooter from "./HomeContactFooter";
 import styles from "../public-access-refresh.module.css";
 
-/** Same MZS header/footer and role-specific photography as the login pages. */
+/** Shared MZS layout for account recovery. */
 export default function RecoveryLayout({
-  role,
   children,
 }: {
-  role: "client" | "partner";
+  role?: "client" | "partner";
   children: ReactNode;
 }) {
-  const background = role === "partner"
-    ? "/images/partner-login-bg.webp"
-    : "/images/client-login-bg.webp";
+  const background = "/images/client-login-bg.webp";
 
   return (
     <main
@@ -39,10 +36,16 @@ export default function RecoveryLayout({
             "linear-gradient(90deg,rgba(8,8,8,.77),rgba(8,8,8,.44) 65%,rgba(8,8,8,.35)),linear-gradient(0deg,rgba(8,8,8,.8),transparent 45%,rgba(8,8,8,.3))",
         }}
       />
+
       <PublicHeader />
-      <section className="login-container" style={{ position: "relative" }}>
+
+      <section
+        className="login-container"
+        style={{ position: "relative" }}
+      >
         {children}
       </section>
+
       <div className={styles.publicFooter}>
         <HomeContactFooter email="info@mzsgroup.eu" />
       </div>
