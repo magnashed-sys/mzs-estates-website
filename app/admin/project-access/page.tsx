@@ -1,663 +1,149 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
+import { assertComplete, matchesSearch, sameIds } from "../admin-model";
 import "../admin.css";
 
-type Profile = {
-  id: string;
-  full_name: string | null;
-  email: string;
-  role: string;
-  is_active: boolean;
-};
-
-type Project = {
-  id: string;
-  title: string;
-  location: string | null;
-  status: string;
-};
-
-type Offering = {
-  id: string;
-  project_id: string;
-  title: string;
-  offering_type: string;
-  status: string;
-};
-
-type ProjectGrant = {
-  user_id: string;
-  project_id: string;
-};
-
-type OfferingGrant = {
-  user_id: string;
-  offering_id: string;
-};
-
-type PageState = "loading" | "ready" | "denied" | "error";
-
-const gold = "#d5c09a";
-const muted = "#a9a398";
-
-const offeringLabels: Record<string, string> = {
-  investment: "Investment",
-  sale: "Private Sale",
-  rental: "Private Rental",
-  financing: "Financing",
-};
-
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "16px",
-  background: "#141412",
-  border: "1px solid #48443d",
-  borderRadius: 0,
-  color: "#ece8df",
-  fontSize: "15px",
-  marginTop: "12px",
-};
-
-const actionStyle: React.CSSProperties = {
-  padding: "15px 24px",
-  border: `1px solid ${gold}`,
-  background: gold,
-  color: "#0b0b0a",
-  fontSize: "12px",
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  cursor: "pointer",
-};
+type Profile = { id: string; full_name: string | null; email: string; role: string; is_active: boolean };
+type Project = { id: string; title: string; location: string | null; status: string };
+type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
+type ProjectGrant = { user_id: string; project_id: string };
+type OfferingGrant = { user_id: string; offering_id: string };
+type Data = { profiles: Profile[]; projects: Project[]; offerings: Offering[]; projectGrants: ProjectGrant[]; offeringGrants: OfferingGrant[] };
+const labels: Record<string, string> = { investment: "Investment", sale: "Private Sale", rental: "Private Rental", financing: "Private Capital" };
+function grantedIds(data: Data, user: string, project: string) {
+  if (!data.projectGrants.some(g => g.user_id === user && g.project_id === project)) return [];
+  const ids = new Set(data.offerings.filter(o => o.project_id === project).map(o => o.id));
+  return data.offeringGrants.filter(g => g.user_id === user && ids.has(g.offering_id)).map(g => g.offering_id);
+}
 
 export default function ProjectAccessPage() {
   const router = useRouter();
-
-  const [pageState, setPageState] =
-    useState<PageState>("loading");
-
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [offerings, setOfferings] = useState<Offering[]>([]);
-
-  const [projectGrants, setProjectGrants] =
-    useState<ProjectGrant[]>([]);
-
-  const [offeringGrants, setOfferingGrants] =
-    useState<OfferingGrant[]>([]);
-
+  const [data, setData] = useState<Data | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "denied" | "error">("loading");
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
-
-  const [selectedOfferings, setSelectedOfferings] =
-    useState<string[]>([]);
-
+  const [selected, setSelected] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
   const [notice, setNotice] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
+  const [uncertain, setUncertain] = useState(false);
+  const mounted = useRef(false);
+  const generation = useRef(0);
+  const actionLock = useRef(false);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadData() {
-      const supabase = createClient();
-
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (!mounted) return;
-
-      if (authError || !user) {
-        router.replace("/login?role=client");
-        return;
-      }
-
-      const { data: adminProfile, error: adminError } =
-        await supabase
-          .from("profiles")
-          .select("role, is_active")
-          .eq("id", user.id)
-          .single();
-
-      if (!mounted) return;
-
-      if (
-        adminError ||
-        adminProfile?.role !== "admin" ||
-        adminProfile.is_active !== true
-      ) {
-        setPageState("denied");
-        return;
-      }
-
-      const [
-        profilesResult,
-        projectsResult,
-        offeringsResult,
-        projectAccessResult,
-        offeringAccessResult,
-      ] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, full_name, email, role, is_active")
-          .in("role", ["client", "partner"])
-          .order("full_name"),
-
-        supabase
-          .from("projects")
-          .select("id, title, location, status")
-          .eq("status", "active")
-          .order("title"),
-
-        supabase
-          .from("offerings")
-          .select(
-            "id, project_id, title, offering_type, status"
-          )
-          .eq("status", "active")
-          .order("title"),
-
-        supabase
-          .from("project_access")
-          .select("user_id, project_id"),
-
-        supabase
-          .from("offering_access")
-          .select("user_id, offering_id"),
-      ]);
-
-      if (!mounted) return;
-
-      const hasError = [
-        profilesResult,
-        projectsResult,
-        offeringsResult,
-        projectAccessResult,
-        offeringAccessResult,
-      ].some((result) => result.error);
-
-      if (hasError) {
-        setErrorMessage(
-          "Unable to retrieve project access information."
-        );
-        setPageState("error");
-        return;
-      }
-
-      setProfiles((profilesResult.data ?? []) as Profile[]);
-      setProjects((projectsResult.data ?? []) as Project[]);
-      setOfferings((offeringsResult.data ?? []) as Offering[]);
-
-      setProjectGrants(
-        (projectAccessResult.data ?? []) as ProjectGrant[]
-      );
-
-      setOfferingGrants(
-        (offeringAccessResult.data ?? []) as OfferingGrant[]
-      );
-
-      setPageState("ready");
-    }
-
-    void loadData();
-
-    return () => {
-      mounted = false;
-    };
-  }, [router]);
-
-  const currentProfile = profiles.find(
-    (profile) => profile.id === selectedUser
-  );
-
-  const currentProject = projects.find(
-    (project) => project.id === selectedProject
-  );
-
-  const availableOfferings = offerings.filter(
-    (offering) => offering.project_id === selectedProject
-  );
-
-  function loadSelection(userId: string, projectId: string) {
-    const offeringIds = new Set(
-      availableOfferingsFor(projectId).map(
-        (offering) => offering.id
-      )
-    );
-
-    const hasProjectAccess = projectGrants.some(
-      (grant) =>
-        grant.user_id === userId &&
-        grant.project_id === projectId
-    );
-
-    const grantedIds = hasProjectAccess
-      ? offeringGrants
-          .filter(
-            (grant) =>
-              grant.user_id === userId &&
-              offeringIds.has(grant.offering_id)
-          )
-          .map((grant) => grant.offering_id)
-      : [];
-
-    setSelectedOfferings(grantedIds);
-    setDirty(false);
-    setNotice("");
-  }
-
-  function availableOfferingsFor(projectId: string) {
-    return offerings.filter(
-      (offering) => offering.project_id === projectId
-    );
-  }
-
-  function handleUserChange(userId: string) {
-    setSelectedUser(userId);
-    loadSelection(userId, selectedProject);
-  }
-
-  function handleProjectChange(projectId: string) {
-    setSelectedProject(projectId);
-    loadSelection(selectedUser, projectId);
-  }
-
-  function toggleOffering(offeringId: string) {
-    setSelectedOfferings((current) =>
-      current.includes(offeringId)
-        ? current.filter((id) => id !== offeringId)
-        : [...current, offeringId]
-    );
-
-    setDirty(true);
-    setNotice("");
-  }
-
-  async function saveAccess() {
-    if (
-      saving ||
-      !dirty ||
-      !selectedUser ||
-      !selectedProject ||
-      !currentProfile ||
-      !currentProject
-    ) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Update project access?\n\n` +
-        `Account: ${currentProfile.email}\n` +
-        `Project: ${currentProject.title}\n\n` +
-        `Selected offerings: ${selectedOfferings.length}\n\n` +
-        `Unselected offerings will lose access.`
-    );
-
-    if (!confirmed) return;
-
-    setSaving(true);
-    setNotice("");
-
+  const load = useCallback(async (userId = "", projectId = "") => {
+    const version = ++generation.current;
+    const current = () => mounted.current && generation.current === version;
+    setState("loading"); setError("");
     try {
       const supabase = createClient();
-
-      const { data, error } = await supabase.rpc(
-        "set_relationship_project_access",
-        {
-          p_user_id: selectedUser,
-          p_project_id: selectedProject,
-          p_offering_ids: selectedOfferings,
-        }
-      );
-
-      if (error) throw error;
-
-      if (data !== selectedOfferings.length) {
-        throw new Error("Unexpected access update result");
-      }
-
-      // Read the authoritative state back from Supabase.
-      const [projectResult, offeringResult] =
-        await Promise.all([
-          supabase
-            .from("project_access")
-            .select("user_id, project_id")
-            .eq("user_id", selectedUser)
-            .eq("project_id", selectedProject),
-
-          supabase
-            .from("offering_access")
-            .select("user_id, offering_id")
-            .eq("user_id", selectedUser),
-        ]);
-
-      if (projectResult.error || offeringResult.error) {
-        setNotice(
-          "Access was updated, but verification failed. Refresh before making further changes."
-        );
-        return;
-      }
-
-      const projectOfferingIds = new Set(
-        availableOfferings.map((offering) => offering.id)
-      );
-
-      const verifiedGrants = (
-        offeringResult.data ?? []
-      ).filter((grant) =>
-        projectOfferingIds.has(grant.offering_id)
-      );
-
-      setProjectGrants((current) => [
-        ...current.filter(
-          (grant) =>
-            !(
-              grant.user_id === selectedUser &&
-              grant.project_id === selectedProject
-            )
-        ),
-        ...((projectResult.data ?? []) as ProjectGrant[]),
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (!current()) return;
+      if (authError || !auth.user) { router.replace("/login"); return; }
+      const { data: profile, error: profileError } = await supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single();
+      if (!current()) return;
+      if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
+      const results = await Promise.all([
+        supabase.from("profiles").select("id,full_name,email,role,is_active", { count: "exact" }).in("role", ["client", "partner"]).order("full_name"),
+        supabase.from("projects").select("id,title,location,status", { count: "exact" }).eq("status", "active").order("title"),
+        supabase.from("offerings").select("id,project_id,title,offering_type,status", { count: "exact" }).order("title"),
+        supabase.from("project_access").select("user_id,project_id", { count: "exact" }),
+        supabase.from("offering_access").select("user_id,offering_id", { count: "exact" }),
       ]);
+      if (!current()) return;
+      assertComplete(results);
+      const next: Data = { profiles: (results[0].data ?? []) as Profile[], projects: (results[1].data ?? []) as Project[], offerings: (results[2].data ?? []) as Offering[], projectGrants: (results[3].data ?? []) as ProjectGrant[], offeringGrants: (results[4].data ?? []) as OfferingGrant[] };
+      const user = next.profiles.some(p => p.id === userId) ? userId : "";
+      const project = next.projects.some(p => p.id === projectId) ? projectId : "";
+      setData(next); setSelectedUser(user); setSelectedProject(project); setSelected(grantedIds(next, user, project));
+      setUncertain(false); setNotice(""); setState("ready");
+    } catch (cause) { if (current()) { setError(cause instanceof Error ? cause.message : "Unable to load permissions."); setState("error"); } }
+  }, [router]);
 
-      setOfferingGrants((current) => [
-        ...current.filter(
-          (grant) =>
-            !(
-              grant.user_id === selectedUser &&
-              projectOfferingIds.has(grant.offering_id)
-            )
-        ),
-        ...(verifiedGrants as OfferingGrant[]),
+  useEffect(() => {
+    mounted.current = true;
+    const params = new URLSearchParams(window.location.search);
+    void load(params.get("user") ?? "", params.get("project") ?? "");
+    return () => { mounted.current = false; generation.current += 1; };
+  }, [load]);
+
+  const initial = data ? grantedIds(data, selectedUser, selectedProject) : [];
+  const dirty = !sameIds(initial, selected);
+  useEffect(() => {
+    if (!dirty && !saving) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, saving]);
+
+  function canLeave() { return !saving && (!dirty || window.confirm("Discard the unsaved access selection?")); }
+  function guardLink(event: MouseEvent<HTMLAnchorElement>) { if (!canLeave()) event.preventDefault(); }
+  function choose(user: string, project: string) {
+    if (!data || !canLeave()) return;
+    setSelectedUser(user); setSelectedProject(project); setSelected(grantedIds(data, user, project)); setNotice("");
+  }
+  const profile = data?.profiles.find(p => p.id === selectedUser);
+  const project = data?.projects.find(p => p.id === selectedProject);
+  const available = data?.offerings.filter(o => o.project_id === selectedProject && o.status === "active") ?? [];
+  const inactiveGrants = initial.filter(id => !available.some(o => o.id === id));
+  const added = available.filter(o => selected.includes(o.id) && !initial.includes(o.id));
+  const removed = available.filter(o => initial.includes(o.id) && !selected.includes(o.id));
+  const title = (o: Offering) => `${labels[o.offering_type] ?? o.offering_type}${o.title ? ` — ${o.title}` : ""}`;
+
+  async function save() {
+    if (actionLock.current || saving || uncertain || !data || !profile || !project || !dirty || inactiveGrants.length) return;
+    const expected = [...selected];
+    const userId = profile.id, projectId = project.id;
+    const description = `Account: ${profile.email}\nProject: ${project.title}\n\nAdd: ${added.map(title).join(", ") || "None"}\nRemove: ${removed.map(title).join(", ") || "None"}${expected.length ? "" : "\n\nAll access to this project will be removed."}`;
+    if (!window.confirm(`Save these access changes?\n\n${description}`)) return;
+    actionLock.current = true; setSaving(true); setNotice("");
+    try {
+      const supabase = createClient();
+      const { data: result, error: failure } = await supabase.rpc("set_relationship_project_access", { p_user_id: userId, p_project_id: projectId, p_offering_ids: expected });
+      if (failure || result !== expected.length) throw new Error("Save could not be confirmed");
+      const [pg, og] = await Promise.all([
+        supabase.from("project_access").select("user_id,project_id", { count: "exact" }).eq("user_id", userId).eq("project_id", projectId),
+        supabase.from("offering_access").select("user_id,offering_id", { count: "exact" }).eq("user_id", userId),
       ]);
-
-      setSelectedOfferings(
-        verifiedGrants.map((grant) => grant.offering_id)
-      );
-
-      setDirty(false);
-      setNotice("Project access updated successfully.");
+      if (!mounted.current) return;
+      assertComplete([pg, og]);
+      const allProjectIds = new Set(data.offerings.filter(o => o.project_id === projectId).map(o => o.id));
+      const verified = ((og.data ?? []) as OfferingGrant[]).filter(g => allProjectIds.has(g.offering_id));
+      if (!sameIds(expected, verified.map(g => g.offering_id)) || (pg.data?.length ?? 0) !== (expected.length ? 1 : 0)) throw new Error("Saved permissions differ from the selection");
+      setData(current => current && ({ ...current,
+        projectGrants: [...current.projectGrants.filter(g => !(g.user_id === userId && g.project_id === projectId)), ...((pg.data ?? []) as ProjectGrant[])],
+        offeringGrants: [...current.offeringGrants.filter(g => !(g.user_id === userId && allProjectIds.has(g.offering_id))), ...verified],
+      }));
+      setSelected(expected); setNotice("Project access saved and verified.");
     } catch {
-      setNotice(
-        "Unable to confirm the access change. Refresh the page and verify the current permissions before retrying."
-      );
-    } finally {
-      setSaving(false);
-    }
+      if (mounted.current) { setUncertain(true); setNotice("The final access state could not be verified. Refresh permissions before another change. The save may already have completed."); }
+    } finally { actionLock.current = false; if (mounted.current) setSaving(false); }
   }
 
-  if (pageState !== "ready") {
-    return (
-      <main className="admin-page">
-        <div className="admin-message">
-          {pageState === "loading" && (
-            <p>Verifying administrator access...</p>
-          )}
+  if (state !== "ready" || !data) return <main className="admin-page"><div className="admin-message"><h1>{state === "denied" ? "Access restricted." : state === "error" ? "Unable to load." : "Preparing permissions."}</h1><p role={state === "error" ? "alert" : "status"}>{state === "error" ? error : state === "denied" ? "Active administrator access is required." : "Verifying administrator access…"}</p>{state === "error" && <button className="admin-button" onClick={() => void load(selectedUser, selectedProject)}>Try again</button>}<Link href="/admin?tab=projects">Return to Admin →</Link></div></main>;
 
-          {pageState === "denied" && (
-            <>
-              <h1>Access restricted.</h1>
-              <p>Administrator access is required.</p>
-            </>
-          )}
-
-          {pageState === "error" && (
-            <>
-              <h1>Unable to continue.</h1>
-              <p>{errorMessage}</p>
-            </>
-          )}
-
-          <Link href="/admin">Return to Admin →</Link>
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="admin-page">
-      <header className="admin-header">
-        <Link href="/" className="admin-brand">
-          MZS GROUP
-        </Link>
-
-        <div className="admin-header-actions">
-          <span>Project Access</span>
-          <Link href="/admin">← Admin Dashboard</Link>
-        </div>
-      </header>
-
-      <section className="admin-content">
-        <p className="eyebrow">MZS Administration</p>
-
-        <h1>Project access.</h1>
-
-        <p className="admin-intro">
-          Manage individual project and offering
-          permissions for selected clients and partners.
-        </p>
-
-        <div
-          style={{
-            maxWidth: "780px",
-            marginTop: "55px",
-          }}
-        >
-          <div style={{ marginBottom: "32px" }}>
-            <label
-              htmlFor="mzs-client"
-              style={{
-                color: muted,
-                fontSize: "12px",
-                letterSpacing: "0.14em",
-              }}
-            >
-              SELECT CLIENT OR PARTNER
-            </label>
-
-            <select
-              id="mzs-client"
-              style={selectStyle}
-              value={selectedUser}
-              disabled={saving}
-              onChange={(event) =>
-                handleUserChange(event.target.value)
-              }
-            >
-              <option value="">Select relationship...</option>
-
-              {profiles.map((profile) => (
-                <option key={profile.id} value={profile.id}>
-                  {profile.full_name || profile.email}
-                  {" — "}
-                  {profile.role}
-                  {profile.is_active ? "" : " (Inactive)"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: "36px" }}>
-            <label
-              htmlFor="mzs-project"
-              style={{
-                color: muted,
-                fontSize: "12px",
-                letterSpacing: "0.14em",
-              }}
-            >
-              SELECT PROJECT
-            </label>
-
-            <select
-              id="mzs-project"
-              style={selectStyle}
-              value={selectedProject}
-              disabled={saving}
-              onChange={(event) =>
-                handleProjectChange(event.target.value)
-              }
-            >
-              <option value="">Select project...</option>
-
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.title}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {currentProfile && currentProject && (
-            <div
-              style={{
-                borderTop: "1px solid #48443d",
-                paddingTop: "35px",
-              }}
-            >
-              <p className="eyebrow">
-                Offering Permissions
-              </p>
-
-              <h2
-                style={{
-                  fontFamily: "Georgia, serif",
-                  fontWeight: 400,
-                  fontSize: "32px",
-                  marginBottom: "12px",
-                }}
-              >
-                {currentProject.title}
-              </h2>
-
-              <p
-                style={{
-                  color: muted,
-                  fontSize: "14px",
-                  marginBottom: "32px",
-                }}
-              >
-                {currentProfile.email}
-                {" · "}
-                {currentProfile.is_active
-                  ? "Active Account"
-                  : "Inactive Account"}
-              </p>
-
-              {availableOfferings.length === 0 ? (
-                <p style={{ color: muted }}>
-                  No active offerings available.
-                </p>
-              ) : (
-                availableOfferings.map((offering) => (
-                  <label
-                    key={offering.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "18px",
-                      padding: "22px 0",
-                      borderBottom: "1px solid #35332e",
-                      cursor: saving ? "wait" : "pointer",
-                      color: "#ece8df",
-                      fontSize: "15px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedOfferings.includes(
-                        offering.id
-                      )}
-                      disabled={saving}
-                      onChange={() =>
-                        toggleOffering(offering.id)
-                      }
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: gold,
-                      }}
-                    />
-
-                    <span>
-                      {offeringLabels[offering.offering_type] ??
-                        offering.title}
-                    </span>
-                  </label>
-                ))
-              )}
-
-              <p
-                style={{
-                  color: muted,
-                  fontSize: "13px",
-                  lineHeight: 1.7,
-                  marginTop: "26px",
-                }}
-              >
-                Only selected offerings will be accessible.
-                Deselecting all offerings removes access
-                to this project.
-              </p>
-
-              {dirty && (
-                <p
-                  style={{
-                    color: gold,
-                    fontSize: "13px",
-                    marginTop: "20px",
-                  }}
-                >
-                  You have unsaved changes.
-                </p>
-              )}
-
-              <button
-                type="button"
-                onClick={saveAccess}
-                disabled={saving || !dirty}
-                style={{
-                  ...actionStyle,
-                  marginTop: "28px",
-                  opacity: saving || !dirty ? 0.45 : 1,
-                  cursor:
-                    saving || !dirty
-                      ? "not-allowed"
-                      : "pointer",
-                }}
-              >
-                {saving
-                  ? "Saving..."
-                  : "Save Access Permissions →"}
-              </button>
-            </div>
-          )}
-
-          {notice && (
-            <p
-              role="status"
-              style={{
-                color: gold,
-                fontSize: "14px",
-                lineHeight: 1.7,
-                marginTop: "30px",
-              }}
-            >
-              {notice}
-            </p>
-          )}
-        </div>
-      </section>
-
-      <footer className="admin-footer">
-        Private. Independent. International.
-      </footer>
-    </main>
-  );
+  return <main className="admin-page"><header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><Link className="admin-button" href="/admin?tab=projects" onClick={guardLink}>← Admin dashboard</Link></header><section className="admin-content">
+    <div className="admin-heading-row"><div><p className="eyebrow">Selected relationships</p><h1>Project access.</h1><p className="admin-intro">Choose a relationship and review exactly which opportunities they can access.</p></div><button className="admin-button" disabled={saving} onClick={() => { if (canLeave()) void load(selectedUser, selectedProject); }}>Refresh permissions</button></div>
+    <div className="admin-access-layout">
+      <aside className="admin-panel"><h2 className="admin-subtitle">Select a relationship.</h2><label className="admin-field">Search<input type="search" disabled={saving || uncertain} value={search} placeholder="Name or email" onChange={e => setSearch(e.target.value)} /></label><label className="admin-field admin-space-top">Client or partner<select disabled={saving || uncertain} value={selectedUser} onChange={e => choose(e.target.value, selectedProject)}><option value="">Select relationship…</option>{data.profiles.filter(p => p.id === selectedUser || matchesSearch(search, p.full_name, p.email)).map(p => <option key={p.id} value={p.id}>{p.full_name || p.email} · {p.role}{p.is_active ? "" : " · Inactive"}</option>)}</select></label><label className="admin-field admin-space-top">Project<select disabled={saving || uncertain} value={selectedProject} onChange={e => choose(selectedUser, e.target.value)}><option value="">Select project…</option>{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        {profile && <div className="admin-space-top"><span className="admin-status">{profile.is_active ? "Active" : "Inactive"} · {profile.role}</span><p className="admin-help">{profile.email}</p>{!profile.is_active && <p className="admin-help">This account is inactive. Saving permissions does not activate it.</p>}</div>}
+      </aside>
+      <div className="admin-panel">{profile && project ? <>
+        <p className="eyebrow">Offering permissions</p><h2 className="admin-subtitle">{project.title}</h2><p className="admin-help">{project.location}</p>
+        {!available.length && <p className="admin-empty">No active offerings are available.</p>}
+        <fieldset className="admin-permissions" disabled={saving || uncertain || inactiveGrants.length > 0}><legend className="admin-help">Accessible opportunities</legend>{available.map(offering => <label className="admin-permission" key={offering.id}><input type="checkbox" checked={selected.includes(offering.id)} onChange={() => setSelected(ids => ids.includes(offering.id) ? ids.filter(id => id !== offering.id) : [...ids, offering.id])} /><span>{title(offering)}</span></label>)}</fieldset>
+        {inactiveGrants.length > 0 && <p role="alert" className="admin-notice">This account has saved permissions for inactive offerings. Review those offering records before editing this selection; they will not be removed silently.</p>}
+        <p className="admin-help">Deselecting every offering removes access to this project. New opportunities are never assigned automatically.</p>
+        {dirty && <div className="admin-change-summary" role="status"><strong>Unsaved changes</strong><p>Add: {added.map(title).join(", ") || "None"}</p><p>Remove: {removed.map(title).join(", ") || "None"}</p></div>}
+        <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={saving || uncertain || !dirty || inactiveGrants.length > 0} onClick={() => void save()}>{saving ? "Saving…" : "Save access permissions"}</button>{dirty && <button className="admin-button" disabled={saving || uncertain} onClick={() => setSelected(initial)}>Undo selection changes</button>}</div>
+      </> : <p className="admin-empty">Select a relationship and project to review access.</p>}
+      {notice && <p className="admin-notice" role={uncertain ? "alert" : "status"}>{notice}</p>}</div>
+    </div>
+    {profile && <><div className="admin-section-heading"><div><p className="eyebrow">Saved permissions</p><h2>Current project access.</h2></div></div><div className="admin-project-grid">{data.projects.filter(p => grantedIds(data, profile.id, p.id).length > 0).map(p => <article className="admin-panel" key={p.id}><h3 className="admin-subtitle">{p.title}</h3><div className="admin-interests">{data.offerings.filter(o => grantedIds(data, profile.id, p.id).includes(o.id)).map(o => <span key={o.id}>{title(o)}{o.status === "active" ? "" : " · Inactive"}</span>)}</div><button className="admin-button admin-space-top" disabled={saving || uncertain} onClick={() => choose(profile.id, p.id)}>Review access →</button></article>)}</div><p className="admin-help">This overview shows saved permissions for active projects. An active account and active offering are also required for private access.</p></>}
+  </section><footer className="admin-footer">Private. Independent. International.</footer></main>;
 }
