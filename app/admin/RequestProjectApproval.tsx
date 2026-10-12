@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createClient } from "../../lib/supabase/client";
+import { sameIds } from "./admin-model";
 
 type Role = "client" | "partner";
 type Request = { id: string; full_name: string; email: string; status: string };
@@ -27,8 +28,8 @@ const button: CSSProperties = {
 const labels: Record<string, string> = {
   rental: "Private Rental", sale: "Private Sale", investment: "Investment", financing: "Private Capital",
 };
-function sameIds(a: string[], b: string[]) {
-  return a.length === b.length && [...a].sort().every((value, i) => value === [...b].sort()[i]);
+function offeringLabel(offering: Offering) {
+  return `${labels[offering.offering_type] ?? offering.offering_type}${offering.title ? ` — ${offering.title}` : ""}`;
 }
 function messageOf(error: unknown) {
   return error && typeof error === "object" && "message" in error && typeof error.message === "string"
@@ -90,11 +91,23 @@ export default function RequestProjectApproval({ request, onApproved, onInvited,
 
   const selectable = offerings.filter(o => projects.some(p => p.id === o.project_id));
   const dirty = !saved || saved.role !== role || !sameIds(saved.ids, selected);
+  const unsavedEdits = dirty && !invitation && (saved !== null || role !== "client" || selected.length > 0);
+  useEffect(() => {
+    if (!unsavedEdits && !busy) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [unsavedEdits, busy]);
+  function closeReview() {
+    if (actionLock.current || busy) return;
+    if (unsavedEdits && !window.confirm("Discard the unsaved access selection?")) return;
+    onClose();
+  }
   const unavailableSaved = selected.some(id => !selectable.some(o => o.id === id));
   const locked = busy || loading || Boolean(invitation) || uncertain || Boolean(error);
   const selectionText = () => selected.map(id => {
     const offering = selectable.find(o => o.id === id);
-    return `${projects.find(p => p.id === offering?.project_id)?.title ?? "Unavailable project"} — ${labels[offering?.offering_type ?? ""] ?? offering?.title ?? "Opportunity"}`;
+    return `${projects.find(p => p.id === offering?.project_id)?.title ?? "Unavailable project"} — ${offering ? offeringLabel(offering) : "Opportunity"}`;
   }).join("\n") || "No projects. The member will see an empty collection.";
 
   async function approveAndSave() {
@@ -157,7 +170,7 @@ export default function RequestProjectApproval({ request, onApproved, onInvited,
   return <section aria-label={`Review access for ${request.full_name}`} style={{ marginTop: 28, padding: "clamp(18px,3vw,30px)", border: `1px solid ${edge}`, background: "#11110f", color: "#eeeae2" }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
       <h4 style={{ fontFamily: "Georgia,serif", fontSize: 26, fontWeight: 400, margin: 0 }}>Approval & project access</h4>
-      <button type="button" style={button} onClick={onClose} disabled={busy}>Close</button>
+      <button type="button" style={button} onClick={closeReview} disabled={busy}>Close</button>
     </div>
     <p style={{ color: muted, lineHeight: 1.7 }}>Select only the opportunities this member may see. Interests on the application do not grant access automatically.</p>
     {loading && <p role="status">Loading approved access...</p>}
@@ -178,7 +191,7 @@ export default function RequestProjectApproval({ request, onApproved, onInvited,
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {selectable.filter(o => o.project_id === project.id).map(offering => <label key={offering.id} style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 40 }}>
               <input type="checkbox" checked={selected.includes(offering.id)} onChange={e => setSelected(current => e.target.checked ? [...current, offering.id] : current.filter(id => id !== offering.id))} style={{ width: 18, height: 18, accentColor: gold }} />
-              {labels[offering.offering_type] ?? offering.title ?? offering.offering_type}
+              {offeringLabel(offering)}
             </label>)}
           </div>
         </div>)}
@@ -190,7 +203,7 @@ export default function RequestProjectApproval({ request, onApproved, onInvited,
         <button type="button" style={{ ...button, background: gold, color: "#111", opacity: locked || unavailableSaved ? .5 : 1 }} disabled={locked || unavailableSaved} onClick={() => void approveAndSave()}>{busy ? "Processing..." : saved ? "Save approved selection" : "Approve & save selection"}</button>
         <button type="button" style={{ ...button, opacity: locked || dirty || !saved || unavailableSaved ? .5 : 1 }} disabled={locked || dirty || !saved || unavailableSaved} onClick={() => void sendInvitation()}>Send invitation →</button>
       </div>}
-      {error && <button type="button" style={{ ...button, marginTop: 16 }} disabled={busy || loading} onClick={() => void load()}>Reload recorded status</button>}
+      {error && <button type="button" style={{ ...button, marginTop: 16 }} disabled={busy || loading} onClick={() => { if (!unsavedEdits || window.confirm("Discard unsaved edits and reload the recorded status?")) void load(); }}>Reload recorded status</button>}
       <p style={{ color: muted, fontSize: 12, lineHeight: 1.8, marginTop: 22 }}>Saving approval does not send an email. Sending requires a second confirmation. Selecting access never creates or confirms a rental booking.</p>
     </>}
   </section>;

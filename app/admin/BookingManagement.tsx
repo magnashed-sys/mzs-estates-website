@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, } from "react";
+import RentalSchedule from "./RentalSchedule";
+import { liveArrivals, matchesSearch, todayInMadrid } from "./admin-model";
 import { createClient } from "../../lib/supabase/client";
 type Booking = {
     id: string;
@@ -26,6 +28,7 @@ type Person = {
 type Property = {
     id: string;
     title: string;
+    status: string;
 };
 type CancellationRequest = {
     id: string;
@@ -42,9 +45,10 @@ type Snapshot = {
     people: Person[];
     properties: Property[];
     cancellations: CancellationRequest[];
+    rentalPropertyIds: string[];
 };
-type Section = "bookings" | "cancellations";
-type BookingFilter = "all" | "requested" | "reviewed";
+type Section = "bookings" | "cancellations" | "calendar";
+type BookingFilter = "all" | "requested" | "confirmed" | "cancelled" | "declined" | "blocked" | "test_approved";
 type CancellationFilter = "pending" | "approved" | "declined" | "all";
 type Decision = "approved" | "declined";
 type Notice = {
@@ -127,15 +131,25 @@ function Detail({ label, children }: {
     return <div><p style={{ color: muted, fontSize: 13, margin: "0 0 8px" }}>{label}</p>
     <p style={{ margin: 0, lineHeight: 1.6, overflowWrap: "anywhere" }}>{children}</p></div>;
 }
-export default function BookingManagement() {
+export default function BookingManagement({ mode = "full", initialSection = "bookings", onNavigate, onBusyChange }: {
+    mode?: "full" | "summary";
+    initialSection?: "bookings" | "cancellations";
+    onNavigate?: (section: "bookings" | "cancellations") => void;
+    onBusyChange?: (busy: boolean) => void;
+} = {}) {
     const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState<string | null>(null);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState<Notice | null>(null);
-    const [section, setSection] = useState<Section>("bookings");
+    const [section, setSection] = useState<Section>(initialSection);
     const [bookingFilter, setBookingFilter] = useState<BookingFilter>("all");
     const [cancellationFilter, setCancellationFilter] = useState<CancellationFilter>("pending");
+    const [search, setSearch] = useState("");
+    const [propertyFilter, setPropertyFilter] = useState("all");
+    const [scope, setScope] = useState<"live" | "test" | "all">("live");
+    const [visibleLimit, setVisibleLimit] = useState(12);
+    const [updated, setUpdated] = useState("");
     const mounted = useRef(false);
     const loadVersion = useRef(0);
     const mutationInProgress = useRef(false);
@@ -160,25 +174,28 @@ export default function BookingManagement() {
             if (profileError || profile?.role !== "admin" || profile.is_active !== true) {
                 throw new Error("Active administrator access is required.");
             }
-            const [bookingsResult, peopleResult, propertiesResult, requestsResult] = await Promise.all([
+            const [bookingsResult, peopleResult, propertiesResult, requestsResult, rentalsResult] = await Promise.all([
                 supabase.rpc("admin_list_rental_bookings", {}, { count: "exact" })
                     .order("created_at", { ascending: false }),
                 supabase.from("profiles").select("id,full_name,email", { count: "exact" }),
-                supabase.from("projects").select("id,title", { count: "exact" }),
+                supabase.from("projects").select("id,title,status", { count: "exact" }),
                 supabase.from("rental_cancellation_requests")
                     .select("id,booking_id,user_id,reason,status,created_at,reviewed_at,reviewed_by", { count: "exact" })
                     .order("created_at", { ascending: false }),
+                supabase.from("offerings").select("project_id", { count: "exact" }).eq("offering_type", "rental").eq("status", "active"),
             ]);
             if (!current())
                 return false;
-            const results = [bookingsResult, peopleResult, propertiesResult, requestsResult];
+            const results = [bookingsResult, peopleResult, propertiesResult, requestsResult, rentalsResult];
             if (results.some(result => result.error))
                 throw new Error("Unable to load booking and cancellation records. Refresh before taking any action.");
             if (results.some(result => result.count !== null && result.count > (result.data?.length ?? 0))) {
                 throw new Error("The overview exceeds the current loading limit. Pagination is required before these records can be managed here.");
             }
             setSnapshot({ bookings: (bookingsResult.data ?? []) as Booking[], people: (peopleResult.data ?? []) as Person[],
-                properties: (propertiesResult.data ?? []) as Property[], cancellations: (requestsResult.data ?? []) as CancellationRequest[] });
+                properties: (propertiesResult.data ?? []) as Property[], cancellations: (requestsResult.data ?? []) as CancellationRequest[],
+                rentalPropertyIds: [...new Set((rentalsResult.data ?? []).map(row => row.project_id as string))] });
+            setUpdated(new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
             return true;
         }
         catch (cause) {
@@ -198,10 +215,17 @@ export default function BookingManagement() {
         void reload();
         return () => { mounted.current = false; loadVersion.current += 1; };
     }, [reload]);
+    useEffect(() => {
+        if (!busy) return;
+        const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+        window.addEventListener("beforeunload", warn);
+        return () => window.removeEventListener("beforeunload", warn);
+    }, [busy]);
     async function runMutation(options: Mutation) {
         if (mutationInProgress.current || loading || error || !snapshot)
             return;
         mutationInProgress.current = true;
+        onBusyChange?.(true);
         setBusy(options.key);
         setNotice(null);
         try {
@@ -224,6 +248,7 @@ export default function BookingManagement() {
         }
         finally {
             mutationInProgress.current = false;
+            onBusyChange?.(false);
             if (mounted.current)
                 setBusy(null);
         }
@@ -282,13 +307,43 @@ export default function BookingManagement() {
     const bookingMap = new Map(bookings.map(booking => [booking.id, booking]));
     const pendingBookings = bookings.filter(booking => booking.status === "requested").length;
     const pendingCancellations = cancellations.filter(request => request.status === "pending").length;
-    const visibleBookings = bookings.filter(booking => bookingFilter === "all" ||
-        (bookingFilter === "requested" ? booking.status === "requested" : booking.status !== "requested"));
-    const visibleCancellations = cancellations.filter(request => cancellationFilter === "all" || request.status === cancellationFilter);
+    function matchesBooking(booking: Booking) {
+        const person = booking.user_id ? people.get(booking.user_id) : undefined;
+        return (scope === "all" || booking.is_test === (scope === "test"))
+            && (propertyFilter === "all" || booking.project_id === propertyFilter)
+            && matchesSearch(search, person?.full_name, person?.email, properties.get(booking.project_id)?.title, booking.id);
+    }
+    const visibleBookings = bookings.filter(booking => matchesBooking(booking) && (bookingFilter === "all" || booking.status === bookingFilter));
+    const visibleCancellations = cancellations.filter(request => {
+        const booking = bookingMap.get(request.booking_id);
+        const person = people.get(request.user_id);
+        const matches = booking ? matchesBooking(booking) : scope === "all" && propertyFilter === "all" && matchesSearch(search, person?.full_name, person?.email, request.booking_id);
+        return matches && (cancellationFilter === "all" || request.status === cancellationFilter);
+    });
     const locked = loading || busy !== null || Boolean(error);
-    return (<div style={{ color: "#eeeae2" }}>
+    const arrivals = liveArrivals(bookings, todayInMadrid());
+    if (mode === "summary") return <section className="admin-rental-summary">
+      <div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Reservations at a glance.</h2></div><ActionButton disabled={locked} onClick={() => void reload()}>Refresh reservations</ActionButton></div>
+      {loading && <p role="status" className="admin-help">Loading reservations…</p>}
+      {error && <div className="admin-notice" role="alert">{error} <ActionButton onClick={() => void reload()} disabled={loading}>Try again</ActionButton></div>}
+      {!loading && !error && snapshot && <>
+        <div className="admin-metrics">
+          <button onClick={() => onNavigate?.("bookings")}><span>Live booking requests</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>Review reservations →</small></button>
+          <button onClick={() => onNavigate?.("cancellations")}><span>Live cancellations</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>Review requests →</small></button>
+          <div><span>Upcoming arrivals</span><strong>{arrivals.length}</strong><small>Next 14 days, including today</small></div>
+          <div><span>Current stays</span><strong>{bookings.filter(b => !b.is_test && b.status === "confirmed" && b.check_in <= todayInMadrid() && todayInMadrid() < b.check_out).length}</strong><small>Confirmed live reservations</small></div>
+        </div>
+        <p className="admin-help">Updated {updated} · Madrid time. Test bookings are excluded. {bookings.filter(b => b.is_test).length} test records are available under Bookings → Test.</p>
+        <div className="admin-panel"><h3 className="admin-subtitle">Next arrivals.</h3>
+          {!arrivals.length && <p className="admin-help">No confirmed arrivals in the next 14 days.</p>}
+          {arrivals.slice(0, 6).map(booking => <button key={booking.id} className="admin-action-row" onClick={() => onNavigate?.("bookings")}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} →</span></button>)}
+          {arrivals.length > 6 && <ActionButton onClick={() => onNavigate?.("bookings")}>View all reservations →</ActionButton>}
+        </div>
+      </>}
+    </section>;
+    return (<div className="admin-bookings" style={{ color: "#eeeae2" }}>
       <div style={{ ...rowStyle, justifyContent: "space-between", marginBottom: 24 }}>
-        <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? `${pendingBookings} pending bookings · ${pendingCancellations} pending cancellations` : "Booking administration"}</p>
+        <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? `${pendingBookings} pending bookings · ${pendingCancellations} pending cancellations · all live and test records` : "Booking administration"}</p>
         <ActionButton disabled={loading || busy !== null} onClick={() => void reload()}>Refresh overview</ActionButton>
       </div>
       <nav aria-label="Booking administration sections" style={{ ...rowStyle, paddingBottom: 24, borderBottom: `1px solid ${border}`, marginBottom: 28 }}>
@@ -296,19 +351,27 @@ export default function BookingManagement() {
         <ActionButton primary={section === "cancellations"} selected={section === "cancellations"} disabled={busy !== null} onClick={() => setSection("cancellations")}>
           Cancellation Requests{snapshot ? ` (${pendingCancellations})` : ""}
         </ActionButton>
+        <ActionButton primary={section === "calendar"} selected={section === "calendar"} disabled={busy !== null} onClick={() => setSection("calendar")}>Calendar</ActionButton>
       </nav>
+      {section !== "calendar" && <div className="admin-toolbar">
+        <label className="admin-field">Search<input type="search" disabled={locked} value={search} placeholder="Guest, property or reference" onChange={e => { setSearch(e.target.value); setVisibleLimit(12); }} /></label>
+        <label className="admin-field">Property<select disabled={locked} value={propertyFilter} onChange={e => { setPropertyFilter(e.target.value); setVisibleLimit(12); }}><option value="all">All properties</option>{[...properties.values()].map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        <label className="admin-field">Records<select disabled={locked} value={scope} onChange={e => { setScope(e.target.value as "live" | "test" | "all"); setVisibleLimit(12); }}><option value="live">Live</option><option value="test">Test</option><option value="all">Live & test</option></select></label>
+      </div>}
+      {!loading && !error && snapshot && section === "calendar" && <RentalSchedule bookings={bookings} properties={snapshot.properties.filter(p => p.status === "active" && snapshot.rentalPropertyIds.includes(p.id))} />}
+
       {notice && <p role={notice.kind === "error" ? "alert" : "status"} style={{ color: notice.kind === "error" ? warning : gold, lineHeight: 1.8 }}>{notice.text}</p>}
       {loading && <p role="status" style={{ color: muted }}>Loading booking administration...</p>}
       {error && <p role="alert" style={{ color: warning, lineHeight: 1.8 }}>{error}</p>}
 
       {!loading && !error && snapshot && section === "bookings" && (<>
           <div style={{ ...rowStyle, marginBottom: 24 }}>
-            {([["all", "All"], ["requested", "Pending"], ["reviewed", "Reviewed"]] as const).map(([key, label]) => (<ActionButton key={key} primary={bookingFilter === key} selected={bookingFilter === key} onClick={() => setBookingFilter(key)}>{label}</ActionButton>))}
+            {([["all", "All"], ["requested", "Pending"], ["confirmed", "Confirmed"], ["cancelled", "Cancelled"], ["declined", "Declined"], ["blocked", "Blocks"], ["test_approved", "Test approved"]] as const).map(([key, label]) => (<ActionButton key={key} primary={bookingFilter === key} selected={bookingFilter === key} onClick={() => { setBookingFilter(key); setVisibleLimit(12); }}>{label}</ActionButton>))}
           </div>
-          <p style={{ color: muted, fontSize: 13 }}>{bookings.length} records, including availability blocks.</p>
+          <p style={{ color: muted, fontSize: 13 }}>{visibleBookings.length} matching records · {scope === "live" ? "Live only" : scope === "test" ? "Test only" : "Live and test"} · Updated {updated} Madrid time.</p>
           {visibleBookings.length === 0 && <p style={{ color: muted }}>No bookings in this category.</p>}
           <div style={{ display: "grid", gap: 20 }}>
-            {visibleBookings.map(booking => {
+            {visibleBookings.slice(0, visibleLimit).map(booking => {
                 const person = booking.user_id ? people.get(booking.user_id) : undefined;
                 const property = properties.get(booking.project_id);
                 const isBlock = booking.status === "blocked";
@@ -347,6 +410,7 @@ export default function BookingManagement() {
                 </article>);
             })}
           </div>
+          {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more bookings</ActionButton>}
           <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Only eligible test records can be permanently deleted here, along with their test cancellation history.</p>
         </>)}
 
@@ -354,11 +418,11 @@ export default function BookingManagement() {
           <h3 style={titleStyle}>Cancellation requests.</h3>
           <p style={{ color: muted, lineHeight: 1.8, maxWidth: 850 }}>Review cancellation requests submitted by clients. A pending request does not cancel the booking. For live reservations, dates remain reserved until approval. Test cancellations never affect real availability. Refund arrangements are handled separately.</p>
           <div style={{ ...rowStyle, margin: "26px 0" }}>
-            {([["pending", "Pending"], ["approved", "Approved"], ["declined", "Declined"], ["all", "All"]] as const).map(([key, label]) => (<ActionButton key={key} primary={cancellationFilter === key} selected={cancellationFilter === key} onClick={() => setCancellationFilter(key)}>{label}</ActionButton>))}
+            {([["pending", "Pending"], ["approved", "Approved"], ["declined", "Declined"], ["all", "All"]] as const).map(([key, label]) => (<ActionButton key={key} primary={cancellationFilter === key} selected={cancellationFilter === key} onClick={() => { setCancellationFilter(key); setVisibleLimit(12); }}>{label}</ActionButton>))}
           </div>
           {visibleCancellations.length === 0 && <div style={cardStyle}><p style={{ color: muted, margin: 0, lineHeight: 1.8 }}>{cancellationFilter === "pending" ? "No pending cancellation requests." : "No cancellation requests in this category."}</p></div>}
           <div style={{ display: "grid", gap: 20 }}>
-            {visibleCancellations.map(request => {
+            {visibleCancellations.slice(0, visibleLimit).map(request => {
                 const booking = bookingMap.get(request.booking_id);
                 const person = people.get(request.user_id);
                 const property = booking ? properties.get(booking.project_id) : undefined;
@@ -401,6 +465,7 @@ export default function BookingManagement() {
                 </article>);
             })}
           </div>
+          {visibleCancellations.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more cancellation requests</ActionButton>}
           <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Eligible bookings: confirmed live reservations and approved test bookings. Pending requests, rejected bookings, cancelled bookings and availability blocks cannot enter this cancellation workflow.</p>
         </>)}
     </div>);

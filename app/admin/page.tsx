@@ -1,542 +1,248 @@
-
 "use client";
 
 import "./admin.css";
-import BookingManagement from "./BookingManagement";
-import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
-
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
+import BookingManagement from "./BookingManagement";
+import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
+import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
 
-type AccessRequest = {
-  id: string;
-  full_name: string;
-  email: string;
-  company: string | null;
-  country: string | null;
-  interests: string[];
-  message: string | null;
-  status: string;
-  created_at: string;
-};
-
-type Invitation = {
-  id: string;
-  request_id: string;
-  email: string;
-  requested_role: "client" | "partner";
-  status: string;
-  invited_at: string;
-};
-
-type Relationship = {
-  id: string;
-  full_name: string | null;
-  email: string;
-  role: "client" | "partner";
-  is_active: boolean;
-  created_at: string;
-};
-
+type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string };
+type Relationship = { id: string; full_name: string | null; email: string; role: "client" | "partner"; is_active: boolean; created_at: string };
+type Project = { id: string; title: string; location: string | null; status: string };
+type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
+type Tab = "overview" | "relationships" | "projects" | "bookings" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
-type AdminTab = "overview" | "relationships" | "projects" | "bookings";
-type Decision = "approved" | "declined";
-
-const offeringLabels: Record<string, string> = {
-  investment: "Investment",
-  financing: "Financing",
-  rental: "Private Rental",
-  sale: "Private Sale",
-};
+const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
+const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
+const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Awaiting invitation"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
+const pageSize = 12;
+const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
+function date(value: string) { return new Date(value).toLocaleDateString("en-GB", { timeZone: "Europe/Madrid" }); }
 
 export default function AdminPage() {
   const router = useRouter();
-
-  const [pageState, setPageState] = useState<PageState>("loading");
+  const [state, setState] = useState<PageState>("loading");
   const [requests, setRequests] = useState<AccessRequest[]>([]);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [invitations, setInvitations] = useState<PlannedInvitation[]>([]);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [offerings, setOfferings] = useState<Offering[]>([]);
+  const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
-  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [updated, setUpdated] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [bookingBusy, setBookingBusy] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const [tab, setTab] = useState<Tab>("overview");
+  const [relationshipView, setRelationshipView] = useState<"requests" | "accounts">("requests");
+  const [filter, setFilter] = useState<RequestFilter>("pending");
+  const [search, setSearch] = useState("");
+  const [accountRole, setAccountRole] = useState("all");
+  const [accountStatus, setAccountStatus] = useState("all");
+  const [limit, setLimit] = useState(pageSize);
+  const [reviewing, setReviewing] = useState<string | null>(null);
+  const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
+  const mounted = useRef(false);
+  const generation = useRef(0);
+  const actionLock = useRef(false);
 
-  useEffect(() => {
-    let active = true;
-
-    async function loadAdmin() {
+  const reload = useCallback(async () => {
+    const version = ++generation.current;
+    const current = () => mounted.current && version === generation.current;
+    setRefreshing(true); setError("");
+    try {
       const supabase = createClient();
-
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (!active) return;
-
-      if (authError || !user) {
-        router.replace("/login?role=client");
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role, is_active")
-        .eq("id", user.id)
-        .single();
-
-      if (!active) return;
-
-      if (profileError) {
-        setErrorMessage("Unable to verify administrator access.");
-        setPageState("error");
-        return;
-      }
-
-      if (profile?.role !== "admin" || !profile.is_active) {
-        setPageState("denied");
-        return;
-      }
-
-      const [requestsResult, invitationsResult, relationshipsResult] = await Promise.all([
-        supabase.from("access_requests")
-          .select("id, full_name, email, company, country, interests, message, status, created_at")
-          .order("created_at", { ascending: false }),
-        supabase.from("access_invitations")
-          .select("id, request_id, email, requested_role, status, invited_at")
-          .order("invited_at", { ascending: false }),
-        supabase.from("profiles")
-          .select("id, full_name, email, role, is_active, created_at")
-          .in("role", ["client", "partner"])
-          .order("created_at", { ascending: false }),
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (!current()) return;
+      if (authError || !auth.user) { router.replace("/login"); return; }
+      const { data: profile, error: profileError } = await supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single();
+      if (!current()) return;
+      if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
+      const results = await Promise.all([
+        supabase.from("access_requests").select("id,full_name,email,company,country,interests,message,status,created_at", { count: "exact" }).order("created_at", { ascending: false }),
+        supabase.from("access_invitations").select("id,request_id,email,requested_role,status,invited_at", { count: "exact" }).order("invited_at", { ascending: false }),
+        supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
+        supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
+        supabase.from("offerings").select("id,project_id,title,offering_type,status", { count: "exact" }).order("title"),
       ]);
-      if (!active) return;
-      if (requestsResult.error || invitationsResult.error || relationshipsResult.error) {
-        setErrorMessage("Unable to retrieve administration records.");
-        setPageState("error");
-        return;
-      }
-      setRequests((requestsResult.data ?? []) as AccessRequest[]);
-      setInvitations((invitationsResult.data ?? []) as Invitation[]);
-      setRelationships((relationshipsResult.data ?? []) as Relationship[]);
-      setPageState("ready");
-    }
-
-    void loadAdmin();
-
-    return () => {
-      active = false;
-    };
+      if (!current()) return;
+      assertComplete(results);
+      setRequests((results[0].data ?? []) as AccessRequest[]);
+      setInvitations((results[1].data ?? []) as PlannedInvitation[]);
+      setRelationships((results[2].data ?? []) as Relationship[]);
+      setProjects((results[3].data ?? []) as Project[]);
+      setOfferings((results[4].data ?? []) as Offering[]);
+      setUpdated(new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
+      setState("ready");
+      setRefreshVersion(value => value + 1);
+    } catch (cause) {
+      if (current()) { setError(cause instanceof Error ? cause.message : "Unable to load administration."); setState("error"); }
+    } finally { if (current()) setRefreshing(false); }
   }, [router]);
 
-  async function handleReview(
-    request: AccessRequest,
-    decision: Decision
-  ) {
-    if (processingId || request.status !== "pending") return;
+  useEffect(() => {
+    mounted.current = true;
+    const initial = new URLSearchParams(window.location.search).get("tab");
+    if (tabs.some(([key]) => key === initial)) setTab(initial as Tab);
+    void reload();
+    return () => { mounted.current = false; generation.current += 1; };
+  }, [reload]);
 
-    const confirmed = window.confirm(
-      decision === "approved"
-        ? `Approve the access request from ${request.full_name}? This does not create an account or grant access.`
-        : `Decline the access request from ${request.full_name}?`
-    );
+  useEffect(() => {
+    if (!busy) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [busy]);
 
-    if (!confirmed) return;
+  const locked = Boolean(busy || bookingBusy || reviewing || refreshing);
+  function guardLink(event: MouseEvent<HTMLAnchorElement>) { if (locked || actionLock.current) event.preventDefault(); }
+  const invitationMap = new Map(invitations.map(item => [item.request_id, item]));
+  const pending = requests.filter(item => matchesRequestFilter(item.status, invitationMap.get(item.id), "pending"));
+  const approved = requests.filter(item => matchesRequestFilter(item.status, invitationMap.get(item.id), "approved"));
+  const attentionInvites = invitations.filter(item => !["sent", "completed"].includes(item.status));
+  const activeCount = relationships.filter(item => item.is_active).length;
+  const visibleRequests = requests.filter(item => item.id === reviewing || (matchesRequestFilter(item.status, invitationMap.get(item.id), filter)
+    && matchesSearch(search, item.full_name, item.email, item.company, item.country)));
+  const visibleAccounts = relationships.filter(item => matchesSearch(search, item.full_name, item.email)
+    && (accountRole === "all" || accountRole === item.role)
+    && (accountStatus === "all" || item.is_active === (accountStatus === "active")));
+  const visibleProjects = projects.filter(item => matchesSearch(search, item.title, item.location));
 
-    setProcessingId(request.id);
-    setNotice("");
+  function navigate(next: Tab) {
+    if (locked || actionLock.current) return;
+    setTab(next); setSearch(""); setLimit(pageSize); setNotice("");
+  }
+  function openRequests(next: RequestFilter) { navigate("relationships"); setRelationshipView("requests"); setFilter(next); }
+  function openBookings(section: "bookings" | "cancellations") { navigate("bookings"); setBookingEntry(section); }
 
-    try {
+  async function runAction(key: string, action: () => Promise<string>) {
+    if (actionLock.current || locked) return;
+    actionLock.current = true; setBusy(key); setNotice("");
+    try { const text = await action(); if (mounted.current) setNotice(text); }
+    catch { if (mounted.current) { setError("The result could not be confirmed. Reload to verify the recorded status before another action."); setState("error"); } }
+    finally { actionLock.current = false; if (mounted.current) setBusy(null); }
+  }
+  function decline(request: AccessRequest) {
+    if (request.status !== "pending" || invitationMap.has(request.id) || locked) return;
+    if (!window.confirm(`Decline the request from ${request.full_name} (${request.email})?`)) return;
+    void runAction(request.id, async () => {
+      const { data, error: failure } = await createClient().rpc("review_access_request", { p_request_id: request.id, p_decision: "declined" });
+      if (failure || data !== true) throw new Error("Review not confirmed");
+      await reload(); return "Request declined.";
+    });
+  }
+  function changeAccount(account: Relationship) {
+    const activate = !account.is_active;
+    if (locked || !window.confirm(`${activate ? "Activate" : "Deactivate"} ${account.email}?\n\n${activate ? "Existing assigned projects become accessible again." : "Private access will be blocked."}`)) return;
+    void runAction(account.id, async () => {
       const supabase = createClient();
-
-      const { data, error } = await supabase.rpc(
-        "review_access_request",
-        {
-          p_request_id: request.id,
-          p_decision: decision,
-        }
-      );
-
-      if (error) throw error;
-
-      if (data !== true) {
-        setNotice(
-          "This request was already processed or is no longer pending. Refresh the page."
-        );
-        return;
-      }
-
-      setRequests((current) =>
-        current.map((item) =>
-          item.id === request.id
-            ? { ...item, status: decision }
-            : item
-        )
-      );
-
-      setNotice(
-        decision === "approved"
-          ? "Request approved. No account or access has been created."
-          : "Request declined."
-      );
-    } catch {
-      setNotice(
-        "Unable to update this request. Please try again."
-      );
-    } finally {
-      setProcessingId(null);
-    }
+      const { data, error: failure } = await supabase.rpc("set_relationship_active", { p_user_id: account.id, p_active: activate });
+      if (failure || data !== true) throw new Error("Update not confirmed");
+      const { data: verified, error: verifyError } = await supabase.from("profiles").select("is_active").eq("id", account.id).single();
+      if (verifyError || verified?.is_active !== activate) throw new Error("Verification failed");
+      if (mounted.current) setRelationships(items => items.map(item => item.id === account.id ? { ...item, is_active: activate } : item));
+      return `${account.email} is now ${activate ? "active" : "inactive"}.`;
+    });
   }
-
-  function markRequestApproved(id: string) {
-    setRequests(current => current.map(item => item.id === id ? { ...item, status: "approved" } : item));
-    setNotice("Request approved. The selected opportunities are saved; send the invitation after reviewing the selection.");
-  }
-
   function recordInvitation(invitation: PlannedInvitation) {
-    setInvitations(current => [invitation, ...current.filter(item => item.request_id !== invitation.request_id)]);
-    setNotice(invitation.status === "sent"
-      ? "Invitation sent. The approved access selection has been attached to the new account."
-      : "Invitation recorded; check its status before any further action.");
-    void (async () => {
-      const { data, error } = await createClient().from("profiles")
-        .select("id, full_name, email, role, is_active, created_at")
-        .in("role", ["client", "partner"]).order("created_at", { ascending: false });
-      if (!error && data) setRelationships(data as Relationship[]);
-    })();
+    setInvitations(items => [invitation, ...items.filter(item => item.request_id !== invitation.request_id)]);
+    // The review panel reports the verified outcome, including assigned access.
   }
-
-  async function handleAccountStatus(account: Relationship, activate: boolean) {
-    if (processingId || account.is_active === activate) return;
-    const action = activate ? "ACTIVATE" : "DEACTIVATE";
-    if (!window.confirm(`${action} ${account.full_name || account.email} (${account.email})?\n\n${activate ? "This permits private sign-in, but does not assign projects." : "This blocks private access."}`)) return;
-    setProcessingId(account.id);
-    setNotice("");
+  async function signOut() {
+    if (locked || actionLock.current) return;
+    actionLock.current = true; setBusy("signout");
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc("set_relationship_active", {
-        p_user_id: account.id, p_active: activate,
-      });
-      if (error || data !== true) throw error ?? new Error("Update not confirmed");
-      const { data: verified, error: verifyError } = await supabase.from("profiles")
-        .select("is_active").eq("id", account.id).single();
-      if (verifyError || !verified || verified.is_active !== activate) {
-        setNotice("Account status could not be verified. Refresh before another action.");
-        return;
-      }
-      setRelationships((current) => current.map((item) =>
-        item.id === account.id ? { ...item, is_active: activate } : item));
-      setNotice(`${account.email} is now ${activate ? "active" : "inactive"}.`);
-    } catch {
-      setNotice("Unable to change account status. Please check and try again.");
-    } finally {
-      setProcessingId(null);
-    }
+      const { error: failure } = await createClient().auth.signOut();
+      if (failure) throw failure;
+      router.replace("/"); router.refresh();
+    } catch { setNotice("Unable to sign out. Please try again."); }
+    finally { actionLock.current = false; if (mounted.current) setBusy(null); }
   }
 
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.replace("/");
-    router.refresh();
-  }
+  if (state !== "ready") return <main className="admin-page"><div className="admin-message">
+    <p className="eyebrow">MZS Administration</p>
+    <h1>{state === "loading" ? "Preparing your workspace." : state === "denied" ? "Access restricted." : "Unable to load."}</h1>
+    <p role={state === "error" ? "alert" : "status"}>{state === "loading" ? "Verifying administrator access…" : state === "denied" ? "Active administrator access is required." : error}</p>
+    {state === "error" && <button className="admin-button" disabled={refreshing} onClick={() => void reload()}>Try again</button>}
+    <Link href="/login">Return to login →</Link>
+  </div></main>;
 
-  if (pageState === "loading") {
-    return (
-      <main className="admin-page">
-        <p className="admin-message">
-          Verifying administrator access...
-        </p>
-      </main>
-    );
-  }
+  return <main className="admin-page">
+    <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
+    <section className="admin-content">
+      <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties and reservations in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
+      <nav className="admin-nav" aria-label="Administration sections">{tabs.map(([key, label]) => <button key={key} disabled={locked} aria-current={tab === key ? "page" : undefined} onClick={() => navigate(key)}>{label}{key === "relationships" && pending.length > 0 && <span className="admin-count">{pending.length}</span>}</button>)}</nav>
+      {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
+      {notice && <p className="admin-notice" role="status">{notice}</p>}
 
-  if (pageState === "denied") {
-    return (
-      <main className="admin-page">
-        <div className="admin-message">
-          <p className="eyebrow">MZS GROUP</p>
-          <h1>Access restricted.</h1>
-          <p>This area is reserved for MZS administrators.</p>
-          <Link href="/private">
-            Return to private environment →
-          </Link>
+      {tab === "overview" && <>
+        <div className="admin-metrics">
+          <button disabled={locked} onClick={() => openRequests("pending")}><span>Access requests</span><strong>{pending.length}</strong><small>Awaiting review →</small></button>
+          <button disabled={locked} onClick={() => openRequests("approved")}><span>Approved requests</span><strong>{approved.length}</strong><small>Awaiting invitation →</small></button>
+          <button disabled={locked} onClick={() => { navigate("relationships"); setRelationshipView("accounts"); }}><span>Active relationships</span><strong>{activeCount}</strong><small>{relationships.length} total accounts →</small></button>
+          <button disabled={locked} onClick={() => navigate("projects")}><span>Active projects</span><strong>{projects.filter(p => p.status === "active").length}</strong><small>View collection →</small></button>
         </div>
-      </main>
-    );
-  }
-
-  if (pageState === "error") {
-    return (
-      <main className="admin-page">
-        <div className="admin-message">
-          <h1>Unable to continue.</h1>
-          <p>{errorMessage}</p>
+        <div className="admin-section-heading"><div><p className="eyebrow">Your next actions</p><h2>Needs attention.</h2></div></div>
+        <div className="admin-panel">
+          {!pending.length && !approved.length && !attentionInvites.length && <p className="admin-help">No relationship actions waiting. Check rental requests below.</p>}
+          {attentionInvites.length > 0 && <button className="admin-action-row" disabled={locked} onClick={() => openRequests("invitations")}><span><strong>{attentionInvites.length} invitations need review</strong><small>Check their recorded status before sending again.</small></span><span aria-hidden="true">→</span></button>}
+          {pending.slice(0, 4).map(item => <button className="admin-action-row" key={item.id} disabled={locked} onClick={() => { openRequests("pending"); setReviewing(item.id); }}><span><strong>{item.full_name}</strong><small>New access request · {date(item.created_at)}</small></span><span>Review →</span></button>)}
+          {approved.length > 0 && <button className="admin-action-row" disabled={locked} onClick={() => openRequests("approved")}><span><strong>{approved.length} approved requests awaiting invitation</strong><small>Review the selected projects and account type.</small></span><span aria-hidden="true">→</span></button>}
         </div>
-      </main>
-    );
-  }
+        <BookingManagement key={`summary-${refreshVersion}`} mode="summary" onNavigate={openBookings} />
+        <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">Website insights</p><h3 className="admin-subtitle">Vercel Analytics</h3><p className="admin-help">Open the traffic report for your public website.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("analytics")}>View analytics →</button></div>
+      </>}
 
-  const pendingCount = requests.filter(
-    (request) => request.status === "pending"
-  ).length;
-
-  const sentCount = invitations.filter((item) => item.status === "sent").length;
-  const activeCount = relationships.filter((item) => item.is_active).length;
-
-  return (
-    <main className="admin-page">
-      <header className="admin-header">
-        <Link href="/" className="admin-brand">
-          MZS GROUP
-        </Link>
-
-        <div className="admin-header-actions">
-          <span>Administration</span>
-          <button type="button" onClick={handleLogout}>
-            Sign Out
-          </button>
-        </div>
-      </header>
-
-      <section className="admin-content">
-        <p className="eyebrow">MZS Administration</p>
-
-        <h1>Private management.</h1>
-
-        <p className="admin-intro">
-          Manage selected relationships and access to private
-          MZS opportunities.
-        </p>
-
-        <nav aria-label="Administration sections" style={{display:"flex",gap:10,flexWrap:"wrap",margin:"32px 0",borderBottom:"1px solid #40392d",paddingBottom:20}}>
-          {([ ["overview","Overview"], ["relationships","Relationships"], ["projects","Projects"], ["bookings","Bookings"] ] as const).map(([key,label]) => (
-            <button key={key} type="button" onClick={() => setActiveTab(key)} aria-current={activeTab === key ? "page" : undefined}
-              style={{padding:"13px 18px",border:"1px solid #665a45",background:activeTab===key?"#d5c09a":"transparent",color:activeTab===key?"#0b0b0a":"#d5c09a",cursor:"pointer",letterSpacing:".1em",fontSize:11}}>{label}</button>
-          ))}
-        </nav>
-
-        {notice && <p role="status" style={{color:"#d5c09a",lineHeight:1.7}}>{notice}</p>}
-
-        {activeTab === "overview" && <div>
-          <div className="admin-stats"><div><span>Access Requests</span><strong>{requests.length}</strong></div><div><span>Pending Review</span><strong>{pendingCount}</strong></div></div>
-          <div className="admin-stats" style={{marginTop:18}}><div><span>Active Accounts</span><strong>{activeCount}</strong></div><div><span>Invitations Sent</span><strong>{sentCount}</strong></div></div>
-          <p className="admin-intro" style={{marginTop:30}}>Choose a section above to manage relationships, project access or rental bookings.</p>
-        </div>}
-
-        {activeTab === "projects" && <div>
-          <div className="admin-section-heading"><div><p className="eyebrow">Private collection</p><h2>Projects & access</h2></div></div>
-          <p className="admin-intro">Manage individual property and offering permissions in the existing secure administration pages.</p>
-          <p><Link href="/admin/project-access" style={{color:"#d5c09a"}}>Open Project Access Management →</Link></p>
-        </div>}
-
-        {activeTab === "bookings" && <div>
-          <div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Booking management</h2></div></div>
-          <BookingManagement />
-        </div>}
-
-        {activeTab === "relationships" && <>
-        <div className="admin-stats">
-          <div>
-            <span>Access Requests</span>
-            <strong>{requests.length}</strong>
-          </div>
-
-          <div>
-            <span>Pending Review</span>
-            <strong>{pendingCount}</strong>
-          </div>
-        </div>
-
-        <div className="admin-section-heading">
-          <div>
-            <p className="eyebrow">Relationships</p>
-            <h2>Access requests</h2>
-          </div>
-
-          <span>{sentCount} invitations sent</span>
-        </div>
-
-        {requests.length === 0 ? (
-          <p className="admin-empty">
-            No access requests have been received.
-          </p>
-        ) : (
-          <div className="admin-requests">
-            {requests.map((request) => {
-              const invitation = invitations.find((item) => item.request_id === request.id);
-              return (
-              <article
-                className="admin-request"
-                key={request.id}
-              >
-                <div className="admin-request-top">
-                  <div>
-                    <h3>{request.full_name}</h3>
-                    <p>{request.email}</p>
-                  </div>
-
-                  <span className="admin-status">
-                    {invitation?.status === "completed" ? "Registered" : invitation?.status === "sent" ? "Invited"
-                      : invitation?.status === "needs_review" ? "Needs Review"
-                      : invitation ? "Invitation Reserved" : request.status}
-                  </span>
-                </div>
-
-                <div className="admin-request-details">
-                  {request.company && (
-                    <p>Company: {request.company}</p>
-                  )}
-
-                  {request.country && (
-                    <p>Country: {request.country}</p>
-                  )}
-
-                  <p>
-                    Received:{" "}
-                    {new Date(
-                      request.created_at
-                    ).toLocaleDateString("en-GB")}
-                  </p>
-                </div>
-
-                <div className="admin-interests">
-                  {(request.interests ?? []).map((interest) => (
-                    <span key={interest}>
-                      {offeringLabels[interest] ?? interest}
-                    </span>
-                  ))}
-                </div>
-
-                {request.message && (
-                  <p className="admin-request-message">
-                    {request.message}
-                  </p>
-                )}
-
-                {request.status === "pending" && (
-                  <div style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    marginTop: "28px",
-                  }}>
-                    <button
-                      type="button"
-                      disabled={processingId !== null}
-                      onClick={() =>
-                        setReviewingRequestId(request.id)
-                      }
-                      style={{
-                        padding: "13px 22px",
-                        background: "#d5c09a",
-                        border: "1px solid #d5c09a",
-                        color: "#0b0b0a",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {processingId === request.id
-                        ? "Processing..."
-                        : "Review & select projects"}
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={processingId !== null}
-                      onClick={() =>
-                        handleReview(request, "declined")
-                      }
-                      style={{
-                        padding: "13px 22px",
-                        background: "transparent",
-                        border: "1px solid #665a45",
-                        color: "#d5c09a",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Decline
-                    </button>
-                  </div>
-                )}
-                {request.status === "approved" && !invitation && (
-                  <div style={{ marginTop: 24 }}>
-                    <button type="button" disabled={processingId !== null}
-                      onClick={() => setReviewingRequestId(request.id)}
-                      style={{ padding: "13px 22px", background: "transparent", border: "1px solid #d5c09a", color: "#d5c09a", cursor: "pointer", fontSize: 12, letterSpacing: ".08em" }}>
-                      Project selection & invitation →
-                    </button>
-                  </div>
-                )}
-                {reviewingRequestId === request.id && (
-                  <RequestProjectApproval
-                    request={request}
-                    onApproved={markRequestApproved}
-                    onInvited={recordInvitation}
-                    onClose={() => setReviewingRequestId(null)}
-                  />
-                )}
-                {invitation && (
-                  <p style={{ color: "#a9a398", fontSize: "12px", lineHeight: 1.7, marginTop: "24px" }}>
-                    {invitation.status === "completed"
-                      ? "Registration completed. Manage later access changes in Project Access Management."
-                      : invitation.status === "sent"
-                      ? "Invitation sent. Any approved access selection was attached when the invitation account was created."
-                      : "This invitation requires administrator review before another attempt."}
-                  </p>
-                )}
-              </article>
-              );
-            })}
-          </div>
-        )}
-        <div className="admin-section-heading" style={{ marginTop: "72px" }}>
-          <div><p className="eyebrow">Relationships</p><h2>Account management</h2></div>
-          <span>{activeCount} active / {relationships.length} accounts</span>
-        </div>
-
-        {relationships.length === 0 ? (
-          <p className="admin-empty">No client or partner accounts found.</p>
-        ) : (
-          <div className="admin-requests">
-            {relationships.map((account) => (
-              <article className="admin-request" key={account.id}>
-                <div className="admin-request-top">
-                  <div>
-                    <h3>{account.full_name || "Unnamed relationship"}</h3>
-                    <p>{account.email}</p>
-                  </div>
-                  <span className="admin-status">{account.is_active ? "Active" : "Inactive"}</span>
-                </div>
-                <div className="admin-request-details">
-                  <p>Role: {account.role === "partner" ? "Partner" : "Client"}</p>
-                  <p>Created: {new Date(account.created_at).toLocaleDateString("en-GB")}</p>
-                </div>
-                <div style={{ marginTop: "28px" }}>
-                  <button type="button" disabled={processingId !== null}
-                    onClick={() => handleAccountStatus(account, !account.is_active)}
-                    style={{ padding: "13px 22px", background: account.is_active ? "transparent" : "#d5c09a", border: "1px solid #d5c09a", color: account.is_active ? "#d5c09a" : "#0b0b0a", cursor: "pointer", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    {processingId === account.id ? "Processing..." : account.is_active ? "Deactivate" : "Activate"}
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+      {tab === "relationships" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">Selected relationships</p><h2>People & access.</h2></div></div>
+        <div className="admin-toolbar"><div className="admin-filters">{(["requests", "accounts"] as const).map(view => <button key={view} disabled={locked} aria-pressed={relationshipView === view} onClick={() => { setRelationshipView(view); setLimit(pageSize); setSearch(""); }}>{view === "requests" ? "Requests & invitations" : "Accounts"}</button>)}</div><label className="admin-field">Search relationships<input type="search" value={search} disabled={locked} placeholder="Name, email or company" onChange={event => { setSearch(event.target.value); setLimit(pageSize); }} /></label></div>
+        {relationshipView === "requests" ? <>
+          <div className="admin-filters">{requestFilters.map(([key, label]) => <button key={key} disabled={locked} aria-pressed={filter === key} onClick={() => { setFilter(key); setLimit(pageSize); }}>{label} <span>({requests.filter(item => matchesRequestFilter(item.status, invitationMap.get(item.id), key)).length})</span></button>)}</div>
+          <p className="admin-help">{visibleRequests.length} matching requests</p>
+          {!visibleRequests.length && <p className="admin-empty">No requests match these filters.</p>}
+          <div className="admin-requests">{visibleRequests.slice(0, limit).map(request => {
+            const invitation = invitationMap.get(request.id);
+            const stage = requestStage(request.status, invitation);
+            return <article key={request.id} className="admin-request">
+              <div className="admin-request-top"><div><h3>{request.full_name}</h3><p>{request.email}</p></div><span className={`admin-status ${stage === "needs_review" ? "admin-status-warning" : ""}`}>{stage.replace(/_/g, " ")}</span></div>
+              <div className="admin-request-details">{request.company && <p>{request.company}</p>}{request.country && <p>{request.country}</p>}<p>Received {date(request.created_at)}</p></div>
+              <div className="admin-interests">{(request.interests ?? []).map(interest => <span key={interest}>{labels[interest] ?? interest}</span>)}</div>
+              {request.message && <p className="admin-request-message">{request.message}</p>}
+              {!invitation && ["pending", "approved"].includes(request.status) && <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={locked} onClick={() => setReviewing(request.id)}>{request.status === "pending" ? "Review & select projects" : "Project selection & invitation"}</button>{request.status === "pending" && <button className="admin-button" disabled={locked} onClick={() => decline(request)}>Decline</button>}</div>}
+              {reviewing === request.id && <RequestProjectApproval request={request} onApproved={id => setRequests(items => items.map(item => item.id === id ? { ...item, status: "approved" } : item))} onInvited={recordInvitation} onClose={() => { setReviewing(null); void reload(); }} />}
+              {invitation && <p className="admin-help admin-space-top">{stage === "registered" ? "Registration completed. Manage assigned rights in Project Access." : stage === "invited" ? "Invitation sent. Registration is a separate step." : "Check the invitation outcome before another attempt."}</p>}
+            </article>;
+          })}</div>
+          {visibleRequests.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more requests</button>}
+        </> : <>
+          <div className="admin-toolbar"><label className="admin-field">Account type<select disabled={locked} value={accountRole} onChange={event => { setAccountRole(event.target.value); setLimit(pageSize); }}><option value="all">All types</option><option value="client">Client</option><option value="partner">Partner</option></select></label><label className="admin-field">Status<select disabled={locked} value={accountStatus} onChange={event => { setAccountStatus(event.target.value); setLimit(pageSize); }}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
+          <p className="admin-help">{visibleAccounts.length} matching accounts</p>
+          {!visibleAccounts.length && <p className="admin-empty">No accounts match these filters.</p>}
+          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
+          {visibleAccounts.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more accounts</button>}
         </>}
-      </section>
+      </>}
 
-      <footer className="admin-footer">
-        Private. Independent. International.
-      </footer>
-    </main>
-  );
+      {tab === "projects" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">Private collection</p><h2>Projects & access.</h2></div><Link className="admin-button" href="/admin/project-access">Manage permissions →</Link></div>
+        <label className="admin-field admin-search">Search projects<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Property or location" /></label>
+        <div className="admin-project-grid">{visibleProjects.map(project => <article className="admin-panel" key={project.id}><span className="admin-status">{project.status}</span><h3 className="admin-subtitle admin-space-top">{project.title}</h3><p className="admin-help">{project.location || "Private collection"}</p><div className="admin-interests">{offerings.filter(item => item.project_id === project.id).map(item => <span key={item.id}>{labels[item.offering_type] ?? item.offering_type}{item.title ? ` — ${item.title}` : ""} · {item.status}</span>)}</div>{project.status === "active" && <Link className="admin-button admin-space-top" href={`/admin/project-access?project=${encodeURIComponent(project.id)}`}>Manage access →</Link>}</article>)}</div>
+        {!visibleProjects.length && <p className="admin-empty">No projects match this search.</p>}
+      </>}
+
+      {tab === "bookings" && <><div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Reservations & calendar.</h2></div></div><BookingManagement key={`bookings-${refreshVersion}`} initialSection={bookingEntry} onBusyChange={setBookingBusy} /></>}
+
+      {tab === "analytics" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">Public website</p><h2>Website analytics.</h2></div><span className="admin-status">Report in Vercel</span></div>
+        <div className="admin-panel"><h3 className="admin-subtitle">Vercel Web Analytics</h3><p className="admin-intro">View visitors, page views and traffic sources in the existing Vercel report. Sign in with your authorised Vercel account.</p><a className="admin-button admin-button-primary admin-space-top" href={trafficReport} target="_blank" rel="noopener noreferrer">Open MZS Analytics ↗</a><p className="admin-help admin-space-top">Visitor figures are displayed in Vercel. They are not synchronised into this dashboard yet.</p></div>
+        <div className="admin-project-grid"><article className="admin-panel"><p className="eyebrow">Public traffic</p><h3 className="admin-subtitle">Understand your audience.</h3><p className="admin-help">Use the report to explore visited pages, countries, devices and referral sources over your selected period.</p></article><article className="admin-panel"><p className="eyebrow">Private relationships</p><h3 className="admin-subtitle">Review actual enquiries.</h3><p className="admin-help">Access requests and account statuses are managed in Relationships. These are separate from website visitor counts.</p><button className="admin-button" onClick={() => openRequests("all")}>View access requests →</button></article></div>
+      </>}
+    </section>
+    <footer className="admin-footer">Private. Independent. International.</footer>
+  </main>;
 }
