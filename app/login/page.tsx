@@ -117,7 +117,7 @@ export default function LoginPage() {
         style={{ position: "relative" }}
       >
         <p className="eyebrow">Private Access</p>
-        <h1>Client &amp; Partner Login</h1>
+        <h2>Client &amp; Partner Login</h2>
         <p className="login-intro">
           Access your private MZS environment.
         </p>
