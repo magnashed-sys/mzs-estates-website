@@ -28,7 +28,7 @@ export default function Home() {
 
         <div className="mzs-actions">
           <Link href="/login" className="mzs-button">
-            Cliënt &amp; Partner Login
+            Client &amp; Partner Login
           </Link>
 
           <Link href="/request-access" className="mzs-button mzs-button-subtle">
