@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import styles from "./PublicHeader.module.css";
 
 /** Shared brand header for the four public entry pages. */
