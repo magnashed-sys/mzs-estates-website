@@ -12,14 +12,17 @@ const visionCaptions = [
   "Stone façade and landscape concept", "Shaded dining terrace concept",
 ];
 const progressCaptions = [
-  "Pool construction", "Existing stone structure · aerial view", "Restoration works · aerial view",
-  "Stone structure and site works", "Existing structure · overhead view",
+  "Pool excavation and construction · aerial view",
+  "Restoration works · aerial view",
+  "Existing stone structure and site works",
+  "Restoration works · overhead view",
 ];
 const vision: PropertyPhoto[] = visionCaptions.map((caption, i) => ({
   src: `${base}/vision-${String(i + 1).padStart(2, "0")}.webp`, alt: caption, caption,
 }));
 const progress: PropertyPhoto[] = progressCaptions.map((caption, i) => ({
-  src: `${base}/progress-${String(i + 1).padStart(2, "0")}.webp`, alt: caption, caption,
+  // progress-01.webp is a future-state visualisation and intentionally excluded.
+  src: `${base}/progress-${String(i + 2).padStart(2, "0")}.webp`, alt: caption, caption,
 }));
 
 const enquiry = (kind: "investment" | "acquisition") => {
