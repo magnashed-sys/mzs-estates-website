@@ -1,3 +1,6 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import styles from "./amsterdamFlorawegInvestment.module.css";
 
@@ -20,7 +23,44 @@ const technical = [
   {file:"materials-palette-b.webp",title:"Material palette B",detail:"Concept material study"},
   {file:"masonry-study.webp",title:"Masonry research",detail:"Indicative facade finishes"},
 ];
+type GalleryItem = { file: string; title: string; detail: string; kind: "visual" | "plan" };
+const allGalleryItems: GalleryItem[] = [
+  ...visuals.map(item => ({ file: item.file, title: item.label, detail: "Architectural concept impression · subject to further design development", kind: "visual" as const })),
+  ...technical.map(item => ({ file: item.file, title: item.title, detail: item.detail, kind: "plan" as const })),
+];
+
 export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquisition}:Props) {
+  const [activeImage, setActiveImage] = useState<number | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const openImage = (index:number, trigger:HTMLButtonElement) => {
+    lastTriggerRef.current = trigger;
+    setZoomed(false);
+    setActiveImage(index);
+  };
+  const closeImage = useCallback(() => {
+    setActiveImage(null);
+    setZoomed(false);
+    requestAnimationFrame(() => lastTriggerRef.current?.focus());
+  }, []);
+  const stepImage = useCallback((amount:number) => {
+    setZoomed(false);
+    setActiveImage(index => index === null ? null : (index + amount + allGalleryItems.length) % allGalleryItems.length);
+  }, []);
+  useEffect(() => {
+    if (activeImage === null) return;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event:KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); closeImage(); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); stepImage(-1); }
+      if (event.key === "ArrowRight") { event.preventDefault(); stepImage(1); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeImage, closeImage, stepImage]);
+
   const subject = (kind:string)=>`MZS Group | Amsterdam Floraweg | ${kind} enquiry`;
   const mail = (kind:string)=>`mailto:info@mzsgroup.eu?subject=${encodeURIComponent(subject(kind))}&body=${encodeURIComponent(`Dear MZS Group,\n\nI would like to receive further information regarding the ${kind.toLowerCase()} opportunity for Amsterdam Floraweg.\n\nKind regards,\n`)}`;
   return <div className={styles.project}>
@@ -55,15 +95,15 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
     </section>
     <section id="architecture" className={styles.section}>
       <div className={styles.heading}><div><p className={styles.eyebrow}>01 / ARCHITECTURE</p><h2>Architectural vision.</h2></div><p>Selected concept impressions from the latest FARO design presentation. Imagery is indicative and is not a representation of completed works.</p></div>
-      <div className={styles.visualGrid}>{visuals.map((item,i)=><figure key={item.file} className={i===0?styles.largeVisual:styles.visual}><a href={`${base}/${item.file}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${item.label} in full size`}><Image src={`${base}/${item.file}`} alt={item.label} fill sizes={i===0?"(max-width: 800px) 100vw, 70vw":"(max-width: 800px) 100vw, 38vw"} className={styles.image}/></a><figcaption>{item.label} <span>↗</span></figcaption></figure>)}</div>
+      <div className={styles.visualGrid}>{visuals.map((item,i)=><figure key={item.file} className={i===0?styles.largeVisual:styles.visual}><button type="button" className={styles.galleryTrigger} onClick={event => openImage(i,event.currentTarget)} aria-label={`View ${item.label} in gallery`}><Image src={`${base}/${item.file}`} alt={item.label} fill sizes={i===0?"(max-width: 800px) 100vw, 70vw":"(max-width: 800px) 100vw, 38vw"} className={styles.image}/></button><figcaption>{item.label} <span>↗</span></figcaption></figure>)}</div>
     </section>
     <section className={styles.story}>
       <div><p className={styles.eyebrow}>02 / DESIGN PRINCIPLES</p><h2>Materiality, rhythm and urban connection.</h2></div>
       <div><p>The presentation explores the relationship between the tower crown, lower plinth and residential facades, with carefully considered masonry tones, aluminium framing, balconies and green detailing.</p><p>Design development has included supervisory comments about the tower articulation, balcony treatment, materials and the proposed parking entrance. These remain matters for ongoing design coordination, rather than confirmed final specifications.</p></div>
     </section>
     <section id="plans" className={styles.section}>
-      <div className={styles.heading}><div><p className={styles.eyebrow}>03 / TECHNICAL MATERIAL</p><h2>Floor plans & design studies.</h2></div><p>Select any drawing to open a larger version in a new tab. Plans are examples from the supplied concept documents and may change.</p></div>
-      <div className={styles.plansGrid}>{technical.map(item=><article key={item.file} className={styles.plan}><a href={`${base}/${item.file}`} target="_blank" rel="noopener noreferrer" aria-label={`View ${item.title} full size`}><div className={styles.planImage}><Image src={`${base}/${item.file}`} alt={item.title} fill sizes="(max-width: 800px) 100vw, 46vw" className={styles.planPhoto}/></div><div className={styles.planText}><h3>{item.title} <span>↗</span></h3><p>{item.detail}</p></div></a></article>)}</div>
+      <div className={styles.heading}><div><p className={styles.eyebrow}>03 / TECHNICAL MATERIAL</p><h2>Floor plans & design studies.</h2></div><p>Select a drawing to view it within the gallery. Use the zoom control for a closer look. Plans are indicative and may change.</p></div>
+      <div className={styles.plansGrid}>{technical.map(item=><article key={item.file} className={styles.plan}><button type="button" className={styles.planTrigger} onClick={event => openImage(visuals.length + technical.findIndex(plan => plan.file === item.file), event.currentTarget)} aria-label={`View ${item.title} in gallery`}><div className={styles.planImage}><Image src={`${base}/${item.file}`} alt={item.title} fill sizes="(max-width: 800px) 100vw, 46vw" className={styles.planPhoto}/></div><div className={styles.planText}><h3>{item.title} <span>⤢</span></h3><p>{item.detail}</p></div></button></article>)}</div>
     </section>
     <section className={styles.sustainable}>
       <p className={styles.eyebrow}>04 / SUSTAINABILITY & PLACE</p><h2>Landscape and resilience are part of the design dialogue.</h2>
@@ -78,5 +118,25 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
       </div>
       <p className={styles.smallPrint}>Private and confidential. Access is granted per project and offering. All concept drawings and illustrations are subject to further design development and applicable approvals. Source: FARO / AMS003 concept presentation, 10 September 2025.</p>
     </section>
+    {activeImage !== null && (
+      <div className={styles.lightbox} role="dialog" aria-modal="true" aria-label="Amsterdam Floraweg image gallery" onClick={event => { if (event.target === event.currentTarget) closeImage(); }}>
+        <div className={styles.lightboxHeader}>
+          <div><span className={styles.lightboxEyebrow}>MZS GROUP · AMSTERDAM FLORAWEG</span><strong>{allGalleryItems[activeImage].title}</strong></div>
+          <button type="button" className={styles.lightboxClose} ref={closeButtonRef} onClick={closeImage} aria-label="Close gallery">CLOSE ×</button>
+        </div>
+        <div className={styles.lightboxViewport}>
+          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(-1)} aria-label="Previous image">←</button>
+          <div className={`${styles.lightboxCanvas} ${zoomed ? styles.lightboxCanvasZoom : ""}`}>
+            <Image src={`${base}/${allGalleryItems[activeImage].file}`} alt={allGalleryItems[activeImage].title} fill sizes="100vw" className={styles.lightboxPicture} priority={false}/>
+          </div>
+          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(1)} aria-label="Next image">→</button>
+        </div>
+        <div className={styles.lightboxFooter}>
+          <div><span>{String(activeImage + 1).padStart(2,"0")} / {String(allGalleryItems.length).padStart(2,"0")}</span><p>{allGalleryItems[activeImage].detail}</p></div>
+          <button type="button" className={styles.zoomButton} onClick={() => setZoomed(value => !value)} aria-pressed={zoomed}>{zoomed ? "FIT IMAGE −" : "ZOOM IN +"}</button>
+        </div>
+        <span className={styles.lightboxHint}>USE ← → TO NAVIGATE · ESC TO CLOSE</span>
+      </div>
+    )}
   </div>;
 }
