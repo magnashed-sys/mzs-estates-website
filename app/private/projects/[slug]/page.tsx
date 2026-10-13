@@ -179,7 +179,7 @@ export default async function PrivateProjectPage({ params }: Props) {
     .eq("id", auth.user.id)
     .single();
   if (profileError || !profile || profile.is_active !== true ||
-      !["client", "partner", "admin"].includes(profile.role)) notFound();
+      !["client", "partner"].includes(profile.role)) notFound();
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
