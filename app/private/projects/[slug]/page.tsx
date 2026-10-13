@@ -8,6 +8,7 @@ import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
+import AmsterdamFlorawegInvestment from "./AmsterdamFlorawegInvestment";
 
 export const dynamic = "force-dynamic";
 
@@ -229,7 +230,9 @@ export default async function PrivateProjectPage({ params }: Props) {
         <Link href="/private" className={styles.headerBack}>← BACK TO PRIVATE COLLECTION</Link>
       </header>
 
-      {slug === "villa-des-coloms-ibiza" ? (
+      {slug === "amsterdam-floraweg" ? (
+        <AmsterdamFlorawegInvestment allowInvestment={visibleOfferings.some((o) => o.offering_type === "investment")} allowAcquisition={visibleOfferings.some((o) => o.offering_type === "sale")} />
+      ) : slug === "villa-des-coloms-ibiza" ? (
         <VillaDesColomsInvestment />
       ) : slug === "villa-can-juan-ibiza" ? (
         <VillaCanJuanInvestment allowInvestment={visibleOfferings.some((o) => o.offering_type === "investment")} allowAcquisition={visibleOfferings.some((o) => o.offering_type === "sale")} />
