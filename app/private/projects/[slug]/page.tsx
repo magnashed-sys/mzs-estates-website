@@ -6,6 +6,7 @@ import RentalCalendar from "./RentalCalendar";
 import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import styles from "./propertyPresentation.module.css";
+import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 
 export const dynamic = "force-dynamic";
 
@@ -227,7 +228,9 @@ export default async function PrivateProjectPage({ params }: Props) {
         <Link href="/private" className={styles.headerBack}>← BACK TO PRIVATE COLLECTION</Link>
       </header>
 
-      {presentation ? (
+      {slug === "villa-can-juan-ibiza" ? (
+        <VillaCanJuanInvestment allowInvestment={visibleOfferings.some((o) => o.offering_type === "investment")} allowAcquisition={visibleOfferings.some((o) => o.offering_type === "sale")} />
+      ) : presentation ? (
         <>
           <section className={styles.hero} aria-label={`${presentation.title} introduction`}>
             <div className={styles.heroImage}>
