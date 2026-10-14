@@ -43,6 +43,11 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [accountRole, setAccountRole] = useState("all");
   const [accountStatus, setAccountStatus] = useState("all");
+  const [smtpStatus, setSmtpStatus] = useState<{
+    configured: boolean; connectionVerified: boolean; missing: string[];
+  } | null>(null);
+  const [smtpChecking, setSmtpChecking] = useState(false);
+  const [smtpCheckError, setSmtpCheckError] = useState("");
   const [limit, setLimit] = useState(pageSize);
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
@@ -112,6 +117,35 @@ export default function AdminPage() {
     && (accountRole === "all" || accountRole === item.role)
     && (accountStatus === "all" || item.is_active === (accountStatus === "active")));
   const visibleProjects = projects.filter(item => matchesSearch(search, item.title, item.location));
+
+  async function checkSmtpConnection() {
+    if (smtpChecking) return;
+    setSmtpChecking(true);
+    setSmtpStatus(null);
+    setSmtpCheckError("");
+    try {
+      const response = await fetch("/api/account/notifications/status", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const result: {
+        configured?: boolean; connectionVerified?: boolean;
+        missing?: string[]; error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to verify SMTP settings");
+      }
+      setSmtpStatus({
+        configured: result.configured === true,
+        connectionVerified: result.connectionVerified === true,
+        missing: Array.isArray(result.missing) ? result.missing : [],
+      });
+    } catch {
+      setSmtpCheckError("Unable to check the mail server. Please try again later.");
+    } finally {
+      setSmtpChecking(false);
+    }
+  }
 
   function navigate(next: Tab) {
     if (locked || actionLock.current) return;
@@ -199,6 +233,28 @@ export default function AdminPage() {
       </>}
 
       {tab === "relationships" && <>
+        <div className="admin-panel" style={{ marginBottom: 28 }}>
+          <h3 className="admin-subtitle">Account notification email</h3>
+          <p className="admin-help">
+            Check whether MZS Group can connect securely to the existing
+            invitation mailbox. No passwords or email account details are shown.
+          </p>
+          <button className="admin-button" type="button"
+            disabled={smtpChecking || locked}
+            onClick={() => void checkSmtpConnection()}>
+            {smtpChecking ? "Checking connection..." : "Verify SMTP connection"}
+          </button>
+          {smtpStatus && (
+            <p role="status" className="admin-help">
+              {smtpStatus.connectionVerified
+                ? "SMTP login and secure connection verified. A real delivery test is still required before release."
+                : smtpStatus.configured
+                  ? "SMTP settings detected but the connection test failed. Check credentials, network and server policy in Vercel."
+                  : "Mail server settings are incomplete: " + smtpStatus.missing.join(", ")}
+            </p>
+          )}
+          {smtpCheckError && <p className="admin-notice" role="alert">{smtpCheckError}</p>}
+        </div>
         <div className="admin-section-heading"><div><p className="eyebrow">Selected relationships</p><h2>People & access.</h2></div></div>
         <div className="admin-toolbar"><div className="admin-filters">{(["requests", "accounts"] as const).map(view => <button key={view} disabled={locked} aria-pressed={relationshipView === view} onClick={() => { setRelationshipView(view); setLimit(pageSize); setSearch(""); }}>{view === "requests" ? "Requests & invitations" : "Accounts"}</button>)}</div><label className="admin-field">Search relationships<input type="search" value={search} disabled={locked} placeholder="Name, email or company" onChange={event => { setSearch(event.target.value); setLimit(pageSize); }} /></label></div>
         {relationshipView === "requests" ? <>
