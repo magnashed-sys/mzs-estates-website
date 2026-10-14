@@ -24,11 +24,13 @@ const strings = (value: unknown) => Array.isArray(value)
   : [];
 
 function mailSettings() {
-  const host = process.env.MZS_SMTP_HOST;
-  const port = Number(process.env.MZS_SMTP_PORT || "587");
-  const user = process.env.MZS_SMTP_USER;
-  const pass = process.env.MZS_SMTP_PASSWORD;
-  const from = process.env.MZS_SMTP_FROM;
+  // Reuse the existing MZS outbound mailbox if the original SMTP_* settings
+  // were already configured in Vercel. Explicit MZS_SMTP_* keys take priority.
+  const host = process.env.MZS_SMTP_HOST || process.env.SMTP_HOST;
+  const port = Number(process.env.MZS_SMTP_PORT || process.env.SMTP_PORT || "587");
+  const user = process.env.MZS_SMTP_USER || process.env.SMTP_USER;
+  const pass = process.env.MZS_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
+  const from = process.env.MZS_SMTP_FROM || process.env.SMTP_FROM;
   if (!host || !user || !pass || !from || ![465, 587].includes(port)) return null;
   return { host, port, user, pass, from };
 }
