@@ -142,6 +142,10 @@ begin
   end if;
   return new;
 end $$;
+-- Trigger functions are invoked by PostgreSQL, not through the public API.
+-- Do not allow direct anonymous or authenticated RPC execution.
+revoke all on function public.handle_new_user() from public,anon,authenticated;
+revoke all on function public.mzs_mark_verified_application() from public,anon,authenticated;
 drop trigger if exists mzs_auth_email_verified on auth.users;
 create trigger mzs_auth_email_verified
 after update of email_confirmed_at on auth.users
