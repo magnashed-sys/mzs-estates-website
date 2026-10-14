@@ -67,8 +67,26 @@ export default function AdminPage() {
       const { data: profile, error: profileError } = await supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single();
       if (!current()) return;
       if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
+      // Keep the preview administration usable while the new database
+      // columns are still under migration review. Production is not modified.
+      async function loadRequestRecords() {
+        const next = await supabase.from("access_requests")
+          .select("id,full_name,email,company,country,interests,message,status,created_at,auth_user_id,email_verified_at",
+            { count: "exact" }).order("created_at", { ascending: false });
+        if (!next.error || next.error.code !== "42703") return next;
+        const legacy = await supabase.from("access_requests")
+          .select("id,full_name,email,company,country,interests,message,status,created_at",
+            { count: "exact" }).order("created_at", { ascending: false });
+        return {
+          ...legacy,
+          data: legacy.data?.map(request => ({
+            ...request, auth_user_id: null, email_verified_at: null,
+          })) ?? null,
+        };
+      }
+
       const results = await Promise.all([
-        supabase.from("access_requests").select("id,full_name,email,company,country,interests,message,status,created_at,auth_user_id,email_verified_at", { count: "exact" }).order("created_at", { ascending: false }),
+        loadRequestRecords(),
         supabase.from("access_invitations").select("id,request_id,email,requested_role,status,invited_at", { count: "exact" }).order("invited_at", { ascending: false }),
         supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
         supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
