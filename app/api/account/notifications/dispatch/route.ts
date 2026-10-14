@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { deliverForRecipient, deliverOnce } from "../../../../lib/mzs/notifications";
+import { deliverForRecipient, deliverOnce } from "../../../../../lib/mzs/notifications";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
