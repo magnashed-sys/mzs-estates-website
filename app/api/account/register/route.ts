@@ -6,6 +6,7 @@ import { deliverOnce } from "../../../../lib/mzs/notifications";
 export const runtime = "nodejs";
 
 const SITE = "https://www.mzsgroup.eu";
+const MZS_STAGING_URL = "https://senonkpxdtlhyhrubicg.supabase.co";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INTERESTS = new Set(["investment", "financing", "sale", "rental"]);
 
@@ -37,6 +38,15 @@ export async function POST(request: NextRequest) {
   if (!url || !publishable || !serviceKey) {
     return response(503, { error: "Registration is temporarily unavailable." });
   }
+  // A preview build must NEVER write new accounts into production Supabase.
+  // Staging uses entirely separate API credentials and authentication.
+  if (process.env.VERCEL_ENV === "preview" && url !== MZS_STAGING_URL) {
+    console.error("[MZS registration] Preview database is not MZS Staging");
+    return response(503, { error: "The test environment is not ready yet." });
+  }
+  const redirectSite = process.env.VERCEL_ENV === "preview"
+    ? request.nextUrl.origin
+    : SITE;
 
   let input: Record<string, unknown>;
   try {
@@ -123,7 +133,7 @@ export async function POST(request: NextRequest) {
       email,
       password,
       options: {
-        emailRedirectTo: SITE + "/registration-pending",
+        emailRedirectTo: redirectSite + "/registration-pending",
         data: {
           mzs_access_request: "v2",
           full_name: fullName,
