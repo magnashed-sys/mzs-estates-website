@@ -79,6 +79,64 @@ export async function verifyExistingSmtpMailbox(): Promise<{
   }
 }
 
+/**
+ * Single recipient self-test for authenticated administrators.
+ * This uses the exact same SMTP settings as real account notifications,
+ * but does not depend on the future outbox migration or change any grants.
+ * A successful result means SMTP accepted the message, not inbox delivery.
+ */
+export async function sendSmtpTestMail(recipient: string): Promise<boolean> {
+  const smtp = mailSettings();
+  if (!smtp) throw new Error("SMTP transport is not configured");
+  if (recipient.length > 254 ||
+      !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(recipient)) {
+    throw new Error("Invalid administrative recipient");
+  }
+  const mailer = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.port === 465,
+    requireTLS: smtp.port === 587,
+    auth: { user: smtp.user, pass: smtp.pass },
+    tls: { minVersion: "TLSv1.2" },
+    connectionTimeout: 8000,
+    greetingTimeout: 6000,
+    socketTimeout: 10000,
+  });
+  try {
+    const result = await mailer.sendMail({
+      from: smtp.from,
+      to: recipient,
+      subject: "MZS Group — Test notification",
+      text: [
+        "MZS GROUP",
+        "Private. Independent. International.",
+        "",
+        "This is a test of the MZS Group account-notification email service.",
+        "No account was created, activated or changed.",
+        "No private project access was modified.",
+        "",
+        "If you received this message, SMTP delivery to your inbox is working.",
+      ].join("\\n"),
+      html: [
+        "<!doctype html><html lang='en'><body style='margin:0;background:#0b0b0a;color:#f1ede6;font-family:Arial,sans-serif'>",
+        "<div style='max-width:550px;margin:35px auto;padding:38px 30px;background:#11100e;border:1px solid #514839'>",
+        "<div style='font-family:Georgia,serif;color:#d5c09a;font-size:34px;letter-spacing:5px;text-align:center'>MZS GROUP</div>",
+        "<p style='text-align:center;letter-spacing:3px;color:#d5c09a;font-size:11px;margin:30px 0'>ACCOUNT NOTIFICATIONS · TEST</p>",
+        "<h1 style='font-family:Georgia,serif;font-size:30px;font-weight:normal;text-align:center'>Email delivery test.</h1>",
+        "<p style='color:#cfc5b7;line-height:1.9'>This test confirms the MZS Group platform can send messages through the existing invitations mailbox.</p>",
+        "<p style='color:#cfc5b7;line-height:1.9'>No accounts, approvals, projects or access permissions have been changed.</p>",
+        "<p style='color:#d5c09a;font-size:11px;text-align:center;margin-top:45px;letter-spacing:2px'>PRIVATE · INDEPENDENT · INTERNATIONAL</p>",
+        "</div></body></html>",
+      ].join(""),
+    });
+    return Array.isArray(result.accepted) &&
+      result.accepted.some(address => address.toLowerCase() === recipient.toLowerCase());
+  } finally {
+    mailer.close();
+  }
+}
+
 function template(event: EventRow, recipientName: string) {
   const name = recipientName.trim().split(/\s+/)[0] || "Member";
   const eName = escapeHtml(name);
