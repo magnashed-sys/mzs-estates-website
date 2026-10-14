@@ -1,0 +1,109 @@
+# MZS Staging — isolated Supabase test environment
+
+Status: Database initialized. Vercel Preview integration not yet configured.
+
+## Provisioned on 14 October 2026
+
+- Supabase organization: MZS (Free plan)
+- Cost confirmed through Supabase: EUR 0 per month
+- Staging project: MZS Staging
+- Staging project ref: senonkpxdtlhyhrubicg
+- Staging API URL: https://senonkpxdtlhyhrubicg.supabase.co
+- Database region: eu-west-1 (same European region as production)
+- Production project: ptrnjzmcehrhbsfxntgw — never modify for staging tests.
+
+## Isolated database setup
+
+Replayed schema-only migration history from MZS production into the NEW
+staging database, excluding the two historical project/email-specific seeds:
+- seed_floraweg_investment_test_access
+- add_floraweg_sale_test_offering
+
+Removed the property-specific data insertion from the historical
+marina_botafoch_secure_rental_configurations migration.
+
+Then applied **20261014_account_lifecycle_v2.sql** to STAGING ONLY and
+the synthetic staging seed in supabase/staging/seed_synthetic_projects.sql.
+
+Verified:
+- 22 public tables, all with RLS enabled.
+- Account creation and email confirmation triggers installed.
+- 3 synthetic TEST projects and 4 synthetic TEST offerings.
+- 0 auth users, profiles, access requests, grants, and email messages.
+- No production accounts, passwords, or customer data were imported.
+
+## Required Vercel environment variable overrides
+
+Project: MZS Group
+Git branch: feature/account-registration-verification-notifications
+
+In Vercel > MZS Group > Settings > Environment Variables, create
+BRANCH-SPECIFIC PREVIEW overrides for these exact variable names:
+
+| Name | Source | Target |
+|---|---|---|
+| NEXT_PUBLIC_SUPABASE_URL | https://senonkpxdtlhyhrubicg.supabase.co | Preview, branch ONLY |
+| NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | Supabase Staging > Settings > API Keys > default publishable key | Preview, branch ONLY |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase Staging > Settings > API Keys > service_role secret (server-only) | Preview, branch ONLY |
+
+This overrides the general Preview values and prevents staging registration
+from connecting to the production database. DO NOT edit the Production
+values, the main branch, or other unrelated Preview environments.
+
+Additional environment flag, branch-specific Preview ONLY:
+- MZS_ACCOUNT_REGISTRATION_ENABLED = true
+
+**Do not enable this flag until all three Supabase variables are correctly
+overridden, Confirm Email is enabled in STAGING, and a safe test mailbox
+has been configured.** The registration API also denies any Preview
+signup when its Supabase URL is not exactly the known MZS Staging URL.
+
+Environment-variable edits only apply to NEW Vercel deployments.
+Start a new Preview build by committing a change to the feature branch.
+
+The Vercel management connector returned 403 for environment variable
+operations, so the owner must enter sensitive values in the dashboard.
+NEVER share secret values in chat, screenshots, code or GitHub.
+
+## Required Supabase Staging Auth configuration
+
+In the separate MZS Staging project:
+1. Authentication > Sign In / Providers > Email: email/password and
+   Confirm Email must be enabled.
+2. Authentication > URL Configuration: set the staging Preview deployment
+   URL as Site URL; add that exact URL plus /registration-pending to
+   allowed redirect URLs. Update this when the Preview URL changes.
+3. Authentication > Emails > SMTP Settings: configure the existing
+   MZS invitations mailbox if confirmation emails must reach external
+   test addresses. Staging is a separate project and does not inherit
+   the production Auth SMTP configuration.
+4. Authentication > Emails > Templates > Confirm Signup:
+   use docs/mzs-confirm-signup-email-template.html. Do not change production
+   email templates during staging preparation.
+
+## First staging administrator
+
+Production accounts have NOT been copied. Before testing approval:
+- Manually create a staging-only admin Auth account through
+  MZS Staging > Authentication > Users. Set a fresh password privately.
+- After the Auth user exists, promote only this staging user's profile
+  to admin and active using a reviewed SQL command targeted to staging.
+- Use another freshly created test email account for the end-to-end
+  client registration/verification/approval/notification test.
+
+## Test workflow
+
+1. Confirm Vercel branch-specific Supabase keys point to staging, not prod.
+2. Confirm staged Preview login queries staging only.
+3. Enable the guarded Preview-only registration flag.
+4. Submit a brand-new test account and validate email confirmation.
+5. Validate account stays inactive pending admin approval.
+6. As staging admin approve and grant one or more TEST offerings.
+7. Confirm activation mail and private access only to granted offerings.
+8. Add another TEST offering; check one new-access email, then verify
+   re-saving unchanged access sends none.
+9. Verify existing Production site remains unchanged and accessible.
+
+STOP if a step unexpectedly references the production Supabase project.
+The main GitHub branch and production Vercel deployment must not be
+changed during staging testing.
