@@ -20,6 +20,13 @@ function clean(value: unknown, max: number): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Fail closed until a tested database migration and explicit operator
+  // release switch are both in place. Preview may point to production Supabase.
+  if (process.env.MZS_ACCOUNT_REGISTRATION_ENABLED !== "true") {
+    return response(503, {
+      error: "New account registration is being prepared. Please return later.",
+    });
+  }
   const origin = request.headers.get("origin");
   if (origin && origin !== request.nextUrl.origin) {
     return response(403, { error: "Unable to process this registration." });
