@@ -44,6 +44,27 @@ not provided in chat or committed to GitHub.
 - MZS_SMTP_FROM (verified sender name and address)
 - CRON_SECRET (long random secret for the scheduled delivery endpoint)
 
+## Reusing the existing invitations mailbox
+
+The mail sender can reuse existing `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM` variables if Vercel
+already contains them. New `MZS_SMTP_*` settings are optional overrides.
+If the existing SMTP username is a full mailbox address and no explicit
+sender is configured, the mailer uses `MZS Group <mailbox>`.
+
+**Supabase Auth SMTP settings are not automatically shared with Vercel.**
+If the invitations mailbox credentials exist only under Supabase
+Authentication → SMTP Settings, copy them securely into
+Vercel → MZS Group → Settings → Environment Variables, without
+pasting credentials into chats, issues or GitHub.
+
+After any Vercel environment variable update, trigger a new preview
+deployment. An authenticated administrator can then visit
+Admin → Relationships → **Verify SMTP connection** to run a
+server-side handshake test. No SMTP credentials or hostnames are
+returned to the browser. This verifies connectivity and login only;
+a real delivery test remains mandatory before publishing.
+
 The Vercel environment-variable connector currently returns access denied, so
 those settings have NOT been read or edited. The SMTP provider must also be
 authorised for the sender domain (SPF, DKIM, DMARC).
