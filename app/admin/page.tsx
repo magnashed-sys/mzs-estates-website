@@ -48,6 +48,9 @@ export default function AdminPage() {
   } | null>(null);
   const [smtpChecking, setSmtpChecking] = useState(false);
   const [smtpCheckError, setSmtpCheckError] = useState("");
+  const [smtpTestSending, setSmtpTestSending] = useState(false);
+  const [smtpTestResult, setSmtpTestResult] = useState("");
+  const [smtpTestError, setSmtpTestError] = useState("");
   const [limit, setLimit] = useState(pageSize);
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
@@ -165,6 +168,38 @@ export default function AdminPage() {
     }
   }
 
+  async function sendSmtpTest() {
+    if (smtpTestSending || smtpChecking || !smtpStatus?.connectionVerified) return;
+    if (!window.confirm(
+      "Send one MZS Group test notification to your own administrator email address?\\n\\nNo clients, partners or project permissions will be affected."
+    )) return;
+    setSmtpTestSending(true);
+    setSmtpTestResult("");
+    setSmtpTestError("");
+    try {
+      const response = await fetch("/api/account/notifications/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const payload: { accepted?: boolean; message?: string; error?: string } =
+        await response.json();
+      if (!response.ok || !payload.accepted) {
+        throw new Error(payload.error || "The SMTP server did not accept the test.");
+      }
+      setSmtpTestResult(
+        "The SMTP server accepted the test email. Please check your administrator inbox and spam folder to confirm it arrived."
+      );
+    } catch {
+      setSmtpTestError(
+        "The test email was not confirmed as accepted. Check the server logs before trying again."
+      );
+    } finally {
+      setSmtpTestSending(false);
+    }
+  }
+
   function navigate(next: Tab) {
     if (locked || actionLock.current) return;
     setTab(next); setSearch(""); setLimit(pageSize); setNotice("");
@@ -271,6 +306,21 @@ export default function AdminPage() {
                   : "Mail server settings are incomplete: " + smtpStatus.missing.join(", ")}
             </p>
           )}
+          {smtpStatus?.connectionVerified && (
+            <div style={{ marginTop: 18 }}>
+              <p className="admin-help">
+                The next check sends one real message only to your own
+                administrator mailbox. It does not register or contact customers.
+              </p>
+              <button type="button" className="admin-button"
+                disabled={smtpTestSending || smtpChecking || locked}
+                onClick={() => void sendSmtpTest()}>
+                {smtpTestSending ? "Sending test email..." : "Send test email to my address →"}
+              </button>
+            </div>
+          )}
+          {smtpTestResult && <p className="admin-help" role="status">{smtpTestResult}</p>}
+          {smtpTestError && <p className="admin-notice" role="alert">{smtpTestError}</p>}
           {smtpCheckError && <p className="admin-notice" role="alert">{smtpCheckError}</p>}
         </div>
         <div className="admin-section-heading"><div><p className="eyebrow">Selected relationships</p><h2>People & access.</h2></div></div>
