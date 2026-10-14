@@ -30,7 +30,11 @@ function mailSettings() {
   const port = Number(process.env.MZS_SMTP_PORT || process.env.SMTP_PORT || "587");
   const user = process.env.MZS_SMTP_USER || process.env.SMTP_USER;
   const pass = process.env.MZS_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
-  const from = process.env.MZS_SMTP_FROM || process.env.SMTP_FROM;
+  // If the existing authenticated mailbox uses a full email address as
+  // username, it can safely serve as the default sender for the same mailbox.
+  // An explicit verified From address always takes precedence.
+  const from = process.env.MZS_SMTP_FROM || process.env.SMTP_FROM ||
+    (user && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(user) ? "MZS Group <" + user + ">" : undefined);
   if (!host || !user || !pass || !from || ![465, 587].includes(port)) return null;
   return { host, port, user, pass, from };
 }
@@ -46,7 +50,7 @@ export async function verifyExistingSmtpMailbox(): Promise<{
   if (!(process.env.MZS_SMTP_HOST || process.env.SMTP_HOST)) missing.push("SMTP host");
   if (!(process.env.MZS_SMTP_USER || process.env.SMTP_USER)) missing.push("SMTP username");
   if (!(process.env.MZS_SMTP_PASSWORD || process.env.SMTP_PASSWORD)) missing.push("SMTP password");
-  if (!(process.env.MZS_SMTP_FROM || process.env.SMTP_FROM)) missing.push("SMTP sender");
+  if (!mailSettings() && !(process.env.MZS_SMTP_FROM || process.env.SMTP_FROM)) missing.push("SMTP sender");
   const settings = mailSettings();
   if (!settings) {
     if (!missing.length) missing.push("Supported SMTP port (465 or 587)");
