@@ -55,32 +55,38 @@ export default function RequestAccessPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (loading) return;
-    setLoading(true);
+    if (loading || submitted) return;
     setError("");
-
+    if (password.length < 8) {
+      setError("Please create a password of at least 8 characters.");
+      return;
+    }
+    if (password !== passwordConfirmation) {
+      setError("The passwords do not match.");
+      return;
+    }
+    setLoading(true);
     try {
-      const supabase = createClient();
-      const { error: submitError } = await supabase
-        .from("access_requests")
-        .insert({
-          full_name: fullName,
-          email,
-          company: company || null,
-          country: country || null,
-          interests: selectedInterests,
-          message: message || null,
-        });
-
-      if (submitError) {
-        console.error(submitError);
-        setError("We were unable to submit your request. Please try again.");
+      const response = await fetch("/api/account/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          full_name: fullName, email, company, country,
+          interests: selectedInterests, message,
+          password, confirm_password: passwordConfirmation,
+        }),
+      });
+      const result: { ok?: boolean; error?: string } = await response.json();
+      if (!response.ok || !result.ok) {
+        setError(result.error || "Unable to create your account. Please try again.");
         return;
       }
       setSubmitted(true);
-    } catch (submitError) {
-      console.error(submitError);
-      setError("We were unable to submit your request. Please try again.");
+      setPassword("");
+      setPasswordConfirmation("");
+    } catch {
+      setError("Registration is temporarily unavailable. Please try again.");
     } finally {
       setLoading(false);
     }
