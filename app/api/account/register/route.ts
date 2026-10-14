@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { deliverOnce } from "../../../../lib/mzs/notifications";
 
 export const runtime = "nodejs";
 
@@ -138,6 +139,17 @@ export async function POST(request: NextRequest) {
       return response(503, {
         error: "Registration needs a configuration review. Contact MZS Group; do not register twice.",
       });
+    }
+    // Send the administrator notification promptly when SMTP is available.
+    // Never make registration dependent on email delivery after account creation.
+    try {
+      const { data: queued } = await admin.from("mzs_mail_outbox")
+        .select("id").eq("event_type", "application_received")
+        .like("idempotency_key", "application:" + data.user.id + ":%")
+        .order("created_at", { ascending: false }).limit(3);
+      for (const event of queued || []) await deliverOnce(event.id);
+    } catch {
+      // Queued notifications are retried separately by the worker.
     }
     return response(201, { ok: true });
   } catch (error) {
