@@ -108,7 +108,7 @@ export default function RequestAccessPage() {
         <p className="eyebrow">Private Access</p>
         <h1>Your private journey begins here.</h1>
         <p className="request-intro">
-          New relationships are considered on a selective basis.
+          New relationships are considered on a selective basis. Registration will require email confirmation.
           Please provide a few details below.
         </p>
         <form className="request-form" onSubmit={handleSubmit} aria-busy={loading}>
