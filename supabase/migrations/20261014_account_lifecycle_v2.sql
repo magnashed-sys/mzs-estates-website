@@ -7,7 +7,7 @@ alter table public.access_requests
   add column if not exists auth_user_id uuid references auth.users(id) on delete set null,
   add column if not exists email_verified_at timestamptz;
 create unique index if not exists mzs_access_request_auth_user_unique
-  on public.access_requests(auth_user_id) where auth_user_id is not null;
+  on public.access_requests(auth_user_id);
 
 alter table public.profiles add column if not exists email_normalized text
   generated always as (lower(btrim(email))) stored;
@@ -103,13 +103,13 @@ begin
   on conflict(id) do nothing;
 
   if v_data->>'mzs_access_request'='v2' then
-    select coalesce(array_agg(x::public.offering_type),array[]::public.offering_type[])
+    select coalesce(array_agg(choice.value::public.offering_type),array[]::public.offering_type[])
       into v_interests
     from jsonb_array_elements_text(
       case when jsonb_typeof(v_data->'interests')='array' then v_data->'interests'
       else '[]'::jsonb end
-    ) as x
-    where x in ('rental','sale','investment','financing');
+    ) as choice(value)
+    where choice.value in ('rental','sale','investment','financing');
     insert into public.access_requests(
       auth_user_id,full_name,email,company,country,interests,message,status,email_verified_at
     ) values(
@@ -223,8 +223,9 @@ begin
     values(v_request.auth_user_id,'account_activated',
       jsonb_build_object('projects',v_titles),
       'activation:'||v_request.id::text)
-    on conflict(idempotency_key) do update set idempotency_key=excluded.idempotency_key
-    returning id into v_event;
+    on conflict(idempotency_key) do nothing;
+  select id into v_event from public.mzs_mail_outbox
+    where idempotency_key='activation:'||v_request.id::text;
   return jsonb_build_object('ok',true,'request_id',v_request.id,'mail_event_id',v_event,
      'email_verified',true,'project_count',jsonb_array_length(v_titles));
 end $$;
@@ -245,7 +246,8 @@ begin
    raise exception 'Administrator access required' using errcode='42501';
  end if;
  if p_user_id is null or p_project_id is null or p_offering_ids is null
-  or array_position(p_offering_ids,null) is not null or cardinality(p_offering_ids)>100 then
+  or array_position(p_offering_ids,null) is not null or cardinality(p_offering_ids)>100
+  or array_ndims(p_offering_ids)>1 then
    raise exception 'Invalid project access request' using errcode='22023';
  end if;
  select p.is_active into v_active from public.profiles p where p.id=p_user_id
