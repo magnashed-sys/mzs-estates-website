@@ -6,7 +6,6 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
-import { createClient } from "../../lib/supabase/client";
 
 const interests = [
   { value: "investment", label: "Investment" },
@@ -39,6 +38,8 @@ export default function RequestAccessPage() {
   const [company, setCompany] = useState("");
   const [country, setCountry] = useState("");
   const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -132,6 +133,18 @@ export default function RequestAccessPage() {
               Country (optional)
               <input type="text" autoComplete="country-name" value={country}
                 onChange={(event) => setCountry(event.target.value)} disabled={loading} />
+            </label>
+            <label>
+              Create password (minimum 8 characters)
+              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
+                value={password} onChange={event => setPassword(event.target.value)}
+                required disabled={loading} />
+            </label>
+            <label>
+              Confirm password
+              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
+                value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)}
+                required disabled={loading} />
             </label>
           </div>
           <fieldset className="request-interests" disabled={loading}>
