@@ -89,7 +89,7 @@ export async function sendSmtpTestMail(recipient: string): Promise<boolean> {
   const smtp = mailSettings();
   if (!smtp) throw new Error("SMTP transport is not configured");
   if (recipient.length > 254 ||
-      !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(recipient)) {
+      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(recipient)) {
     throw new Error("Invalid administrative recipient");
   }
   const mailer = nodemailer.createTransport({
@@ -117,7 +117,7 @@ export async function sendSmtpTestMail(recipient: string): Promise<boolean> {
         "No private project access was modified.",
         "",
         "If you received this message, SMTP delivery to your inbox is working.",
-      ].join("\\n"),
+      ].join("\n"),
       html: [
         "<!doctype html><html lang='en'><body style='margin:0;background:#0b0b0a;color:#f1ede6;font-family:Arial,sans-serif'>",
         "<div style='max-width:550px;margin:35px auto;padding:38px 30px;background:#11100e;border:1px solid #514839'>",
@@ -131,7 +131,7 @@ export async function sendSmtpTestMail(recipient: string): Promise<boolean> {
       ].join(""),
     });
     return Array.isArray(result.accepted) &&
-      result.accepted.some(address => address.toLowerCase() === recipient.toLowerCase());
+      result.accepted.some(address => typeof address === "string" && address.toLowerCase() === recipient.toLowerCase());
   } finally {
     mailer.close();
   }
