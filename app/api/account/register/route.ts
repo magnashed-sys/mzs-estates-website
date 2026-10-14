@@ -95,6 +95,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Protect unfinished applications from the older invitation workflow.
+    // Those requests must be resolved by an administrator, not duplicated.
+    const { data: legacy, error: legacyError } = await admin.from("access_requests")
+      .select("id").ilike("email", email).is("auth_user_id", null)
+      .in("status", ["pending", "approved"]).limit(1);
+    if (legacyError) throw legacyError;
+    if (legacy?.length) {
+      return response(409, {
+        error: "A private access request already exists for this email address. Please contact MZS Group.",
+      });
+    }
+
     // Supabase sends the confirmation email; the auth.users trigger creates
     // the inactive profile and pending application in the same transaction.
     const signup = createClient(url, publishable, {
