@@ -35,6 +35,46 @@ function mailSettings() {
   return { host, port, user, pass, from };
 }
 
+/**
+ * Safe operational check for an authenticated MZS administrator.
+ * No SMTP host, username, password or sender address is returned.
+ */
+export async function verifyExistingSmtpMailbox(): Promise<{
+  configured: boolean; connectionVerified: boolean; missing: string[];
+}> {
+  const missing: string[] = [];
+  if (!(process.env.MZS_SMTP_HOST || process.env.SMTP_HOST)) missing.push("SMTP host");
+  if (!(process.env.MZS_SMTP_USER || process.env.SMTP_USER)) missing.push("SMTP username");
+  if (!(process.env.MZS_SMTP_PASSWORD || process.env.SMTP_PASSWORD)) missing.push("SMTP password");
+  if (!(process.env.MZS_SMTP_FROM || process.env.SMTP_FROM)) missing.push("SMTP sender");
+  const settings = mailSettings();
+  if (!settings) {
+    if (!missing.length) missing.push("Supported SMTP port (465 or 587)");
+    return { configured: false, connectionVerified: false, missing };
+  }
+  try {
+    const mailer = nodemailer.createTransport({
+      host: settings.host,
+      port: settings.port,
+      secure: settings.port === 465,
+      requireTLS: settings.port === 587,
+      auth: { user: settings.user, pass: settings.pass },
+      tls: { minVersion: "TLSv1.2" },
+      connectionTimeout: 8000,
+      greetingTimeout: 6000,
+      socketTimeout: 10000,
+    });
+    await mailer.verify();
+    mailer.close();
+    return { configured: true, connectionVerified: true, missing: [] };
+  } catch (error) {
+    console.error("[MZS mail] SMTP readiness check failed", {
+      category: error instanceof Error ? error.name : "unknown",
+    });
+    return { configured: true, connectionVerified: false, missing: [] };
+  }
+}
+
 function template(event: EventRow, recipientName: string) {
   const name = recipientName.trim().split(/\s+/)[0] || "Member";
   const eName = escapeHtml(name);
