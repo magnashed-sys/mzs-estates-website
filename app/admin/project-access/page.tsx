@@ -119,7 +119,37 @@ export default function ProjectAccessPage() {
         projectGrants: [...current.projectGrants.filter(g => !(g.user_id === userId && g.project_id === projectId)), ...((pg.data ?? []) as ProjectGrant[])],
         offeringGrants: [...current.offeringGrants.filter(g => !(g.user_id === userId && allProjectIds.has(g.offering_id))), ...verified],
       }));
-      setSelected(expected); setNotice("Project access saved and verified.");
+      // Notify only after an authoritative, successful permission change.
+      // The database enqueues only genuinely added offerings; an email failure
+      // never reverses or duplicates project access.
+      let mailNotice = "";
+      if (added.length > 0 && profile.is_active) {
+        mailNotice = " New access notifications remain queued for delivery.";
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          if (session.session?.access_token) {
+            const res = await fetch("/api/account/notifications/dispatch", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + session.session.access_token,
+              },
+              body: JSON.stringify({
+                recipient_user_id: userId, event_type: "new_project_access",
+              }),
+            });
+            const result = await res.json();
+            if (res.ok && Array.isArray(result.results) &&
+                result.results.some((item: { status: string }) => item.status === "sent")) {
+              mailNotice = " The member was notified by email.";
+            }
+          }
+        } catch {
+          // The durable outbox remains authoritative.
+        }
+      }
+      setSelected(expected);
+      setNotice("Project access saved and verified." + mailNotice);
     } catch {
       if (mounted.current) { setUncertain(true); setNotice("The final access state could not be verified. Refresh permissions before another change. The save may already have completed."); }
     } finally { actionLock.current = false; if (mounted.current) setSaving(false); }
