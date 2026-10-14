@@ -9,7 +9,7 @@ import BookingManagement from "./BookingManagement";
 import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
 
-type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string };
+type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string; auth_user_id: string | null; email_verified_at: string | null };
 type Relationship = { id: string; full_name: string | null; email: string; role: "client" | "partner"; is_active: boolean; created_at: string };
 type Project = { id: string; title: string; location: string | null; status: string };
 type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
@@ -17,7 +17,7 @@ type Tab = "overview" | "relationships" | "projects" | "bookings" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
 const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
 const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
-const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Awaiting invitation"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
+const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Approved"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
 const pageSize = 12;
 const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
 function date(value: string) { return new Date(value).toLocaleDateString("en-GB", { timeZone: "Europe/Madrid" }); }
@@ -63,7 +63,7 @@ export default function AdminPage() {
       if (!current()) return;
       if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
       const results = await Promise.all([
-        supabase.from("access_requests").select("id,full_name,email,company,country,interests,message,status,created_at", { count: "exact" }).order("created_at", { ascending: false }),
+        supabase.from("access_requests").select("id,full_name,email,company,country,interests,message,status,created_at,auth_user_id,email_verified_at", { count: "exact" }).order("created_at", { ascending: false }),
         supabase.from("access_invitations").select("id,request_id,email,requested_role,status,invited_at", { count: "exact" }).order("invited_at", { ascending: false }),
         supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
         supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
@@ -207,13 +207,15 @@ export default function AdminPage() {
           {!visibleRequests.length && <p className="admin-empty">No requests match these filters.</p>}
           <div className="admin-requests">{visibleRequests.slice(0, limit).map(request => {
             const invitation = invitationMap.get(request.id);
-            const stage = requestStage(request.status, invitation);
+            const stage = request.auth_user_id
+              ? (request.status === "approved" ? "activated" : request.email_verified_at ? "verified_pending" : "awaiting_email_verification")
+              : requestStage(request.status, invitation);
             return <article key={request.id} className="admin-request">
               <div className="admin-request-top"><div><h3>{request.full_name}</h3><p>{request.email}</p></div><span className={`admin-status ${stage === "needs_review" ? "admin-status-warning" : ""}`}>{stage.replace(/_/g, " ")}</span></div>
               <div className="admin-request-details">{request.company && <p>{request.company}</p>}{request.country && <p>{request.country}</p>}<p>Received {date(request.created_at)}</p></div>
               <div className="admin-interests">{(request.interests ?? []).map(interest => <span key={interest}>{labels[interest] ?? interest}</span>)}</div>
               {request.message && <p className="admin-request-message">{request.message}</p>}
-              {!invitation && ["pending", "approved"].includes(request.status) && <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={locked} onClick={() => setReviewing(request.id)}>{request.status === "pending" ? "Review & select projects" : "Project selection & invitation"}</button>{request.status === "pending" && <button className="admin-button" disabled={locked} onClick={() => decline(request)}>Decline</button>}</div>}
+              {!invitation && (request.auth_user_id ? request.status === "pending" : ["pending", "approved"].includes(request.status)) && <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={locked} onClick={() => setReviewing(request.id)}>{request.auth_user_id ? "Review verified account" : request.status === "pending" ? "Review & select projects" : "Project selection & invitation"}</button>{request.status === "pending" && <button className="admin-button" disabled={locked} onClick={() => decline(request)}>Decline</button>}</div>}
               {reviewing === request.id && <RequestProjectApproval request={request} onApproved={id => setRequests(items => items.map(item => item.id === id ? { ...item, status: "approved" } : item))} onInvited={recordInvitation} onClose={() => { setReviewing(null); void reload(); }} />}
               {invitation && <p className="admin-help admin-space-top">{stage === "registered" ? "Registration completed. Manage assigned rights in Project Access." : stage === "invited" ? "Invitation sent. Registration is a separate step." : "Check the invitation outcome before another attempt."}</p>}
             </article>;
@@ -223,7 +225,7 @@ export default function AdminPage() {
           <div className="admin-toolbar"><label className="admin-field">Account type<select disabled={locked} value={accountRole} onChange={event => { setAccountRole(event.target.value); setLimit(pageSize); }}><option value="all">All types</option><option value="client">Client</option><option value="partner">Partner</option></select></label><label className="admin-field">Status<select disabled={locked} value={accountStatus} onChange={event => { setAccountStatus(event.target.value); setLimit(pageSize); }}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
           <p className="admin-help">{visibleAccounts.length} matching accounts</p>
           {!visibleAccounts.length && <p className="admin-empty">No accounts match these filters.</p>}
-          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
+          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked || (!account.is_active && requests.some(req => req.auth_user_id === account.id && req.status !== "approved"))} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
           {visibleAccounts.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more accounts</button>}
         </>}
       </>}
