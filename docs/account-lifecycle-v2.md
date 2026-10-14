@@ -18,6 +18,26 @@ STATUS: DRAFT / NOT RELEASED. Do not merge or apply the production SQL before te
    Permission changes survive temporary email failures. Daily Vercel Cron
    retries undelivered events; immediate sends are attempted after admin actions.
 
+## Email delivery verification — 14 October 2026
+
+**CONFIRMED by site administrator on MZS Preview:**
+- Secure SMTP connection and mailbox authentication verified by the
+  protected admin Relationships dashboard.
+- One real account notification **test** message sent from the preview.
+- Administrator confirmed its successful arrival in the mailbox, with
+  correct MZS Group black-and-gold HTML rendering.
+
+**NOT YET TESTED:**
+- Supabase Auth **Confirm Signup** mail and callback for a newly registered account.
+- Real account activation email after the new SQL migration.
+- Project-grant notification after the new SQL migration.
+- Mail outbox retry worker (requires a configured CRON_SECRET).
+
+**Safety:** The test email did not create or modify accounts, approvals,
+project assignments or bookings. The feature branch and database migration
+are still not released. The new registration endpoint is fail-closed unless
+MZS_ACCOUNT_REGISTRATION_ENABLED is explicitly set to true after testing.
+
 ## Required Supabase configuration
 
 - Authentication / Sign In / Providers / Email: confirm email is ENABLED.
