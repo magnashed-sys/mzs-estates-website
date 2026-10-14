@@ -17,6 +17,7 @@ type Project = {
   title: string;
   subtitle: string | null;
   location: string | null;
+  hero_image_url: string | null;
   status: string;
 };
 type Offering = {
@@ -56,11 +57,24 @@ function categoryFor(type: string): Category | null {
   return null;
 }
 
-// Images are already public assets in this MZS project; no new assets required.
-function imageFor(slug: string): string | null {
-  if (slug === "villa-la-nucia") return "/properties/villa-la-nucia/pool-mountain-view.webp";
-  if (slug === "marina-botafoch-apartment") return "/properties/marina-botafoch-apartment/hero-living-kitchen.webp";
-  return null;
+// These images already exist in public/properties. The three investment
+// filenames match the image assets used by the individual project pages.
+// A database hero_image_url can override the fallback for future updates.
+const fallbackImages: Record<string, string> = {
+  "villa-la-nucia": "/properties/villa-la-nucia/pool-mountain-view.webp",
+  "marina-botafoch-apartment": "/properties/marina-botafoch-apartment/hero-living-kitchen.webp",
+  "amsterdam-floraweg": "/properties/amsterdam-floraweg/hero-park-view.webp",
+  "villa-can-juan-ibiza": "/properties/villa-can-juan-ibiza/vision-09.webp",
+  "villa-des-coloms-ibiza": "/properties/villa-des-coloms-ibiza/vision-12.webp",
+};
+
+function imageFor(project: Project): string | null {
+  // The overview only accepts site-local property assets as image sources.
+  const configuredImage = project.hero_image_url?.trim();
+  if (configuredImage?.startsWith("/properties/") && !configuredImage.includes("..")) {
+    return configuredImage;
+  }
+  return fallbackImages[project.slug] ?? null;
 }
 
 function regionFor(project: Project): string {
@@ -151,7 +165,7 @@ export default function PrivatePage() {
 
         const [projectResult, offeringResult] = await Promise.all([
           supabase.from("projects")
-            .select("id,slug,title,subtitle,location,status")
+            .select("id,slug,title,subtitle,location,hero_image_url,status")
             .in("id", projectIds).eq("status", "active"),
           supabase.from("offerings")
             .select("id,project_id,offering_type,title,status")
@@ -324,7 +338,7 @@ export default function PrivatePage() {
                 ) : (
                   <div className={styles.properties}>
                     {selected.projects.map((project) => {
-                      const picture = imageFor(project.slug);
+                      const picture = imageFor(project);
                       const href = `/private/projects/${encodeURIComponent(project.slug)}`;
                       return (
                         <article key={project.id} className={styles.property}>
