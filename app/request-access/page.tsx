@@ -97,10 +97,10 @@ export default function RequestAccessPage() {
       <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
         <PublicHeader />
         <section className="request-success" style={contentStyle}>
-          <p className="eyebrow">Request received</p>
-          <h1>Thank you.</h1>
-          <p>Your request has been received and will be reviewed individually by MZS Group.</p>
-          <p className="request-success-note">Access is granted on a selective basis.</p>
+          <p className="eyebrow">Account Created · Verification Required</p>
+          <h1>Check your email.</h1>
+          <p>Your MZS account has been created but remains inactive. Please verify your email address using the confirmation link we sent you.</p>
+          <p className="request-success-note">After verification, MZS Group will review your account and chosen project access. You will receive an activation email when approved.</p>
           <Link href="/" className="request-return">Return to MZS Group →</Link>
         </section>
         <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
@@ -116,7 +116,7 @@ export default function RequestAccessPage() {
         <h1>Your private journey begins here.</h1>
         <p className="request-intro">
           New relationships are considered on a selective basis. Registration will require email confirmation.
-          Please provide a few details below.
+          Create a secure password and confirm your email address before MZS Group reviews your application.
         </p>
         <form className="request-form" onSubmit={handleSubmit} aria-busy={loading}>
           <div className="request-grid">
@@ -173,9 +173,10 @@ export default function RequestAccessPage() {
             <textarea rows={4} value={message}
               onChange={(event) => setMessage(event.target.value)} disabled={loading} />
           </label>
+          <p className="request-success-note">Your account remains inactive until email verification and individual MZS Group approval.</p>
           {error && <p className="login-error" role="alert">{error}</p>}
           <button type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Request →"}
+            {loading ? "Creating account..." : "Create Account & Request Access →"}
           </button>
         </form>
       </section>
