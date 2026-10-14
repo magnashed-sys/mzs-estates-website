@@ -34,7 +34,7 @@ function mailSettings() {
   // username, it can safely serve as the default sender for the same mailbox.
   // An explicit verified From address always takes precedence.
   const from = process.env.MZS_SMTP_FROM || process.env.SMTP_FROM ||
-    (user && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(user) ? "MZS Group <" + user + ">" : undefined);
+    (user && user.includes("@") && user.includes(".") && !user.includes(" ") ? "MZS Group <" + user + ">" : undefined);
   if (!host || !user || !pass || !from || ![465, 587].includes(port)) return null;
   return { host, port, user, pass, from };
 }
