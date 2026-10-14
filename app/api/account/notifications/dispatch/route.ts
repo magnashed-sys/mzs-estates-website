@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
 /** Vercel Cron or another authorised scheduler may retry the durable outbox. */
 export async function GET(request: NextRequest) {
-  const secret = process.env.MZS_NOTIFICATION_CRON_SECRET;
+  const secret = process.env.CRON_SECRET;
   const authorization = request.headers.get("authorization") || "";
   if (!secret || !secureEquals(authorization, "Bearer " + secret)) {
     return json(401, { error: "Unauthorised" });
