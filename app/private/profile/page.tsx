@@ -59,6 +59,17 @@ export default function MemberProfilePage() {
     let mounted = true;
     async function load() {
       try {
+        // A new Preview branch may still inherit Production credentials.
+        // Fail closed until this branch is explicitly linked to MZS Staging.
+        const previewHost = window.location.hostname.startsWith("mzs-group-") &&
+          window.location.hostname.endsWith("-mzs3.vercel.app");
+        if (previewHost &&
+            process.env.NEXT_PUBLIC_SUPABASE_URL !==
+              "https://senonkpxdtlhyhrubicg.supabase.co") {
+          setError("This Preview is not yet linked to MZS Staging. Profile editing is disabled.");
+          setStatus("error");
+          return;
+        }
         const supabase = createClient();
         const { data: auth, error: authError } = await supabase.auth.getUser();
         if (authError || !auth.user) {
