@@ -57,8 +57,8 @@ export default function RequestAccessPage() {
     event.preventDefault();
     if (loading || submitted) return;
     setError("");
-    if (password.length < 12) {
-      setError("Please create a password of at least 12 characters.");
+    if (password.length < 8) {
+      setError("Please create a password of at least 8 characters.");
       return;
     }
     if (password !== passwordConfirmation) {
@@ -141,14 +141,14 @@ export default function RequestAccessPage() {
                 onChange={(event) => setCountry(event.target.value)} disabled={loading} />
             </label>
             <label>
-              Create password (minimum 12 characters)
-              <input type="password" autoComplete="new-password" minLength={12} maxLength={128}
+              Create password (minimum 8 characters)
+              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
                 value={password} onChange={event => setPassword(event.target.value)}
                 required disabled={loading} />
             </label>
             <label>
               Confirm password
-              <input type="password" autoComplete="new-password" minLength={12} maxLength={128}
+              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
                 value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)}
                 required disabled={loading} />
             </label>
