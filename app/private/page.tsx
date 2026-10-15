@@ -238,9 +238,14 @@ export default function PrivatePage() {
               {role === "partner" ? "PARTNER ACCESS" : "PRIVATE CLIENT"}
             </span>
             {viewState === "ready" && (
-              <Link className={styles.headerLink} href="/private/reservations">
-                My Reservations <span aria-hidden="true">↗</span>
-              </Link>
+              <>
+                <Link className={styles.headerLink} href="/private/profile">
+                  My Profile <span aria-hidden="true">↗</span>
+                </Link>
+                <Link className={styles.headerLink} href="/private/reservations">
+                  My Reservations <span aria-hidden="true">↗</span>
+                </Link>
+              </>
             )}
             <button type="button" className={styles.signout} onClick={signOut} disabled={signingOut}>
               {signingOut ? "Signing out…" : "Sign out"}
