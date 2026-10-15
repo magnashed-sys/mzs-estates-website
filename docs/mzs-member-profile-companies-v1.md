@@ -142,3 +142,7 @@ settings.
 
 This feature is additive; no live account, project, booking, invitation
 or notification is altered during its staging preparation.
+
+## Preview configuration confirmation
+
+On 15 October 2026 the site owner confirmed that all three Supabase Staging variables have been added or checked for this feature branch in Vercel Preview. A new Preview deployment is required to load them. Before interactive testing, verify /api/staging/readiness reports isolatedStagingDatabase, publicKeyAccepted, serviceKeyAccepted, testProjectsAvailable, and readyForIsolatedTesting as true. No Production variables were requested to change.
