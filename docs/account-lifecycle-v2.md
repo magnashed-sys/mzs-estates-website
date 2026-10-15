@@ -131,6 +131,41 @@ rolled back after each verification:
   browser checks for recovery, old invitations and failed SMTP delivery
   remain required before releasing to production.
 
+## Release audit — additional checks, 15 October 2026
+
+Completed in **MZS Staging**, with no production mutations:
+- Verified all six logged transactional emails were marked sent; zero unsent.
+- Verified there are no duplicate email groups in the staging profile table.
+- Verified all public application tables are protected with RLS.
+- Verified no unconfirmed Auth users have assigned project grants.
+- Verified new privileged account functions deny the anon role: approval,
+  changing project rights, outbox claims, rate limiting and signup trigger.
+- Repeated selection and revoked selection were exercised inside rolled-back
+  transactions: no new access email was queued. Existing five offering grants
+  remained intact after rollback.
+- Inspected, but did not re-run, the existing login, recovery, invitation
+  and confirmation routes. Static inspection is NOT a replacement for browser
+  tests with real email links.
+
+Security audit findings to assess before release:
+- Existing `public.is_admin()` is executable by anon according to
+  Supabase security advisor. It only returns a boolean, but its public
+  execution privilege should be reviewed with RLS regression tests.
+- Supabase leaked password protection is not enabled in both checked
+  projects. Consider enabling it after compatibility review.
+  See https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+- `btree_gist` is in the public schema, an existing warning:
+  https://supabase.com/docs/guides/database/database-linter?lint=0014_extension_in_public
+- Tables holding private auth proofs, rate limits and mail outbox intentionally
+  have RLS enabled with no public policies. This is not missing user access;
+  server-only functions own these operations.
+
+Not yet verified end to end: duplicate-email race, invalid signup passwords,
+unverified user approval denial, old-invitation flow, admin/client/partner
+password recovery and an intentionally failed SMTP delivery then retry.
+Do not publish until these checks and an operator-approved rollback plan
+have been completed.
+
 ## Safe release order
 
 1. Review draft pull request and test it in a separate Supabase test project.
