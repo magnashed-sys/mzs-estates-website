@@ -51,6 +51,10 @@ export default function AdminPage() {
   const [smtpTestSending, setSmtpTestSending] = useState(false);
   const [smtpTestResult, setSmtpTestResult] = useState("");
   const [smtpTestError, setSmtpTestError] = useState("");
+  const [stagingPreview, setStagingPreview] = useState(false);
+  const [activationRetrying, setActivationRetrying] = useState(false);
+  const [activationRetryResult, setActivationRetryResult] = useState("");
+  const [activationRetryError, setActivationRetryError] = useState("");
   const [limit, setLimit] = useState(pageSize);
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
@@ -112,6 +116,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     mounted.current = true;
+    setStagingPreview(
+      /^mzs-group-[a-z0-9-]+-mzs3\\.vercel\\.app$/i.test(window.location.hostname)
+    );
     const initial = new URLSearchParams(window.location.search).get("tab");
     if (tabs.some(([key]) => key === initial)) setTab(initial as Tab);
     void reload();
@@ -197,6 +204,48 @@ export default function AdminPage() {
       );
     } finally {
       setSmtpTestSending(false);
+    }
+  }
+
+  async function retryStagingActivationMail() {
+    if (activationRetrying || locked) return;
+    if (!window.confirm(
+      "Send the pending activation email to the already approved test client in MZS Staging?\\n\\nNo account status, projects or permissions will change."
+    )) return;
+    setActivationRetrying(true);
+    setActivationRetryError("");
+    setActivationRetryResult("");
+    try {
+      const response = await fetch("/api/account/notifications/retry-staging", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const result: { status?: string; error?: string; note?: string } =
+        await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Staging activation email retry not confirmed.");
+      }
+      if (result.status === "sent") {
+        setActivationRetryResult(
+          "The activation email has been accepted by the mail server. Check the test client's inbox or spam folder."
+        );
+      } else if (result.status === "none") {
+        setActivationRetryResult(
+          "There are no pending activation emails available for retry."
+        );
+      } else {
+        setActivationRetryError(
+          "The activation email is not confirmed as sent. Please check the mail queue before trying again."
+        );
+      }
+    } catch {
+      setActivationRetryError(
+        "Unable to confirm delivery. Do not retry repeatedly; review the staging queue first."
+      );
+    } finally {
+      setActivationRetrying(false);
     }
   }
 
@@ -322,6 +371,28 @@ export default function AdminPage() {
           {smtpTestResult && <p className="admin-help" role="status">{smtpTestResult}</p>}
           {smtpTestError && <p className="admin-notice" role="alert">{smtpTestError}</p>}
           {smtpCheckError && <p className="admin-notice" role="alert">{smtpCheckError}</p>}
+          {stagingPreview && (
+            <div style={{ borderTop: "1px solid #514839", marginTop: 26, paddingTop: 18 }}>
+              <h4 className="admin-subtitle">Staging — Activation email</h4>
+              <p className="admin-help">
+                One approved test account has an activation email in the queue.
+                Retry only the existing message; no account or project permissions change.
+              </p>
+              <button type="button" className="admin-button"
+                disabled={activationRetrying || locked}
+                onClick={() => void retryStagingActivationMail()}>
+                {activationRetrying
+                  ? "Checking queued activation email..."
+                  : "Send pending activation email →"}
+              </button>
+              {activationRetryResult && (
+                <p className="admin-help" role="status">{activationRetryResult}</p>
+              )}
+              {activationRetryError && (
+                <p className="admin-notice" role="alert">{activationRetryError}</p>
+              )}
+            </div>
+          )}
         </div>
         <div className="admin-section-heading"><div><p className="eyebrow">Selected relationships</p><h2>People & access.</h2></div></div>
         <div className="admin-toolbar"><div className="admin-filters">{(["requests", "accounts"] as const).map(view => <button key={view} disabled={locked} aria-pressed={relationshipView === view} onClick={() => { setRelationshipView(view); setLimit(pageSize); setSearch(""); }}>{view === "requests" ? "Requests & invitations" : "Accounts"}</button>)}</div><label className="admin-field">Search relationships<input type="search" value={search} disabled={locked} placeholder="Name, email or company" onChange={event => { setSearch(event.target.value); setLimit(pageSize); }} /></label></div>
