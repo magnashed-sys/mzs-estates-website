@@ -133,6 +133,20 @@ Production accounts have NOT been copied. Before testing approval:
    re-saving unchanged access sends none.
 9. Verify existing Production site remains unchanged and accessible.
 
+## 15 October 2026 — preview-only signup activation check
+
+The operator confirmed these two staging-specific settings have been saved:
+- Supabase Staging Auth allowed confirmation redirect wildcard.
+- Vercel Preview branch variable `MZS_ACCOUNT_REGISTRATION_ENABLED=true`.
+
+This documentation-only commit triggers a **new Vercel Preview build**
+so the updated environment variables are loaded. Confirm the
+`/api/staging/readiness` response reports:
+`isolatedStagingDatabase=true`, `publicKeyAccepted=true`,
+`serviceKeyAccepted=true`, `testProjectsAvailable=true`,
+`registrationEnabled=true` and `readyForIsolatedTesting=true`
+before registering a test account. Do not set the flag in Production.
+
 STOP if a step unexpectedly references the production Supabase project.
 The main GitHub branch and production Vercel deployment must not be
 changed during staging testing.
