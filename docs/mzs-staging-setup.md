@@ -167,6 +167,34 @@ To test securely, in **Supabase Staging only**:
 Do not alter or replace the existing Production password-recovery or
 invitation templates during this staging verification.
 
+## Legacy invitation Staging deployment — 15 October 2026
+
+Verified the manually installed Edge Function was initially still the Supabase
+starter example. Replaced it via the authenticated Supabase Staging connector
+with the validated MZS staging-only function. Current version: **2**, ACTIVE,
+JWT verification enabled. The implementation checks the fixed MZS Staging
+Supabase URL, accepts only `mzs-group-*-mzs3.vercel.app` browser origins,
+requires an active admin, and redirects invitees to the current Preview
+`/auth/confirm` callback. No production function or data was changed.
+
+The same reviewed Deno source is preserved as
+`supabase/functions/invite-approved-relationship-staging/index.txt`,
+not `.ts`, to keep Deno-only imports out of the Next.js build. The updated
+feature Preview has a READY deployment.
+
+**Before an end-to-end legacy invitation test:**
+- In Supabase **Staging only**, Authentication > Email Templates >
+  Invite User, change the invitation CTA URL to
+  `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=invite`
+  (HTML source uses `&amp;type=invite`).
+- Keep the staging Redirect URLs wildcard
+  `https://mzs-group-*-mzs3.vercel.app/auth/confirm`.
+- Choose a new, accessible test inbox that is not in either Staging Auth
+  or Profiles. Add a *legacy* access_request with no auth_user_id in
+  **Staging only**. Approve and send via Admin > Relationships, then follow
+  invitation link, choose an 8+ character password and verify project rights.
+- Do not use a real client email or production accounts.
+
 ## Test workflow
 
 1. Confirm Vercel branch-specific Supabase keys point to staging, not prod.
