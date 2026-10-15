@@ -119,6 +119,18 @@ authorised for the sender domain (SPF, DKIM, DMARC).
 - Coordinate the schema migration and app release. Do not merge the draft
   PR without operator approval.
 
+## 15 October — additional negative-path checks
+
+Checked in MZS Staging only, using database transactions explicitly
+rolled back after each verification:
+- Rewriting the exact same access selection did NOT enqueue another mail.
+- Revoking an existing test offering did NOT enqueue a new-access mail.
+- The recorded outbox count remained 6 before and after both checks.
+- After rollback, the five assigned test offerings remained in place.
+- This establishes the database grant-diff behaviour; full end-to-end
+  browser checks for recovery, old invitations and failed SMTP delivery
+  remain required before releasing to production.
+
 ## Safe release order
 
 1. Review draft pull request and test it in a separate Supabase test project.
