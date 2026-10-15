@@ -117,7 +117,8 @@ export default function AdminPage() {
   useEffect(() => {
     mounted.current = true;
     setStagingPreview(
-      /^mzs-group-[a-z0-9-]+-mzs3\\.vercel\\.app$/i.test(window.location.hostname)
+      window.location.hostname.startsWith("mzs-group-") &&
+      window.location.hostname.endsWith("-mzs3.vercel.app")
     );
     const initial = new URLSearchParams(window.location.search).get("tab");
     if (tabs.some(([key]) => key === initial)) setTab(initial as Tab);
