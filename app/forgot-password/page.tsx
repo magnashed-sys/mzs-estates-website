@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
       // A generic response avoids revealing which addresses are registered.
       // This never activates accounts or changes project permissions.
       await createClient().auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: "https://www.mzsgroup.eu/reset-password",
+        redirectTo: window.location.origin + "/reset-password",
       });
     } catch {
       // Do not disclose whether the email is registered.
