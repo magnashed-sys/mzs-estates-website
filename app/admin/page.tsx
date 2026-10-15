@@ -55,6 +55,9 @@ export default function AdminPage() {
   const [activationRetrying, setActivationRetrying] = useState(false);
   const [activationRetryResult, setActivationRetryResult] = useState("");
   const [activationRetryError, setActivationRetryError] = useState("");
+  const [projectMailRetrying, setProjectMailRetrying] = useState(false);
+  const [projectMailRetryResult, setProjectMailRetryResult] = useState("");
+  const [projectMailRetryError, setProjectMailRetryError] = useState("");
   const [limit, setLimit] = useState(pageSize);
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
@@ -250,6 +253,50 @@ export default function AdminPage() {
     }
   }
 
+  async function retryStagingProjectNotifications() {
+    if (projectMailRetrying || locked) return;
+    if (!window.confirm(
+      "Send the existing pending project-access notifications in MZS Staging?\\n\\nThis does not add, remove or modify project access."
+    )) return;
+    setProjectMailRetrying(true);
+    setProjectMailRetryResult("");
+    setProjectMailRetryError("");
+    try {
+      const response = await fetch("/api/account/notifications/retry-project-staging", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const outcome: {
+        status?: string;
+        emailsAccepted?: number;
+        error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        throw new Error(outcome.error || "Project-email delivery could not be confirmed.");
+      }
+      if (outcome.status === "none") {
+        setProjectMailRetryResult("No pending project notifications need delivery.");
+      } else if (outcome.status === "sent") {
+        setProjectMailRetryResult(
+          String(outcome.emailsAccepted ?? 0) +
+          " project notification(s) accepted by the mail server. Check the test client's inbox."
+        );
+      } else {
+        setProjectMailRetryError(
+          "Some emails still require review. Check the staging notification queue before retrying."
+        );
+      }
+    } catch {
+      setProjectMailRetryError(
+        "The project notification attempt is unconfirmed. Check the staging queue before retrying."
+      );
+    } finally {
+      setProjectMailRetrying(false);
+    }
+  }
+
   function navigate(next: Tab) {
     if (locked || actionLock.current) return;
     setTab(next); setSearch(""); setLimit(pageSize); setNotice("");
@@ -392,6 +439,27 @@ export default function AdminPage() {
               {activationRetryError && (
                 <p className="admin-notice" role="alert">{activationRetryError}</p>
               )}
+              <div style={{ borderTop: "1px solid #514839", marginTop: 20, paddingTop: 18 }}>
+                <h4 className="admin-subtitle">Staging — Project notifications</h4>
+                <p className="admin-help">
+                  Send already queued notifications about newly granted test
+                  project access. Account approvals and project permissions
+                  will not be changed.
+                </p>
+                <button type="button" className="admin-button"
+                  disabled={projectMailRetrying || locked}
+                  onClick={() => void retryStagingProjectNotifications()}>
+                  {projectMailRetrying
+                    ? "Sending queued project emails..."
+                    : "Send pending project emails →"}
+                </button>
+                {projectMailRetryResult && (
+                  <p className="admin-help" role="status">{projectMailRetryResult}</p>
+                )}
+                {projectMailRetryError && (
+                  <p className="admin-notice" role="alert">{projectMailRetryError}</p>
+                )}
+              </div>
             </div>
           )}
         </div>
