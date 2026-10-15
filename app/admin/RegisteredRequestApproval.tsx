@@ -91,33 +91,34 @@ export default function RegisteredRequestApproval({
     )) return;
     setSaving(true); setError(""); setNotice("");
     try {
-      const supabase = createClient();
-      const { data, error: failure } = await supabase.rpc("approve_mzs_registered_request", {
-        p_request_id: request.id, p_role: role, p_offering_ids: selected,
+      // One guarded server call commits the approval and starts the
+      // activation email dispatch. A failed SMTP send never rolls back access.
+      const response = await fetch("/api/account/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          request_id: request.id,
+          role,
+          offering_ids: selected,
+        }),
       });
-      if (failure || data?.ok !== true) throw new Error("Approval was not confirmed. Please reload.");
+      const result: {
+        ok?: boolean;
+        emailStatus?: "sent" | "queued";
+        error?: string;
+      } = await response.json();
+      if (!response.ok || result.ok !== true) {
+        throw new Error(result.error || "Approval could not be confirmed. Please reload.");
+      }
       setCompleted(true);
       onApproved(request.id);
-      // Email is best-effort. A delivery failure never undoes a committed approval.
-      let mailText = "The activation email has been queued.";
-      try {
-        const { data: session } = await supabase.auth.getSession();
-        if (session.session?.access_token && typeof data.mail_event_id === "string") {
-          const response = await fetch("/api/account/notifications/dispatch", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + session.session.access_token,
-            },
-            body: JSON.stringify({ event_id: data.mail_event_id }),
-          });
-          const result = await response.json();
-          if (response.ok && result.status === "sent") mailText = "The activation email was sent.";
-        }
-      } catch {
-        // The database outbox retains the notification for a scheduled retry.
-      }
-      setNotice("The account is active and the selected project access has been saved. " + mailText);
+      setNotice(
+        "The account is active and the selected project access has been saved. " +
+        (result.emailStatus === "sent"
+          ? "The activation email was sent."
+          : "The activation email remains queued and can be retried.")
+      );
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to confirm approval.");
     } finally {
