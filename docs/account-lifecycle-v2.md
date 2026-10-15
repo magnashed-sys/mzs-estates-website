@@ -89,6 +89,36 @@ The Vercel environment-variable connector currently returns access denied, so
 those settings have NOT been read or edited. The SMTP provider must also be
 authorised for the sender domain (SPF, DKIM, DMARC).
 
+## 15 October 2026 — staging end-to-end test status
+
+**Verified in the isolated MZS Staging project:**
+- A new user registered with a password, received and clicked the Supabase
+  confirmation email, and remained inactive pending approval.
+- Admin approval activated the account and assigned exactly the selected
+  Investment offering. The activation email was initially queued, then
+  delivered on the first explicit retry. The approval flow was subsequently
+  changed to dispatch server-side in the same authorised request.
+- The test member subsequently gained Financing and Rental rights. Two
+  pending notification emails were delivered through the staging retry
+  action and recorded as `sent`, with one attempt each.
+- A later **new offering** assignment (Private Sale under the existing
+  TEST — Development Opportunity project) generated one new notification
+  and was sent **immediately**, with exactly one recorded delivery attempt.
+- In total, one application email, one activation email and three
+  new-access messages were recorded as sent. No pending messages remained.
+- The separate TEST — New Investment Opportunity project has **not yet**
+  been granted to the test client. Adding a separate new project is still
+  an optional final scenario.
+- All actual production deployments remained on the main branch.
+
+**Before production release:**
+- Review the pending GitHub draft PR and migration, test recovery/invite
+  compatibility, role and permission changes, and no-op updates.
+- Validate strict sender delivery and notification retries with production
+  SMTP settings and the configured scheduler.
+- Coordinate the schema migration and app release. Do not merge the draft
+  PR without operator approval.
+
 ## Safe release order
 
 1. Review draft pull request and test it in a separate Supabase test project.
