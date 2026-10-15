@@ -1,6 +1,6 @@
 # MZS Staging — isolated Supabase test environment
 
-Status: Database initialized. Vercel Preview integration not yet configured.
+Status (15 October 2026): Isolated Supabase Staging + Preview verified; registration, approval, new-access emails and security guards tested. Production remains untouched.
 
 ## Provisioned on 14 October 2026
 
@@ -119,6 +119,53 @@ Production accounts have NOT been copied. Before testing approval:
   to admin and active using a reviewed SQL command targeted to staging.
 - Use another freshly created test email account for the end-to-end
   client registration/verification/approval/notification test.
+
+## Final pre-production checks — 15 October 2026
+
+The staging and production projects are separate. Production is on `main`,
+and the feature PR remains a draft. Password minimum is **8 characters**.
+
+Completed without any lasting changes to the staging client:
+- Saving identical rights emits **zero** extra emails.
+- A rights removal correctly removes project+offering grants and emits
+  **zero** new-access emails; the transaction was rolled back.
+- A non-admin client cannot approve a registration or edit another
+  user's rights.
+- Unverified email registration cannot be approved (rolled-back test).
+- A pending registered application cannot be activated by bypassing
+  the verified approval RPC.
+- Case-insensitive duplicate profile email is rejected by the unique
+  database constraint (rolled-back test).
+- The live/legacy invitation and password-recovery RPC definitions remain
+  identical across Production and Staging.
+- Five client test offering rights and the six sent notification records
+  remained intact; no pending mail was left.
+
+### Staging-only password recovery (still requires interactive test)
+
+The Preview forgot-password form now gives Supabase a redirect at
+`https://<preview-host>/auth/confirm` (Production's existing
+`/reset-password` redirect is left alone).
+
+To test securely, in **Supabase Staging only**:
+1. Authentication > URL Configuration > Redirect URLs: add
+   `https://mzs-group-*-mzs3.vercel.app/auth/confirm`. Keep existing
+   `/registration-pending` redirect and Site URL unchanged.
+2. Authentication > Email Templates > **Reset Password**: paste the HTML
+   from `docs/mzs-staging-reset-password-email-template.html`.
+   It uses `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery`
+   and returns the user to Preview via the one-time verified callback.
+3. On the newest READY Preview, open `/forgot-password` as a test client;
+   request recovery and follow the email link privately. Confirm that the
+   page allows an **8-character minimum** and sends the user back to the
+   staging login; do not share tokens, links, or passwords.
+4. Test a fresh email that already has a staging account via
+   `/request-access`: the form should reject duplication immediately
+   (HTTP 409); do not share the password. Confirm no extra auth user
+   or mail queue record was created.
+
+Do not alter or replace the existing Production password-recovery or
+invitation templates during this staging verification.
 
 ## Test workflow
 
