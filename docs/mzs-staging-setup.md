@@ -81,6 +81,35 @@ In the separate MZS Staging project:
    use docs/mzs-confirm-signup-email-template.html. Do not change production
    email templates during staging preparation.
 
+## Preview signup readiness and confirmation URL
+
+The administrator's separate staging login was verified on 15 October 2026.
+A safe registration flag is still required before any new test applicant
+can register.
+
+- Supabase Staging Authentication > URL Configuration:
+  add the branch-specific, project-scoped wildcard Redirect URL
+  `https://mzs-group-*-mzs3.vercel.app/registration-pending`.
+  Keep the existing Site URL and exact redirect URL intact. This extra
+  allowlist entry is necessary because each GitHub Preview deployment
+  gets a different immutable hostname.
+- Vercel Environment Variables:
+  add `MZS_ACCOUNT_REGISTRATION_ENABLED=true`, selecting ONLY Preview
+  branch `feature/account-registration-verification-notifications`.
+  **Never set this flag for Production at this stage.**
+- Redeploy by committing to the feature branch, since Vercel environment
+  variable changes only apply to new builds.
+- Verify `/api/staging/readiness` on the NEW Preview has
+  `isolatedStagingDatabase=true`, all key probes true, and
+  `registrationEnabled=true` before entering any test account details.
+- Submit a fresh applicant using an email inbox under your control and
+  a new strong password. Use a private/incognito browser window for
+  the applicant to avoid overwriting the test admin's existing session.
+- A confirmation email is sent by **Supabase Staging Auth**; do not
+  confuse this with the already validated MZS SMTP notification test
+  from the Next.js app.
+- This staging registration does not create or change Production users.
+
 ## First staging administrator
 
 Production accounts have NOT been copied. Before testing approval:
