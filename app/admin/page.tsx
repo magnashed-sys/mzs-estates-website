@@ -11,12 +11,14 @@ import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type
 
 type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string; auth_user_id: string | null; email_verified_at: string | null };
 type Relationship = { id: string; full_name: string | null; email: string; role: "client" | "partner"; is_active: boolean; created_at: string };
+type CompanyAssociation = { id: string; user_id: string; legal_name: string; trading_name: string | null; registration_number: string | null; country: string | null; relationship_type: string };
+type ContactSnapshot = { user_id: string; phone: string | null; city: string | null; country: string | null };
 type Project = { id: string; title: string; location: string | null; status: string };
 type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
-type Tab = "overview" | "relationships" | "projects" | "bookings" | "analytics";
+type Tab = "overview" | "relationships" | "companies" | "projects" | "bookings" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
 const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
-const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
+const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["companies", "Companies"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
 const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Approved"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
 const pageSize = 12;
 const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
@@ -28,6 +30,8 @@ export default function AdminPage() {
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [invitations, setInvitations] = useState<PlannedInvitation[]>([]);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [memberCompanies, setMemberCompanies] = useState<CompanyAssociation[]>([]);
+  const [memberContacts, setMemberContacts] = useState<ContactSnapshot[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [error, setError] = useState("");
@@ -101,12 +105,16 @@ export default function AdminPage() {
         supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
         supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
         supabase.from("offerings").select("id,project_id,title,offering_type,status", { count: "exact" }).order("title"),
+        supabase.from("mzs_member_companies").select("id,user_id,legal_name,trading_name,registration_number,country,relationship_type", { count: "exact" }).order("legal_name"),
+        supabase.from("mzs_member_contact_details").select("user_id,phone,city,country", { count: "exact" }),
       ]);
       if (!current()) return;
       assertComplete(results);
       setRequests((results[0].data ?? []) as AccessRequest[]);
       setInvitations((results[1].data ?? []) as PlannedInvitation[]);
       setRelationships((results[2].data ?? []) as Relationship[]);
+      setMemberCompanies((results[5].data ?? []) as CompanyAssociation[]);
+      setMemberContacts((results[6].data ?? []) as ContactSnapshot[]);
       setProjects((results[3].data ?? []) as Project[]);
       setOfferings((results[4].data ?? []) as Offering[]);
       setUpdated(new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
@@ -145,9 +153,24 @@ export default function AdminPage() {
   const activeCount = relationships.filter(item => item.is_active).length;
   const visibleRequests = requests.filter(item => item.id === reviewing || (matchesRequestFilter(item.status, invitationMap.get(item.id), filter)
     && matchesSearch(search, item.full_name, item.email, item.company, item.country)));
-  const visibleAccounts = relationships.filter(item => matchesSearch(search, item.full_name, item.email)
-    && (accountRole === "all" || accountRole === item.role)
-    && (accountStatus === "all" || item.is_active === (accountStatus === "active")));
+  const companiesFor = (userId: string) => memberCompanies.filter(company => company.user_id === userId);
+  const contactFor = (userId: string) => memberContacts.find(contact => contact.user_id === userId);
+  const visibleAccounts = relationships.filter(item => {
+    const contact = contactFor(item.id);
+    const companies = companiesFor(item.id);
+    return matchesSearch(search, item.full_name, item.email, contact?.phone, contact?.city,
+      contact?.country, ...companies.flatMap(company => [
+        company.legal_name, company.trading_name, company.registration_number,
+        company.country, company.relationship_type,
+      ])) && (accountRole === "all" || accountRole === item.role)
+      && (accountStatus === "all" || item.is_active === (accountStatus === "active"));
+  });
+  const visibleCompanies = memberCompanies.filter(company => {
+    const linked = relationships.find(account => account.id === company.user_id);
+    return matchesSearch(search, company.legal_name, company.trading_name,
+      company.registration_number, company.country, company.relationship_type,
+      linked?.full_name, linked?.email);
+  });
   const visibleProjects = projects.filter(item => matchesSearch(search, item.title, item.location));
 
   async function checkSmtpConnection() {
@@ -489,9 +512,53 @@ export default function AdminPage() {
           <div className="admin-toolbar"><label className="admin-field">Account type<select disabled={locked} value={accountRole} onChange={event => { setAccountRole(event.target.value); setLimit(pageSize); }}><option value="all">All types</option><option value="client">Client</option><option value="partner">Partner</option></select></label><label className="admin-field">Status<select disabled={locked} value={accountStatus} onChange={event => { setAccountStatus(event.target.value); setLimit(pageSize); }}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
           <p className="admin-help">{visibleAccounts.length} matching accounts</p>
           {!visibleAccounts.length && <p className="admin-empty">No accounts match these filters.</p>}
-          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked || (!account.is_active && requests.some(req => req.auth_user_id === account.id && req.status !== "approved"))} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
+          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => {
+            const contact = contactFor(account.id);
+            const declaredCompanies = companiesFor(account.id);
+            return <article key={account.id} className="admin-request">
+              <div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div>
+              <div className="admin-request-details">
+                <p>Created {date(account.created_at)}</p>
+                {(contact?.city || contact?.country) && <p>{[contact.city, contact.country].filter(Boolean).join(" · ")}</p>}
+                {contact?.phone && <p>{contact.phone}</p>}
+              </div>
+              {declaredCompanies.length > 0 && <div className="admin-interests">
+                {declaredCompanies.map(company => <span key={company.id}>{company.legal_name} · {company.relationship_type.replace(/_/g, " ")}</span>)}
+              </div>}
+              <div className="admin-actions admin-space-top">
+                <Link onClick={guardLink} className="admin-button admin-button-primary" href={"/admin/relationships/" + encodeURIComponent(account.id)}>Open relationship dossier →</Link>
+                <Link onClick={guardLink} className="admin-button" href={"/admin/project-access?user=" + encodeURIComponent(account.id)}>Manage project access →</Link>
+                <button className="admin-button" disabled={locked || (!account.is_active && requests.some(req => req.auth_user_id === account.id && req.status !== "approved"))} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button>
+              </div>
+            </article>;
+          })}</div>
           {visibleAccounts.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more accounts</button>}
         </>}
+      </>}
+
+      {tab === "companies" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">Relationship affiliations</p><h2>Company directory.</h2></div><span>{memberCompanies.length} declared records</span></div>
+        <p className="admin-help">Each entry is a relationship self-declared by a client or partner, not a verified legal entity. Company declarations never assign project rights.</p>
+        <label className="admin-field admin-search">Search companies and members<input type="search" value={search} disabled={locked} onChange={event => setSearch(event.target.value)} placeholder="Company, member, registration number or country" /></label>
+        <p className="admin-help">{visibleCompanies.length} matching company affiliations</p>
+        {!visibleCompanies.length && <p className="admin-empty">No member-declared companies match the current search.</p>}
+        <div className="admin-requests">
+          {visibleCompanies.map(company => {
+            const member = relationships.find(account => account.id === company.user_id);
+            return <article key={company.id} className="admin-request">
+              <div className="admin-request-top"><div><h3>{company.legal_name}</h3>
+                {company.trading_name && <p>{company.trading_name}</p>}
+              </div><span className="admin-status">Self-declared</span></div>
+              <div className="admin-request-details">
+                <p>{[company.country, company.registration_number].filter(Boolean).join(" · ") || "No additional company details supplied"}</p>
+                <p>Relationship: {company.relationship_type.replace(/_/g, " ")} · {member?.full_name || member?.email || "Member unavailable"}</p>
+              </div>
+              {member && <div className="admin-actions admin-space-top">
+                <Link onClick={guardLink} className="admin-button" href={"/admin/relationships/" + encodeURIComponent(member.id)}>Open relationship dossier →</Link>
+              </div>}
+            </article>;
+          })}
+        </div>
       </>}
 
       {tab === "projects" && <>
