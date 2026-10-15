@@ -148,12 +148,6 @@ export default function ProjectAccessPage() {
       setSelected(expected);
       setNotice("Project access saved and verified." + mailNotice);
     } catch {
-          // The durable outbox remains authoritative.
-        }
-      }
-      setSelected(expected);
-      setNotice("Project access saved and verified." + mailNotice);
-    } catch {
       if (mounted.current) { setUncertain(true); setNotice("The final access state could not be verified. Refresh permissions before another change. The save may already have completed."); }
     } finally { actionLock.current = false; if (mounted.current) setSaving(false); }
   }
