@@ -13,7 +13,21 @@ export type DeliveryResult =
   | { status: "sent"; id: string }
   | { status: "none" | "not_configured" | "failed"; id?: string };
 
-const SITE = "https://www.mzsgroup.eu";
+const PRODUCTION_SITE = "https://www.mzsgroup.eu";
+// Staging notifications link to the actual Preview deployment, never the live
+// platform. VERCEL_URL is a deployment-provided hostname, not user input.
+function siteForNotification(): string {
+  if (process.env.VERCEL_ENV === "preview" &&
+      process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co") {
+    const host = process.env.VERCEL_URL || "";
+    if (/^mzs-group-[a-z0-9-]+\.vercel\.app$/i.test(host)) {
+      return "https://" + host;
+    }
+    // Never misdirect staging users to production.
+    throw new Error("MZS Staging email link is not configured safely");
+  }
+  return PRODUCTION_SITE;
+}
 const GOLD = "#d5c09a";
 const escapeHtml = (value: string) => value
   .replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -140,11 +154,12 @@ export async function sendSmtpTestMail(recipient: string): Promise<boolean> {
 function template(event: EventRow, recipientName: string) {
   const name = recipientName.trim().split(/\s+/)[0] || "Member";
   const eName = escapeHtml(name);
+  const site = siteForNotification();
   let subject = "";
   let headline = "";
   let intro = "";
   let plain = "";
-  let link = SITE + "/login";
+  let link = site + "/login";
   let linkTitle = "PRIVATE LOGIN";
   let detailsHtml = "";
 
@@ -155,7 +170,7 @@ function template(event: EventRow, recipientName: string) {
     const requester = escapeHtml(str(event.payload?.requester) || "New applicant");
     detailsHtml = "<p style='color:#d5c09a'>Applicant: " + requester + "</p>";
     plain = "A new account request has been received. Review applications in the MZS administrator dashboard.";
-    link = SITE + "/admin?tab=relationships";
+    link = site + "/admin?tab=relationships";
     linkTitle = "OPEN ADMIN DASHBOARD";
   } else if (event.event_type === "account_activated") {
     subject = "Your MZS Group account is now active";
@@ -180,7 +195,7 @@ function template(event: EventRow, recipientName: string) {
     plain = "New access is available: " + project +
       (types.length ? " (" + types.join(", ") + ")." : ".") +
       " Sign in to review your updated collection.";
-    link = SITE + "/private";
+    link = site + "/private";
     linkTitle = "EXPLORE MY COLLECTION";
   } else {
     throw new Error("Unsupported notification type");
