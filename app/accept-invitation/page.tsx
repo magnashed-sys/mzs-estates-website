@@ -61,8 +61,8 @@ export default function AcceptInvitationPage() {
       setError("Please enter your full first and last name.");
       return;
     }
-    if (password.length < 12) {
-      setError("Please use at least 12 characters.");
+    if (password.length < 8) {
+      setError("Please use at least 8 characters.");
       return;
     }
     if (password !== confirmation) {
@@ -150,12 +150,12 @@ export default function AcceptInvitationPage() {
                 disabled={status === "saving"}/>
             </label>
             <label>New Password
-              <input type="password" autoComplete="new-password" minLength={12} required
+              <input type="password" autoComplete="new-password" minLength={8} required
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 disabled={status === "saving"}/>
             </label>
             <label>Confirm Password
-              <input type="password" autoComplete="new-password" minLength={12} required
+              <input type="password" autoComplete="new-password" minLength={8} required
                 value={confirmation} onChange={(e) => setConfirmation(e.target.value)}
                 disabled={status === "saving"}/>
             </label>

@@ -23,8 +23,15 @@ export default function ForgotPasswordPage() {
     try {
       // A generic response avoids revealing which addresses are registered.
       // This never activates accounts or changes project permissions.
+      // MZS Staging uses a custom one-time verification callback so that
+      // password recovery stays inside the isolated Preview environment.
+      // Production retains its established recovery redirect.
+      const previewHost = window.location.hostname;
+      const isolatedPreview = previewHost.startsWith("mzs-group-") &&
+        previewHost.endsWith("-mzs3.vercel.app");
       await createClient().auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: "https://www.mzsgroup.eu/reset-password",
+        redirectTo: window.location.origin +
+          (isolatedPreview ? "/auth/confirm" : "/reset-password"),
       });
     } catch {
       // Do not disclose whether the email is registered.

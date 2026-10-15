@@ -9,7 +9,7 @@ import BookingManagement from "./BookingManagement";
 import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
 
-type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string };
+type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string; auth_user_id: string | null; email_verified_at: string | null };
 type Relationship = { id: string; full_name: string | null; email: string; role: "client" | "partner"; is_active: boolean; created_at: string };
 type Project = { id: string; title: string; location: string | null; status: string };
 type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
@@ -17,7 +17,7 @@ type Tab = "overview" | "relationships" | "projects" | "bookings" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
 const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
 const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
-const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Awaiting invitation"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
+const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Approved"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
 const pageSize = 12;
 const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
 function date(value: string) { return new Date(value).toLocaleDateString("en-GB", { timeZone: "Europe/Madrid" }); }
@@ -43,6 +43,21 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [accountRole, setAccountRole] = useState("all");
   const [accountStatus, setAccountStatus] = useState("all");
+  const [smtpStatus, setSmtpStatus] = useState<{
+    configured: boolean; connectionVerified: boolean; missing: string[];
+  } | null>(null);
+  const [smtpChecking, setSmtpChecking] = useState(false);
+  const [smtpCheckError, setSmtpCheckError] = useState("");
+  const [smtpTestSending, setSmtpTestSending] = useState(false);
+  const [smtpTestResult, setSmtpTestResult] = useState("");
+  const [smtpTestError, setSmtpTestError] = useState("");
+  const [stagingPreview, setStagingPreview] = useState(false);
+  const [activationRetrying, setActivationRetrying] = useState(false);
+  const [activationRetryResult, setActivationRetryResult] = useState("");
+  const [activationRetryError, setActivationRetryError] = useState("");
+  const [projectMailRetrying, setProjectMailRetrying] = useState(false);
+  const [projectMailRetryResult, setProjectMailRetryResult] = useState("");
+  const [projectMailRetryError, setProjectMailRetryError] = useState("");
   const [limit, setLimit] = useState(pageSize);
   const [reviewing, setReviewing] = useState<string | null>(null);
   const [bookingEntry, setBookingEntry] = useState<"bookings" | "cancellations">("bookings");
@@ -62,8 +77,26 @@ export default function AdminPage() {
       const { data: profile, error: profileError } = await supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single();
       if (!current()) return;
       if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
+      // Keep the preview administration usable while the new database
+      // columns are still under migration review. Production is not modified.
+      async function loadRequestRecords() {
+        const next = await supabase.from("access_requests")
+          .select("id,full_name,email,company,country,interests,message,status,created_at,auth_user_id,email_verified_at",
+            { count: "exact" }).order("created_at", { ascending: false });
+        if (!next.error || next.error.code !== "42703") return next;
+        const legacy = await supabase.from("access_requests")
+          .select("id,full_name,email,company,country,interests,message,status,created_at",
+            { count: "exact" }).order("created_at", { ascending: false });
+        return {
+          ...legacy,
+          data: legacy.data?.map(request => ({
+            ...request, auth_user_id: null, email_verified_at: null,
+          })) ?? null,
+        };
+      }
+
       const results = await Promise.all([
-        supabase.from("access_requests").select("id,full_name,email,company,country,interests,message,status,created_at", { count: "exact" }).order("created_at", { ascending: false }),
+        loadRequestRecords(),
         supabase.from("access_invitations").select("id,request_id,email,requested_role,status,invited_at", { count: "exact" }).order("invited_at", { ascending: false }),
         supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
         supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
@@ -86,6 +119,10 @@ export default function AdminPage() {
 
   useEffect(() => {
     mounted.current = true;
+    setStagingPreview(
+      window.location.hostname.startsWith("mzs-group-") &&
+      window.location.hostname.endsWith("-mzs3.vercel.app")
+    );
     const initial = new URLSearchParams(window.location.search).get("tab");
     if (tabs.some(([key]) => key === initial)) setTab(initial as Tab);
     void reload();
@@ -112,6 +149,153 @@ export default function AdminPage() {
     && (accountRole === "all" || accountRole === item.role)
     && (accountStatus === "all" || item.is_active === (accountStatus === "active")));
   const visibleProjects = projects.filter(item => matchesSearch(search, item.title, item.location));
+
+  async function checkSmtpConnection() {
+    if (smtpChecking) return;
+    setSmtpChecking(true);
+    setSmtpStatus(null);
+    setSmtpCheckError("");
+    try {
+      const response = await fetch("/api/account/notifications/status", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const result: {
+        configured?: boolean; connectionVerified?: boolean;
+        missing?: string[]; error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to verify SMTP settings");
+      }
+      setSmtpStatus({
+        configured: result.configured === true,
+        connectionVerified: result.connectionVerified === true,
+        missing: Array.isArray(result.missing) ? result.missing : [],
+      });
+    } catch {
+      setSmtpCheckError("Unable to check the mail server. Please try again later.");
+    } finally {
+      setSmtpChecking(false);
+    }
+  }
+
+  async function sendSmtpTest() {
+    if (smtpTestSending || smtpChecking || !smtpStatus?.connectionVerified) return;
+    if (!window.confirm(
+      "Send one MZS Group test notification to your own administrator email address?\\n\\nNo clients, partners or project permissions will be affected."
+    )) return;
+    setSmtpTestSending(true);
+    setSmtpTestResult("");
+    setSmtpTestError("");
+    try {
+      const response = await fetch("/api/account/notifications/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const payload: { accepted?: boolean; message?: string; error?: string } =
+        await response.json();
+      if (!response.ok || !payload.accepted) {
+        throw new Error(payload.error || "The SMTP server did not accept the test.");
+      }
+      setSmtpTestResult(
+        "The SMTP server accepted the test email. Please check your administrator inbox and spam folder to confirm it arrived."
+      );
+    } catch {
+      setSmtpTestError(
+        "The test email was not confirmed as accepted. Check the server logs before trying again."
+      );
+    } finally {
+      setSmtpTestSending(false);
+    }
+  }
+
+  async function retryStagingActivationMail() {
+    if (activationRetrying || locked) return;
+    if (!window.confirm(
+      "Send the pending activation email to the already approved test client in MZS Staging?\\n\\nNo account status, projects or permissions will change."
+    )) return;
+    setActivationRetrying(true);
+    setActivationRetryError("");
+    setActivationRetryResult("");
+    try {
+      const response = await fetch("/api/account/notifications/retry-staging", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const result: { status?: string; error?: string; note?: string } =
+        await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Staging activation email retry not confirmed.");
+      }
+      if (result.status === "sent") {
+        setActivationRetryResult(
+          "The activation email has been accepted by the mail server. Check the test client's inbox or spam folder."
+        );
+      } else if (result.status === "none") {
+        setActivationRetryResult(
+          "There are no pending activation emails available for retry."
+        );
+      } else {
+        setActivationRetryError(
+          "The activation email is not confirmed as sent. Please check the mail queue before trying again."
+        );
+      }
+    } catch {
+      setActivationRetryError(
+        "Unable to confirm delivery. Do not retry repeatedly; review the staging queue first."
+      );
+    } finally {
+      setActivationRetrying(false);
+    }
+  }
+
+  async function retryStagingProjectNotifications() {
+    if (projectMailRetrying || locked) return;
+    if (!window.confirm(
+      "Send the existing pending project-access notifications in MZS Staging?\\n\\nThis does not add, remove or modify project access."
+    )) return;
+    setProjectMailRetrying(true);
+    setProjectMailRetryResult("");
+    setProjectMailRetryError("");
+    try {
+      const response = await fetch("/api/account/notifications/retry-project-staging", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}",
+      });
+      const outcome: {
+        status?: string;
+        emailsAccepted?: number;
+        error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        throw new Error(outcome.error || "Project-email delivery could not be confirmed.");
+      }
+      if (outcome.status === "none") {
+        setProjectMailRetryResult("No pending project notifications need delivery.");
+      } else if (outcome.status === "sent") {
+        setProjectMailRetryResult(
+          String(outcome.emailsAccepted ?? 0) +
+          " project notification(s) accepted by the mail server. Check the test client's inbox."
+        );
+      } else {
+        setProjectMailRetryError(
+          "Some emails still require review. Check the staging notification queue before retrying."
+        );
+      }
+    } catch {
+      setProjectMailRetryError(
+        "The project notification attempt is unconfirmed. Check the staging queue before retrying."
+      );
+    } finally {
+      setProjectMailRetrying(false);
+    }
+  }
 
   function navigate(next: Tab) {
     if (locked || actionLock.current) return;
@@ -199,6 +383,86 @@ export default function AdminPage() {
       </>}
 
       {tab === "relationships" && <>
+        <div className="admin-panel" style={{ marginBottom: 28 }}>
+          <h3 className="admin-subtitle">Account notification email</h3>
+          <p className="admin-help">
+            Check whether MZS Group can connect securely to the existing
+            invitation mailbox. No passwords or email account details are shown.
+          </p>
+          <button className="admin-button" type="button"
+            disabled={smtpChecking || locked}
+            onClick={() => void checkSmtpConnection()}>
+            {smtpChecking ? "Checking connection..." : "Verify SMTP connection"}
+          </button>
+          {smtpStatus && (
+            <p role="status" className="admin-help">
+              {smtpStatus.connectionVerified
+                ? "SMTP login and secure connection verified. A real delivery test is still required before release."
+                : smtpStatus.configured
+                  ? "SMTP settings detected but the connection test failed. Check credentials, network and server policy in Vercel."
+                  : "Mail server settings are incomplete: " + smtpStatus.missing.join(", ")}
+            </p>
+          )}
+          {smtpStatus?.connectionVerified && (
+            <div style={{ marginTop: 18 }}>
+              <p className="admin-help">
+                The next check sends one real message only to your own
+                administrator mailbox. It does not register or contact customers.
+              </p>
+              <button type="button" className="admin-button"
+                disabled={smtpTestSending || smtpChecking || locked}
+                onClick={() => void sendSmtpTest()}>
+                {smtpTestSending ? "Sending test email..." : "Send test email to my address →"}
+              </button>
+            </div>
+          )}
+          {smtpTestResult && <p className="admin-help" role="status">{smtpTestResult}</p>}
+          {smtpTestError && <p className="admin-notice" role="alert">{smtpTestError}</p>}
+          {smtpCheckError && <p className="admin-notice" role="alert">{smtpCheckError}</p>}
+          {stagingPreview && (
+            <div style={{ borderTop: "1px solid #514839", marginTop: 26, paddingTop: 18 }}>
+              <h4 className="admin-subtitle">Staging — Activation email</h4>
+              <p className="admin-help">
+                One approved test account has an activation email in the queue.
+                Retry only the existing message; no account or project permissions change.
+              </p>
+              <button type="button" className="admin-button"
+                disabled={activationRetrying || locked}
+                onClick={() => void retryStagingActivationMail()}>
+                {activationRetrying
+                  ? "Checking queued activation email..."
+                  : "Send pending activation email →"}
+              </button>
+              {activationRetryResult && (
+                <p className="admin-help" role="status">{activationRetryResult}</p>
+              )}
+              {activationRetryError && (
+                <p className="admin-notice" role="alert">{activationRetryError}</p>
+              )}
+              <div style={{ borderTop: "1px solid #514839", marginTop: 20, paddingTop: 18 }}>
+                <h4 className="admin-subtitle">Staging — Project notifications</h4>
+                <p className="admin-help">
+                  Send already queued notifications about newly granted test
+                  project access. Account approvals and project permissions
+                  will not be changed.
+                </p>
+                <button type="button" className="admin-button"
+                  disabled={projectMailRetrying || locked}
+                  onClick={() => void retryStagingProjectNotifications()}>
+                  {projectMailRetrying
+                    ? "Sending queued project emails..."
+                    : "Send pending project emails →"}
+                </button>
+                {projectMailRetryResult && (
+                  <p className="admin-help" role="status">{projectMailRetryResult}</p>
+                )}
+                {projectMailRetryError && (
+                  <p className="admin-notice" role="alert">{projectMailRetryError}</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         <div className="admin-section-heading"><div><p className="eyebrow">Selected relationships</p><h2>People & access.</h2></div></div>
         <div className="admin-toolbar"><div className="admin-filters">{(["requests", "accounts"] as const).map(view => <button key={view} disabled={locked} aria-pressed={relationshipView === view} onClick={() => { setRelationshipView(view); setLimit(pageSize); setSearch(""); }}>{view === "requests" ? "Requests & invitations" : "Accounts"}</button>)}</div><label className="admin-field">Search relationships<input type="search" value={search} disabled={locked} placeholder="Name, email or company" onChange={event => { setSearch(event.target.value); setLimit(pageSize); }} /></label></div>
         {relationshipView === "requests" ? <>
@@ -207,13 +471,15 @@ export default function AdminPage() {
           {!visibleRequests.length && <p className="admin-empty">No requests match these filters.</p>}
           <div className="admin-requests">{visibleRequests.slice(0, limit).map(request => {
             const invitation = invitationMap.get(request.id);
-            const stage = requestStage(request.status, invitation);
+            const stage = request.auth_user_id
+              ? (request.status === "approved" ? "activated" : request.email_verified_at ? "verified_pending" : "awaiting_email_verification")
+              : requestStage(request.status, invitation);
             return <article key={request.id} className="admin-request">
               <div className="admin-request-top"><div><h3>{request.full_name}</h3><p>{request.email}</p></div><span className={`admin-status ${stage === "needs_review" ? "admin-status-warning" : ""}`}>{stage.replace(/_/g, " ")}</span></div>
               <div className="admin-request-details">{request.company && <p>{request.company}</p>}{request.country && <p>{request.country}</p>}<p>Received {date(request.created_at)}</p></div>
               <div className="admin-interests">{(request.interests ?? []).map(interest => <span key={interest}>{labels[interest] ?? interest}</span>)}</div>
               {request.message && <p className="admin-request-message">{request.message}</p>}
-              {!invitation && ["pending", "approved"].includes(request.status) && <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={locked} onClick={() => setReviewing(request.id)}>{request.status === "pending" ? "Review & select projects" : "Project selection & invitation"}</button>{request.status === "pending" && <button className="admin-button" disabled={locked} onClick={() => decline(request)}>Decline</button>}</div>}
+              {!invitation && (request.auth_user_id ? request.status === "pending" : ["pending", "approved"].includes(request.status)) && <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={locked} onClick={() => setReviewing(request.id)}>{request.auth_user_id ? "Review verified account" : request.status === "pending" ? "Review & select projects" : "Project selection & invitation"}</button>{request.status === "pending" && <button className="admin-button" disabled={locked} onClick={() => decline(request)}>Decline</button>}</div>}
               {reviewing === request.id && <RequestProjectApproval request={request} onApproved={id => setRequests(items => items.map(item => item.id === id ? { ...item, status: "approved" } : item))} onInvited={recordInvitation} onClose={() => { setReviewing(null); void reload(); }} />}
               {invitation && <p className="admin-help admin-space-top">{stage === "registered" ? "Registration completed. Manage assigned rights in Project Access." : stage === "invited" ? "Invitation sent. Registration is a separate step." : "Check the invitation outcome before another attempt."}</p>}
             </article>;
@@ -223,7 +489,7 @@ export default function AdminPage() {
           <div className="admin-toolbar"><label className="admin-field">Account type<select disabled={locked} value={accountRole} onChange={event => { setAccountRole(event.target.value); setLimit(pageSize); }}><option value="all">All types</option><option value="client">Client</option><option value="partner">Partner</option></select></label><label className="admin-field">Status<select disabled={locked} value={accountStatus} onChange={event => { setAccountStatus(event.target.value); setLimit(pageSize); }}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
           <p className="admin-help">{visibleAccounts.length} matching accounts</p>
           {!visibleAccounts.length && <p className="admin-empty">No accounts match these filters.</p>}
-          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
+          <div className="admin-requests">{visibleAccounts.slice(0, limit).map(account => <article key={account.id} className="admin-request"><div className="admin-request-top"><div><h3>{account.full_name || "Unnamed relationship"}</h3><p>{account.email}</p></div><span className="admin-status">{account.is_active ? "Active" : "Inactive"} · {account.role}</span></div><div className="admin-request-details"><p>Created {date(account.created_at)}</p></div><div className="admin-actions admin-space-top"><Link onClick={guardLink} className="admin-button" href={`/admin/project-access?user=${encodeURIComponent(account.id)}`}>Manage project access →</Link><button className="admin-button" disabled={locked || (!account.is_active && requests.some(req => req.auth_user_id === account.id && req.status !== "approved"))} onClick={() => changeAccount(account)}>{busy === account.id ? "Processing…" : account.is_active ? "Deactivate" : "Activate"}</button></div></article>)}</div>
           {visibleAccounts.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more accounts</button>}
         </>}
       </>}

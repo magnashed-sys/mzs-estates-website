@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createClient } from "../../lib/supabase/client";
 import { sameIds } from "./admin-model";
+import RegisteredRequestApproval from "./RegisteredRequestApproval";
 
 type Role = "client" | "partner";
-type Request = { id: string; full_name: string; email: string; status: string };
+type Request = { id: string; full_name: string; email: string; status: string; auth_user_id?: string | null; email_verified_at?: string | null };
 type Project = { id: string; title: string; location: string | null };
 type Offering = { id: string; project_id: string; title: string | null; offering_type: string };
 type Plan = { requested_role: Role; revision: number; applied_at: string | null };
@@ -36,7 +37,17 @@ function messageOf(error: unknown) {
     ? error.message : "The action could not be verified. Reload before another attempt.";
 }
 
-export default function RequestProjectApproval({ request, onApproved, onInvited, onClose }: Props) {
+export default function RequestProjectApproval(props: Props) {
+  // New signups already have an inactive Auth account. Legacy requests still
+  // use the original invitation path and are not migrated implicitly.
+  if (props.request.auth_user_id) {
+    return <RegisteredRequestApproval
+      request={props.request} onApproved={props.onApproved} onClose={props.onClose} />;
+  }
+  return <LegacyInvitationApproval {...props} />;
+}
+
+function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: Props) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [role, setRole] = useState<Role>("client");
