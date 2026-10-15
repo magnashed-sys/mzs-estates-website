@@ -65,6 +65,19 @@ SQL migration: `supabase/migrations/20261015_member_profile_companies_v1.sql`.
   Staging Auth accounts/project/offering grants unchanged.
 - GitHub/Vercel Preview builds compile independently of Production.
 
+### Additional security checks
+
+- Active users cannot insert a company row on behalf of another user.
+- Inactive users cannot SELECT their prior address details, even if a
+  row exists; contact-read RLS includes the active-member guard.
+- Cross-client company UPDATEs affect no rows.
+- Service role retains read access; anonymous access is not granted.
+- Supabase Security Advisor confirms RLS is enabled on both new tables.
+- The security-definer contact-update RPC is intentionally executable
+  by authenticated users because it explicitly validates `auth.uid()`,
+  active role and field lengths. Direct authenticated table UPDATE is
+  **not** granted for personal address records.
+
 ## IMPORTANT: new Preview branch isolation
 
 The previous account-registration staging variables were configured only
