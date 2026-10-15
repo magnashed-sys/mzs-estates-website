@@ -30,7 +30,8 @@ grant select on public.mzs_member_contact_details to authenticated;
 -- Personal updates use a verified RPC rather than direct client UPDATE.
 create policy mzs_member_contact_read on public.mzs_member_contact_details
   for select to authenticated using (
-    user_id=(select auth.uid()) or (select public.is_admin())
+    (user_id=(select auth.uid()) and (select public.is_active_member()))
+    or (select public.is_admin())
   );
 
 create table if not exists public.mzs_member_companies (
