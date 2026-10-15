@@ -104,8 +104,26 @@ export default function ProjectAccessPage() {
     actionLock.current = true; setSaving(true); setNotice("");
     try {
       const supabase = createClient();
-      const { data: result, error: failure } = await supabase.rpc("set_relationship_project_access", { p_user_id: userId, p_project_id: projectId, p_offering_ids: expected });
-      if (failure || result !== expected.length) throw new Error("Save could not be confirmed");
+      // Save and start the notification from one authenticated server request.
+      // Even if SMTP fails, permissions remain committed and the email is queued.
+      const response = await fetch("/api/account/access/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          user_id: userId, project_id: projectId, offering_ids: expected,
+        }),
+      });
+      const result: {
+        ok?: boolean;
+        grantedCount?: number;
+        emailStatus?: "none" | "sent" | "queued";
+        emailsAccepted?: number;
+      } = await response.json();
+      if (!response.ok || result.ok !== true ||
+          result.grantedCount !== expected.length) {
+        throw new Error("Save could not be confirmed. Refresh permissions.");
+      }
       const [pg, og] = await Promise.all([
         supabase.from("project_access").select("user_id,project_id", { count: "exact" }).eq("user_id", userId).eq("project_id", projectId),
         supabase.from("offering_access").select("user_id,offering_id", { count: "exact" }).eq("user_id", userId),
@@ -119,32 +137,17 @@ export default function ProjectAccessPage() {
         projectGrants: [...current.projectGrants.filter(g => !(g.user_id === userId && g.project_id === projectId)), ...((pg.data ?? []) as ProjectGrant[])],
         offeringGrants: [...current.offeringGrants.filter(g => !(g.user_id === userId && allProjectIds.has(g.offering_id))), ...verified],
       }));
-      // Notify only after an authoritative, successful permission change.
-      // The database enqueues only genuinely added offerings; an email failure
-      // never reverses or duplicates project access.
+      // The server already dispatched (or safely queued) any new-access
+      // notification. Do not send again from the browser.
       let mailNotice = "";
-      if (added.length > 0 && profile.is_active) {
-        mailNotice = " New access notifications remain queued for delivery.";
-        try {
-          const { data: session } = await supabase.auth.getSession();
-          if (session.session?.access_token) {
-            const res = await fetch("/api/account/notifications/dispatch", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + session.session.access_token,
-              },
-              body: JSON.stringify({
-                recipient_user_id: userId, event_type: "new_project_access",
-              }),
-            });
-            const result = await res.json();
-            if (res.ok && Array.isArray(result.results) &&
-                result.results.some((item: { status: string }) => item.status === "sent")) {
-              mailNotice = " The member was notified by email.";
-            }
-          }
-        } catch {
+      if (result.emailStatus === "sent") {
+        mailNotice = " The new-access email was accepted by the mail server.";
+      } else if (result.emailStatus === "queued") {
+        mailNotice = " The new-access email remains queued for delivery.";
+      }
+      setSelected(expected);
+      setNotice("Project access saved and verified." + mailNotice);
+    } catch {
           // The durable outbox remains authoritative.
         }
       }
