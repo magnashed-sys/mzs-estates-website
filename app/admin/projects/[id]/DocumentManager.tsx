@@ -111,14 +111,24 @@ export default function DocumentManager({ projectId, offerings, documents, onRel
 
   async function openPrivate(doc: ProjectDocument) {
     if (busy) return;
+    // Reserve the new tab immediately on the click; waiting for the signed
+    // URL first can trigger popup blocking in Safari and other browsers.
+    const newTab = window.open("about:blank", "_blank");
+    if (!newTab) {
+      setError("Your browser blocked the new tab. Allow pop-ups for MZS Group and try again.");
+      return;
+    }
+    newTab.opener = null;
     setBusy(true); setError("");
     try {
       const { data, error: failure } = await createClient().storage.from(BUCKET)
         .createSignedUrl(doc.file_path, 60);
       if (failure || !data?.signedUrl) throw new Error("Secure access to this file could not be confirmed.");
-      window.location.assign(data.signedUrl);
+      newTab.location.replace(data.signedUrl);
     } catch (cause) {
+      newTab.close();
       setError(cause instanceof Error ? cause.message : "Unable to open document.");
+    } finally {
       setBusy(false);
     }
   }
@@ -164,7 +174,7 @@ export default function DocumentManager({ projectId, offerings, documents, onRel
               ? offerings.find(o=>o.id === doc.offering_id)?.title || "Selected offering only"
               : "All members authorized for this project"}</p>
             <div className={styles.actions}>
-              <button className="admin-button" type="button" disabled={busy} onClick={()=>void openPrivate(doc)}>Open privately</button>
+              <button className="admin-button" type="button" disabled={busy} onClick={()=>void openPrivate(doc)}>Open in new tab ↗</button>
               <button className="admin-button" type="button" disabled={busy} onClick={()=>void changePublication(doc)}>{doc.is_published ? "Unpublish" : "Publish"}</button>
               <button className="admin-button" type="button" disabled={busy} onClick={()=>void remove(doc)}>Delete</button>
             </div>
