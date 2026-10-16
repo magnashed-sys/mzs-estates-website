@@ -286,7 +286,7 @@ export default function PrivatePage() {
               </div>
               <aside className={styles.welcomeAside} aria-label="Collection overview">
                 <span className={styles.asideKicker}>YOUR PRIVATE ACCESS</span>
-                <div className={styles.asideNumber}>{items.length.toString().padStart(2, "0")}</div>
+                <div className={styles.asideNumber}>{String(items.length)}</div>
                 <p className={styles.asideDescription}>
                   {items.length === 1 ? "Personally selected property" : "Personally selected properties"}
                 </p>
@@ -313,12 +313,12 @@ export default function PrivatePage() {
                     onClick={() => setActive(group.id)}
                   >
                     <span className={styles.categoryTop}>
-                      <span className={styles.categoryIndex}>0{index + 1} / {group.shortTitle}</span>
+                      <span className={styles.categoryIndex}>{index + 1} / {group.shortTitle}</span>
                       <span className={styles.categoryArrow} aria-hidden="true">↗</span>
                     </span>
                     <span className={styles.categoryBody}>
                       <span className={styles.categoryTitle}>{group.title}</span>
-                      <span className={styles.categoryCount}>{String(group.projects.length).padStart(2, "0")}</span>
+                      <span className={styles.categoryCount}>{String(group.projects.length)}</span>
                     </span>
                   </button>
                 ))}
@@ -328,19 +328,21 @@ export default function PrivatePage() {
                 <div className={styles.opportunitiesHeading}>
                   <div>
                     <p className={styles.sectionKicker}>SELECTED EXCLUSIVELY FOR YOU</p>
-                    <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.projects.length).padStart(2, "0")}</span></h2>
+                    <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.projects.length)}</span></h2>
                   </div>
                   <p>{selected.description}</p>
                 </div>
 
                 {selected.projects.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <span className={styles.emptyMark} aria-hidden="true">✦</span>
-                    <div>
-                      <h3>No opportunities assigned yet.</h3>
-                      <p>Your MZS relationship manager will notify you when selected opportunities become available.</p>
+                  active === "capital" ? null : (
+                    <div className={styles.emptyState}>
+                      <span className={styles.emptyMark} aria-hidden="true">✦</span>
+                      <div>
+                        <h3>No opportunities assigned yet.</h3>
+                        <p>Your MZS relationship manager will notify you when selected opportunities become available.</p>
+                      </div>
                     </div>
-                  </div>
+                  )
                 ) : (
                   <div className={styles.properties}>
                     {selected.projects.map((project) => {
@@ -392,6 +394,15 @@ export default function PrivatePage() {
                 )}
               </div>
               {active === "capital" && <CapitalRequestForms />}
+              {active === "capital" && selected.projects.length === 0 && (
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyMark} aria-hidden="true">✦</span>
+                  <div>
+                    <h3>No opportunities assigned yet.</h3>
+                    <p>Your MZS relationship manager will notify you when selected opportunities become available.</p>
+                  </div>
+                </div>
+              )}
             </section>
           </>
         )}
