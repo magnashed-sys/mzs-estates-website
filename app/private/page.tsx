@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./privateDashboard.module.css";
+import CapitalRequestForms from "./CapitalRequestForms";
 
 type Category = "rentals" | "investments" | "capital";
 type ViewState = "loading" | "ready" | "pending" | "denied" | "error";
@@ -390,6 +391,7 @@ export default function PrivatePage() {
                   </div>
                 )}
               </div>
+              {active === "capital" && <CapitalRequestForms />}
             </section>
           </>
         )}
