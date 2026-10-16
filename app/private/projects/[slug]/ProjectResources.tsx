@@ -40,14 +40,25 @@ export default function ProjectResources({ projectId, editorial }: {
 
   async function openDocument(document: Document) {
     if (opening) return;
+    // Open the tab directly from the click event, before requesting the
+    // short-lived signed URL. Browsers otherwise tend to block async popups.
+    const newTab = window.open("about:blank", "_blank");
+    if (!newTab) {
+      setError("Your browser blocked the new tab. Allow pop-ups for MZS Group and try again.");
+      return;
+    }
+    // Avoid giving the destination page access to the client dashboard.
+    newTab.opener = null;
     setOpening(document.id); setError("");
     try {
       const { data, error: failure } = await createClient().storage
         .from(BUCKET).createSignedUrl(document.file_path, 60);
       if (failure || !data?.signedUrl) throw new Error("Your private document link could not be verified.");
-      window.location.assign(data.signedUrl);
+      newTab.location.replace(data.signedUrl);
     } catch {
+      newTab.close();
       setError("This document could not be opened. Please try again or contact MZS Group.");
+    } finally {
       setOpening(null);
     }
   }
@@ -74,7 +85,7 @@ export default function ProjectResources({ projectId, editorial }: {
           <h3>{doc.title}</h3>
           {doc.description && <p className={styles.body}>{doc.description}</p>}
           <button type="button" disabled={!!opening} onClick={()=>void openDocument(doc)} className={styles.button}>
-            {opening === doc.id ? "Checking access…" : "Open document ↗"}
+            {opening === doc.id ? "Checking access…" : "Open document in new tab ↗"}
           </button>
         </article>)}
       </div>
