@@ -28,7 +28,7 @@ export default function ProjectResources({ projectId, editorial }: {
         .eq("project_id", projectId).eq("is_published", true)
         .order("position").order("created_at");
       if (!mounted) return;
-      if (failure || (data && data.length < 0)) {
+      if (failure) {
         setStatus("error"); setError("Private documents are temporarily unavailable."); return;
       }
       setDocuments((data || []) as Document[]);
