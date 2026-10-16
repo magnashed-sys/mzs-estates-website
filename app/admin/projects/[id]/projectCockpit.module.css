@@ -1,0 +1,45 @@
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:28px}
+.hero h1{font:400 clamp(38px,5vw,66px)/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.035em;margin:10px 0 13px;color:#eee8df}
+.heroActions{display:flex;flex-wrap:wrap;gap:10px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:26px 0 30px}
+.metrics>div{border:1px solid #4c4132;background:#151411;min-width:0;padding:20px}
+.metrics span{display:block;color:#c5bbac;letter-spacing:.1em;font-size:10px;text-transform:uppercase}
+.metrics strong{display:block;color:#d5c09a;font:400 38px Georgia,serif;margin-top:18px}
+.nav{display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #554735;padding-bottom:22px;margin:14px 0 30px}
+.nav button{border:1px solid #6d5d43;background:transparent;color:#d5c09a;min-height:44px;padding:12px 17px;font-size:12px;cursor:pointer}
+.nav button[aria-current="page"]{background:#d5c09a;color:#11100d}
+.nav button:disabled{opacity:.5}
+.stack{display:grid;gap:18px}
+.panel{min-width:0;background:#151411;border:1px solid #504431;padding:clamp(20px,3vw,35px);color:#eee8df}
+.panel h2{font:400 clamp(25px,2.5vw,33px) Georgia,serif;margin:0 0 19px}
+.panelTitle{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #443b2f;padding-bottom:19px;margin-bottom:21px}
+.panelTitle h2{margin:0}
+.panelTitle span{color:#aa9980;font-size:11px;letter-spacing:.1em}
+.form{display:grid;gap:19px}
+.form label{display:grid;gap:9px;font-size:12px;line-height:1.55;color:#d8cbb8;min-width:0}
+.form input,.form select,.form textarea{width:100%;min-width:0;background:#211d17;color:#f2eadf;border:1px solid #65553d;font-size:15px;line-height:1.5;border-radius:0;padding:11px 13px;resize:vertical}
+.form input[type="file"]{font-size:12px;cursor:pointer}
+.form :is(input,select,textarea):focus-visible{outline:2px solid #d5c09a;outline-offset:2px}
+.form :is(input,select,textarea):disabled{opacity:.55}
+.formColumns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.note{font-size:12px;line-height:1.85;color:#b9b0a2;margin:0 0 18px}
+.muted{font-size:12px;line-height:1.6;color:#b9b0a2;margin:9px 0;overflow-wrap:anywhere}
+.item{background:#181611;border:1px solid #4d4131;padding:clamp(18px,2vw,26px);min-width:0}
+.itemHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:19px;margin-bottom:17px}
+.itemHeading h3{margin:8px 0;color:#eee8df;font:400 25px Georgia,"Times New Roman",serif;overflow-wrap:anywhere}
+.itemHeading>div{min-width:0}
+.pill{display:inline-flex;align-items:center;color:#d5c09a;border:1px solid #6d5b40;padding:7px 10px;white-space:normal;font-size:10px;letter-spacing:.06em}
+.kicker{display:block;color:#d5c09a;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+.preview{font-size:13px;line-height:1.9;color:#c2b8a8;white-space:pre-line;overflow-wrap:anywhere;max-height:300px;overflow:auto}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}
+.success{border-left:2px solid #d5c09a;padding:12px 17px;background:#221e18;color:#eee0c7;font-size:12px;line-height:1.7}
+.failure{border-left:2px solid #cc8e78;padding:12px 17px;background:#281c19;color:#f0bcaa;font-size:12px;line-height:1.7}
+.empty{font-size:13px;line-height:1.8;color:#b6aca1}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.summaryColumns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.summaryRow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #403629;padding:18px 0;color:#e6dfd4;font-size:12px}
+.summaryRow strong{font-size:12px;font-weight:400}
+.summaryRow small{display:block;color:#a89e91;font-size:11px;margin-top:6px}
+.summaryRow:last-of-type{margin-bottom:20px}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:740px){.summaryColumns,.formColumns{grid-template-columns:1fr}.metrics>div{padding:15px}.metrics strong{font-size:32px}.heroActions{width:100%}.nav button{flex:1 1 auto}.itemHeading{flex-wrap:wrap}}
