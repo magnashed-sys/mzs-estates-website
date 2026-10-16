@@ -36,3 +36,21 @@
 
 ## Release caution
 The first implementation should **not** overwrite `profiles.role`, `public.is_admin()`, legacy RLS policies, or change any live permissions. Propose migration only once role assignments and dependent UI/API surfaces are reviewed.
+
+## Integration review — Private Capital Requests (17 October 2026)
+- Current `main` includes Production commit `2d28ee6b` (Capital Requests) and `2d73f338` (Private Capital layout). Preserve both.
+- `mzs_capital_requests` is already deployed in both Staging and Production; **do not recreate or migrate it** as part of Phase 3A.
+- The existing Capital Requests admin UI and PATCH API currently require active `profiles.role='admin'`, and the read RLS permits the request owner or an active legacy admin. Department scope is **not yet integrated**.
+- The phase-3 scope assignment table exists only in Staging, currently with 0 scope assignments and 2 RLS policies.
+- A Capital Administrator must never be granted the legacy `admin` role just to access Capital Requests. Implement dedicated scoped admin read and update paths after verifying all surrounding RLS, service-role API enforcement and audit behavior.
+- The `mzs_has_department_scope` helper validates active profile and assignment, but future group/department role semantics and provisioning constraints need additional review before assigning personnel.
+- The Phase-3 branch is behind `main` by 2 Capital commits as of this review. Sync using a reviewed forward-only merge/rebase, preserving both branches and avoiding force pushes; verify new Vercel Preview on the updated head.
+- No changes to Production or to the existing Capital Requests workflow are authorized by this note.
+
+### Acceptance tests required for Capital integration
+1. Assigned Capital Admin can access only the scoped Capital administration routes/data.
+2. Estates Admin cannot read or change any Capital request, including direct REST/API requests.
+3. Regular client can only see their own eligible requests and cannot perform admin updates.
+4. Group Admin retains existing authorized visibility and can audit scoped admin actions.
+5. Revoked/deactivated assignments stop authorizing immediately; rejected changes do not create side effects.
+6. Existing Production Capital Requests UI and delivery workflow remain intact.
