@@ -1,0 +1,13 @@
+.section{margin-top:58px;border-top:1px solid #3d3529;padding-top:42px}
+.heading{margin-bottom:26px}.heading h2{font-family:Georgia,serif;font-size:clamp(27px,3vw,42px);font-weight:normal;color:#eee8dc;margin:12px 0}
+.heading p,.card p{color:#a7a095;line-height:1.7}.kicker{font-size:11px;letter-spacing:2px;color:#c8ad80}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.card{border:1px solid #453d30;background:#14130f;padding:clamp(18px,3vw,36px)}
+.card h3{font-family:Georgia,serif;color:#eee8dc;font-size:31px;font-weight:normal;margin:15px 0 8px}
+.card form{display:flex;flex-direction:column;gap:11px;margin-top:25px}
+.card label{text-transform:uppercase;letter-spacing:1px;font-size:11px;color:#c8ad80;margin-top:12px}
+.card input,.card textarea{width:100%;box-sizing:border-box;background:#0d0c0a;border:1px solid #514939;color:#eee8dc;border-radius:2px;padding:14px;font:inherit}
+.card input:focus,.card textarea:focus{outline:2px solid #c8ad80;outline-offset:2px}
+.card button{background:#c8ad80;border:0;color:#11100e;padding:16px;cursor:pointer;font-weight:600;margin-top:12px}
+.card button:disabled{opacity:.6;cursor:wait}.card .error{color:#eab4ab}.card .success{color:#cde6bc;overflow-wrap:anywhere}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
