@@ -5,6 +5,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import RentalCalendar from "./RentalCalendar";
 import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
+import ProjectResources from "./ProjectResources";
 import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
@@ -219,6 +220,21 @@ export default async function PrivateProjectPage({ params }: Props) {
   const visibleOfferings = offerings as Offering[];
   const hasRental = visibleOfferings.some((o) => o.offering_type === "rental");
   const presentation = hasRental ? presentations[slug] : undefined;
+  const { data: contentRows, error: contentError } = await supabase
+    .from("project_content").select("id,content,block_type,position")
+    .eq("project_id", property.id).eq("block_type", "text")
+    .eq("is_visible", true).order("position").order("created_at");
+  if (contentError) notFound();
+  // Render plain text only. React escapes it; never render raw HTML from the editor.
+  const editorial = (contentRows ?? []).map(row => {
+    const content = row.content && typeof row.content === "object" &&
+      !Array.isArray(row.content) ? row.content as Record<string, unknown> : {};
+    return {
+      id: row.id as string,
+      heading: typeof content.heading === "string" ? content.heading : "",
+      body: typeof content.body === "string" ? content.body : "",
+    };
+  }).filter(row => row.heading && row.body);
 
   return (
     <main className={styles.page}>
@@ -405,6 +421,8 @@ export default async function PrivateProjectPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <ProjectResources projectId={property.id} editorial={editorial} />
 
       <footer className={styles.footer}>
         <span>PRIVATE · INDEPENDENT · INTERNATIONAL</span>
