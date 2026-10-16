@@ -54,3 +54,18 @@ The first implementation should **not** overwrite `profiles.role`, `public.is_ad
 4. Group Admin retains existing authorized visibility and can audit scoped admin actions.
 5. Revoked/deactivated assignments stop authorizing immediately; rejected changes do not create side effects.
 6. Existing Production Capital Requests UI and delivery workflow remain intact.
+
+## Phase 3A.2 next gate — scoped role assignments
+Current Staging state: role assignment table and helper exist, but no scoped assignees are provisioned. Existing Group Admin is still the only route into both new cockpit pages.
+
+### Security review before implementing writes
+- Existing assignment RLS allows a legacy Group Admin to insert/update rows with assigned_by = auth.uid(); self/other department assignment must be audited and unauthorized self-escalation explicitly tested before access is enabled.
+- The current department-scope helper tests only an active profile and active assignment. New app routes must not rely on this alone until provisioning rules, privilege elevation, and revocation are reviewed.
+- Add an append-only audit record for all department assignment changes, with old/new role state, actor and timestamp; fail closed on audit failures.
+- Restrict department assignment to verified active Group Admin operators. No department administrator may assign or revoke roles.
+- Avoid changing legacy `profiles.role` or `public.is_admin()` to make scoped admins access the existing global routes.
+- Capital Requests admin PATCH currently uses a service-role client after checking for an active legacy admin; develop a narrowly scoped server authorization path for Capital Admin before granting access.
+- Use synthetic users in Staging to prove Group Admin, Estates Admin, Capital Admin, client and inactive account behavior, including direct REST and API requests.
+
+### Acceptance checkpoint
+Ready for owner testing only when isolated Preview is READY, staging readiness is true, five-role negative/positive checks pass, audit/revocation tests pass, and Production remains unchanged.
