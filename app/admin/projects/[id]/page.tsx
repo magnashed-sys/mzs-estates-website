@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "../../../../lib/supabase/client";
-import "../..//admin.css";
+import "../../admin.css";
 import OfferingManager from "./OfferingManager";
 import ContentManager from "./ContentManager";
 import DocumentManager from "./DocumentManager";
