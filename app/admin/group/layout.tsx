@@ -4,20 +4,36 @@ import "./group.css";
 
 export default async function GroupLayout({ children }: { children: React.ReactNode }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  // Phase 3A preview is isolated: never read live customer data from branch previews.
   const staging = "https://senonkpxdtlhyhrubicg.supabase.co";
-  const isPreview = process.env.VERCEL_ENV === "preview";
-  if (isPreview && url !== staging) {
+  if (process.env.VERCEL_ENV === "preview" && url !== staging) {
     return <main className="mzsGroup"><h1>Preview isolation required</h1><p>This Preview must use MZS Staging.</p></main>;
   }
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return <main className="mzsGroup"><h1>Private access required</h1><Link href="/login">Sign in</Link></main>;
   const { data: profile, error } = await supabase.from("profiles")
-    .select("role,is_active").eq("id",user.id).single();
-  // Existing active Group administrators only. Scoped department accounts will
-  // receive separate, audited entry points after end-to-end RLS tests.
-  if (error || profile?.role !== "admin" || profile?.is_active !== true)
-    return <main className="mzsGroup"><h1>Access restricted</h1><p>Active Group Administrator access is required.</p></main>;
-  return <main className="mzsGroup"><header><Link href="/admin">MZS GROUP</Link><span>PRIVATE ADMINISTRATION</span></header>{children}</main>;
+    .select("role,is_active").eq("id", user.id).single();
+  if (error || profile?.is_active !== true) {
+    return <main className="mzsGroup"><h1>Access restricted</h1><p>An active administration account is required.</p></main>;
+  }
+  const groupAdmin = profile.role === "admin";
+  let capitalAdmin = false;
+  if (!groupAdmin) {
+    const { data, error: scopeError } = await supabase.rpc("mzs_has_department_scope", {
+      p_department: "capital"
+    });
+    capitalAdmin = !scopeError && data === true;
+  }
+  if (!groupAdmin && !capitalAdmin) {
+    return <main className="mzsGroup"><h1>Access restricted</h1><p>Authorised MZS Group or Capital administration access is required.</p></main>;
+  }
+  // Group/Estates pages carry their own Group-only guards below this layout.
+  // A Capital operator never inherits legacy Group or Estates permissions.
+  return <main className="mzsGroup">
+    <header>
+      <Link href={groupAdmin ? "/admin/group" : "/admin/group/capital"}>MZS GROUP</Link>
+      <span>{groupAdmin ? "PRIVATE GROUP ADMINISTRATION" : "SCOPED CAPITAL ADMINISTRATION"}</span>
+    </header>
+    {children}
+  </main>;
 }
