@@ -1,0 +1,35 @@
+name: Phase 3A security guardrails
+
+on:
+  push:
+    branches:
+      - feature/phase3a-admin-scopes-capital-integrated
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/admin/**'
+      - 'app/api/capital-requests/**'
+      - 'app/login/**'
+      - 'lib/security/**'
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+      - 'tests/phase3a-security.test.mjs'
+      - '.github/workflows/phase3a-security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact PR commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Run offline security guardrails
+        run: |
+          node --version
+          node --test tests/phase3a-security.test.mjs
