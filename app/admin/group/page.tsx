@@ -19,6 +19,10 @@ export default async function GroupHome() {
       <Link href="/admin/group/capital"><small>02 / PRIVATE CAPITAL</small><h2>MZS Capital</h2>
         <p>Own and external investments, financing and private capital enquiries.</p><span>Enter Capital →</span></Link>
     </section>
+    {process.env.VERCEL_ENV === "preview" && <p className="mzsFootnote">
+      STAGING ONLY · <Link href="/admin/group/capital-access">Capital access pilot →</Link>
+      {" "}Grant and revoke Capital rights for synthetic test accounts.
+    </p>}
     <p className="mzsFootnote">Group Administration is restricted to existing active Group Administrators.</p>
   </>;
 }
