@@ -67,9 +67,20 @@ export default function LoginPage() {
           router.replace("/admin");
           break;
         case "client":
-        case "partner":
-          router.replace("/private");
+        case "partner": {
+          // An explicitly assigned Capital operator is still a standard
+          // client/partner in the legacy profile model, never a global admin.
+          // If the scoped RPC does not exist (e.g. Production before release),
+          // preserve the regular private client destination.
+          const { data: capitalScope, error: scopeError } = await supabase.rpc(
+            "mzs_has_department_scope",
+            { p_department: "capital" }
+          );
+          router.replace(!scopeError && capitalScope === true
+            ? "/admin/group/capital"
+            : "/private");
           break;
+        }
         default:
           await supabase.auth.signOut();
           setError("Your account does not have a valid access role.");
