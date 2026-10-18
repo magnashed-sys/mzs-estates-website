@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../lib/supabase/server";
+import { isPhase3aPreviewIsolated } from "../../../../lib/security/phase3a-preview-isolation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,6 +9,9 @@ const reply = (status: number, data: Record<string, unknown>) =>
   NextResponse.json(data, { status, headers: { "Cache-Control": "no-store" } });
 
 export async function PATCH(request: NextRequest) {
+  if (!isPhase3aPreviewIsolated()) {
+    return reply(503, { error: "Preview isolation required" });
+  }
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return reply(403, { error: "Invalid origin" });
   }
