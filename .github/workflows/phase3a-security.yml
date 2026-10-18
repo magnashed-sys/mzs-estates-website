@@ -15,6 +15,7 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/tests/**'
       - 'tests/phase3a-security.test.mjs'
+      - 'scripts/phase3a-provision-staging-test-account.mjs'
       - '.github/workflows/phase3a-security.yml'
 
 permissions:
@@ -32,4 +33,5 @@ jobs:
       - name: Run offline security guardrails
         run: |
           node --version
+          node --check scripts/phase3a-provision-staging-test-account.mjs
           node --test tests/phase3a-security.test.mjs
