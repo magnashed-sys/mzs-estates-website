@@ -69,3 +69,16 @@ test("Staging SQL keeps privileged writes audited and synthetic tests rollback-o
   assert.match(sqlTest, /EXCEPTION WHEN SQLSTATE 'PZ999' THEN NULL/);
   assert.match(sqlTest, /Revoked Capital Admin still has write/);
 });
+
+test("Capital access pilot is Preview-only, Group-only, and limits UI to synthetic identities", () => {
+  const page = source("app/admin/group/capital-access/page.tsx");
+  const client = source("app/admin/group/capital-access/CapitalAccessPilot.tsx");
+  assert.match(page, /process\.env\.VERCEL_ENV\s*!==\s*"preview"/);
+  assert.match(page, /!isPhase3aPreviewIsolated\(\)/);
+  assert.match(page, /profile\?\.role\s*!==\s*"admin"/);
+  assert.match(page, /profile\.is_active\s*!==\s*true/);
+  assert.match(client, /full_name\.startsWith\("Phase 3A Test "\)/);
+  assert.match(client, /mzs_set_admin_department_scope/);
+  assert.match(client, /p_department:\s*"capital"/);
+  assert.match(client, /window\.confirm\(/);
+});
