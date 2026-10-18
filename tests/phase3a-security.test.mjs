@@ -70,15 +70,25 @@ test("Staging SQL keeps privileged writes audited and synthetic tests rollback-o
   assert.match(sqlTest, /Revoked Capital Admin still has write/);
 });
 
-test("Capital access pilot is Preview-only, Group-only, and limits UI to synthetic identities", () => {
+test("Capital access pilot requires immutable test identity markers", () => {
   const page = source("app/admin/group/capital-access/page.tsx");
   const client = source("app/admin/group/capital-access/CapitalAccessPilot.tsx");
-  assert.match(page, /process\.env\.VERCEL_ENV\s*!==\s*"preview"/);
-  assert.match(page, /!isPhase3aPreviewIsolated\(\)/);
-  assert.match(page, /profile\?\.role\s*!==\s*"admin"/);
-  assert.match(page, /profile\.is_active\s*!==\s*true/);
-  assert.match(client, /full_name\.startsWith\("Phase 3A Test "\)/);
-  assert.match(client, /mzs_set_admin_department_scope/);
-  assert.match(client, /p_department:\s*"capital"/);
-  assert.match(client, /window\.confirm\(/);
+  const migration = source("supabase/migrations/20261019_phase3a_pilot_trusted_test_accounts_staging.sql");
+  const sqlTest = source("supabase/tests/phase3a_trusted_pilot_staging.sql");
+  assert.match(page, /process\\.env\\.VERCEL_ENV\\s*!==\\s*"preview"/);
+  assert.match(page, /!isPhase3aPreviewIsolated\\(\\)/);
+  assert.match(page, /profile\\?\\.role\\s*!==\\s*"admin"/);
+  assert.match(page, /profile\\.is_active\\s*!==\\s*true/);
+  assert.match(client, /mzs_phase3a_pilot_list_capital_accounts/);
+  assert.match(client, /mzs_phase3a_pilot_set_capital_scope/);
+  assert.doesNotMatch(client, /full_name\\.startsWith\\(/);
+  assert.doesNotMatch(client, /mzs_set_admin_department_scope/);
+  assert.match(client, /window\\.confirm\\(/);
+  assert.match(migration, /raw_app_meta_data/);
+  assert.match(migration, /"mzs_phase3a_test":true/);
+  assert.match(migration, /email like 'phase3a-test-%@example\\.invalid'/);
+  assert.doesNotMatch(migration, /raw_user_meta_data/);
+  assert.match(migration, /revoke all on function public\\.mzs_phase3a_pilot_set_capital_scope/);
+  assert.match(sqlTest, /MZS_PHASE3A_TRUSTED_PILOT_ROLLBACK/);
+  assert.match(sqlTest, /User-controlled name\\/metadata fooled the pilot grant/);
 });
