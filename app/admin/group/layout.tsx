@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
+import { isPhase3aPreviewIsolated } from "../../../lib/security/phase3a-preview-isolation";
 import "./group.css";
 
 export default async function GroupLayout({ children }: { children: React.ReactNode }) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const staging = "https://senonkpxdtlhyhrubicg.supabase.co";
-  if (process.env.VERCEL_ENV === "preview" && url !== staging) {
+  if (!isPhase3aPreviewIsolated()) {
     return <main className="mzsGroup"><h1>Preview isolation required</h1><p>This Preview must use MZS Staging.</p></main>;
   }
   const supabase = await createClient();
