@@ -10,6 +10,7 @@ import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
 import AmsterdamFlorawegInvestment from "./AmsterdamFlorawegInvestment";
+import { isPhase3aPreviewIsolated } from "../../../../lib/security/phase3a-preview-isolation";
 
 export const dynamic = "force-dynamic";
 
@@ -220,6 +221,11 @@ export default async function PrivateProjectPage({ params }: Props) {
   const visibleOfferings = offerings as Offering[];
   const hasRental = visibleOfferings.some((o) => o.offering_type === "rental");
   const presentation = hasRental ? presentations[slug] : undefined;
+  const showStagingTestCalendar = process.env.VERCEL_ENV === "preview"
+    && isPhase3aPreviewIsolated()
+    && slug === "staging-test-residence"
+    && property.id === "d14bb1c4-8fe7-46e5-b56c-bad717ff297d"
+    && hasRental;
   const { data: contentRows, error: contentError } = await supabase
     .from("project_content").select("id,content,block_type,position")
     .eq("project_id", property.id).eq("block_type", "text")
@@ -423,6 +429,17 @@ export default async function PrivateProjectPage({ params }: Props) {
       )}
 
       <ProjectResources projectId={property.id} editorial={editorial} />
+
+      {showStagingTestCalendar && (
+        <section id="availability" className={styles.calendarSection}>
+          <div className={styles.calendarIntro}>
+            <p className={styles.kicker}>STAGING TEST RESIDENCE</p>
+            <h2>Plan your test stay.</h2>
+            <p>Fictional availability and rates for testing. Select dates to check the calendar; do not submit a booking during this review.</p>
+          </div>
+          <RentalCalendar projectId={property.id} />
+        </section>
+      )}
 
       <footer className={styles.footer}>
         <span>PRIVATE · INDEPENDENT · INTERNATIONAL</span>
