@@ -13,15 +13,17 @@
   align-items: center;
   gap: 16px;
 }
-.home :global(.mzs-hero) {
+/* The next two pages use the same 1200px inner grid. Match that
+   horizontal origin and move the homepage heading down to their hero line. */
+.home:global(.mzs-home-refined) :global(.mzs-hero) {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1200px;
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   margin: 0 auto;
-  padding: clamp(10px, 2.3svh, 28px) 0;
+  padding: clamp(165px, 21svh, 225px) 0 clamp(22px, 4svh, 42px);
 }
 .home :global(.mzs-hero h1) {
   font-size: clamp(48px, min(7.35vw, 11svh), 112px);
@@ -43,19 +45,6 @@
   line-height: 1.65;
   color: #b8b1a6;
 }
-.home :global(.mzs-actions) {
-  margin-top: clamp(14px, 2.3svh, 25px);
-  gap: 10px;
-}
-.home :global(.mzs-button) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 12px 17px;
-  font-size: 10px;
-  line-height: 1.25;
-}
 .home :global(.mzs-selective) {
   margin-top: clamp(12px, 1.9svh, 20px);
   font-size: 11px;
@@ -66,8 +55,8 @@
   .home:global(.mzs-home) {
     padding: 18px 20px 14px;
   }
-  .home :global(.mzs-hero) {
-    padding: clamp(14px, 2.5svh, 25px) 0;
+  .home:global(.mzs-home-refined) :global(.mzs-hero) {
+    padding: clamp(124px, 19svh, 168px) 0 clamp(26px, 4svh, 40px);
   }
   .home :global(.mzs-hero h1) {
     font-size: clamp(42px, 12.6vw, 78px);
@@ -79,15 +68,6 @@
     line-height: 1.55;
     margin-top: 14px;
   }
-  .home :global(.mzs-actions) {
-    width: 100%;
-    flex-direction: column;
-    margin-top: 15px;
-  }
-  .home :global(.mzs-button) {
-    width: 100%;
-    min-height: 44px;
-  }
   .home :global(.mzs-selective) {
     margin-top: 13px;
     font-size: 11px;
@@ -95,43 +75,10 @@
 }
 @media (max-height: 620px) {
   .home:global(.mzs-home) { padding-top: 12px; padding-bottom: 12px; }
-  .home :global(.mzs-hero) { padding-top: 10px; padding-bottom: 10px; }
+  .home:global(.mzs-home-refined) :global(.mzs-hero) { padding-top: clamp(96px, 18svh, 142px); padding-bottom: 20px; }
   .home :global(.mzs-hero h1) { font-size: clamp(38px, min(6vw, 10svh), 70px); }
   .home :global(.mzs-separator) { margin-top: 10px; }
   .home :global(.mzs-intro) { margin-top: 10px; }
-  .home :global(.mzs-actions) { margin-top: 10px; }
   .home :global(.mzs-selective) { margin-top: 10px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .home :global(.mzs-button) { transition: none; }
-}
 
-/* Subtle discovery links for the two public introduction pages. */
-.divisionLinks {
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:12px 18px;
-  margin-top:clamp(16px,2.2svh,24px);
-}
-.divisionLinks a {
-  color:#e0c69c;
-  font-size:11px;
-  font-weight:500;
-  letter-spacing:.1em;
-  line-height:1.5;
-  text-decoration:none;
-  text-transform:uppercase;
-  border-bottom:1px solid rgba(213,192,154,.4);
-  padding-bottom:5px;
-  transition:color .18s,border-color .18s;
-}
-.divisionLinks a:hover {color:#fff;border-bottom-color:#fff;}
-.divisionLinks a:focus-visible {outline:2px solid #d5c09a;outline-offset:5px;}
-.divisionLinks a span {margin-left:8px;}
-.divisionSeparator{height:15px;width:1px;background:rgba(213,192,154,.35);}
-@media(max-width:700px){
-  .divisionLinks{justify-content:flex-start;margin-top:16px;gap:12px;}
-  .divisionLinks a{font-size:10px;}
-}
-@media(prefers-reduced-motion:reduce){.divisionLinks a{transition:none;}}
