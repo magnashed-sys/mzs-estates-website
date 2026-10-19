@@ -97,3 +97,11 @@ De eigenaar heeft toestemming gegeven om de overige releasevoorbereiding voort t
 De broncode van `app/private`, de bestaande centrale adminpagina, projecttoegang, projectbeheer en Supabase-clienthelpers is vergeleken met main `113972641c870a06b49619df4ae3d58b94368acb`: geen wijzigingen in deze onderdelen. De actieve globale-admincontroles van projectbeheer/projecttoegang blijven aanwezig. Dit is broncodecontrole, geen nieuwe echte-sessie functionele regressietest.
 
 Open menselijke sessiecontroles: bestaande Group Admin-projecten/relaties openen; bestaande geautoriseerde Staging-client een toegestaan project/document laten openen; huurkalender en reserveringen bekijken zonder boeking of e-mail te versturen. Directe REST-negatieve controles met echte sessies zijn nog niet zelfstandig uitgevoerd; SQL-roltests en de browser-PATCH na intrekking zijn wel uitgevoerd zoals hierboven beschreven.
+
+## Kalenderfixture — 20 oktober 2026
+
+Eigenaar bevestigde bestaande Group Admin-project/relatiebeheer en geautoriseerde client-project/documentweergave. Het testobject had geen kalender omdat de algemene projectpagina die niet rendert; dit was bestaand gedrag. Op verzoek is alleen voor `staging-test-residence` met de exacte testproject-ID en uitsluitend geïsoleerde Vercel Preview de bestaande RentalCalendar toegevoegd. Staging rental_settings voor dit fictieve object: EUR 100/nacht, 7 nachten minimum, 4 gasten, geen zwembadverwarming. Geen toegangsrechten toegevoegd. Production en de bestaande kalendercomponent zijn ongewijzigd.
+
+Build/TypeScript geslaagd (bestaande CSS-waarschuwingen). In een teruggedraaide SQL-transactie kalender-RPC gelezen als reeds geautoriseerde Staging-client en geweigerd voor een niet-geautoriseerde identiteit. Dit is een database-roltest, geen nieuwe browseracceptatie. Geen boeking of mail verstuurd. Visuele kalenderacceptatie blijft nog te doen.
+
+Daarnaast: GitHub-checks voor releasepakket 2da0a227 waren succesvol, Preview READY. Vier echte anonieme Staging REST-RPC-aanroepen naar scopebeheer/Capitalbeheer/pilotlijst geweigerd met HTTP 401 en SQL-code 42501.
