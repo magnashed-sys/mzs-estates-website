@@ -97,7 +97,6 @@ export default function PrivateCapitalPage() {
           <h2 id="capital-approach">Discretion first.<br /><em>Independent thinking.</em></h2>
           <p>Every relationship, financing enquiry and opportunity is considered individually and confidentially.</p>
         </div>
-        <span className={styles.presenceMark} aria-hidden="true">MZS / C</span>
       </section>
 
       <section className={styles.invitation} aria-labelledby="capital-invitation">

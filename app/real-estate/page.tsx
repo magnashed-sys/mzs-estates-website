@@ -98,7 +98,6 @@ export default function RealEstatePage() {
           <h2 id="estates-presence">Local knowledge.<br /><em>International outlook.</em></h2>
           <p>Selected activity across the Netherlands, Spain and the United Arab Emirates.</p>
         </div>
-        <span className={styles.presenceMark} aria-hidden="true">MZS / E</span>
       </section>
 
       <section className={styles.invitation} aria-labelledby="estates-invitation">
