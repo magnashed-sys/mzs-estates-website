@@ -1,4 +1,6 @@
 import Image from "next/image";
+import ProjectTimeline from "../../../components/projects/ProjectTimeline";
+import IbizaLoanTerms from "../../../components/projects/IbizaLoanTerms";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import styles from "./villaCanJuanInvestment.module.css";
 
@@ -54,7 +56,7 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
       </section>
       <nav className={styles.nav} aria-label="Project sections">
         <span>VILLA CAN JUAN IBIZA</span>
-        <div><a href="#opportunity">OVERVIEW</a><a href="#architecture">DESIGN</a><a href="#progress">PROGRESS</a><a href="#acquisition">ENQUIRE ↗</a></div>
+        <div><a href="#opportunity">OVERVIEW</a><a href="#architecture">DESIGN</a><a href="#timeline">TIMELINE</a><a href="#progress">PROGRESS</a><a href="#acquisition">ENQUIRE ↗</a></div>
       </nav>
       <section className={styles.metrics} aria-label="Documented property details">
         <div><strong>18,400 <small>m²</small></strong><span>REGISTERED PLOT AREA</span></div>
@@ -70,6 +72,8 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
           <p>The concept imagery illustrates an aspirational architectural direction. Separate photographs document physical works at the site. The extent, status and permissibility of works shown in either set of images require independent technical and legal verification.</p>
         </div>
       </section>
+      <div id="timeline"><ProjectTimeline milestones={{site:{date:"2022",status:"completed"},permit:{date:"2025",status:"completed"},construction:{date:"2026",status:"current"},completion:{date:"Q4 2027",status:"planned"}}} /></div>
+      {allowInvestment && <IbizaLoanTerms />}
       <section className={styles.galleryBlock} id="architecture">
         <header className={styles.sectionHead}><div><p className={styles.eyebrow}>02 / ARCHITECTURAL VISION</p><h2>A refined Mediterranean <em>expression.</em></h2></div><p>Concept visualisations · not photographs of the completed property.</p></header>
         <PropertyGallery photos={vision} title="Villa Can Juan Ibiza — architectural vision" />
@@ -83,9 +87,9 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
         <div><p>The land is registered in the municipality of Santa Eulària des Riu, in the Santa Gertrudis parish, under property registration number 1643 and cadastral reference 07054A027000510000WK.</p><p>According to documents dated November–December 2024, the registered parcel measures 1.84 hectares and the cadastral record describes 121 m² of built area. These historical records should be refreshed before a transaction.</p><p className={styles.fine}>The land registry extract includes access and utility easements. Title, encumbrances, planning permissions, building licences, technical drawings, budgets and project status should be assessed during due diligence. The quoted area is not a statement of approved development potential.</p></div>
       </section>
       <section className={styles.opportunities} id="acquisition">
-        <div className={styles.centerHeader}><p className={styles.eyebrow}>05 / PRIVATE ENQUIRY</p><h2>Explore your <em>opportunity.</em></h2><p>Full transaction terms and supporting documentation are available for discussion directly with MZS Group. No return or price is represented on this page.</p></div>
+        <div className={styles.centerHeader}><p className={styles.eyebrow}>05 / PRIVATE ENQUIRY</p><h2>Explore your <em>opportunity.</em></h2><p>Full transaction terms and supporting documentation are available for discussion directly with MZS Group. Any financing remains subject to final agreement.</p></div>
         <div className={styles.optionGrid}>
-          {allowInvestment && <article><span>01 / PARTICIPATION</span><h3>Investment Opportunity</h3><p>Express your interest in participating in the project. Investment structure, capital requirements, timelines, risk factors and potential returns are subject to separate documentation and agreement.</p><a href={enquiry("investment")} className={styles.goldButton}>REQUEST INVESTMENT DETAILS ↗</a></article>}
+          {allowInvestment && <article><span>01 / PARTICIPATION</span><h3>Investment Opportunity</h3><p>Discuss the proposed €1 million loan at 10% annual interest for an initial 12-month term. Participation covers the full initial amount; any additional financing is optional and separately agreed.</p><a href={enquiry("investment")} className={styles.goldButton}>REQUEST INVESTMENT DETAILS ↗</a></article>}
           {allowAcquisition && <article><span>02 / FULL OWNERSHIP</span><h3>Acquisition Opportunity</h3><p>Enquire about acquiring the entire property. Price, scope of sale, conditions and the status of construction and permits will be discussed privately and verified as part of due diligence.</p><a href={enquiry("acquisition")} className={styles.outlineButton}>ENQUIRE ABOUT ACQUISITION ↗</a></article>}
         </div>
         <p className={styles.legal}>PRIVATE INFORMATION · Images are illustrative concept visualisations or supplied site photographs, as labelled. This presentation is not a public offer, financial forecast, guarantee of return or legal confirmation of permitted works.</p>
