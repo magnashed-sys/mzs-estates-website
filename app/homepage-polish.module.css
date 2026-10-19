@@ -124,3 +124,33 @@
 @media (prefers-reduced-motion: reduce) {
   .home :global(.mzs-button) { transition: none; }
 }
+
+/* Subtle discovery links for the two public introduction pages. */
+.divisionLinks {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px 18px;
+  margin-top:clamp(16px,2.2svh,24px);
+}
+.divisionLinks a {
+  color:#e0c69c;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.1em;
+  line-height:1.5;
+  text-decoration:none;
+  text-transform:uppercase;
+  border-bottom:1px solid rgba(213,192,154,.4);
+  padding-bottom:5px;
+  transition:color .18s,border-color .18s;
+}
+.divisionLinks a:hover {color:#fff;border-bottom-color:#fff;}
+.divisionLinks a:focus-visible {outline:2px solid #d5c09a;outline-offset:5px;}
+.divisionLinks a span {margin-left:8px;}
+.divisionSeparator{height:15px;width:1px;background:rgba(213,192,154,.35);}
+@media(max-width:700px){
+  .divisionLinks{justify-content:flex-start;margin-top:16px;gap:12px;}
+  .divisionLinks a{font-size:10px;}
+}
+@media(prefers-reduced-motion:reduce){.divisionLinks a{transition:none;}}
