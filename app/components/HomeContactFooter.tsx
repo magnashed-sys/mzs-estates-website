@@ -15,7 +15,7 @@ export default function HomeContactFooter({ email }: Props) {
       <a className={styles.contact} href={`mailto:${address}`} aria-label={`Contact MZS Group by email: ${address}`}>
         <span>Contact MZS</span><span aria-hidden="true">↗</span>
       </a>
-      <span className={styles.invitation}>BY INVITATION ONLY</span>
+      <span className={styles.invitation}>PRIVATE ACCESS</span>
     </footer>
   );
 }
