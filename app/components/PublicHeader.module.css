@@ -51,5 +51,54 @@
   /* Preserve the homepage logo's 42px size on mobile as well. */
   .header .wordmark .monogram { font-size: 42px; }
   .header .wordmark .groupLabel { font-size: 10.5px; }
-  .header .privateLabel { display: block; font-size: 12px; }
+}
+
+/* One consistent public navigation, replacing the old Private Access label.
+   Large displays show all four destinations and preserve the ↗ arrows.
+   Compact displays use native <details> for keyboard/touch accessibility. */
+.navigationRegion { display:flex;flex:1;min-width:0;align-items:center;justify-content:flex-end; }
+.desktopNavigation {display:flex;align-items:center;justify-content:flex-end;gap:clamp(14px,1.9vw,34px);flex-wrap:wrap;}
+.header .navLink,.header .dashboardLink {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;
+  padding:8px 0 6px;border-bottom:1px solid transparent;background:transparent;
+  color:#e0d9cd;text-decoration:none;text-transform:uppercase;
+  letter-spacing:.115em;font:500 11px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.115em;
+  white-space:nowrap;transition:border-color .2s,color .2s;
+}
+.header .navLink:hover,.header .dashboardLink:hover {color:#e4cfaa;border-color:rgba(213,192,154,.7);}
+.header .navArrow {color:#d5c09a;font-size:14px;line-height:1;}
+.header .dashboardLink {color:#d5c09a;}
+.header .navLink:focus-visible,.header .dashboardLink:focus-visible,
+.menuToggle:focus-visible,.mobileLink:focus-visible {outline:2px solid #d5c09a;outline-offset:4px;}
+.mobileNavigation{display:none;position:relative;margin:0;}
+.menuToggle {display:flex;align-items:center;gap:14px;cursor:pointer;list-style:none;
+  min-height:44px;padding:7px 10px;color:#d5c09a;
+  font:500 12px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.15em;text-transform:uppercase;
+  border:1px solid rgba(213,192,154,.55);background:rgba(10,10,10,.3);}
+.menuToggle::-webkit-details-marker{display:none;}
+.menuIcon {color:#d5c09a;font-size:17px;line-height:1;}
+.mobilePanel {
+  position:absolute;top:calc(100% + 10px);right:0;z-index:25;
+  display:flex;flex-direction:column;width:min(330px,calc(100vw - 40px));
+  padding:8px 18px;
+  border:1px solid rgba(213,192,154,.55);
+  background:rgba(12,13,13,.97);
+  box-shadow:0 20px 45px rgba(0,0,0,.4);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.header .mobileLink {
+  display:flex;justify-content:space-between;align-items:center;gap:18px;
+  width:100%;min-height:47px;padding:13px 3px;
+  border-bottom:1px solid rgba(213,192,154,.18);
+  color:#eee8dc;text-decoration:none;text-transform:uppercase;
+  font:500 11px/1.6 Arial,Helvetica,sans-serif;letter-spacing:.11em;
+}
+.header .mobileLink:last-child {border-bottom:0;}
+.header .mobileLink:hover {color:#d5c09a;}
+@media (max-width: 1100px) {
+  .desktopNavigation{display:none;}
+  .mobileNavigation{display:block;}
+}
+@media (prefers-reduced-motion: reduce) {
+  .header .navLink,.header .dashboardLink {transition:none;}
 }
