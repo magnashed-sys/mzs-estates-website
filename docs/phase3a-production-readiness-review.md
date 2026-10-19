@@ -105,3 +105,9 @@ Eigenaar bevestigde bestaande Group Admin-project/relatiebeheer en geautoriseerd
 Build/TypeScript geslaagd (bestaande CSS-waarschuwingen). In een teruggedraaide SQL-transactie kalender-RPC gelezen als reeds geautoriseerde Staging-client en geweigerd voor een niet-geautoriseerde identiteit. Dit is een database-roltest, geen nieuwe browseracceptatie. Geen boeking of mail verstuurd. Visuele kalenderacceptatie blijft nog te doen.
 
 Daarnaast: GitHub-checks voor releasepakket 2da0a227 waren succesvol, Preview READY. Vier echte anonieme Staging REST-RPC-aanroepen naar scopebeheer/Capitalbeheer/pilotlijst geweigerd met HTTP 401 en SQL-code 42501.
+
+## Laatste sessiecontrole voorbereiden — 20 oktober 2026
+
+Eigenaar bevestigde dat de kalender werkt; geen boekingstest uitgevoerd. Een uitsluitend voor geïsoleerde Preview en gemarkeerde actieve synthetische client/partneraccounts toegankelijke pagina `/private/staging-api-check` is toegevoegd. Deze controleert met de eigen browsersessie drie directe RPC-weigeringen, een HTTP PATCH-weigering en het behoud van de ingelogde identiteit. Vooraf wordt gecontroleerd dat Capital-rechten ontbreken. Schrijfpogingen gebruiken een niet-bestaand aanvraag-ID en een null scopetarget; geen mail of echte aanvraagwijziging nodig.
+
+Build inclusief TypeScript en zeven Node-beveiligingstests geslaagd. Lokale productie-runtime geeft 404 op de testpagina. Een runtime-override van NEXT_PUBLIC_SUPABASE_URL is geen geldige aanvullende isolatietest: Next.js legt die waarde tijdens de build vast; deze poging gaf 200 en bewijst geen omgevingswissel. De bestaande isolatietests blijven van toepassing. De echte ingelogde vijfdelige browsercontrole is nog niet uitgevoerd en blijft een acceptatiepunt. Production blijft ongewijzigd.
