@@ -60,7 +60,7 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
       </nav>
       <section className={styles.metrics} aria-label="Documented property details">
         <div><strong>18,400 <small>m²</small></strong><span>REGISTERED PLOT AREA</span></div>
-        <div><strong>121 <small>m²</small></strong><span>CADASTRAL BUILT AREA</span></div>
+        <div><strong>343.35 <small>m²</small></strong><span>TOTAL FLOOR AREA · AFTER RENOVATION</span></div>
         <div><strong>IBIZA</strong><span>SANTA GERTRUDIS AREA</span></div>
         <div><strong>{allowInvestment && allowAcquisition ? "2 WAYS" : "PRIVATE"}</strong><span>{allowInvestment && allowAcquisition ? "INVESTMENT / ACQUISITION" : allowInvestment ? "INVESTMENT" : "ACQUISITION"}</span></div>
       </section>
@@ -84,7 +84,7 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
       </section>
       <section className={styles.detailSection} id="location">
         <div><p className={styles.eyebrow}>04 / PROPERTY & LOCATION</p><h2>Santa Gertrudis, <em>Ibiza.</em></h2></div>
-        <div><p>The land is registered in the municipality of Santa Eulària des Riu, in the Santa Gertrudis parish, under property registration number 1643 and cadastral reference 07054A027000510000WK.</p><p>According to documents dated November–December 2024, the registered parcel measures 1.84 hectares and the cadastral record describes 121 m² of built area. These historical records should be refreshed before a transaction.</p><p className={styles.fine}>The land registry extract includes access and utility easements. Title, encumbrances, planning permissions, building licences, technical drawings, budgets and project status should be assessed during due diligence. The quoted area is not a statement of approved development potential.</p></div>
+        <div><p>The land is registered in the municipality of Santa Eulària des Riu, in the Santa Gertrudis parish, under property registration number 1643 and cadastral reference 07054A027000510000WK.</p><p>The registered parcel measures 1.84 hectares. The project’s total floor area after renovation is 343.35 m²: 255.35 m² on the ground floor and 88 m² underground. The 40 m² swimming pool is additional and is not included in the total floor area. Project areas supplied by the owner.</p><p className={styles.fine}>The land registry extract includes access and utility easements. Title, encumbrances, planning permissions, building licences, technical drawings, budgets and project status should be assessed during due diligence. Current project areas should be read alongside the approved plans and updated property records.</p></div>
       </section>
       <section className={styles.opportunities} id="acquisition">
         <div className={styles.centerHeader}><p className={styles.eyebrow}>05 / PRIVATE ENQUIRY</p><h2>Explore your <em>opportunity.</em></h2><p>Full transaction terms and supporting documentation are available for discussion directly with MZS Group. Any financing remains subject to final agreement.</p></div>
