@@ -13,19 +13,6 @@
   align-items: center;
   gap: 16px;
 }
-.home :global(.mzs-wordmark) {
-  gap: 6px;
-}
-/* Original 28px and 7px, enlarged exactly 50% on desktop and mobile. */
-.home :global(.mzs-monogram) {
-  font-size: 42px;
-  line-height: .95;
-}
-.home :global(.mzs-group-label) {
-  font-size: 10.5px;
-  line-height: 1.2;
-  letter-spacing: .48em;
-}
 .home :global(.mzs-hero) {
   width: 100%;
   max-width: 1120px;
@@ -78,12 +65,6 @@
 @media (max-width: 700px) {
   .home:global(.mzs-home) {
     padding: 18px 20px 14px;
-  }
-  .home :global(.mzs-monogram) {
-    font-size: 42px;
-  }
-  .home :global(.mzs-group-label) {
-    font-size: 10.5px;
   }
   .home :global(.mzs-hero) {
     padding: clamp(14px, 2.5svh, 25px) 0;

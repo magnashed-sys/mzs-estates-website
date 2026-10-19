@@ -1,8 +1,55 @@
-.header { display:flex; align-items:center; justify-content:space-between; gap:16px; position:relative; z-index:1; flex:0 0 auto; width:100%; }
-.wordmark { display:inline-flex; flex-direction:column; gap:6px; text-decoration:none; flex-shrink:0; }
-.monogram { color:#e4cfaa; font-family:Georgia,"Times New Roman",serif; font-size:42px; line-height:.95; letter-spacing:.16em; font-weight:400; }
-.groupLabel { padding-left:2px; color:#c1b9a9; font-size:10.5px; line-height:1.2; letter-spacing:.48em; }
-.privateLabel { color:#c1b9a9; font-size:12px; line-height:1.5; letter-spacing:.18em; text-transform:uppercase; text-align:right; }
-.wordmark:focus-visible { outline:2px solid #d5c09a; outline-offset:6px; }
-@media (max-width:700px) { .privateLabel { display:block; font-size:10px; letter-spacing:.12em; } }
-@media (max-width:340px) { .privateLabel { font-size:9px; } }
+/* MZS Group — single source of truth for the public logo and header.
+   Applies on Home, Real Estate, Private Capital, Login, Request Access
+   and Recovery pages. Stronger scoped selectors intentionally override
+   historical, unscoped .mzs-monogram rules in globals.css. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+.header .wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+/* Homepage is the visual baseline: MZS = 42px, GROUP = 10.5px.
+   Use 3-class specificity so legacy global rules cannot shrink the logo
+   on inner pages regardless of stylesheet loading order. */
+.header .wordmark .monogram {
+  color: #e4cfaa;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 42px;
+  font-weight: 400;
+  line-height: .95;
+  letter-spacing: .16em;
+}
+.header .wordmark .groupLabel {
+  padding-left: 2px;
+  color: #c1b9a9;
+  font-size: 10.5px;
+  line-height: 1.2;
+  letter-spacing: .48em;
+}
+.header .privateLabel {
+  color: #c1b9a9;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: right;
+}
+.wordmark:focus-visible { outline: 2px solid #d5c09a; outline-offset: 6px; }
+@media (max-width: 700px) {
+  /* Preserve the homepage logo's 42px size on mobile as well. */
+  .header .wordmark .monogram { font-size: 42px; }
+  .header .wordmark .groupLabel { font-size: 10.5px; }
+  .header .privateLabel { display: block; font-size: 12px; }
+}
