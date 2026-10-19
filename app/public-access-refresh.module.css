@@ -8,7 +8,8 @@
   box-sizing: border-box;
   min-height: 100vh;
   min-height: 100svh;
-  padding: 24px clamp(18px, 4.5vw, 80px);
+  /* Same public frame as the approved homepage; forms retain their own widths. */
+  padding: clamp(16px, 2.45svh, 30px) clamp(20px, 4.5vw, 82px) clamp(10px, 1.8svh, 22px);
   color: #f1ede6;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -82,6 +83,14 @@
   margin: 16px 0 20px;
   overflow-wrap: break-word;
 }
+/* Only the /login heading: fit Client & Partner Login on one line.
+   Fluid typography shrinks gently for narrow phones; recovery/request titles are unchanged. */
+.page :global(.login-container) .loginTitle {
+  font-size: clamp(18px, 5.4vw, 34px);
+  letter-spacing: -.025em;
+  white-space: nowrap;
+}
+
 .page :global(.login-intro),
 .page :global(.request-intro),
 .page :global(.request-success > p:not(.eyebrow)) {
@@ -227,7 +236,7 @@
   font-size: 14px; letter-spacing: .06em; line-height: 1.6;
 }
 @media (max-width: 700px) {
-  .page:global(.login-page), .page:global(.request-page) { padding: 20px 18px; }
+  .page:global(.login-page), .page:global(.request-page) { padding: 18px 20px 14px; }
   .page :global(.request-grid) { grid-template-columns: minmax(0, 1fr); }
   .page :global(.request-container), .page :global(.request-success) { margin-top: 24px; }
   .page :global(.login-container) { margin: auto; }

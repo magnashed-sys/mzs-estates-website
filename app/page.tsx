@@ -1,4 +1,3 @@
-import Link from "next/link";
 import PublicHeader from "./components/PublicHeader";
 import HomeContactFooter from "./components/HomeContactFooter";
 import polish from "./homepage-polish.module.css";
@@ -25,16 +24,6 @@ export default function Home() {
           group, providing selected clients and partners with access to private
           opportunities across Europe and the UAE.
         </p>
-
-        <div className="mzs-actions">
-          <Link href="/login" className="mzs-button">
-            Client &amp; Partner Login
-          </Link>
-
-          <Link href="/request-access" className="mzs-button mzs-button-subtle">
-            Request Access →
-          </Link>
-        </div>
 
         <p className="mzs-selective">
           New relationships are considered on a selective basis.

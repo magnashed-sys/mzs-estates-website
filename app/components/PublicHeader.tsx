@@ -5,6 +5,13 @@ import Link from "next/link";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./PublicHeader.module.css";
 
+const publicNavigation = [
+  { href: "/real-estate", label: "Real Estate" },
+  { href: "/private-capital", label: "Private Capital" },
+  { href: "/login", label: "Client & Partner Login" },
+  { href: "/request-access", label: "Request Access" },
+] as const;
+
 type DashboardHref = "/admin" | "/private" | null;
 
 /**
@@ -85,42 +92,38 @@ export default function PublicHeader() {
         <span className={`${styles.groupLabel} mzs-group-label`}>GROUP</span>
       </Link>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          flexWrap: "wrap",
-          columnGap: "clamp(14px, 2.5vw, 34px)",
-          rowGap: "8px",
-          minWidth: 0,
-        }}
-      >
-        <span className={`${styles.privateLabel} mzs-private-label`}>
-          Private Access
-        </span>
+      <div className={styles.navigationRegion}>
+        <nav className={styles.desktopNavigation} aria-label="Main navigation">
+          {publicNavigation.map(({ href, label }) => (
+            <Link href={href} className={styles.navLink} key={href}>
+              {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
+            </Link>
+          ))}
+          {dashboardHref && (
+            <Link href={dashboardHref} className={styles.dashboardLink}>
+              My Dashboard <span className={styles.navArrow} aria-hidden="true">↗</span>
+            </Link>
+          )}
+        </nav>
 
-        {dashboardHref && (
-          <Link
-            href={dashboardHref}
-            aria-label="Go to my dashboard"
-            style={{
-              color: "#d5c09a",
-              fontFamily: "Arial, Helvetica, sans-serif",
-              fontSize: "11px",
-              fontWeight: 600,
-              letterSpacing: "0.12em",
-              lineHeight: 1.6,
-              textDecoration: "none",
-              textTransform: "uppercase",
-              whiteSpace: "nowrap",
-              borderBottom: "1px solid rgba(213, 192, 154, 0.55)",
-              paddingBottom: "3px",
-            }}
-          >
-            My Dashboard <span aria-hidden="true">↗</span>
-          </Link>
-        )}
+        <details className={styles.mobileNavigation}>
+          <summary className={styles.menuToggle}>
+            <span>Menu</span>
+            <span className={styles.menuIcon} aria-hidden="true">☰</span>
+          </summary>
+          <nav className={styles.mobilePanel} aria-label="Mobile main navigation">
+            {publicNavigation.map(({ href, label }) => (
+              <Link href={href} className={styles.mobileLink} key={href}>
+                {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
+              </Link>
+            ))}
+            {dashboardHref && (
+              <Link href={dashboardHref} className={styles.mobileLink}>
+                My Dashboard <span className={styles.navArrow} aria-hidden="true">↗</span>
+              </Link>
+            )}
+          </nav>
+        </details>
       </div>
     </header>
   );
