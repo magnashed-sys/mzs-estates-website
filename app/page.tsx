@@ -26,6 +26,12 @@ export default function Home() {
           opportunities across Europe and the UAE.
         </p>
 
+        <nav className={polish.divisionLinks} aria-label="Discover MZS Group activities">
+          <Link href="/real-estate">Real Estate <span aria-hidden="true">↗</span></Link>
+          <span className={polish.divisionSeparator} aria-hidden="true" />
+          <Link href="/private-capital">Private Capital <span aria-hidden="true">↗</span></Link>
+        </nav>
+
         <div className="mzs-actions">
           <Link href="/login" className="mzs-button">
             Client &amp; Partner Login
