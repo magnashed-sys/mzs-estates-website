@@ -12,6 +12,8 @@
   flex: 0 0 auto;
   align-items: center;
   gap: 16px;
+  /* Keep expanded mobile navigation above the hero background and copy. */
+  z-index: 10;
 }
 /* The next two pages use the same 1200px inner grid. Match that
    horizontal origin and move the homepage heading down to their hero line. */
