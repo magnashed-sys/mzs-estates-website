@@ -25,7 +25,8 @@
   flex-direction: column;
   justify-content: flex-start;
   margin: 0 auto;
-  padding: clamp(165px, 21svh, 225px) 0 clamp(22px, 4svh, 42px);
+  /* Shift the headline precisely 10px upward and recover excess bottom space. */
+  padding: clamp(155px, calc(21svh - 10px), 215px) 0 clamp(8px, calc(4svh - 14px), 28px);
 }
 .home :global(.mzs-hero h1) {
   font-size: clamp(48px, min(7.35vw, 11svh), 112px);
@@ -58,7 +59,7 @@
     padding: 18px 20px 14px;
   }
   .home:global(.mzs-home-refined) :global(.mzs-hero) {
-    padding: clamp(124px, 19svh, 168px) 0 clamp(26px, 4svh, 40px);
+    padding: clamp(114px, calc(19svh - 10px), 158px) 0 clamp(12px, calc(4svh - 14px), 26px);
   }
   .home :global(.mzs-hero h1) {
     font-size: clamp(42px, 12.6vw, 78px);
@@ -77,7 +78,7 @@
 }
 @media (max-height: 620px) {
   .home:global(.mzs-home) { padding-top: 12px; padding-bottom: 12px; }
-  .home:global(.mzs-home-refined) :global(.mzs-hero) { padding-top: clamp(96px, 18svh, 142px); padding-bottom: 20px; }
+  .home:global(.mzs-home-refined) :global(.mzs-hero) { padding-top: clamp(86px, calc(18svh - 10px), 132px); padding-bottom: 8px; }
   .home :global(.mzs-hero h1) { font-size: clamp(38px, min(6vw, 10svh), 70px); }
   .home :global(.mzs-separator) { margin-top: 10px; }
   .home :global(.mzs-intro) { margin-top: 10px; }
