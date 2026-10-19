@@ -11,7 +11,7 @@ export default function HomeContactFooter({ email }: Props) {
   }
   return (
     <footer className={styles.footer}>
-      <span className={styles.locations}>AMSTERDAM · IBIZA · DUBAI - INTERNATIONAL</span>
+      <span className={styles.locations}>AMSTERDAM · IBIZA · DUBAI</span>
       <a className={styles.contact} href={`mailto:${address}`} aria-label={`Contact MZS Group by email: ${address}`}>
         <span>Contact MZS</span><span aria-hidden="true">↗</span>
       </a>
