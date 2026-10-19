@@ -5,7 +5,7 @@ import { deliverOnce } from "../../../../lib/mzs/notifications";
 
 export const runtime = "nodejs";
 
-const SITE = "https://www.mzsgroup.eu";
+const SITE = "https://www.mzsgroup.com";
 const MZS_STAGING_URL = "https://senonkpxdtlhyhrubicg.supabase.co";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INTERESTS = new Set(["investment", "financing", "sale", "rental"]);

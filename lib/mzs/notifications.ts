@@ -13,7 +13,7 @@ export type DeliveryResult =
   | { status: "sent"; id: string }
   | { status: "none" | "not_configured" | "failed"; id?: string };
 
-const PRODUCTION_SITE = "https://www.mzsgroup.eu";
+const PRODUCTION_SITE = "https://www.mzsgroup.com";
 // Staging notifications link to the actual Preview deployment, never the live
 // platform. VERCEL_URL is a deployment-provided hostname, not user input.
 function siteForNotification(): string {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
 
-const siteUrl = "https://www.mzsgroup.eu";
+const siteUrl = "https://www.mzsgroup.com";
 
 const siteDescription =
   "MZS Group is an independent international real estate and investment group, connecting selected clients and partners with private opportunities in Europe and the UAE";

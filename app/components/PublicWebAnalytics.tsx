@@ -15,7 +15,7 @@ const PUBLIC_PATHS = new Set([
   "/forgot-password",
 ]);
 
-const PRODUCTION_HOSTS = new Set(["www.mzsgroup.eu", "mzsgroup.eu"]);
+const PRODUCTION_HOSTS = new Set(["www.mzsgroup.com", "mzsgroup.com", "www.mzsgroup.eu", "mzsgroup.eu"]);
 
 function normalizePath(path: string): string {
   return path !== "/" && path.endsWith("/") ? path.slice(0, -1) : path;
