@@ -37,7 +37,7 @@ const focus = [
 
 export default function PrivateCapitalPage() {
   return (
-    <main className={`${styles.page} ${styles.capital}`}>
+    <main className={styles.page}>
       <div className={styles.headerWrap}><PublicHeader /></div>
       <section className={styles.hero} aria-labelledby="capital-heading">
         <div className={styles.capitalImage} aria-hidden="true" />
