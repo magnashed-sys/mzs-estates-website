@@ -90,10 +90,9 @@
 .activitySubtitle {margin:38px 0 10px!important;color:#9e9485!important;font-size:11px!important;letter-spacing:.09em;text-transform:uppercase;}
 .activity h3 {font:400 clamp(25px,2.5vw,34px)/1.25 Georgia,'Times New Roman',serif;margin:0 0 19px;}
 .activity p {color:var(--mzs-copy);font-size:14px;line-height:1.83;margin:0;}
-.presence {display:grid;grid-template-columns:minmax(160px,.55fr) minmax(320px,1.1fr) auto;gap:28px;align-items:start;background:linear-gradient(115deg,#1c1c19,#151514);border-block:1px solid rgba(213,192,154,.15);max-width:none;}
+.presence {display:grid;grid-template-columns:minmax(160px,.55fr) minmax(320px,1.1fr);gap:28px;align-items:start;background:linear-gradient(115deg,#1c1c19,#151514);border-block:1px solid rgba(213,192,154,.15);max-width:none;}
 .presence h2 {font-size:clamp(37px,4.5vw,64px);}
 .presence p:not(.eyebrow) {color:var(--mzs-copy);line-height:1.85;max-width:470px;margin:23px 0 0;}
-.presenceMark {font:400 clamp(21px,3vw,45px) Georgia,serif;letter-spacing:.18em;color:rgba(213,192,154,.34);white-space:nowrap;}
 .invitation {text-align:center;padding-top:110px;padding-bottom:115px;}
 .invitation h2 {margin:24px auto 18px;max-width:790px;}
 .invitation > p:not(.eyebrow):not(.disclaimer) {max-width:590px;margin:0 auto;color:var(--mzs-copy);font-size:15px;line-height:1.9;}
@@ -111,7 +110,6 @@
  .activity {min-height:0;border:0!important;padding:27px 0!important;border-bottom:1px solid rgba(213,192,154,.2)!important;}
  .activitySubtitle {margin-top:15px!important;}
  .presence{grid-template-columns:1fr;gap:20px;}
- .presenceMark{display:none;}
 }
 @media(max-width:540px){
  .hero{min-height:100vh;min-height:100svh;padding:128px 20px 82px;}
