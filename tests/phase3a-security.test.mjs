@@ -92,3 +92,18 @@ test("Capital access pilot requires immutable test identity markers", () => {
   assert.ok(sqlTest.includes("MZS_PHASE3A_TRUSTED_PILOT_ROLLBACK"));
   assert.ok(sqlTest.includes("User-controlled name/metadata fooled the pilot grant"));
 });
+
+test("Capital Requests server layout checks active authenticated Group or Capital scope", () => {
+  const layout = source("app/admin/capital-requests/layout.tsx");
+  assert.ok(layout.includes('export default async function CapitalRequestsLayout'));
+  assert.ok(layout.includes('export const dynamic = "force-dynamic"'));
+  assert.ok(layout.includes('supabase.auth.getUser()'));
+  assert.ok(layout.includes('profile?.is_active !== true'));
+  assert.ok(layout.includes('profile.role !== "admin"'));
+  assert.ok(layout.includes('"mzs_has_department_scope"'));
+  assert.ok(layout.includes('p_department: "capital"'));
+  assert.ok(layout.includes('scopeError || hasCapitalScope !== true'));
+  assert.ok(!layout.includes("SUPABASE_SERVICE_ROLE_KEY"));
+  assert.ok(layout.indexOf("if (!isPhase3aPreviewIsolated())") <
+    layout.indexOf("await createClient()"));
+});
