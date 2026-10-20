@@ -6,6 +6,8 @@ import RentalCalendar from "./RentalCalendar";
 import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import ProjectResources from "./ProjectResources";
+import PropertyWalkthrough from "./PropertyWalkthrough";
+import villaPhotoChapters from "./villaLaNuciaPhotos.json";
 import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
@@ -63,22 +65,16 @@ const marinaBase = "/properties/marina-botafoch-apartment";
 
 // Labels refer to the photo contents, not the original (sometimes misleading)
 // filename. This allows the existing media files to remain untouched.
+const villaPhotos = Array.from(new Map(
+  villaPhotoChapters.flatMap((chapter) => chapter.photos).map((photo) => [photo.src, photo]),
+).values()).map((photo) => ({
+  ...photo,
+  caption: photo.retouched ? `${photo.caption} · Bed linen digitally tidied` : photo.caption,
+}));
+const villaHighlights = ["6883", "6845", "6852", "6865", "6877"];
 const villaGallery: PropertyPhoto[] = [
-  { src: `${villaBase}/pool-panorama.webp`, alt: "Private swimming pool, sun loungers and stone arches", caption: "The private pool" },
-  { src: `${villaBase}/hero-pool.webp`, alt: "Main residence with open-plan dining and living room", caption: "Living & dining" },
-  { src: `${villaBase}/pool-evening.webp`, alt: "The private swimming pool lit up in the evening", caption: "The pool after dark" },
-  { src: `${villaBase}/living-dining.webp`, alt: "Dining table and lounge seating in the main residence", caption: "The main residence" },
-  { src: `${villaBase}/pool-terrace.webp`, alt: "Shaded terrace overlooking the swimming pool and mountains", caption: "The outdoor terrace" },
-  { src: `${villaBase}/pool-mountain-view.webp`, alt: "Main residence living room with seating and fireplace", caption: "Living room" },
-  { src: `${villaBase}/kitchen.webp`, alt: "White fitted kitchen in the main residence", caption: "Kitchen" },
-  { src: `${villaBase}/bedroom-double.webp`, alt: "Bedroom with a double bed", caption: "Double bedroom" },
-  { src: `${villaBase}/bathroom-shower.webp`, alt: "Main residence walk-in shower", caption: "Bathroom" },
-  { src: `${villaBase}/outdoor-shower.webp`, alt: "Outdoor shower near the swimming pool", caption: "Poolside shower" },
-  { src: `${villaBase}/villa-front.webp`, alt: "Entrance to the private villa", caption: "Villa approach" },
-  { src: `${villaBase}/private-entrance.webp`, alt: "Private terrace and entrance", caption: "Private entrance" },
-  { src: `${villaBase}/living-room.webp`, alt: "Compact kitchenette beside the outdoor terrace", caption: "Indoor-outdoor kitchen" },
-  { src: `${villaBase}/dining-room.webp`, alt: "Hallway and sideboard in the main residence", caption: "Interior details" },
-  { src: `${villaBase}/bedroom-twin-setup.webp`, alt: "Exterior terrace beside the villa", caption: "Villa terrace" },
+  ...villaHighlights.map((id) => villaPhotos.find((photo) => photo.src.endsWith(`/${id}.webp`))!),
+  ...villaPhotos.filter((photo) => !villaHighlights.some((id) => photo.src.endsWith(`/${id}.webp`))),
 ];
 
 const marinaGallery: PropertyPhoto[] = [
@@ -103,8 +99,8 @@ const presentations: Record<string, Presentation> = {
     destination: "La Nucía · Costa Blanca, Spain",
     title: "Villa La Nucia",
     introduction: "A Mediterranean hideaway made for unhurried days, private gatherings and the freedom to unwind.",
-    hero: `${villaBase}/pool-terrace.webp`,
-    heroAlt: "Villa La Nucia shaded terrace overlooking the swimming pool and mountains",
+    hero: `${villaBase}/2026-10/6883.webp`,
+    heroAlt: "Villa La Nucia swimming pool, terraces and mountain views",
     facts: [
       { number: "04", label: "Bedrooms" },
       { number: "03", label: "Bathrooms" },
@@ -121,7 +117,7 @@ const presentations: Record<string, Presentation> = {
     featuresTitle: "The art of staying together, privately.",
     features: [
       { number: "01", title: "Main residence", description: "Two double bedrooms, a bathroom, living and dining space, and a fitted kitchen." },
-      { number: "02", title: "Guest accommodation", description: "Two independent guest spaces, each with a double bedroom and private bathroom. Separate interior photographs will be added when available." },
+      { number: "02", title: "Guest accommodation", description: "Two independent guest spaces, each with a double bedroom and private bathroom." },
       { number: "03", title: "Outdoors, all day", description: "A private swimming pool, sun terraces and an outdoor shower, with a quieter atmosphere after dark." },
     ],
     bookingKicker: "PRIVATE RENTAL",
@@ -281,6 +277,7 @@ export default async function PrivateProjectPage({ params }: Props) {
             <span className={styles.anchorName}>{presentation.title}</span>
             <div className={styles.anchorLinks}>
               <a href="#gallery">PHOTOGRAPHY</a>
+              {slug === "villa-la-nucia" && <a href="#walkthrough">PHOTO TOUR</a>}
               <a href="#experience">THE RESIDENCE</a>
               <a href="#stay">THE STAY</a>
               <a href="#availability" className={styles.anchorBook}>CHECK DATES ↗</a>
@@ -307,6 +304,8 @@ export default async function PrivateProjectPage({ params }: Props) {
             <PropertyGallery photos={presentation.gallery} title={presentation.title} />
           </section>
 
+          {slug === "villa-la-nucia" && <PropertyWalkthrough />}
+
           <section id="experience" className={styles.storySection}>
             <div className={styles.storyCopy}>
               <p className={styles.kicker}>{presentation.storyKicker}</p>
@@ -320,7 +319,7 @@ export default async function PrivateProjectPage({ params }: Props) {
             </div>
             <div className={styles.storyVisual}>
               <Image
-                src={slug === "villa-la-nucia" ? `${villaBase}/living-dining.webp` : `${marinaBase}/residence-pool.webp`}
+                src={slug === "villa-la-nucia" ? `${villaBase}/2026-10/6845.webp` : `${marinaBase}/residence-pool.webp`}
                 alt={slug === "villa-la-nucia" ? "Villa La Nucia main residence interior" : "Shared pool at Marina Botafoch residence"}
                 fill
                 sizes="(max-width: 900px) 100vw, 44vw"
