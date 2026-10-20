@@ -1,0 +1,27 @@
+name: Platform checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/capital-client-access-admin]
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ENV: preview
+      NEXT_PUBLIC_SUPABASE_URL: https://senonkpxdtlhyhrubicg.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_offline_build_only
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run build
