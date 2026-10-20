@@ -8,6 +8,7 @@ export default async function Deals({searchParams}:{searchParams:Promise<{notice
  const {db}=await requireDealsAdmin();const query=await searchParams;
  const {data,error,count}=await db.from('mzs_capital_deals').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(500);
  return <><nav className={s.nav}><Link href="/admin/group/capital">← Capital management</Link><Link href="/admin/capital-requests">Capital requests</Link></nav>
+  <Link href="/admin?tab=capital" className={s.nav}>← Administration · Private Capital</Link>
   <p className="mzsEyebrow">MZS CAPITAL / PRIVATE DEALS</p><h1>Loans & agreements</h1>
   <p className="mzsIntro">One private dossier for each loan. Keep the contract, planned cash flows and confirmed payments together.</p>
   <p className={s.notice}>{process.env.VERCEL_ENV === 'preview' ? 'Staging review · ' : ''}Full administrators only. No client access or email notifications. Source schedules do not prove payment.</p>
