@@ -4,31 +4,35 @@ import {randomUUID} from 'node:crypto';
 import {requireDealsAdmin} from '../../../../../../lib/security/capital-deals';
 import DealForm from '../DealForm';
 import Documents from '../Documents';
+import ClientAccess,{type ClientGrant,type AccessRelationship} from '../ClientAccess';
 import {addInstalment,recordPayment,voidPayment} from '../actions';
 import {type Deal,type Instalment,type Payment,type LoanDocument,money,date,label,paidFor} from '../model';
 import s from '../deals.module.css';
 export const dynamic='force-dynamic';
-export default async function Dossier({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{notice?:string}>}) {
+export default async function Dossier({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{notice?:string;mail?:string}>}) {
  const {db}=await requireDealsAdmin();const {id}=await params;const query=await searchParams;
  if(!/^[0-9a-f-]{36}$/i.test(id))notFound();
  const {data:deal,error}=await db.from('mzs_capital_deals').select('*').eq('id',id).single();if(error||!deal)notFound();
  const d=deal as Deal;
- const [schedule,docs]=await Promise.all([
+ const [schedule,docs,access,relationships]=await Promise.all([
   db.from('mzs_capital_instalments').select('*',{count:'exact'}).eq('deal_id',id).order('due_date').order('created_at').limit(500),
-  db.from('mzs_capital_documents').select('id,title,category,version_label,document_status,created_at',{count:'exact'}).eq('deal_id',id).order('created_at',{ascending:false}).limit(500)
+  db.from('mzs_capital_documents').select('id,title,category,version_label,document_status,created_at',{count:'exact'}).eq('deal_id',id).order('created_at',{ascending:false}).limit(500),
+  db.from('mzs_capital_client_access').select('*',{count:'exact'}).eq('deal_id',id).order('created_at').limit(500),
+  db.from('profiles').select('id,email,full_name,role,is_active',{count:'exact'}).in('role',['client','partner']).order('email').limit(1000)
  ]);
  const entries=(schedule.data||[]) as Instalment[];
  const paymentResult=entries.length?await db.from('mzs_capital_payments').select('*',{count:'exact'}).in('instalment_id',entries.map(x=>x.id)).order('created_at',{ascending:false}).limit(1000):{data:[],error:null,count:0};
  const payments=(paymentResult.data||[]) as Payment[];
  const complete=!schedule.error&&!paymentResult.error&&schedule.count===entries.length&&paymentResult.count===payments.length;
- const ids=[id,...entries.map(x=>x.id),...payments.map(x=>x.id),...(docs.data||[]).map(x=>x.id)];
+ const ids=[id,...entries.map(x=>x.id),...payments.map(x=>x.id),...(docs.data||[]).map(x=>x.id),...(access.data||[]).map(x=>x.id)];
  const audit=await db.from('mzs_capital_deal_audit').select('id,table_name,action,created_at,actor_id,new_record').in('row_id',ids).order('created_at',{ascending:false}).limit(30);
  const today=new Date().toISOString().slice(0,10);
  return <><nav className={s.nav}><Link href="/admin/group/capital/deals">← Loans & agreements</Link></nav>
   <p className="mzsEyebrow">MZS CAPITAL / {d.direction==='provided'?'LOAN PROVIDED':'LOAN RECEIVED'}</p><h1>{d.title}</h1>
   <span className={s.badge}>{label(d.status)}</span><span className={s.badge}>{label(d.review_state)}</span><span className={s.badge}>Admin only{process.env.VERCEL_ENV === 'preview' ? ' · Staging' : ''}</span>
-  {query.notice&&<p className={s.notice} role={query.notice==='saved'?'status':'alert'}>{query.notice==='saved'?'Saved successfully.':'The change could not be confirmed. Check dates, remaining amount and reference, then reload before retrying.'}</p>}
+  {query.notice&&<p className={s.notice} role={query.notice==='saved'?'status':'alert'}>{query.notice==='saved'?'Saved successfully.':'The change could not be confirmed. Check the submitted details and permissions, then reload before retrying.'}</p>}
   <dl className={s.facts}>{[['Original principal',money(d.principal)],['Annual interest',Number(d.annual_rate)+'%'],['Lender',d.lender],['Borrower',d.borrower],['Agreement date',date(d.agreement_date)],['Funding date (source)',date(d.start_date)],['Maturity',date(d.maturity_date)],['Currency','EUR']].map(([a,b])=><div key={a}><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
+  {query.mail&&<p className={s.notice} role="status">{query.mail==='sent'?'Notification accepted by the mail server. Inbox delivery is not yet confirmed.':'Access saved. Email queued; delivery has not been confirmed. Preview email delivery is disabled.'}</p>}
   <p className={s.notice}>Original principal is a contractual figure, not a reconciled outstanding balance. A schedule, due date or source deposit entry does not confirm that money was received or paid.</p>
   <section className={s.section}><h2>Terms & source review</h2><p className={s.notes}>{d.notes||'No additional terms recorded.'}</p><h3>Source references</h3><p className={s.notes}>{d.source_reference||'Not yet recorded.'}</p><details><summary>Edit deal details</summary><DealForm deal={d}/></details></section>
   <section className={s.section}><h2>Payment schedule</h2><p>{d.direction==='provided'?'Expected receipts from the borrower.':'Expected payments to the lender.'} Amounts and dates are entered from the supplied schedule; no automatic interest calculation is applied.</p>
@@ -53,6 +57,7 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
    </>}
   </section>
   <section className={s.section}><h2>Agreements & documents</h2><p>Retained document versions for full administrators only. Downloads open in a new tab using short-lived private links.</p>{docs.error||docs.count!==(docs.data||[]).length?<p role="alert">Document list could not be loaded completely.</p>:<Documents dealId={id} documents={docs.data as LoanDocument[]}/>}</section>
+  <ClientAccess dealId={id} grants={(access.data||[]) as ClientGrant[]} relationships={(relationships.data||[]) as AccessRelationship[]} complete={!access.error&&!relationships.error&&access.count===(access.data||[]).length&&relationships.count===(relationships.data||[]).length}/>
   <section className={s.section}><h2>Activity history</h2><p>Latest 30 recorded changes. Complete records are retained in the audit store.</p>{audit.error?<p role="alert">History unavailable.</p>:<ul>{(audit.data||[]).map(a=><li key={a.id}>{date(a.created_at)} · {a.table_name.replace('mzs_capital_','')} · {a.action.toLowerCase()} · {a.actor_id?'Administrator '+a.actor_id.slice(0,8):'Controlled source import'}{a.new_record?.is_void?' · payment voided':''}</li>)}</ul>}</section>
  </>;
 }
