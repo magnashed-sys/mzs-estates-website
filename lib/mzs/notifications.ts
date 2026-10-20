@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-type EventType = "application_received" | "account_activated" | "new_project_access";
+type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted";
 type EventRow = {
   id: string;
   user_id: string;
@@ -197,6 +197,13 @@ function template(event: EventRow, recipientName: string) {
       " Sign in to review your updated collection.";
     link = site + "/private";
     linkTitle = "EXPLORE MY COLLECTION";
+  } else if (event.event_type === "capital_access_granted") {
+    subject = "Your Private Capital access | MZS Group";
+    headline = "Your private dossier is available.";
+    intro = "Access to a Private Capital dossier has been granted to your MZS Group account. Sign in to view your overview securely.";
+    plain = intro;
+    link = site + "/private/capital";
+    linkTitle = "OPEN PRIVATE CAPITAL";
   } else {
     throw new Error("Unsupported notification type");
   }
@@ -245,9 +252,21 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
 
   try {
     const { data: profile, error: profileError } = await admin.from("profiles")
-      .select("full_name,email,is_active").eq("id", event.user_id).single();
+      .select("full_name,email,is_active,role").eq("id", event.user_id).single();
     if (profileError || !profile?.email || profile.is_active !== true) {
       throw new Error("Recipient profile unavailable");
+    }
+    if (event.event_type === "capital_access_granted") {
+      if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Capital mail requires production");
+      const { data: grant, error } = await admin.from("mzs_capital_client_access")
+        .select("id").eq("id", str(event.payload.grant_id)).eq("user_id", event.user_id)
+        .eq("is_active", true).eq("notification_revision", event.payload.revision).maybeSingle();
+      if (error) throw new Error("Unable to verify current access");
+      if (!grant || !["client", "partner"].includes(profile.role)) {
+        await admin.from("mzs_mail_outbox").update({status:"failed",last_error:"Access no longer current"})
+          .eq("id",event.id).eq("status","sending");
+        return {status:"failed",id:event.id};
+      }
     }
     const message = template(event, profile.full_name || "Member");
     const mailer = nodemailer.createTransport({
@@ -257,10 +276,15 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       tls: { minVersion: "TLSv1.2" },
       connectionTimeout: 8000, greetingTimeout: 6000, socketTimeout: 10000,
     });
-    await mailer.sendMail({
-      from: config.from, to: profile.email,
-      subject: message.subject, html: message.html, text: message.text,
-    });
+    try {
+      const receipt = await mailer.sendMail({
+        from: config.from, to: profile.email,
+        subject: message.subject, html: message.html, text: message.text,
+      });
+      if (!receipt.accepted?.some(address => typeof address === "string" && address.toLowerCase() === profile.email.toLowerCase())) {
+        throw new Error("Recipient not accepted");
+      }
+    } finally { mailer.close(); }
     const { error: savedError } = await admin.from("mzs_mail_outbox")
       .update({ status: "sent", sent_at: new Date().toISOString(), last_error: null })
       .eq("id", event.id).eq("status", "sending");
@@ -295,4 +319,19 @@ export async function deliverForRecipient(
   const results: DeliveryResult[] = [];
   for (const item of data || []) results.push(await deliverOnce(item.id));
   return results;
+}
+
+/** Deliver only this assignment; Preview never sends Capital notifications. */
+export async function deliverForCapitalGrant(userId: string, grantId: string): Promise<boolean> {
+  if (process.env.VERCEL_ENV !== "production" ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") return false;
+  try {
+    const admin = serviceClient();
+    const {data,error} = await admin.from("mzs_mail_outbox").select("id")
+      .eq("user_id",userId).eq("event_type","capital_access_granted")
+      .contains("payload",{grant_id:grantId}).eq("status","pending")
+      .order("created_at",{ascending:false}).limit(1);
+    if(error || !data?.length) return false;
+    return (await deliverOnce(data[0].id)).status === "sent";
+  } catch { return false; }
 }

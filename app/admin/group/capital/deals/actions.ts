@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { requireDealsAdmin } from '../../../../../lib/security/capital-deals';
 
+import { deliverForCapitalGrant } from '../../../../../lib/mzs/notifications';
+
 const ROOT='/admin/group/capital/deals';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function str(f:FormData,key:string,max:number,min=0) {
@@ -68,5 +70,56 @@ export async function voidPayment(f:FormData) {
   if(!inst)throw new Error('invalid');
   const {data,error:e}=await db.from('mzs_capital_payments').update({is_void:true,void_reason:str(f,'void_reason',500,3)}).eq('id',payment).eq('is_void',false).select('id').single();ok=!e&&!!data;
  }catch{}
+ finish(uuid.test(deal)?ROOT+'/'+deal:ROOT,ok);
+}
+
+function finishAccess(deal:string,ok:boolean,mail:string){
+ revalidatePath('/private');revalidatePath('/private/capital');revalidatePath(ROOT,'layout');
+ redirect((uuid.test(deal)?ROOT+'/'+deal:ROOT)+'?notice='+(ok?'saved':'failed')+(ok&&mail?'&mail='+mail:''));
+}
+function accessFields(f:FormData){
+ if(f.get('confirm_access')!=='yes')throw new Error('confirmation required');
+ return {party_role:choice(f,'party_role',['lender','borrower']),display_label:str(f,'display_label',120,2)};
+}
+export async function grantClientAccess(f:FormData){
+ const {db}=await requireDealsAdmin();let deal='';let ok=false;let mail='';
+ try{
+  deal=id(f,'deal_id');const userId=id(f,'user_id');const fields=accessFields(f);
+  const {data:p,error:pe}=await db.from('profiles').select('role,is_active').eq('id',userId).single();
+  if(pe||!p?.is_active||!['client','partner'].includes(p.role))throw new Error('invalid recipient');
+  const {data:d,error:de}=await db.from('mzs_capital_deals').select('id').eq('id',deal).single();
+  if(de||!d)throw new Error('invalid dossier');
+  // Insert only: duplicate submissions cannot silently reactivate a revoked grant.
+  const {data,error}=await db.from('mzs_capital_client_access').insert({deal_id:deal,user_id:userId,...fields,is_active:true}).select('id').single();
+  ok=!error&&!!data;
+  if(ok) mail=await deliverForCapitalGrant(userId,data.id)?"sent":"pending";
+ }catch{}
+ finishAccess(deal,ok,mail);
+}
+export async function updateClientAccess(f:FormData){
+ const {db}=await requireDealsAdmin();let deal='';let ok=false;let mail='';
+ try{
+  deal=id(f,'deal_id');const grant=id(f,'grant_id');const fields=accessFields(f);
+  const active=choice(f,'is_active',['true','false'])==='true';
+  const {data:g,error:ge}=await db.from('mzs_capital_client_access').select('user_id').eq('id',grant).eq('deal_id',deal).single();
+  if(ge||!g)throw new Error('invalid grant');
+  if(active){const {data:p,error:pe}=await db.from('profiles').select('role,is_active').eq('id',g.user_id).single();if(pe||!p?.is_active||!['client','partner'].includes(p.role))throw new Error('invalid recipient');}
+  const expectedActive=choice(f,'expected_active',['true','false'])==='true';
+  const {data,error}=await db.from('mzs_capital_client_access').update({...fields,is_active:active}).eq('id',grant).eq('deal_id',deal)
+   .eq('is_active',choice(f,'expected_active',['true','false'])==='true')
+   .eq('party_role',choice(f,'expected_role',['lender','borrower'])).eq('display_label',str(f,'expected_label',120,2)).select('id').single();
+  ok=!error&&!!data;
+  if(ok&&active&&!expectedActive) mail=await deliverForCapitalGrant(g.user_id,grant)?"sent":"pending";
+ }catch{}
+ finishAccess(deal,ok,mail);
+}
+export async function revokeClientAccess(f:FormData){
+ const {db}=await requireDealsAdmin();let deal='';let ok=false;
+ try{
+  deal=id(f,'deal_id');
+  const {data,error}=await db.from('mzs_capital_client_access').update({is_active:false}).eq('id',id(f,'grant_id')).eq('deal_id',deal).eq('is_active',true).select('id').single();
+  ok=!error&&!!data;
+ }catch{}
+ revalidatePath('/private');revalidatePath('/private/capital');
  finish(uuid.test(deal)?ROOT+'/'+deal:ROOT,ok);
 }
