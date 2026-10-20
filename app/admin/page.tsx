@@ -15,10 +15,10 @@ type CompanyAssociation = { id: string; user_id: string; legal_name: string; tra
 type ContactSnapshot = { user_id: string; phone: string | null; city: string | null; country: string | null };
 type Project = { id: string; title: string; location: string | null; status: string };
 type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
-type Tab = "overview" | "relationships" | "companies" | "projects" | "bookings" | "analytics";
+type Tab = "overview" | "relationships" | "companies" | "projects" | "bookings" | "capital" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
 const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
-const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["companies", "Companies"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["analytics", "Analytics"]];
+const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["companies", "Companies"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["capital", "Private Capital"], ["analytics", "Analytics"]];
 const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Approved"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
 const pageSize = 12;
 const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
@@ -382,10 +382,18 @@ export default function AdminPage() {
   return <main className="admin-page">
     <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
     <section className="admin-content">
-      <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties and reservations in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
+      <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections">{tabs.map(([key, label]) => <button key={key} disabled={locked} aria-current={tab === key ? "page" : undefined} onClick={() => navigate(key)}>{label}{key === "relationships" && pending.length > 0 && <span className="admin-count">{pending.length}</span>}</button>)}</nav>
       {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
       {notice && <p className="admin-notice" role="status">{notice}</p>}
+      {tab === "capital" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">MZS Capital</p><h2>Private Capital.</h2></div></div>
+        <div className="admin-project-grid">
+          <article className="admin-panel"><p className="eyebrow">Loans &amp; Agreements</p><h3 className="admin-subtitle">Your private loan dossiers.</h3><p className="admin-intro">Manage loans provided and received, agreement documents, payment schedules and confirmed payments.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary admin-space-top" href="/admin/group/capital/deals">Open Loans &amp; Agreements →</Link></article>
+          <article className="admin-panel"><p className="eyebrow">Capital Requests</p><h3 className="admin-subtitle">Financing enquiries.</h3><p className="admin-intro">Review incoming capital requests and follow up their status.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/capital-requests">Open Capital Requests →</Link></article>
+        </div>
+      </>}
+
 
       {tab === "overview" && <>
         <div className="admin-metrics">
@@ -401,6 +409,7 @@ export default function AdminPage() {
           {pending.slice(0, 4).map(item => <button className="admin-action-row" key={item.id} disabled={locked} onClick={() => { openRequests("pending"); setReviewing(item.id); }}><span><strong>{item.full_name}</strong><small>New access request · {date(item.created_at)}</small></span><span>Review →</span></button>)}
           {approved.length > 0 && <button className="admin-action-row" disabled={locked} onClick={() => openRequests("approved")}><span><strong>{approved.length} approved requests awaiting invitation</strong><small>Review the selected projects and account type.</small></span><span aria-hidden="true">→</span></button>}
         </div>
+        <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">MZS Capital</p><h3 className="admin-subtitle">Private Capital</h3><p className="admin-help">Loans, agreements, payment schedules and capital requests.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("capital")}>Open Private Capital →</button></div>
         <BookingManagement key={`summary-${refreshVersion}`} mode="summary" onNavigate={openBookings} />
         <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">Website insights</p><h3 className="admin-subtitle">Vercel Analytics</h3><p className="admin-help">Open the traffic report for your public website.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("analytics")}>View analytics →</button></div>
       </>}
