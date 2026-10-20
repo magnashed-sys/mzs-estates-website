@@ -24,9 +24,9 @@ Status: Staging review only. Production publication and migration are not author
 Two owner-approved source dossiers and 19 planned entries were imported into
 Staging through the controlled database connection. All payment records remain
 unconfirmed. Source contract values, identities and PDFs are NOT committed.
-The source references are not attachments: the three unique supplied PDFs still
-need to be attached through the protected upload interface and accepted by the
-owner. A duplicate schedule should not be uploaded/imported as another loan.
+On 20 October the owner confirmed document upload/download. Database inspection
+confirmed three attached PDFs across the two real dossiers and no missing Storage
+objects. A duplicate schedule must not be imported as another loan.
 
 The maturity of one source loan is not established by its last interest date.
 One final interest instalment must remain exactly as supplied until its basis
@@ -44,17 +44,18 @@ is confirmed. Do not fabricate interest accrual conventions or payment evidence.
   All synthetic fixture changes roll back. This tests database permissions,
   not actual binary PDF upload/download or an authenticated browser flow.
 
-## Owner acceptance still required
+## Acceptance recorded — 20 October 2026
 
-1. Sign in to the Preview using the existing Staging full admin.
-2. Review both directions, actual contract parties, amounts and source dates.
-3. Attach the original agreement and payment schedules. Confirm signed/reference
-   classifications manually; verify download opens in a separate tab.
-4. Create a separate synthetic dossier to test partial receipt, a void with
-   correction reason, and resulting schedule/audit on desktop and mobile.
-5. Check real HTTP access as a client/inactive account. The SQL denial tests do
-   not replace those browser/API checks.
-6. Agree further access/publication requirements. Current version is admin-only.
+The owner reported successful full-admin dossier access, document operation,
+partial payment and void/correction on a separate synthetic dossier, and access
+refusal for a non-administrator account. Database inspection confirms that the
+synthetic dossier has one payment, voided, and the real dossiers have no payments.
+Three document metadata records resolve to existing private Storage objects.
+These reports do not establish a separate mobile review or an inactive-account
+browser test; inactive profiles were covered by automated guard/SQL tests.
+
+Production preparation and remaining release gates are documented in
+`private-capital-deals-release.md`. No production migration or merge performed.
 
 ## Limits / next iteration
 
