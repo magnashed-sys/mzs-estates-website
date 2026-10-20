@@ -394,7 +394,7 @@ export default function PrivatePage() {
                   </div>
                 )}
               </div>
-              {active === "capital" && process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co" && (
+              {active === "capital" && (
                 <CapitalDossiers />
               )}
               {active === "capital" && <CapitalRequestForms />}

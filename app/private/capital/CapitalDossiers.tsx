@@ -10,10 +10,11 @@ export default function CapitalDossiers(){
   let live=true;const db=createClient();
   async function load(){
    try{
-    const {data,error}=await db.rpc('mzs_my_capital_summaries');
+    const response=await fetch('/api/capital-client-summary',{cache:'no-store'});
+    const payload=await response.json();
     if(!live)return;
-    if(error){setItems([]);setState('error');return;}
-    setItems((data||[]) as Summary[]);setState('ready');
+    if(!response.ok){setItems([]);setState('error');return;}
+    setItems((payload.items||[]) as Summary[]);setState('ready');
    }catch{if(live){setItems([]);setState('error');}}
   }
   void load();
