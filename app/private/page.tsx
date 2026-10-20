@@ -393,6 +393,9 @@ export default function PrivatePage() {
                   </div>
                 )}
               </div>
+              {active === "capital" && process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co" && (
+                <div className={styles.emptyState}><div><h3>Your Capital dossiers</h3><p>View your loan amount, dates and confirmed interest payments.</p><Link className={styles.headerLink} href="/private/capital">Open your capital overview →</Link></div></div>
+              )}
               {active === "capital" && <CapitalRequestForms />}
               {active === "capital" && selected.projects.length === 0 && (
                 <div className={styles.emptyState}>

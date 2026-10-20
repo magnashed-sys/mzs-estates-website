@@ -1,0 +1,48 @@
+-- All synthetic rows and profile changes roll back. Staging only.
+begin;
+do $$
+declare c uuid; stranger uuid; d uuid:=gen_random_uuid(); i uuid:=gen_random_uuid(); ip uuid:=gen_random_uuid(); p uuid:=gen_random_uuid(); g uuid:=gen_random_uuid(); r jsonb; denied boolean;
+begin
+ select id into c from public.profiles where role='client' and is_active order by created_at limit 1;
+ select id into stranger from public.profiles where role='client' and is_active and id<>c limit 1;
+ if c is null or stranger is null then raise exception 'Two active Staging clients required';end if;
+ insert into public.mzs_capital_deals(id,title,direction,lender,borrower,principal,annual_rate,notes) values(d,'Synthetic limited view','provided','Secret lender','Secret borrower',1000,8,'PRIVATE INTERNAL NOTE');
+ insert into public.mzs_capital_instalments(id,deal_id,kind,due_date,amount) values(i,d,'interest',current_date,100),(ip,d,'principal',current_date,100);
+ insert into public.mzs_capital_payments(instalment_id,amount,paid_on,reference) values(i,40,current_date,'PRIVATE BANK REFERENCE'),(ip,10,current_date,'PRINCIPAL');
+ insert into public.mzs_capital_payments(id,instalment_id,amount,paid_on,reference) values(p,i,20,current_date,'VOID TEST');
+ update public.mzs_capital_payments set is_void=true,void_reason='Synthetic correction' where id=p;
+ insert into public.mzs_capital_client_access(id,deal_id,user_id,party_role,display_label) values(g,d,c,'lender','Your loan');
+ perform set_config('request.jwt.claim.sub',c::text,true);execute 'set local role authenticated';
+ r:=public.mzs_my_capital_summaries();
+ select x into r from jsonb_array_elements(r) x where x->>'id'=g::text;
+ if r is null or (r->>'total_interest_received')::numeric<>40 or (r->>'total_interest_paid')::numeric<>0 or jsonb_array_length(r->'interest_payments')<>1 then raise exception 'Interest projection failed';end if;
+ if exists(select 1 from jsonb_object_keys(r) k where k not in ('id','label','party_role','principal','currency','start_date','end_date','total_interest_received','total_interest_paid','interest_payments')) then raise exception 'Unapproved field';end if;
+ if r::text like '%PRIVATE%' or r::text like '%Secret%' then raise exception 'Sensitive fields exposed';end if;
+ if exists(select 1 from public.mzs_capital_deals where id=d) or exists(select 1 from public.mzs_capital_payments where instalment_id=i) or exists(select 1 from public.mzs_capital_client_access where id=g) then raise exception 'Raw data exposed';end if;
+ denied:=false;begin insert into public.mzs_capital_client_access(deal_id,user_id,party_role,display_label) values(d,stranger,'lender','Escalation');exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Client granted access';end if;
+ update public.mzs_capital_client_access set is_active=false where id=g;
+ execute 'reset role';perform set_config('request.jwt.claim.sub','',true);
+ if not (select is_active from public.mzs_capital_client_access where id=g) then raise exception 'Client changed grant';end if;
+ update public.mzs_capital_client_access set party_role='borrower' where id=g;
+ perform set_config('request.jwt.claim.sub',c::text,true);execute 'set local role authenticated';
+ select x into r from jsonb_array_elements(public.mzs_my_capital_summaries()) x where x->>'id'=g::text;
+ if (r->>'total_interest_paid')::numeric<>40 or (r->>'total_interest_received')::numeric<>0 then raise exception 'Borrower perspective failed';end if;
+ perform set_config('request.jwt.claim.sub',stranger::text,true);
+ if exists(select 1 from jsonb_array_elements(public.mzs_my_capital_summaries()) x where x->>'id'=g::text) then raise exception 'Other client exposure';end if;
+ execute 'reset role';perform set_config('request.jwt.claim.sub','',true);
+ update public.mzs_capital_client_access set is_active=false where id=g;
+ perform set_config('request.jwt.claim.sub',c::text,true);execute 'set local role authenticated';
+ if exists(select 1 from jsonb_array_elements(public.mzs_my_capital_summaries()) x where x->>'id'=g::text) then raise exception 'Revocation ignored';end if;
+ execute 'reset role';perform set_config('request.jwt.claim.sub','',true);
+ update public.profiles set is_active=false where id=c;
+ perform set_config('request.jwt.claim.sub',c::text,true);execute 'set local role authenticated';
+ denied:=false;begin perform public.mzs_my_capital_summaries();exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Inactive client allowed';end if;
+ execute 'set local role anon';perform set_config('request.jwt.claim.sub','',true);
+ denied:=false;begin perform public.mzs_my_capital_summaries();exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Anonymous access allowed';end if;
+ execute 'reset role';
+end $$;
+rollback;
+select 'PASS: assigned projection, field allowlist, lender/borrower totals, interest-only, void exclusion, raw table denial, no self-grant, other client isolation, revocation, inactive and anonymous denial. Fixtures rolled back.' as result;
