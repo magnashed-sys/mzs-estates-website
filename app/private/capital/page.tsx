@@ -26,8 +26,7 @@ export default async function ClientCapital(){
     <dl className={s.facts}>
      <div><dt>Loan amount</dt><dd>{money(d.principal)}</dd></div>
      <div><dt>Start date</dt><dd>{day(d.start_date)}</dd></div><div><dt>End date</dt><dd>{day(d.end_date)}</dd></div>
-     <div><dt>Total interest received</dt><dd>{money(d.total_interest_received)}</dd></div>
-     <div><dt>Total interest paid</dt><dd>{money(d.total_interest_paid)}</dd></div>
+     <div><dt>{d.party_role==='lender'?'Total interest received':'Total interest paid'}</dt><dd>{money(d.party_role==='lender'?d.total_interest_received:d.total_interest_paid)}</dd></div>
     </dl>
     <h3>{d.party_role==='lender'?'Interest received':'Interest paid'}</h3>
     {d.interest_payments.length?<div className={s.tableWrap}><table><caption>Confirmed interest payments</caption><thead><tr><th scope="col">Payment date</th><th scope="col">Amount</th></tr></thead><tbody>{d.interest_payments.map((p,i)=><tr key={i}><td>{day(p.date)}</td><td>{money(p.amount)}</td></tr>)}</tbody></table></div>:<p className={s.empty}>No interest payments have been confirmed in this dossier yet.</p>}
