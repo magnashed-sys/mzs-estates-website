@@ -16,7 +16,8 @@ Status: Staging review only. Production publication and migration are not author
   download URLs opening in a new tab. No client publication or e-signing.
 - Full admins only, including database and Storage RLS. Capital department scope
   does not grant access. Each page/action/download route independently checks
-  active full admin and strict Preview + Staging URL before reading data.
+  active full admin and strict environment/project pairing before reading data; Production additionally
+  requires the server-only opt-in flag documented in the release plan.
 - No emails, no project/relationship grants, no production changes.
 
 ## Data and documents
@@ -70,9 +71,9 @@ payment changes are separately guarded and audited.
 
 ## Release / rollback
 
-The feature is intentionally 404 outside Preview + MZS Staging. To publish,
+The feature remains disabled in Production unless deliberately opted in. To publish,
 obtain explicit owner approval, verify backup, prepare Production migration and
-source import, add production enablement deliberately, and retest all guards.
+source import, set the production enablement flag deliberately, and retest all guards.
 Do not promote this Preview directly or merge the draft PR without that review.
 Rollback the Preview app or remove its feature exposure; retain deal data and
 audit. Never drop financial records as a casual rollback. Existing schemas,

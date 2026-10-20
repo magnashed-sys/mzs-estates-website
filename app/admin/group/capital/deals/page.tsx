@@ -10,7 +10,7 @@ export default async function Deals({searchParams}:{searchParams:Promise<{notice
  return <><nav className={s.nav}><Link href="/admin/group/capital">← Capital management</Link><Link href="/admin/capital-requests">Capital requests</Link></nav>
   <p className="mzsEyebrow">MZS CAPITAL / PRIVATE DEALS</p><h1>Loans & agreements</h1>
   <p className="mzsIntro">One private dossier for each loan. Keep the contract, planned cash flows and confirmed payments together.</p>
-  <p className={s.notice}>Staging review · Full administrators only. No client access or email notifications. Source schedules do not prove payment.</p>
+  <p className={s.notice}>{process.env.VERCEL_ENV === 'preview' ? 'Staging review · ' : ''}Full administrators only. No client access or email notifications. Source schedules do not prove payment.</p>
   {query.notice&&<p role={query.notice==='saved'?'status':'alert'} className={s.notice}>{query.notice==='saved'?'Saved successfully.':'The operation could not be confirmed. Check the values and reload before retrying.'}</p>}
   {error||count!==(data||[]).length?<p role="alert">Unable to load a complete deal list. No totals are displayed.</p>:['provided','received'].map(direction=>{
    const deals=(data as Deal[]).filter(d=>d.direction===direction);

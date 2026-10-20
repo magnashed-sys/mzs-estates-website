@@ -26,7 +26,7 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
  const today=new Date().toISOString().slice(0,10);
  return <><nav className={s.nav}><Link href="/admin/group/capital/deals">← Loans & agreements</Link></nav>
   <p className="mzsEyebrow">MZS CAPITAL / {d.direction==='provided'?'LOAN PROVIDED':'LOAN RECEIVED'}</p><h1>{d.title}</h1>
-  <span className={s.badge}>{label(d.status)}</span><span className={s.badge}>{label(d.review_state)}</span><span className={s.badge}>Admin only · Staging</span>
+  <span className={s.badge}>{label(d.status)}</span><span className={s.badge}>{label(d.review_state)}</span><span className={s.badge}>Admin only{process.env.VERCEL_ENV === 'preview' ? ' · Staging' : ''}</span>
   {query.notice&&<p className={s.notice} role={query.notice==='saved'?'status':'alert'}>{query.notice==='saved'?'Saved successfully.':'The change could not be confirmed. Check dates, remaining amount and reference, then reload before retrying.'}</p>}
   <dl className={s.facts}>{[['Original principal',money(d.principal)],['Annual interest',Number(d.annual_rate)+'%'],['Lender',d.lender],['Borrower',d.borrower],['Agreement date',date(d.agreement_date)],['Funding date (source)',date(d.start_date)],['Maturity',date(d.maturity_date)],['Currency','EUR']].map(([a,b])=><div key={a}><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
   <p className={s.notice}>Original principal is a contractual figure, not a reconciled outstanding balance. A schedule, due date or source deposit entry does not confirm that money was received or paid.</p>

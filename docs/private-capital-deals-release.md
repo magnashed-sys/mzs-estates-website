@@ -15,6 +15,17 @@ build: its compiled public Supabase configuration belongs to Staging.
   and non-admin access refusal. Automated checks recorded in the staging guide.
 - No document bytes or production backup restore were verified in this preparation.
 
+## Preparation update
+
+Owner confirmed the Production backup timestamp shown in Supabase as
+20 October 2026 01:17:17, completed with Restore available. This is owner-reported
+backup availability, not a performed restore test; retain the dashboard timezone.
+Production enablement is prepared on the feature branch: the exact Production URL
+and `VERCEL_ENV=production` must match, and server-only
+`MZS_CAPITAL_DEALS_ENABLED=true` is required. No flag has been set in Vercel and
+nothing has been merged or deployed to Production. Unset/false disables routes,
+actions and downloads as well as the navigation card. Preview remains Staging-only.
+
 ## Release gates
 
 1. Confirm a recent completed, restorable Production database backup in the
@@ -22,8 +33,8 @@ build: its compiled public Supabase configuration belongs to Staging.
    migration. The earlier backup confirmation is not a new restore verification.
    Separately preserve original PDFs: database recovery is not a substitute for
    recovery of Storage file bytes.
-2. Implement deliberate production enablement in `lib/security/capital-deals.ts`
-   and the Capital navigation card. Current code supports Preview only. Require
+2. Review prepared production enablement in `lib/security/capital-deals.ts`
+   and the Capital navigation card. The release guard now supports explicit opt-in. Require
    exact Production project URL AND a server-side opt-in flag, keeping Preview
    pinned to Staging. Retain active full-admin checks on every entry point.
    Test production flag absent/false, wrong project, cross-environment pairs,
@@ -94,6 +105,6 @@ Keep the production feature disabled while provisioning and checking data.
 
 ## Remaining work
 
-Production enablement code/tests; current backup and rollback-target verification;
+Confirm fresh backup availability at execution and record rollback target;
 release approval; protected source export/document transfer; Production migration,
 new build and smoke tests. None is claimed completed by this document.

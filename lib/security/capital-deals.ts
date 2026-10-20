@@ -1,14 +1,20 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '../supabase/server';
 
-export function capitalDealsPreviewEnabled() {
-  return process.env.VERCEL_ENV === 'preview' &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://senonkpxdtlhyhrubicg.supabase.co';
+export function capitalDealsEnabled() {
+  const environment = process.env.VERCEL_ENV;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (environment === 'preview') {
+    return url === 'https://senonkpxdtlhyhrubicg.supabase.co';
+  }
+  return environment === 'production' &&
+    url === 'https://ptrnjzmcehrhbsfxntgw.supabase.co' &&
+    process.env.MZS_CAPITAL_DEALS_ENABLED === 'true';
 }
 
 // Call in each page, action and route: parent layouts do not protect actions.
 export async function requireDealsAdmin() {
-  if (!capitalDealsPreviewEnabled()) notFound();
+  if (!capitalDealsEnabled()) notFound();
   const db = await createClient();
   const { data: { user }, error } = await db.auth.getUser();
   if (error || !user) redirect('/login');
