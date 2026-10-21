@@ -446,6 +446,8 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 const processing = busy === `booking:${booking.id}`;
                 const hasCancellation = cancellations.some(request => request.booking_id === booking.id && request.status === "pending");
                 const canDelete = booking.is_test && ["requested", "test_approved", "declined", "cancelled"].includes(booking.status);
+                const canEditLive = !booking.is_test && ["requested","confirmed"].includes(booking.status) && booking.user_id !== null && booking.check_in >= todayInMadrid();
+                const canCancelLive = !booking.is_test && booking.status === "confirmed" && booking.user_id !== null && booking.check_out > todayInMadrid();
                 return (<article key={booking.id} style={cardStyle}>
                   <div style={{ ...rowStyle, alignItems: "flex-start", justifyContent: "space-between" }}>
                     <div><h3 style={titleStyle}>{property?.title ?? "Property unavailable"}</h3>
@@ -473,13 +475,15 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                       <ActionButton primary disabled={locked} onClick={() => reviewBooking(booking, "approved")}>{processing ? "Processing..." : booking.is_test ? "Approve test" : "Confirm booking"}</ActionButton>
                       <ActionButton disabled={locked} onClick={() => reviewBooking(booking, "declined")}>Decline</ActionButton>
                     </>}
+                    {canEditLive && <ActionButton disabled={locked} onClick={() => startEditingBooking(booking)}>Edit booking</ActionButton>}
+                    {canCancelLive && <ActionButton danger disabled={locked} onClick={() => {setEditingBookingId(null);setCancellingBookingId(booking.id);setCancellationReason("");setNotice(null);}}>Cancel reservation</ActionButton>}
                     {canDelete && <ActionButton danger disabled={locked} onClick={() => removeTest(booking)}>Delete test booking</ActionButton>}
                   </div>
                 </article>);
             })}
           </div>
           {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more bookings</ActionButton>}
-          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Only eligible test records can be permanently deleted here, along with their test cancellation history.</p>
+          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. No automatic guest notification or refund is sent. Only eligible test records can be permanently deleted.</p>
         </>)}
 
       {!loading && !error && snapshot && section === "cancellations" && (<>
