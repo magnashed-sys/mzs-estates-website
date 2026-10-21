@@ -122,7 +122,7 @@ const presentations: Record<string, Presentation> = {
     ],
     bookingKicker: "PRIVATE RENTAL",
     bookingTitle: "Stay a little longer.",
-    bookingIntro: "Entire villa from €400 per night, with a minimum stay of seven nights. Optional pool heating is available at €50 per day. Arrival and departure preferences can be included in your request; every booking is personally reviewed by MZS Group.",
+    bookingIntro: "Entire villa from €400 per night, with stays available from one night. Optional pool heating is available at €50 per day. Arrival and departure preferences can be included in your request; every booking is personally reviewed by MZS Group.",
     locationHeading: "Your place on the Costa Blanca.",
     locationDescription: "Enjoy the Costa Blanca's mountain scenery and Mediterranean towns from a private base in La Nucía.",
     locationDetail: "Carrer Serra del Ferrer 3 · 03530 La Nucía · Alicante, Spain",
@@ -155,7 +155,7 @@ const presentations: Record<string, Presentation> = {
     ],
     bookingKicker: "YOUR IBIZA STAY",
     bookingTitle: "Choose how you stay.",
-    bookingIntro: "Both options offer exclusive use of the apartment for a minimum of seven nights. Select the configuration in the live calendar below to request your preferred dates.",
+    bookingIntro: "Both options offer exclusive use of the apartment for stays from one night. Select the configuration in the live calendar below to request your preferred dates.",
     rentalOptions: [
       { title: "Two-bedroom residence", price: "€400", details: "2 bedrooms · 1 bathroom · Up to 4 guests", description: "Third bedroom and second bathroom remain closed." },
       { title: "Three-bedroom residence", price: "€600", details: "3 bedrooms · 2 bathrooms · Up to 6 guests", description: "Full apartment configuration, for a larger party." },
@@ -355,7 +355,7 @@ export default async function PrivateProjectPage({ params }: Props) {
               <div className={styles.stayPrice}>
                 <span>FROM</span>
                 <strong>€400</strong>
-                <small>PER NIGHT · MINIMUM 7 NIGHTS</small>
+                <small>PER NIGHT · STAYS FROM 1 NIGHT</small>
                 <a href="#availability">SELECT YOUR DATES ↗</a>
               </div>
             </div>
