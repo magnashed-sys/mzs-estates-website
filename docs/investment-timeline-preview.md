@@ -1,5 +1,13 @@
 # Investment presentation draft — 20 October 2026
 
+> Historical Staging preparation record. The Staging-only restriction below was
+> superseded by the owner's specific Production approval on 20 October 2026 at
+> 00:48:05 Europe/Madrid (19 October 22:48:05 UTC), followed by PR #17's merge
+> `cd66860bad3c67bae580629c49a7f454748bc07c` and successful Production deployments.
+> See [the publication audit](can-juan-publication-audit-2026-10-21.md) for evidence,
+> current visibility, access tests and verification limits. The separate admin
+> review route remains Preview-only; the approved client presentation does not.
+
 Owner authorized Staging preparation only. Production remains unchanged.
 
 Prepared reusable four-step ProjectTimeline (site, permit, construction, completion), with explicit completed/current/planned/unconfirmed states and mobile vertical layout. Unknown dates must stay unconfirmed; do not copy the Ibiza dates into other projects.
