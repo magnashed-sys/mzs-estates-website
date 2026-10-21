@@ -1,6 +1,6 @@
 create or replace function public.mzs_admin_update_member_contact(p_user_id uuid, p_details jsonb)
 returns void language plpgsql security definer set search_path = ''
-as $$
+as $function$
 declare v_key text; v_value text;
 begin
   if auth.uid() is null or not (select public.is_admin()) then
@@ -37,6 +37,6 @@ begin
     phone=excluded.phone,street_address=excluded.street_address,
     house_number=excluded.house_number,address_addition=excluded.address_addition,
     postal_code=excluded.postal_code,city=excluded.city,region=excluded.region,country=excluded.country;
-end $$;
+end; $function$;
 revoke all on function public.mzs_admin_update_member_contact(uuid,jsonb) from public,anon;
 grant execute on function public.mzs_admin_update_member_contact(uuid,jsonb) to authenticated;
