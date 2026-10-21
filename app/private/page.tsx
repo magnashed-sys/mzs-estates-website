@@ -140,6 +140,11 @@ export default function PrivatePage() {
 
         setRole(profile.role);
         setName(profile.full_name?.trim().split(/\s+/)[0] || "Member");
+        if (profile.is_active !== true) {
+          setViewState("pending");
+          return;
+        }
+
         // Capital dossiers are granted individually and are not financing project offerings.
         // Read the same protected endpoint used by the Capital dossier cards.
         void fetch("/api/capital-client-summary", { cache: "no-store" })
@@ -151,10 +156,6 @@ export default function PrivatePage() {
             if (mounted) setCapitalDossierCount(count);
           })
           .catch(() => { if (mounted) setCapitalDossierCount(null); });
-        if (profile.is_active !== true) {
-          setViewState("pending");
-          return;
-        }
 
         // Both project AND offering grants must be present. Never display
         // an opportunity based on its project grant alone.
