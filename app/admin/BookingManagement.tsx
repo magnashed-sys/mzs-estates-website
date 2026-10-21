@@ -57,8 +57,8 @@ type Notice = {
 };
 type Mutation = {
     key: string;
-    functionName: "review_rental_booking" | "delete_test_rental_booking" | "review_booking_cancellation";
-    args: Record<string, string | null>;
+    functionName: "review_rental_booking" | "delete_test_rental_booking" | "review_booking_cancellation" | "admin_modify_live_rental_booking" | "admin_cancel_live_rental_booking";
+    args: Record<string, string | number | null>;
     expected: string | boolean;
     success: string;
 };
@@ -70,6 +70,7 @@ const rowStyle: CSSProperties = { display: "flex", alignItems: "center", flexWra
 const cardStyle: CSSProperties = { padding: "clamp(20px,3vw,34px)", border: `1px solid ${border}`, background: "#151411" };
 const gridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 20, marginTop: 26 };
 const titleStyle: CSSProperties = { fontFamily: "Georgia, serif", fontSize: 29, fontWeight: 400, lineHeight: 1.2, margin: "0 0 10px" };
+const bookingInputStyle: CSSProperties = { width:"100%",maxWidth:"100%",minWidth:0,minHeight:46,boxSizing:"border-box",background:"#171612",color:"#eeeae2",border:"1px solid #665a45",padding:12,fontSize:15 };
 const badgeStyle: CSSProperties = { color: gold, border: `1px solid ${border}`, padding: "9px 12px", fontSize: 12, letterSpacing: ".08em", lineHeight: 1.5 };
 // Same eligibility as My Reservations and the cancellation RPCs.
 function isCancellationEligible(booking: Booking): boolean {
@@ -107,6 +108,14 @@ function actionErrorMessage(value: unknown): string {
         "Booking starts in the past": "A booking starting in the past cannot be confirmed.",
         "Test booking not found or cannot be deleted": "This record cannot be deleted with the test-booking function.",
         "Invalid decision": "The decision was not accepted. Refresh before trying again.",
+        "Booking changed since last refresh": "Booking details have changed. Refresh before trying again.",
+        "Only live pending or confirmed client bookings can be modified": "Only live client requests or confirmed bookings can be edited.",
+        "Only confirmed live client bookings can be cancelled": "Only confirmed live reservations can be cancelled.",
+        "Review pending cancellation request before editing": "Review the pending cancellation request before editing.",
+        "Past reservation cannot be cancelled": "Past reservations cannot be cancelled.",
+        "Minimum stay requirement not met": "Selected dates do not meet the minimum stay.",
+        "Invalid guest count": "The number of guests is invalid.",
+        "Invalid stay dates": "Please choose valid future stay dates.",
     };
     return known[message] ?? "The outcome could not be confirmed. Refresh and check the current status before trying again.";
 }
@@ -148,6 +157,10 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     const [search, setSearch] = useState("");
     const [propertyFilter, setPropertyFilter] = useState("all");
     const [scope, setScope] = useState<"live" | "test" | "all">("live");
+    const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
+    const [editDraft, setEditDraft] = useState({check_in:"", check_out:"", guest_count:"2", admin_notes:""});
+    const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+    const [cancellationReason, setCancellationReason] = useState("");
     const [visibleLimit, setVisibleLimit] = useState(12);
     const [updated, setUpdated] = useState("");
     const mounted = useRef(false);
@@ -252,6 +265,8 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 }
             }
             const refreshed = await reload();
+            if (options.functionName === "admin_modify_live_rental_booking") setEditingBookingId(null);
+            if (options.functionName === "admin_cancel_live_rental_booking") setCancellingBookingId(null);
             if (mounted.current)
                 setNotice({ kind: refreshed ? "success" : "error", text: refreshed ? options.success + mailWarning
                         : `${options.success} The overview could not be refreshed. Refresh before another action.` });
@@ -282,6 +297,44 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         void runMutation({ key: `booking:${booking.id}`, functionName: "review_rental_booking",
             args: { p_booking_id: booking.id, p_decision: decision, p_admin_notes: booking.admin_notes }, expected,
             success: `Booking status updated: ${statusLabel(expected)}.` });
+    }
+    function startEditingBooking(booking: Booking) {
+        setNotice(null); setCancellingBookingId(null); setEditingBookingId(booking.id);
+        setEditDraft({check_in:booking.check_in,check_out:booking.check_out,
+          guest_count:String(booking.guest_count??1),admin_notes:booking.admin_notes??""});
+    }
+    function saveBooking(booking: Booking) {
+        const guests=Number(editDraft.guest_count);
+        if (mutationInProgress.current || !editDraft.check_in || !editDraft.check_out ||
+            !Number.isInteger(guests) || guests<1 || editDraft.admin_notes.length>2000) {
+            setNotice({kind:"error",text:"Review dates, guest count and admin notes."});return;
+        }
+        const property=snapshot?.properties.find(p=>p.id===booking.project_id);
+        if (!window.confirm("Save changes to this LIVE booking?\\n\\nProperty: "+
+             (property?.title??"Property")+"\\nOriginal: "+formatDate(booking.check_in)+" – "+
+             formatDate(booking.check_out)+"\\nNew: "+formatDate(editDraft.check_in)+" – "+
+             formatDate(editDraft.check_out)+"\\nGuests: "+guests+
+             "\\n\\nThe original per-night rate is retained. No automatic email or refund is sent."))return;
+        void runMutation({key:"booking:"+booking.id,functionName:"admin_modify_live_rental_booking",
+          args:{p_booking_id:booking.id,p_check_in:editDraft.check_in,p_check_out:editDraft.check_out,
+            p_guest_count:guests,p_expected_check_in:booking.check_in,
+            p_expected_check_out:booking.check_out,p_expected_guest_count:booking.guest_count,
+            p_admin_notes:editDraft.admin_notes},expected:"updated",
+          success:"Booking updated. Please inform the guest about the changes."});
+    }
+    function cancelLiveBooking(booking: Booking) {
+        const reason=cancellationReason.trim();
+        if (mutationInProgress.current || reason.length<3) {
+            setNotice({kind:"error",text:"A cancellation reason of at least 3 characters is required."});return;
+        }
+        const property=snapshot?.properties.find(p=>p.id===booking.project_id);
+        if (!window.confirm("CANCEL this confirmed LIVE booking?\\n\\nProperty: "+
+          (property?.title??"Property")+"\\nStay: "+formatDate(booking.check_in)+" – "+
+          formatDate(booking.check_out)+"\\nReason: "+reason+
+          "\\n\\nThe dates are released; no refund or automatic email is sent."))return;
+        void runMutation({key:"booking:"+booking.id,functionName:"admin_cancel_live_rental_booking",
+          args:{p_booking_id:booking.id,p_reason:reason},expected:"cancelled",
+          success:"Reservation cancelled and dates released. Please notify the guest; handle refunds separately."});
     }
     function removeTest(booking: Booking) {
         if (mutationInProgress.current || !booking.is_test || !["requested", "test_approved", "declined", "cancelled"].includes(booking.status))
@@ -394,6 +447,8 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 const processing = busy === `booking:${booking.id}`;
                 const hasCancellation = cancellations.some(request => request.booking_id === booking.id && request.status === "pending");
                 const canDelete = booking.is_test && ["requested", "test_approved", "declined", "cancelled"].includes(booking.status);
+                const canEditLive = !booking.is_test && ["requested","confirmed"].includes(booking.status) && booking.user_id !== null && booking.check_in >= todayInMadrid();
+                const canCancelLive = !booking.is_test && booking.status === "confirmed" && booking.user_id !== null && booking.check_out > todayInMadrid();
                 return (<article key={booking.id} style={cardStyle}>
                   <div style={{ ...rowStyle, alignItems: "flex-start", justifyContent: "space-between" }}>
                     <div><h3 style={titleStyle}>{property?.title ?? "Property unavailable"}</h3>
@@ -421,13 +476,48 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                       <ActionButton primary disabled={locked} onClick={() => reviewBooking(booking, "approved")}>{processing ? "Processing..." : booking.is_test ? "Approve test" : "Confirm booking"}</ActionButton>
                       <ActionButton disabled={locked} onClick={() => reviewBooking(booking, "declined")}>Decline</ActionButton>
                     </>}
+                    {canEditLive && <ActionButton disabled={locked} onClick={() => startEditingBooking(booking)}>Edit booking</ActionButton>}
+                    {canCancelLive && <ActionButton danger disabled={locked} onClick={() => {setEditingBookingId(null);setCancellingBookingId(booking.id);setCancellationReason("");setNotice(null);}}>Cancel reservation</ActionButton>}
                     {canDelete && <ActionButton danger disabled={locked} onClick={() => removeTest(booking)}>Delete test booking</ActionButton>}
                   </div>
+                  {editingBookingId === booking.id && <form onSubmit={e=>{e.preventDefault();saveBooking(booking);}}
+                    style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
+                    <h4 style={{margin:0,color:gold}}>Edit live booking</h4>
+                    <p style={{color:muted,margin:0}}>Update dates, guest count or notes. The original nightly price is retained.</p>
+                    <label style={{display:"grid",gap:6}}>Check-in
+                      <input style={bookingInputStyle} type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Check-out
+                      <input style={bookingInputStyle} type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Guests
+                      <input style={bookingInputStyle} type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Internal admin notes
+                      <textarea style={bookingInputStyle} rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
+                    </label>
+                    <div style={rowStyle}>
+                      <button className="admin-button admin-button-primary" type="submit" disabled={locked}>Save changes</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setEditingBookingId(null)}>Close</button>
+                    </div>
+                    <p style={{color:muted,margin:0}}>No automatic client email or refund. Inform the guest separately.</p>
+                  </form>}
+                  {cancellingBookingId === booking.id && <div style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
+                    <h4 style={{margin:0,color:warning}}>Cancel confirmed reservation</h4>
+                    <label style={{display:"grid",gap:6}}>Cancellation reason
+                      <textarea style={bookingInputStyle} rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
+                    </label>
+                    <div style={rowStyle}>
+                      <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>Confirm cancellation</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setCancellingBookingId(null)}>Keep reservation</button>
+                    </div>
+                    <p style={{color:muted,margin:0}}>This releases reserved dates. Refund and client notification are handled separately.</p>
+                  </div>}
                 </article>);
             })}
           </div>
           {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more bookings</ActionButton>}
-          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Only eligible test records can be permanently deleted here, along with their test cancellation history.</p>
+          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. No automatic guest notification or refund is sent. Only eligible test records can be permanently deleted.</p>
         </>)}
 
       {!loading && !error && snapshot && section === "cancellations" && (<>
