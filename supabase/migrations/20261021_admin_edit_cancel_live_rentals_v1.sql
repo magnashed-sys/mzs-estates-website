@@ -31,6 +31,9 @@ BEGIN
   IF v_booking.is_test OR v_booking.status <> 'confirmed' OR v_booking.user_id IS NULL THEN
     RAISE EXCEPTION 'Only confirmed live client bookings can be cancelled';
   END IF;
+  IF v_booking.check_out <= CURRENT_DATE THEN
+    RAISE EXCEPTION 'Past reservation cannot be cancelled';
+  END IF;
   UPDATE public.rental_bookings
   SET status='cancelled',reviewed_at=now(),reviewed_by=v_uid,
       admin_notes=left(concat_ws(E'\n',nullif(admin_notes,''),
