@@ -57,8 +57,8 @@ type Notice = {
 };
 type Mutation = {
     key: string;
-    functionName: "review_rental_booking" | "delete_test_rental_booking" | "review_booking_cancellation";
-    args: Record<string, string | null>;
+    functionName: "review_rental_booking" | "delete_test_rental_booking" | "review_booking_cancellation" | "admin_modify_live_rental_booking" | "admin_cancel_live_rental_booking";
+    args: Record<string, string | number | null>;
     expected: string | boolean;
     success: string;
 };
@@ -107,6 +107,14 @@ function actionErrorMessage(value: unknown): string {
         "Booking starts in the past": "A booking starting in the past cannot be confirmed.",
         "Test booking not found or cannot be deleted": "This record cannot be deleted with the test-booking function.",
         "Invalid decision": "The decision was not accepted. Refresh before trying again.",
+        "Booking changed since last refresh": "Booking details have changed. Refresh before trying again.",
+        "Only live pending or confirmed client bookings can be modified": "Only live client requests or confirmed bookings can be edited.",
+        "Only confirmed live client bookings can be cancelled": "Only confirmed live reservations can be cancelled.",
+        "Review pending cancellation request before editing": "Review the pending cancellation request before editing.",
+        "Past reservation cannot be cancelled": "Past reservations cannot be cancelled.",
+        "Minimum stay requirement not met": "Selected dates do not meet the minimum stay.",
+        "Invalid guest count": "The number of guests is invalid.",
+        "Invalid stay dates": "Please choose valid future stay dates.",
     };
     return known[message] ?? "The outcome could not be confirmed. Refresh and check the current status before trying again.";
 }
@@ -148,6 +156,10 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     const [search, setSearch] = useState("");
     const [propertyFilter, setPropertyFilter] = useState("all");
     const [scope, setScope] = useState<"live" | "test" | "all">("live");
+    const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
+    const [editDraft, setEditDraft] = useState({check_in:"", check_out:"", guest_count:"2", admin_notes:""});
+    const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+    const [cancellationReason, setCancellationReason] = useState("");
     const [visibleLimit, setVisibleLimit] = useState(12);
     const [updated, setUpdated] = useState("");
     const mounted = useRef(false);
@@ -252,6 +264,8 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 }
             }
             const refreshed = await reload();
+            if (options.functionName === "admin_modify_live_rental_booking") setEditingBookingId(null);
+            if (options.functionName === "admin_cancel_live_rental_booking") setCancellingBookingId(null);
             if (mounted.current)
                 setNotice({ kind: refreshed ? "success" : "error", text: refreshed ? options.success + mailWarning
                         : `${options.success} The overview could not be refreshed. Refresh before another action.` });
@@ -282,6 +296,44 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         void runMutation({ key: `booking:${booking.id}`, functionName: "review_rental_booking",
             args: { p_booking_id: booking.id, p_decision: decision, p_admin_notes: booking.admin_notes }, expected,
             success: `Booking status updated: ${statusLabel(expected)}.` });
+    }
+    function startEditingBooking(booking: Booking) {
+        setNotice(null); setCancellingBookingId(null); setEditingBookingId(booking.id);
+        setEditDraft({check_in:booking.check_in,check_out:booking.check_out,
+          guest_count:String(booking.guest_count??1),admin_notes:booking.admin_notes??""});
+    }
+    function saveBooking(booking: Booking) {
+        const guests=Number(editDraft.guest_count);
+        if (mutationInProgress.current || !editDraft.check_in || !editDraft.check_out ||
+            !Number.isInteger(guests) || guests<1 || editDraft.admin_notes.length>2000) {
+            setNotice({kind:"error",text:"Review dates, guest count and admin notes."});return;
+        }
+        const property=snapshot?.properties.find(p=>p.id===booking.project_id);
+        if (!window.confirm("Save changes to this LIVE booking?\\n\\nProperty: "+
+             (property?.title??"Property")+"\\nOriginal: "+formatDate(booking.check_in)+" – "+
+             formatDate(booking.check_out)+"\\nNew: "+formatDate(editDraft.check_in)+" – "+
+             formatDate(editDraft.check_out)+"\\nGuests: "+guests+
+             "\\n\\nThe original per-night rate is retained. No automatic email or refund is sent."))return;
+        void runMutation({key:"booking:"+booking.id,functionName:"admin_modify_live_rental_booking",
+          args:{p_booking_id:booking.id,p_check_in:editDraft.check_in,p_check_out:editDraft.check_out,
+            p_guest_count:guests,p_expected_check_in:booking.check_in,
+            p_expected_check_out:booking.check_out,p_expected_guest_count:booking.guest_count,
+            p_admin_notes:editDraft.admin_notes},expected:"updated",
+          success:"Booking updated. Please inform the guest about the changes."});
+    }
+    function cancelLiveBooking(booking: Booking) {
+        const reason=cancellationReason.trim();
+        if (mutationInProgress.current || reason.length<3) {
+            setNotice({kind:"error",text:"A cancellation reason of at least 3 characters is required."});return;
+        }
+        const property=snapshot?.properties.find(p=>p.id===booking.project_id);
+        if (!window.confirm("CANCEL this confirmed LIVE booking?\\n\\nProperty: "+
+          (property?.title??"Property")+"\\nStay: "+formatDate(booking.check_in)+" – "+
+          formatDate(booking.check_out)+"\\nReason: "+reason+
+          "\\n\\nThe dates are released; no refund or automatic email is sent."))return;
+        void runMutation({key:"booking:"+booking.id,functionName:"admin_cancel_live_rental_booking",
+          args:{p_booking_id:booking.id,p_reason:reason},expected:"cancelled",
+          success:"Reservation cancelled and dates released. Please notify the guest; handle refunds separately."});
     }
     function removeTest(booking: Booking) {
         if (mutationInProgress.current || !booking.is_test || !["requested", "test_approved", "declined", "cancelled"].includes(booking.status))
