@@ -155,8 +155,8 @@ export default function RentalCalendar({
 
     const nights = nightsBetween(checkIn, day);
 
-    if (nights < (settings?.minimum_nights ?? 7)) {
-      setMessage("Minimum stay is 7 nights.");
+    if (nights < (settings?.minimum_nights ?? 1)) {
+      setMessage("Minimum stay is 1 night.");
       return;
     }
 
@@ -494,7 +494,7 @@ export default function RentalCalendar({
             </div>
 
             <p style={{ color: muted, fontSize: 12 }}>
-              Estimated total · Minimum {settings.minimum_nights} nights
+              Estimated total · Stays from {settings.minimum_nights} night{settings.minimum_nights === 1 ? "" : "s"}
             </p>
           </div>
 
