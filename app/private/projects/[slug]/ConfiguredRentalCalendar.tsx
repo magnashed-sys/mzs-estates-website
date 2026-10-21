@@ -176,7 +176,7 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
           <div style={{ borderTop: `1px solid ${border}`, paddingTop: 20, marginTop: 20 }}>
             <p style={{ color: muted }}>{nights} nights × {euro(Number(config?.nightly_rate_eur ?? 0))}</p>
             <div style={{ fontFamily: "Georgia,serif", fontSize: 42 }}>{euro(total)}</div>
-            <p style={{ color: muted, fontSize: 12 }}>Estimated total · Minimum {config?.minimum_nights ?? 7} nights</p>
+            <p style={{ color: muted, fontSize: 12 }}>Estimated total · Stays from {config?.minimum_nights ?? 1} night{config?.minimum_nights === 1 ? "" : "s"}</p>
           </div>
           {checkIn && checkOut && config && !submitted && (
             <form onSubmit={submitBooking} style={{ display: "grid", gap: 18, borderTop: `1px solid ${border}`, paddingTop: 24, marginTop: 26 }}>
