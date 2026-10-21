@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       ["Booking reference", booking.id],
     ];
     const rows = details.map(([name, value]) => "<tr><td style='padding:12px;color:#d5c09a'>" + escape(name) +
-      "</td><td style='padding:12px'>" + escape(value) + "</td></tr>").join("");
+      "</td><td style='padding:12px;color:#eeeae2!important;background-color:#151411;font-family:Arial,sans-serif'>" + escape(value) + "</td></tr>").join("");
     const html = "<!doctype html><html lang='en'><body style='background:#0b0b0a;color:#eeeae2;font-family:Arial,sans-serif'>" +
       "<div style='max-width:580px;margin:28px auto;padding:36px;background:#151411;border:1px solid #514839'>" +
       "<p style='color:#d5c09a;letter-spacing:4px;text-align:center'>MZS GROUP</p>" +
