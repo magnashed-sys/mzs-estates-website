@@ -67,6 +67,10 @@ export default function RelationshipDossierPage() {
   const [state, setState] = useState<Status>("loading");
   const [dossier, setDossier] = useState<Dossier | null>(null);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveNotice, setSaveNotice] = useState("");
+  const [contactDraft, setContactDraft] = useState<Record<string,string>>({});
   const mounted = useRef(false);
   const generation = useRef(0);
 
@@ -154,6 +158,41 @@ export default function RelationshipDossierPage() {
     return () => { mounted.current = false; generation.current += 1; };
   }, [load]);
 
+  function startEditing() {
+    if (!dossier) return;
+    setContactDraft({
+      full_name: dossier.person.full_name || "",
+      phone: dossier.contact?.phone || "",
+      street_address: dossier.contact?.street_address || "",
+      house_number: dossier.contact?.house_number || "",
+      address_addition: dossier.contact?.address_addition || "",
+      postal_code: dossier.contact?.postal_code || "",
+      city: dossier.contact?.city || "",
+      region: dossier.contact?.region || "",
+      country: dossier.contact?.country || "",
+    });
+    setSaveNotice("");
+    setEditing(true);
+  }
+  async function saveContact(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving || !dossier) return;
+    setSaving(true); setSaveNotice("");
+    try {
+      const res = await fetch("/api/admin/member-contact", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: dossier.person.id, ...contactDraft }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Unable to save contact details.");
+      setEditing(false);
+      setSaveNotice("Contact details saved.");
+      await load();
+    } catch (cause) {
+      setSaveNotice(cause instanceof Error ? cause.message : "Unable to save contact details.");
+    } finally { setSaving(false); }
+  }
+
   if (state !== "ready" || !dossier) {
     return <main className="admin-page"><div className="admin-message">
       <p className="eyebrow">MZS Relationships</p>
@@ -220,8 +259,11 @@ export default function RelationshipDossierPage() {
 
       <div className={styles.twoColumns}>
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><h2>Personal details.</h2><span>Self-managed</span></div>
-          <div className={styles.fieldGrid}>
+          <div className={styles.panelHeading}><h2>Personal details.</h2><button type="button" className="admin-button" onClick={() => editing ? setEditing(false) : startEditing()}>{editing ? "Cancel" : "Edit contact details"}</button></div>
+          {editing ? <form onSubmit={saveContact} style={{display:"grid",gap:12}}>
+            {([["full_name","Full name"],["phone","Telephone"],["street_address","Street"],["house_number","House number"],["address_addition","Address addition"],["postal_code","Postal code"],["city","City"],["region","Region"],["country","Country"]] as const).map(([key,label]) => <label key={key} style={{display:"grid",gap:6}}>{label}<input className="admin-input" value={contactDraft[key] || ""} maxLength={key === "full_name" || key === "street_address" ? 160 : key === "phone" ? 40 : key === "house_number" || key === "postal_code" ? 24 : key === "address_addition" ? 80 : 120} required={key === "full_name"} onChange={e => setContactDraft(d => ({...d,[key]:e.target.value}))} /></label>)}
+            <button type="submit" className="admin-button" disabled={saving}>{saving ? "Saving..." : "Save contact details"}</button>
+          </form> : <div className={styles.fieldGrid}>
             <div><small>Full name</small><p>{filled(person.full_name)}</p></div>
             <div><small>Email address</small><p>{filled(person.email)}</p></div>
             <div><small>Telephone</small><p>{filled(contact?.phone)}</p></div>
@@ -229,8 +271,9 @@ export default function RelationshipDossierPage() {
             <div className={styles.wide}><small>Postal address</small><p>{address || "Not supplied"}</p></div>
             <div><small>Member since</small><p>{date(person.created_at)}</p></div>
             <div><small>Account status</small><p>{person.is_active ? "Active" : "Inactive"}</p></div>
-          </div>
-          <p className={styles.note}>The client or partner edits their own contact details in My Profile. No account changes are made from this dossier.</p>
+          </div>}
+          {saveNotice && <p role="status" className={styles.note}>{saveNotice}</p>}
+          <p className={styles.note}>Administrators can update contact details here. Email, account status and access permissions are managed separately.</p>
         </section>
 
         <section className={styles.panel}>
