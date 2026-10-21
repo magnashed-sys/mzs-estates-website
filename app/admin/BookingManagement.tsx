@@ -479,6 +479,39 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                     {canCancelLive && <ActionButton danger disabled={locked} onClick={() => {setEditingBookingId(null);setCancellingBookingId(booking.id);setCancellationReason("");setNotice(null);}}>Cancel reservation</ActionButton>}
                     {canDelete && <ActionButton danger disabled={locked} onClick={() => removeTest(booking)}>Delete test booking</ActionButton>}
                   </div>
+                  {editingBookingId === booking.id && <form onSubmit={e=>{e.preventDefault();saveBooking(booking);}}
+                    style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
+                    <h4 style={{margin:0,color:gold}}>Edit live booking</h4>
+                    <p style={{color:muted,margin:0}}>Update dates, guest count or notes. The original nightly price is retained.</p>
+                    <label style={{display:"grid",gap:6}}>Check-in
+                      <input className="admin-input" type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Check-out
+                      <input className="admin-input" type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Guests
+                      <input className="admin-input" type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
+                    </label>
+                    <label style={{display:"grid",gap:6}}>Internal admin notes
+                      <textarea className="admin-input" rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
+                    </label>
+                    <div style={rowStyle}>
+                      <button className="admin-button admin-button-primary" type="submit" disabled={locked}>Save changes</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setEditingBookingId(null)}>Close</button>
+                    </div>
+                    <p style={{color:muted,margin:0}}>No automatic client email or refund. Inform the guest separately.</p>
+                  </form>}
+                  {cancellingBookingId === booking.id && <div style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
+                    <h4 style={{margin:0,color:warning}}>Cancel confirmed reservation</h4>
+                    <label style={{display:"grid",gap:6}}>Cancellation reason
+                      <textarea className="admin-input" rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
+                    </label>
+                    <div style={rowStyle}>
+                      <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>Confirm cancellation</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setCancellingBookingId(null)}>Keep reservation</button>
+                    </div>
+                    <p style={{color:muted,margin:0}}>This releases reserved dates. Refund and client notification are handled separately.</p>
+                  </div>}
                 </article>);
             })}
           </div>
