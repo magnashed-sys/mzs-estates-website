@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       ["Nights", String(nights)],
       ["Guests", String(booking.guest_count)],
       ["Estimated total", euro(Number(booking.quoted_total_eur))],
-      ["Pool heating requested", booking.pool_heating_requested ? "Yes" : "No"],
+      ...(body.mode === "villa" ? [["Pool heating requested", booking.pool_heating_requested ? "Yes" : "No"]] : []),
       ["Special requests", booking.guest_notes || "None"],
     ];
     const lines = details.map(([label, value]) => label + ": " + value).join("\n");
