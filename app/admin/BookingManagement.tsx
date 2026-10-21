@@ -235,9 +235,25 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 throw rpcError;
             if (data !== options.expected)
                 throw new Error("Unexpected result");
+            // Only a successful approval of a real booking triggers the guest email.
+            // An email failure never undoes the confirmed reservation or retries approval.
+            let mailWarning = "";
+            if (options.functionName === "review_rental_booking" && options.expected === "confirmed") {
+                try {
+                    const bookingId = options.args.p_booking_id;
+                    const mailResponse = await fetch("/api/rental/booking-confirmation", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ bookingId }),
+                    });
+                    if (!mailResponse.ok) mailWarning = " Confirmation email could not be verified; review mail logs.";
+                } catch {
+                    mailWarning = " Confirmation email could not be verified; review mail logs.";
+                }
+            }
             const refreshed = await reload();
             if (mounted.current)
-                setNotice({ kind: refreshed ? "success" : "error", text: refreshed ? options.success
+                setNotice({ kind: refreshed ? "success" : "error", text: refreshed ? options.success + mailWarning
                         : `${options.success} The overview could not be refreshed. Refresh before another action.` });
         }
         catch (cause) {
