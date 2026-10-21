@@ -241,31 +241,17 @@ export default function RentalCalendar({
     setMessage("");
 
     try {
-      const supabase = createClient();
-
-      const { error: bookingError } = await supabase.rpc(
-        "request_rental_booking",
-        {
-          p_project_id: projectId,
-          p_check_in: checkIn,
-          p_check_out: checkOut,
-          p_guest_count: guests,
-          p_preferred_check_in: arrivalTime || null,
-          p_preferred_check_out: departureTime || null,
-          p_pool_heating_requested: poolHeating,
-          p_guest_notes: notes.trim() || null,
-        }
-      );
-
-      if (bookingError) {
-        setMessage(
-          "Unable to submit your request. Please verify availability and try again."
-        );
+      const response = await fetch("/api/rental/booking-request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "villa", projectId, checkIn, checkOut, guests,
+          arrival: arrivalTime, departure: departureTime, poolHeating, notes }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage(result.error || "Unable to submit your request. Please try again.");
       } else {
         setSubmitted(true);
-        setMessage(
-          "Your test booking request has been submitted successfully."
-        );
+        setMessage(result.message);
       }
     } catch {
       setMessage("Something went wrong. Please try again.");
@@ -578,7 +564,7 @@ export default function RentalCalendar({
               >
                 {submitting
                   ? "SUBMITTING..."
-                  : "SUBMIT TEST BOOKING REQUEST →"}
+                  : "SEND BOOKING REQUEST →"}
               </button>
 
               <p style={{ color: muted, fontSize: 12 }}>

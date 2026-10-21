@@ -99,19 +99,15 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
     setSubmitting(true);
     setMessage("");
     try {
-      const { data: bookingId, error: submitError } = await createClient().rpc("request_configured_rental_booking", {
-        p_project_id: projectId,
-        p_configuration_id: config.id,
-        p_check_in: checkIn,
-        p_check_out: checkOut,
-        p_guest_count: guests,
-        p_preferred_check_in: arrival || null,
-        p_preferred_check_out: departure || null,
-        p_guest_notes: notes.trim() || null,
+      const response = await fetch("/api/rental/booking-request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "configured", projectId, configurationId: config.id,
+          checkIn, checkOut, guests, arrival, departure, notes }),
       });
-      if (submitError || !bookingId) throw new Error("Booking submission failed");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Booking submission failed");
       setSubmitted(true);
-      setMessage("Your test booking request was submitted successfully. No dates have been reserved.");
+      setMessage(result.message);
     } catch {
       setMessage("Unable to submit the request. Please check availability and try again.");
     } finally {
@@ -180,13 +176,13 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
           </div>
           {checkIn && checkOut && config && !submitted && (
             <form onSubmit={submitBooking} style={{ display: "grid", gap: 18, borderTop: `1px solid ${border}`, paddingTop: 24, marginTop: 26 }}>
-              <p style={{ color: gold, letterSpacing: ".15em", fontSize: 12 }}>REQUEST YOUR STAY · TEST MODE</p>
+              <p style={{ color: gold, letterSpacing: ".15em", fontSize: 12 }}>REQUEST YOUR STAY</p>
               <label>Number of guests<input style={inputStyle} type="number" min={1} max={config.maximum_guests} required value={guests} onChange={(e) => setGuests(Number(e.target.value))} /></label>
               <label>Preferred check-in time (optional)<input style={inputStyle} type="time" value={arrival} onChange={(e) => setArrival(e.target.value)} /></label>
               <label>Preferred check-out time (optional)<input style={inputStyle} type="time" value={departure} onChange={(e) => setDeparture(e.target.value)} /></label>
               <label>Special requests (optional)<textarea style={inputStyle} rows={3} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
-              <button type="submit" disabled={submitting} style={{ background: gold, color: "#111", border: 0, padding: 17, cursor: submitting ? "wait" : "pointer", letterSpacing: ".1em" }}>{submitting ? "SUBMITTING..." : "SUBMIT TEST BOOKING REQUEST →"}</button>
-              <p style={{ color: muted, fontSize: 12 }}>Test requests do not reserve dates. MZS approval is required for real bookings.</p>
+              <button type="submit" disabled={submitting} style={{ background: gold, color: "#111", border: 0, padding: 17, cursor: submitting ? "wait" : "pointer", letterSpacing: ".1em" }}>{submitting ? "SUBMITTING..." : "SEND BOOKING REQUEST →"}</button>
+              <p style={{ color: muted, fontSize: 12 }}>This is a booking request only. Your reservation is not confirmed; a separate confirmation will follow after approval.</p>
             </form>
           )}
           {message && <p role="status" style={{ color: submitted ? gold : "#e2a78d", lineHeight: 1.7 }}>{message}</p>}
