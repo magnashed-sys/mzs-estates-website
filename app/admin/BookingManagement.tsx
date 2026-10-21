@@ -70,6 +70,7 @@ const rowStyle: CSSProperties = { display: "flex", alignItems: "center", flexWra
 const cardStyle: CSSProperties = { padding: "clamp(20px,3vw,34px)", border: `1px solid ${border}`, background: "#151411" };
 const gridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 20, marginTop: 26 };
 const titleStyle: CSSProperties = { fontFamily: "Georgia, serif", fontSize: 29, fontWeight: 400, lineHeight: 1.2, margin: "0 0 10px" };
+const bookingInputStyle: CSSProperties = { width:"100%",maxWidth:"100%",minWidth:0,minHeight:46,boxSizing:"border-box",background:"#171612",color:"#eeeae2",border:"1px solid #665a45",padding:12,fontSize:15 };
 const badgeStyle: CSSProperties = { color: gold, border: `1px solid ${border}`, padding: "9px 12px", fontSize: 12, letterSpacing: ".08em", lineHeight: 1.5 };
 // Same eligibility as My Reservations and the cancellation RPCs.
 function isCancellationEligible(booking: Booking): boolean {
@@ -484,16 +485,16 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                     <h4 style={{margin:0,color:gold}}>Edit live booking</h4>
                     <p style={{color:muted,margin:0}}>Update dates, guest count or notes. The original nightly price is retained.</p>
                     <label style={{display:"grid",gap:6}}>Check-in
-                      <input className="admin-input" type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
+                      <input style={bookingInputStyle} type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
                     </label>
                     <label style={{display:"grid",gap:6}}>Check-out
-                      <input className="admin-input" type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
+                      <input style={bookingInputStyle} type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
                     </label>
                     <label style={{display:"grid",gap:6}}>Guests
-                      <input className="admin-input" type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
+                      <input style={bookingInputStyle} type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
                     </label>
                     <label style={{display:"grid",gap:6}}>Internal admin notes
-                      <textarea className="admin-input" rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
+                      <textarea style={bookingInputStyle} rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
                     </label>
                     <div style={rowStyle}>
                       <button className="admin-button admin-button-primary" type="submit" disabled={locked}>Save changes</button>
@@ -504,7 +505,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                   {cancellingBookingId === booking.id && <div style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
                     <h4 style={{margin:0,color:warning}}>Cancel confirmed reservation</h4>
                     <label style={{display:"grid",gap:6}}>Cancellation reason
-                      <textarea className="admin-input" rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
+                      <textarea style={bookingInputStyle} rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
                     </label>
                     <div style={rowStyle}>
                       <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>Confirm cancellation</button>
