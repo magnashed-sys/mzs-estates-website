@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createClient as serviceClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 import { createClient } from "../../../../lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
 const reply = (status: number, value: Record<string, unknown>) =>
@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
 
   // Booking has been committed. Mail errors must never encourage submitting it twice.
   const bookingId = result.data;
+  after(async () => {
   try {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -158,6 +159,7 @@ export async function POST(request: NextRequest) {
       bookingId, category: e instanceof Error ? e.name : "unknown",
     });
   }
+  });
   return reply(201, {
     id: bookingId, message: "Your booking request has been received. Your reservation is not confirmed; MZS Group will respond after review.",
   });
