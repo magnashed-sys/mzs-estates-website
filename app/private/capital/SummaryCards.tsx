@@ -1,5 +1,5 @@
 import s from './summary.module.css';
-export type Summary={id:string;label:string;party_role:'lender'|'borrower';principal:number;currency:string;start_date:string|null;end_date:string|null;total_interest_received:number;total_interest_paid:number;interest_payments:{date:string;amount:number}[]};
+export type Summary={id:string;label:string;party_role:'lender'|'borrower';principal:number;currency:string;annual_rate:number|null;start_date:string|null;end_date:string|null;total_interest_received:number;total_interest_paid:number;interest_payments:{date:string;amount:number}[]};
 const money=(n:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(n);
 const day=(d:string|null)=>d?new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(d+'T00:00:00Z')):'Not confirmed';
 export default function SummaryCards({items}:{items:Summary[]}) {
@@ -7,6 +7,7 @@ export default function SummaryCards({items}:{items:Summary[]}) {
     <p className={s.eyebrow}>{d.party_role==='lender'?'YOU ARE THE LENDER':'YOU ARE THE BORROWER'}</p><h2>{d.label}</h2>
     <dl className={s.facts}>
      <div><dt>Loan amount</dt><dd>{money(d.principal)}</dd></div>
+     <div><dt>Annual interest rate</dt><dd>{d.annual_rate == null ? 'Not specified' : `${new Intl.NumberFormat('en-GB',{maximumFractionDigits:4}).format(d.annual_rate)}% p.a.`}</dd></div>
      <div><dt>Start date</dt><dd>{day(d.start_date)}</dd></div><div><dt>End date</dt><dd>{day(d.end_date)}</dd></div>
      <div><dt>{d.party_role==='lender'?'Total interest received':'Total interest paid'}</dt><dd>{money(d.party_role==='lender'?d.total_interest_received:d.total_interest_paid)}</dd></div>
     </dl>

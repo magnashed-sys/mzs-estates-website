@@ -101,6 +101,7 @@ export default function PrivatePage() {
   const [name, setName] = useState("Member");
   const [role, setRole] = useState<MemberRole>("client");
   const [items, setItems] = useState<Opportunity[]>([]);
+  const [capitalDossierCount, setCapitalDossierCount] = useState<number | null>(null);
   const [active, setActive] = useState<Category>("rentals");
   const [error, setError] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -143,6 +144,18 @@ export default function PrivatePage() {
           setViewState("pending");
           return;
         }
+
+        // Capital dossiers are granted individually and are not financing project offerings.
+        // Read the same protected endpoint used by the Capital dossier cards.
+        void fetch("/api/capital-client-summary", { cache: "no-store" })
+          .then(async (response) => {
+            if (!response.ok) throw new Error("Capital summary unavailable");
+            const payload: unknown = await response.json();
+            const count = payload && typeof payload === "object" && "items" in payload &&
+              Array.isArray(payload.items) ? payload.items.length : null;
+            if (mounted) setCapitalDossierCount(count);
+          })
+          .catch(() => { if (mounted) setCapitalDossierCount(null); });
 
         // Both project AND offering grants must be present. Never display
         // an opportunity based on its project grant alone.
@@ -319,7 +332,7 @@ export default function PrivatePage() {
                     </span>
                     <span className={styles.categoryBody}>
                       <span className={styles.categoryTitle}>{group.title}</span>
-                      <span className={styles.categoryCount}>{String(group.projects.length)}</span>
+                      <span className={styles.categoryCount}>{String(group.id === "capital" ? (capitalDossierCount ?? "—") : group.projects.length)}</span>
                     </span>
                   </button>
                 ))}
@@ -329,7 +342,7 @@ export default function PrivatePage() {
                 <div className={styles.opportunitiesHeading}>
                   <div>
                     <p className={styles.sectionKicker}>SELECTED EXCLUSIVELY FOR YOU</p>
-                    <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.projects.length)}</span></h2>
+                    <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.id === "capital" ? (capitalDossierCount ?? "—") : selected.projects.length)}</span></h2>
                   </div>
                   <p>{selected.description}</p>
                 </div>
