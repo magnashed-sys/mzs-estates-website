@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, } from "react";
 import RentalSchedule from "./RentalSchedule";
+import RentalNotificationStatus from "./RentalNotificationStatus";
 import { liveArrivals, matchesSearch, todayInMadrid } from "./admin-model";
 import { createClient } from "../../lib/supabase/client";
 type Booking = {
@@ -243,14 +244,29 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         setNotice(null);
         try {
             // All writes go through the existing permission-checked RPCs.
-            const { data, error: rpcError } = await createClient().rpc(options.functionName, options.args);
-            if (rpcError)
-                throw rpcError;
+            const isAdminChange = ["admin_modify_live_rental_booking", "admin_cancel_live_rental_booking", "review_booking_cancellation"].includes(options.functionName);
+            let data: unknown;
+            let mailWarning = "";
+            if (isAdminChange) {
+                const result = await fetch("/api/rental/admin-booking", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ functionName: options.functionName, args: options.args }),
+                });
+                const body = await result.json();
+                if (!result.ok) throw new Error(body.error || "Unexpected result");
+                data = body.result;
+                if (body.delivery === "captured") mailWarning = " Staging email captured; no email sent.";
+                else if (body.delivery === "accepted") mailWarning = " Client email accepted by the mail server.";
+                else if (body.delivery !== "none") mailWarning = " Check client notification status below; the booking change is saved.";
+            } else {
+                const result = await createClient().rpc(options.functionName, options.args);
+                if (result.error) throw result.error;
+                data = result.data;
+            }
             if (data !== options.expected)
                 throw new Error("Unexpected result");
             // Only a successful approval of a real booking triggers the guest email.
             // An email failure never undoes the confirmed reservation or retries approval.
-            let mailWarning = "";
             if (options.functionName === "review_rental_booking" && options.expected === "confirmed") {
                 try {
                     const bookingId = options.args.p_booking_id;
@@ -314,13 +330,13 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
              (property?.title??"Property")+"\\nOriginal: "+formatDate(booking.check_in)+" – "+
              formatDate(booking.check_out)+"\\nNew: "+formatDate(editDraft.check_in)+" – "+
              formatDate(editDraft.check_out)+"\\nGuests: "+guests+
-             "\\n\\nThe original per-night rate is retained. No automatic email or refund is sent."))return;
+             "\\n\\nThe original per-night rate is retained. Relevant changes to confirmed reservations queue a client email. Internal notes remain private. No refund is processed."))return;
         void runMutation({key:"booking:"+booking.id,functionName:"admin_modify_live_rental_booking",
           args:{p_booking_id:booking.id,p_check_in:editDraft.check_in,p_check_out:editDraft.check_out,
             p_guest_count:guests,p_expected_check_in:booking.check_in,
             p_expected_check_out:booking.check_out,p_expected_guest_count:booking.guest_count,
             p_admin_notes:editDraft.admin_notes},expected:"updated",
-          success:"Booking updated. Please inform the guest about the changes."});
+          success:"Booking updated."});
     }
     function cancelLiveBooking(booking: Booking) {
         const reason=cancellationReason.trim();
@@ -331,10 +347,10 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         if (!window.confirm("CANCEL this confirmed LIVE booking?\\n\\nProperty: "+
           (property?.title??"Property")+"\\nStay: "+formatDate(booking.check_in)+" – "+
           formatDate(booking.check_out)+"\\nReason: "+reason+
-          "\\n\\nThe dates are released; no refund or automatic email is sent."))return;
+          "\\n\\nThe dates are released; a cancellation email is queued. No refund is processed."))return;
         void runMutation({key:"booking:"+booking.id,functionName:"admin_cancel_live_rental_booking",
           args:{p_booking_id:booking.id,p_reason:reason},expected:"cancelled",
-          success:"Reservation cancelled and dates released. Please notify the guest; handle refunds separately."});
+          success:"Reservation cancelled and dates released. A client notification is queued; handle refunds separately."});
     }
     function removeTest(booking: Booking) {
         if (mutationInProgress.current || !booking.is_test || !["requested", "test_approved", "declined", "cancelled"].includes(booking.status))
@@ -500,7 +516,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                       <button className="admin-button admin-button-primary" type="submit" disabled={locked}>Save changes</button>
                       <button className="admin-button" type="button" disabled={locked} onClick={()=>setEditingBookingId(null)}>Close</button>
                     </div>
-                    <p style={{color:muted,margin:0}}>No automatic client email or refund. Inform the guest separately.</p>
+                    <p style={{color:muted,margin:0}}>Relevant changes to confirmed reservations queue a client email. Internal notes stay private. No refund is processed.</p>
                   </form>}
                   {cancellingBookingId === booking.id && <div style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
                     <h4 style={{margin:0,color:warning}}>Cancel confirmed reservation</h4>
@@ -511,13 +527,13 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                       <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>Confirm cancellation</button>
                       <button className="admin-button" type="button" disabled={locked} onClick={()=>setCancellingBookingId(null)}>Keep reservation</button>
                     </div>
-                    <p style={{color:muted,margin:0}}>This releases reserved dates. Refund and client notification are handled separately.</p>
+                    <p style={{color:muted,margin:0}}>This releases reserved dates and queues a cancellation email. The reason stays internal. Refunds are handled separately.</p>
                   </div>}
                 </article>);
             })}
           </div>
           {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more bookings</ActionButton>}
-          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. No automatic guest notification or refund is sent. Only eligible test records can be permanently deleted.</p>
+          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. Relevant changes and cancellations queue client notifications. No automatic refund is processed. Only eligible test records can be permanently deleted.</p>
         </>)}
 
       {!loading && !error && snapshot && section === "cancellations" && (<>
@@ -560,7 +576,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                   {canReview && <>
                     <p style={{ color: muted, lineHeight: 1.8 }}>{booking?.is_test
                             ? "Approving cancels only the test booking. Declining leaves it test-approved. Both outcomes are retained in the cancellation history."
-                            : "Approving cancels this reservation and releases its dates, subject to other blocks. Declining keeps the reservation confirmed. Neither action processes a refund or sends an email."}</p>
+                            : "Approving cancels this reservation and releases its dates, subject to other blocks. Declining keeps the reservation confirmed. Approval queues a client cancellation email. Declining sends no email. Neither action processes a refund."}</p>
                     <div style={{ ...rowStyle, marginTop: 24 }}>
                       <ActionButton primary disabled={locked} onClick={() => reviewCancellation(request, "approved")}>{processing ? "Processing..." : booking?.is_test ? "Approve test cancellation" : "Approve cancellation"}</ActionButton>
                       <ActionButton disabled={locked} onClick={() => reviewCancellation(request, "declined")}>{booking?.is_test ? "Decline test cancellation" : "Decline cancellation"}</ActionButton>
@@ -574,5 +590,6 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
           {visibleCancellations.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more cancellation requests</ActionButton>}
           <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Eligible bookings: confirmed live reservations and approved test bookings. Pending requests, rejected bookings, cancelled bookings and availability blocks cannot enter this cancellation workflow.</p>
         </>)}
+      {!loading && !error && snapshot && <RentalNotificationStatus refreshKey={`${updated}:${busy ?? "idle"}`} />}
     </div>);
 }

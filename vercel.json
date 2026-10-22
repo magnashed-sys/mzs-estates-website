@@ -3,6 +3,10 @@
     {
       "path": "/api/account/notifications/dispatch",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/rental/notifications/dispatch",
+      "schedule": "5 6 * * *"
     }
   ]
 }
