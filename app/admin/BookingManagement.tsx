@@ -415,14 +415,13 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         <div className="admin-metrics">
           <button onClick={() => onNavigate?.("bookings")}><span>Live booking requests</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>Review reservations →</small></button>
           <button onClick={() => onNavigate?.("cancellations")}><span>Live cancellations</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>Review requests →</small></button>
-          <div><span>Upcoming arrivals</span><strong>{arrivals.length}</strong><small>Next 14 days, including today</small></div>
+          <div><span>Upcoming arrivals</span><strong>{arrivals.length}</strong><small>Next 3 months, including today</small></div>
           <div><span>Current stays</span><strong>{bookings.filter(b => !b.is_test && b.status === "confirmed" && b.check_in <= todayInMadrid() && todayInMadrid() < b.check_out).length}</strong><small>Confirmed live reservations</small></div>
         </div>
         <p className="admin-help">Updated {updated} · Madrid time. Test bookings are excluded. {bookings.filter(b => b.is_test).length} test records are available under Bookings → Test.</p>
         <div className="admin-panel"><h3 className="admin-subtitle">Next arrivals.</h3>
-          {!arrivals.length && <p className="admin-help">No confirmed arrivals in the next 14 days.</p>}
-          {arrivals.slice(0, 6).map(booking => <button key={booking.id} className="admin-action-row" onClick={() => onNavigate?.("bookings")}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} →</span></button>)}
-          {arrivals.length > 6 && <ActionButton onClick={() => onNavigate?.("bookings")}>View all reservations →</ActionButton>}
+          {!arrivals.length && <p className="admin-help">No confirmed arrivals in the next 3 months.</p>}
+          {arrivals.map(booking => <button key={booking.id} className="admin-action-row" onClick={() => onNavigate?.("bookings")}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} →</span></button>)}
         </div>
       </>}
     </section>;

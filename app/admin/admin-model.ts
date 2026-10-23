@@ -48,8 +48,14 @@ export function occupiedOn(booking: CalendarBooking, day: string): boolean {
     && booking.check_in <= day && day < booking.check_out;
 }
 
-export function liveArrivals<T extends CalendarBooking>(bookings: T[], today: string, days = 14): T[] {
-  const end = addDays(today, days);
+export function liveArrivals<T extends CalendarBooking>(bookings: T[], today: string, months = 3): T[] {
+  const date = new Date(`${today}T12:00:00Z`);
+  const day = date.getUTCDate();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  date.setUTCDate(Math.min(day, lastDay));
+  const end = date.toISOString().slice(0, 10);
   return bookings.filter(booking => !booking.is_test && booking.status === "confirmed"
     && booking.check_in >= today && booking.check_in < end)
     .sort((a, b) => a.check_in.localeCompare(b.check_in) || a.id.localeCompare(b.id));
