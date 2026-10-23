@@ -19,3 +19,7 @@ export function localizedPath(path: string, locale: string) {
 export function languageAlternates(path: string) {
   return Object.fromEntries([...locales.map(locale => [locale, localizedPath(path, locale)]), ['x-default', path]]);
 }
+
+/** Account token routes keep their exact URLs; only their presentation follows the cookie. */
+export const accountPaths = ["/request-access", "/registration-pending", "/forgot-password", "/reset-password", "/accept-invitation"] as const;
+export function isAccountPath(path: string) { return (accountPaths as readonly string[]).includes(path); }

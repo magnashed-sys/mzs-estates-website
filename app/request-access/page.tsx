@@ -1,18 +1,14 @@
 "use client";
+import {useTranslations, useLocale} from "next-intl";
+import {localizedPath} from "../../i18n/public-routing";
 
+import {registrationErrorKey} from "../../i18n/registration-errors";
 import styles from "../public-access-refresh.module.css";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 
-const interests = [
-  { value: "investment", label: "Investment" },
-  { value: "financing", label: "Financing" },
-  { value: "sale", label: "Private Sale" },
-  { value: "rental", label: "Private Rental" },
-];
 
 const pageStyle: React.CSSProperties = {
   position: "relative",
@@ -33,6 +29,14 @@ const contentStyle: React.CSSProperties = {
 };
 
 export default function RequestAccessPage() {
+  const t = useTranslations("AccountUI");
+  const locale = useLocale();
+  const interests = [
+    { value: "investment", label: t("a065") },
+    { value: "financing", label: t("a066") },
+    { value: "sale", label: t("a067") },
+    { value: "rental", label: t("a068") },
+  ];
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
@@ -58,11 +62,11 @@ export default function RequestAccessPage() {
     if (loading || submitted) return;
     setError("");
     if (password.length < 8) {
-      setError("Please create a password of at least 8 characters.");
+      setError(t("a069"));
       return;
     }
     if (password !== passwordConfirmation) {
-      setError("The passwords do not match.");
+      setError(t("a070"));
       return;
     }
     setLoading(true);
@@ -74,19 +78,19 @@ export default function RequestAccessPage() {
         body: JSON.stringify({
           full_name: fullName, email, company, country,
           interests: selectedInterests, message,
-          password, confirm_password: passwordConfirmation,
+          password, confirm_password: passwordConfirmation, preferred_language: locale,
         }),
       });
       const result: { ok?: boolean; error?: string } = await response.json();
       if (!response.ok || !result.ok) {
-        setError(result.error || "Unable to create your account. Please try again.");
+        setError(t(registrationErrorKey(result.error)));
         return;
       }
       setSubmitted(true);
       setPassword("");
       setPasswordConfirmation("");
     } catch {
-      setError("Registration is temporarily unavailable. Please try again.");
+      setError(t("a072"));
     } finally {
       setLoading(false);
     }
@@ -97,11 +101,11 @@ export default function RequestAccessPage() {
       <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
         <PublicHeader />
         <section className="request-success" style={contentStyle}>
-          <p className="eyebrow">Account Created · Verification Required</p>
-          <h1>Check your email.</h1>
-          <p>Your MZS account has been created but remains inactive. Please verify your email address using the confirmation link we sent you.</p>
-          <p className="request-success-note">After verification, MZS Group will review your account and chosen project access. You will receive an activation email when approved.</p>
-          <Link href="/" className="request-return">Return to MZS Group →</Link>
+          <p className="eyebrow">{t("a073")}</p>
+          <h1>{t("a074")}</h1>
+          <p>{t("a075")}</p>
+          <p className="request-success-note">{t("a076")}</p>
+          <a href={localizedPath("/", locale)} className="request-return">{t("a053")}</a>
         </section>
         <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
       </main>
@@ -112,49 +116,41 @@ export default function RequestAccessPage() {
     <main className={`request-page ${styles.page} ${styles.requestPage}`} style={pageStyle}>
       <PublicHeader />
       <section className="request-container" style={contentStyle}>
-        <p className="eyebrow">Private Access</p>
-        <h1>Your private journey begins here.</h1>
+        <p className="eyebrow">{t("a077")}</p>
+        <h1>{t("a078")}</h1>
         <p className="request-intro">
-          New relationships are considered on a selective basis. Registration will require email confirmation.
-          Create a secure password and confirm your email address before MZS Group reviews your application.
-        </p>
+          {t("a079")}</p>
         <form className="request-form" onSubmit={handleSubmit} aria-busy={loading}>
           <div className="request-grid">
             <label>
-              Full name
-              <input type="text" autoComplete="name" value={fullName}
+              {t("a080")}<input type="text" autoComplete="name" value={fullName}
                 onChange={(event) => setFullName(event.target.value)} required disabled={loading} />
             </label>
             <label>
-              Email
-              <input type="email" autoComplete="email" value={email}
+              {t("a005")}<input type="email" autoComplete="email" value={email}
                 onChange={(event) => setEmail(event.target.value)} required disabled={loading} />
             </label>
             <label>
-              Company (optional)
-              <input type="text" autoComplete="organization" value={company}
+              {t("a081")}<input type="text" autoComplete="organization" value={company}
                 onChange={(event) => setCompany(event.target.value)} disabled={loading} />
             </label>
             <label>
-              Country (optional)
-              <input type="text" autoComplete="country-name" value={country}
+              {t("a082")}<input type="text" autoComplete="country-name" value={country}
                 onChange={(event) => setCountry(event.target.value)} disabled={loading} />
             </label>
             <label>
-              Create password (minimum 8 characters)
-              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
+              {t("a083")}<input type="password" autoComplete="new-password" minLength={8} maxLength={128}
                 value={password} onChange={event => setPassword(event.target.value)}
                 required disabled={loading} />
             </label>
             <label>
-              Confirm password
-              <input type="password" autoComplete="new-password" minLength={8} maxLength={128}
+              {t("a084")}<input type="password" autoComplete="new-password" minLength={8} maxLength={128}
                 value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)}
                 required disabled={loading} />
             </label>
           </div>
           <fieldset className="request-interests" disabled={loading}>
-            <legend>Areas of interest</legend>
+            <legend>{t("a085")}</legend>
             <div className="interest-options">
               {interests.map((interest) => (
                 <label key={interest.value}
@@ -169,14 +165,13 @@ export default function RequestAccessPage() {
             </div>
           </fieldset>
           <label className="request-message">
-            How can MZS assist you? (optional)
-            <textarea rows={4} value={message}
+            {t("a086")}<textarea rows={4} value={message}
               onChange={(event) => setMessage(event.target.value)} disabled={loading} />
           </label>
-          <p className="request-success-note">Your account remains inactive until email verification and individual MZS Group approval.</p>
+          <p className="request-success-note">{t("a087")}</p>
           {error && <p className="login-error" role="alert">{error}</p>}
           <button type="submit" disabled={loading}>
-            {loading ? "Creating account..." : "Create Account & Request Access →"}
+            {loading ? t("a088") : t("a089")}
           </button>
         </form>
       </section>

@@ -1,15 +1,15 @@
 "use client";
+import {useTranslations, useLocale} from "next-intl";
+import {localizedPath} from "../../i18n/public-routing";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { createClient } from "../../lib/supabase/client";
 import RecoveryLayout from "../components/RecoveryLayout";
 import recoveryStyles from "../account-recovery.module.css";
 
-const genericConfirmation =
-  "If an eligible MZS account exists for this email address, you will receive password recovery instructions shortly. Please check your inbox and spam folder.";
-
 export default function ForgotPasswordPage() {
+  const t = useTranslations("AccountUI");
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -44,21 +44,20 @@ export default function ForgotPasswordPage() {
 
   return (
     <RecoveryLayout role="client">
-      <p className="eyebrow">Account Security</p>
+      <p className="eyebrow">{t("a001")}</p>
 
       {submitted ? (
         <>
-          <h1>Check your inbox.</h1>
+          <h1>{t("a002")}</h1>
           <p className={recoveryStyles.successMessage} role="status">
-            {genericConfirmation}
+            {t("a000")}
           </p>
         </>
       ) : (
         <>
-          <h1>Reset your password.</h1>
+          <h1>{t("a003")}</h1>
           <p className="login-intro">
-            Enter the email address associated with your private MZS account.
-          </p>
+            {t("a004")}</p>
 
           <form
             className="login-form"
@@ -66,8 +65,7 @@ export default function ForgotPasswordPage() {
             aria-busy={sending}
           >
             <label>
-              Email
-              <input
+              {t("a005")}<input
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -80,19 +78,17 @@ export default function ForgotPasswordPage() {
             </label>
 
             <button type="submit" disabled={sending}>
-              {sending ? "Sending..." : "Send recovery link →"}
+              {sending ? t("a006") : t("a007")}
             </button>
           </form>
 
           <p className={recoveryStyles.recoveryNote}>
-            New relationships must first request a personal invitation.
-          </p>
+            {t("a008")}</p>
         </>
       )}
 
-      <Link href="/login" className={recoveryStyles.backLink}>
-        ← Return to Cliënt &amp; Partner Login
-      </Link>
+      <a href={localizedPath("/login", locale)} className={recoveryStyles.backLink}>
+        {t("a009")}</a>
     </RecoveryLayout>
   );
 }

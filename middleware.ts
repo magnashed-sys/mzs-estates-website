@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {publicRoute, isLocale, localizedPath} from "./i18n/public-routing";
+import {publicRoute, isLocale, localizedPath, isAccountPath} from "./i18n/public-routing";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
   // Never trust a caller-supplied locale header on private or machine routes.
   const forwardedHeaders = new Headers(request.headers);
   const publicPage = publicRoute(pathname);
-  forwardedHeaders.set("x-mzs-locale", publicPage?.locale || "en");
+  forwardedHeaders.set("x-mzs-locale", publicPage?.locale || (isAccountPath(pathname) && isLocale(preference) ? preference : "en"));
   forwardedHeaders.set("x-mzs-client-overview", (pathname === "/private" || pathname.startsWith("/private/")) ? "true" : "false");
   const next = () => NextResponse.next({request: {headers: forwardedHeaders}});
 

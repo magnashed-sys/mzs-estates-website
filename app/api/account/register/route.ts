@@ -1,3 +1,4 @@
+import {isLocale} from "../../../../i18n/public-routing";
 import { createHmac } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -136,6 +137,8 @@ export async function POST(request: NextRequest) {
         emailRedirectTo: redirectSite + "/registration-pending",
         data: {
           mzs_access_request: "v2",
+          // Presentation preference only; the database still controls roles and access.
+          preferred_language: isLocale(input.preferred_language) ? input.preferred_language : "en",
           full_name: fullName,
           company, country, message, interests,
         },
