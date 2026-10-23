@@ -1,0 +1,15 @@
+.access {display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(35px,6vw,85px);padding:clamp(75px,9vw,130px) max(var(--mzs-public-inset),calc((100vw - 1200px)/2));background:linear-gradient(120deg,#11130f,#0b0b0a);border-bottom:1px solid rgba(213,192,154,.15);}
+.access h2 {font:400 clamp(37px,4.3vw,62px)/1.12 Georgia,serif;letter-spacing:-.035em;margin:26px 0;}
+.lead {color:var(--mzs-copy);line-height:1.9;font-size:16px;max-width:510px;}
+.personal {color:#d5c09a;font:italic 18px/1.6 Georgia,serif;margin:35px 0 0;}
+.accessPanel {padding:clamp(26px,3.3vw,48px);border:1px solid rgba(213,192,154,.27);background:rgba(213,192,154,.045);}
+.accessPanel h3 {font:400 clamp(28px,2.6vw,37px)/1.2 Georgia,serif;margin:0 0 20px;}
+.accessPanel p {color:var(--mzs-copy);font:14px/1.9 Arial,sans-serif;margin:0 0 27px;}
+.accessButton,.requestLink {display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:52px;text-decoration:none;text-transform:uppercase;font:500 11px/1.5 Arial,sans-serif;letter-spacing:.1em;}
+.accessPanel .accessButton {background:#d5c09a;color:#111;padding:17px 20px;}
+.accessButton:hover {background:#e4cfaa;}
+.requestLink {margin-top:15px;border-bottom:1px solid rgba(213,192,154,.3);color:#d5c09a!important;}
+.requestLink:hover {color:#fff!important;}
+.accessPanel .note {font-size:11px;line-height:1.7;color:#a69f92;margin:24px 0 0;}
+.regions {font-size:10px;letter-spacing:.16em;color:#d5c09a!important;}
+@media(max-width:850px){.access {grid-template-columns:1fr;gap:38px;}.accessPanel {max-width:650px;width:100%;}}
