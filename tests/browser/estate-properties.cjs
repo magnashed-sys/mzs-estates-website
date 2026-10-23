@@ -9,6 +9,7 @@ let role = 'admin', active = true, unitsError = false;
 const user = { id, aud: 'authenticated', role: 'authenticated', email: 'test@example.invalid', app_metadata: {}, user_metadata: {}, created_at: new Date().toISOString() };
 const token = [Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'), Buffer.from(JSON.stringify({ sub: id, role: 'authenticated', exp: Math.floor(Date.now()/1000)+3600 })).toString('base64url'), 'local-fixture-signature'].join('.');
 const units = [
+  { id: 'unit3', address: 'Test Street 1C', unit_type: 'office', tenant_name: 'Synthetic tenant A', monthly_rent: 0, rent_included: true, utilities_advance: null, sort_order: 3 },
   { id: 'unit1', address: 'Test Street 1A', unit_type: 'studio', tenant_name: 'Synthetic tenant A', monthly_rent: 500.01, utilities_advance: null, sort_order: 1 },
   { id: 'unit2', address: 'Test Street 1B', unit_type: 'room', tenant_name: 'Synthetic tenant B', monthly_rent: 400.02, utilities_advance: null, sort_order: 2 },
 ];
@@ -57,10 +58,12 @@ const mock = http.createServer(async (req, res) => {
   await page.waitForURL('**/properties/'+propertyId);
   await page.getByRole('heading', { name: property.name, exact: true, level: 1 }).waitFor();
   await page.locator('table, [role="alert"]').first().waitFor();
-  assert.equal(await page.locator('tbody tr').count(), 2, await page.locator('main').innerText());
+  assert.equal(await page.locator('tbody tr').count(), 3, await page.locator('main').innerText());
   assert.match(await page.locator('main').innerText(), /€900\.03/);
   assert.match(await page.locator('main').innerText(), /€10,800\.36/);
   assert.match(await page.locator('main').innerText(), /Not provided/);
+  assert.equal(await page.getByText('Included*', { exact: true }).count(), 2);
+  assert.equal(await page.getByText('Office', { exact: true }).count(), 1);
   for (const width of [375, 1440]) {
     await page.setViewportSize({ width, height: 950 });
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Viewport overflow at '+width);

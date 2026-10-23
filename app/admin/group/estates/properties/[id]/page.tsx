@@ -6,7 +6,7 @@ import s from '../estates.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const unitTypes: Record<string, string> = { studio: 'Studio', room: 'Room', apartment: 'Apartment', other: 'Other' };
+const unitTypes: Record<string, string> = { studio: 'Studio', room: 'Room', apartment: 'Apartment', office: 'Office', other: 'Other' };
 
 export default async function EstateProperty({ params }: { params: Promise<{ id: string }> }) {
   const { db } = await requireEstateAdmin();
@@ -18,7 +18,7 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
   if (error) return <p className={s.error} role="alert">The property is unavailable. Please try again later.</p>;
   if (!property) notFound();
   const [unitsResult, auditResult, imagesResult] = await Promise.all([
-    db.from('mzs_estate_units').select('id,address,unit_type,tenant_name,monthly_rent,utilities_advance,sort_order')
+    db.from('mzs_estate_units').select('id,address,unit_type,tenant_name,monthly_rent,rent_included,utilities_advance,sort_order')
       .eq('property_id', id).order('sort_order').order('address'),
     db.from('mzs_estate_audit').select('id,action,created_at,source_reference')
       .eq('property_id', id).order('created_at', { ascending: false }).limit(20),
@@ -67,12 +67,13 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
             <tbody>{units.map(unit => <tr key={unit.id}>
               <td>{unit.address}<span className={s.type}>{unitTypes[unit.unit_type] || unit.unit_type}</span></td>
               <td>{unit.tenant_name || 'Not provided'}</td>
-              <td className={s.money}>{euros(unit.monthly_rent)}</td>
-              <td className={s.money}>{euros(Math.round(Number(unit.monthly_rent) * 100) * 12 / 100)}</td>
+              <td className={s.money}>{unit.rent_included ? 'Included*' : euros(unit.monthly_rent)}</td>
+              <td className={s.money}>{unit.rent_included ? 'Included*' : euros(Math.round(Number(unit.monthly_rent) * 100) * 12 / 100)}</td>
             </tr>)}</tbody>
             <tfoot><tr><th scope="row" colSpan={2}>Total</th><td className={s.money}>{euros(totals.monthly)}</td><td className={s.money}>{euros(totals.annual)}</td></tr></tfoot>
           </table>
         </div>}
+        {units.some(unit => unit.rent_included) && <p className={s.note}>* Rent is included in another unit’s rent. No separate rent is added to the totals.</p>}
       </>}
     </section>
     <section className={s.section} aria-labelledby="source-heading">
