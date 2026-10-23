@@ -26,14 +26,17 @@ test('All translation catalogues are complete and every ICU message renders with
     assert.deepEqual(Object.keys(messages).sort(), Object.keys(catalogs.en).sort());
     const errors = [];
     const t = createTranslator({locale, messages, onError: error => errors.push(error)});
-    for (const [namespace, values] of Object.entries(catalogs.en)) {
-      assert.deepEqual(Object.keys(messages[namespace]).sort(), Object.keys(values).sort());
-      for (const key of Object.keys(values)) {
-        assert.ok(messages[namespace][key].trim());
-        const rendered = t(`${namespace}.${key}`, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference'});
+    function check(expected, actual, prefix = '') {
+      assert.deepEqual(Object.keys(actual).sort(), Object.keys(expected).sort());
+      for (const [key, value] of Object.entries(expected)) {
+        const path = prefix ? `${prefix}.${key}` : key;
+        if (typeof value === 'object') { check(value, actual[key], path); continue; }
+        assert.ok(actual[key].trim());
+        const rendered = t(path, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference', name: 'Test company', message: 'Saved', start: '1 Jan', end: '3 Jan', explanation: 'Test', date: '1 Jan'});
         assert.ok(rendered.length > 0);
       }
     }
+    check(catalogs.en, messages);
     assert.deepEqual(errors, [], `${locale}: ${errors.map(error => error.message).join(', ')}`);
   }
 });

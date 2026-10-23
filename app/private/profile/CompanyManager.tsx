@@ -1,4 +1,5 @@
 "use client";
+import {useTranslations} from "next-intl";
 
 import { useEffect, useState, type FormEvent } from "react";
 import { createClient } from "../../../lib/supabase/client";
@@ -15,24 +16,27 @@ type Draft = {
   legal_name: string; trading_name: string; registration_number: string;
   country: string; relationship_type: Relationship; relationship_notes: string;
 };
-const options: { value: Relationship; label: string }[] = [
-  { value: "owner", label: "Owner" },
-  { value: "co_owner", label: "Co-owner" },
-  { value: "shareholder", label: "Shareholder" },
-  { value: "director", label: "Director / manager" },
-  { value: "employee", label: "Employee" },
-  { value: "authorized_representative", label: "Authorised representative" },
-  { value: "advisor", label: "Advisor" },
-  { value: "other", label: "Other relationship" },
-];
 const initial = (): Draft => ({
   legal_name: "", trading_name: "", registration_number: "", country: "",
   relationship_type: "owner", relationship_notes: "",
 });
 const display = (value: string | null) => value?.trim() || "";
-const labelOf = (value: Relationship) => options.find(x => x.value === value)?.label || "Other";
+
 
 export default function CompanyManager({ userId }: { userId: string }) {
+  const t = useTranslations("MemberUI");
+const options: { value: Relationship; label: string }[] = [
+  { value: "owner", label: t("owner") },
+  { value: "co_owner", label: t("coowner") },
+  { value: "shareholder", label: t("shareholder") },
+  { value: "director", label: t("directorManager") },
+  { value: "employee", label: t("employee") },
+  { value: "authorized_representative", label: t("authorisedRepresentative") },
+  { value: "advisor", label: t("advisor") },
+  { value: "other", label: t("otherRelationship") },
+];
+
+const labelOf = (value: Relationship) => options.find(x => x.value === value)?.label || t("other");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,14 +68,14 @@ export default function CompanyManager({ userId }: { userId: string }) {
         if (failure) throw failure;
         if (mounted) setCompanies((data || []) as Company[]);
       } catch {
-        if (mounted) setError("Unable to load your business relationships.");
+        if (mounted) setError(t("unableToLoadYourBusinessRelationships"));
       } finally {
         if (mounted) setLoading(false);
       }
     }
     void load();
     return () => { mounted = false; };
-  }, [userId]);
+  }, [userId, t]);
 
   function start(company?: Company) {
     if (saving) return;
@@ -95,7 +99,7 @@ export default function CompanyManager({ userId }: { userId: string }) {
     setNotice(""); setError("");
     const name = draft.legal_name.trim().replace(/\s+/g, " ");
     if (name.length < 2 || name.length > 180) {
-      setError("Enter a legal company name between 2 and 180 characters.");
+      setError(t("enterALegalCompanyNameBetween2And"));
       return;
     }
     const fields = {
@@ -118,10 +122,10 @@ export default function CompanyManager({ userId }: { userId: string }) {
         if (failure || !data) throw new Error("Creation unconfirmed");
       }
       await refresh();
-      setNotice(editing ? "Company details updated." : "Company added to your profile.");
+      setNotice(editing ? t("companyDetailsUpdated") : t("companyAddedToYourProfile"));
       setShowForm(false); setEditing(null); setDraft(initial());
     } catch {
-      setError("Unable to confirm this change. Refresh before trying again.");
+      setError(t("unableToConfirmThisChangeRefreshBeforeTrying"));
     } finally {
       setSaving(false);
     }
@@ -129,8 +133,7 @@ export default function CompanyManager({ userId }: { userId: string }) {
 
   async function remove(company: Company) {
     if (saving) return;
-    if (!window.confirm("Remove " + company.legal_name +
-      " from your listed businesses? This will not affect project access.")) return;
+    if (!window.confirm(t("removeCompanyConfirm", {name: company.legal_name}))) return;
     setError(""); setNotice(""); setSaving(true);
     try {
       const { data, error: failure } = await createClient().from("mzs_member_companies")
@@ -140,97 +143,87 @@ export default function CompanyManager({ userId }: { userId: string }) {
       if (editing === company.id) {
         setEditing(null); setShowForm(false); setDraft(initial());
       }
-      setNotice("The company has been removed from your profile.");
+      setNotice(t("theCompanyHasBeenRemovedFromYourProfile"));
     } catch {
-      setError("The removal was not confirmed. Refresh before retrying.");
+      setError(t("theRemovalWasNotConfirmedRefreshBeforeRetrying"));
     } finally {
       setSaving(false);
     }
   }
 
-  return <section className={styles.panel} aria-label="My companies">
+  return <section className={styles.panel} aria-label={t("myCompaniesLabel")}>
     <div className={styles.panelHead}>
       <div>
-        <p className={styles.kicker}>BUSINESS RELATIONSHIPS</p>
-        <h2 className={styles.panelTitle}>My Companies.</h2>
-        <p className={styles.panelDescription}>Register multiple companies and describe
-          your personal role in each one. You can revise or remove these details.</p>
+        <p className={styles.kicker}>{t("businessRelationships")}</p>
+        <h2 className={styles.panelTitle}>{t("myCompaniesLabelLabel")}</h2>
+        <p className={styles.panelDescription}>{t("registerMultipleCompaniesAndDescribeYourPersonalRole")}</p>
       </div>
       {!showForm && <button className={styles.primary} type="button"
-        disabled={saving || loading} onClick={() => start()}>+ Add Company</button>}
+        disabled={saving || loading} onClick={() => start()}>{t("addCompany")}</button>}
     </div>
-    <p className={styles.note}>These company connections are self-declared.
-      Adding a company or choosing &ldquo;Owner&rdquo; does not verify ownership,
-      give anyone access to MZS projects, or create accounts for employees.</p>
+    <p className={styles.note}>{t("theseCompanyConnectionsAreSelfdeclaredAddingACompany")}</p>
     {notice && <p className={styles.success} role="status">{notice}</p>}
     {error && <p className={styles.error} role="alert">{error}</p>}
-    {loading ? <p className={styles.empty} role="status">Loading businesses…</p>
+    {loading ? <p className={styles.empty} role="status">{t("loadingBusinesses")}</p>
       : companies.length ? <div className={styles.companyCards} style={{ marginTop: 25 }}>
         {companies.map(company => <article key={company.id} className={styles.companyCard}>
           <h3 className={styles.companyName}>{company.legal_name}</h3>
           {company.trading_name && company.trading_name !== company.legal_name &&
-            <p className={styles.companyMeta}>Trading as {company.trading_name}</p>}
-          {company.country && <p className={styles.companyMeta}>Country: {company.country}</p>}
+            <p className={styles.companyMeta}>{t("tradingAs")} {company.trading_name}</p>}
+          {company.country && <p className={styles.companyMeta}>{t("countryLabel")} {company.country}</p>}
           {company.registration_number &&
-            <p className={styles.companyMeta}>Registration: {company.registration_number}</p>}
+            <p className={styles.companyMeta}>{t("registration")} {company.registration_number}</p>}
           <span className={styles.rolePill}>{labelOf(company.relationship_type)}</span>
           {company.relationship_notes &&
             <p className={styles.companyMeta}>{company.relationship_notes}</p>}
           <div className={styles.companyActions}>
             <button className={styles.secondary} type="button" disabled={saving}
-              onClick={() => start(company)}>Edit</button>
+              onClick={() => start(company)}>{t("edit")}</button>
             <button className={styles.danger} type="button" disabled={saving}
-              onClick={() => void remove(company)}>Remove</button>
+              onClick={() => void remove(company)}>{t("remove")}</button>
           </div>
         </article>)}
       </div> : <p className={styles.empty} style={{ marginTop: 22 }}>
-        No companies added yet. Select <strong>Add Company</strong> to begin.
+        {t("noCompanies")}
       </p>}
 
     {showForm && <form className={styles.form} onSubmit={save} aria-busy={saving}
       style={{ marginTop: 30, paddingTop: 25, borderTop: "1px solid rgba(213,192,154,.24)" }}>
       <div>
-        <p className={styles.kicker}>{editing ? "EDIT RELATIONSHIP" : "NEW BUSINESS"}</p>
-        <h3 className={styles.panelTitle}>{editing ? "Update company." : "Add a company."}</h3>
+        <p className={styles.kicker}>{editing ? t("editRelationship") : t("newBusiness")}</p>
+        <h3 className={styles.panelTitle}>{editing ? t("updateCompany") : t("addACompany")}</h3>
       </div>
       <div className={styles.grid}>
-        <label className={styles.field}>Legal company name *
-          <input value={draft.legal_name} maxLength={180} minLength={2} required
+        <label className={styles.field}>{t("legalCompanyName")} <input value={draft.legal_name} maxLength={180} minLength={2} required
             disabled={saving} autoComplete="organization"
             onChange={e => change("legal_name", e.target.value)} />
         </label>
-        <label className={styles.field}>Your relationship *
-          <select value={draft.relationship_type} required disabled={saving}
+        <label className={styles.field}>{t("yourRelationship")} <select value={draft.relationship_type} required disabled={saving}
             onChange={e => change("relationship_type", e.target.value as Relationship)}>
             {options.map(option =>
               <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
-        <label className={styles.field}>Trading name
-          <input value={draft.trading_name} maxLength={180} disabled={saving}
+        <label className={styles.field}>{t("tradingName")} <input value={draft.trading_name} maxLength={180} disabled={saving}
             onChange={e => change("trading_name", e.target.value)} />
         </label>
-        <label className={styles.field}>Registration number
-          <input value={draft.registration_number} maxLength={100} disabled={saving}
+        <label className={styles.field}>{t("registrationNumber")} <input value={draft.registration_number} maxLength={100} disabled={saving}
             onChange={e => change("registration_number", e.target.value)} />
         </label>
-        <label className={styles.field}>Country of registration
-          <input value={draft.country} maxLength={120} disabled={saving}
+        <label className={styles.field}>{t("countryOfRegistration")} <input value={draft.country} maxLength={120} disabled={saving}
             onChange={e => change("country", e.target.value)} />
         </label>
-        <label className={styles.field + " " + styles.fieldFull}>
-          Additional details about your role
-          <textarea value={draft.relationship_notes} maxLength={1000} disabled={saving}
+        <label className={styles.field + " " + styles.fieldFull}> {t("additionalDetailsAboutYourRole")} <textarea value={draft.relationship_notes} maxLength={1000} disabled={saving}
             onChange={e => change("relationship_notes", e.target.value)}
-            placeholder="For example: managing director and minority shareholder" />
+            placeholder={t("forExampleManagingDirectorAndMinorityShareholder")} />
         </label>
       </div>
       <div className={styles.actions}>
         <button className={styles.primary} type="submit" disabled={saving}>
-          {saving ? "Saving…" : editing ? "Save Changes →" : "Add Company →"}
+          {saving ? t("saving") : editing ? t("saveChanges") : t("addCompanyLabelLabel")}
         </button>
         <button className={styles.secondary} type="button" disabled={saving}
-          onClick={cancel}>Cancel</button>
+          onClick={cancel}>{t("cancel")}</button>
       </div>
     </form>}
   </section>;
