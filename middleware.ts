@@ -6,11 +6,12 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // A saved explicit choice applies only at the language-neutral entry point.
-  // Language-specific URLs always win; auth, API and private paths are untouched.
+  // Language-specific URLs always win; login shares the public choice.
+  // Recovery, API and private paths are never redirected for language.
   const preference = request.cookies.get("MZS_LOCALE")?.value;
-  if (pathname === "/" && isLocale(preference) && preference !== "en") {
+  if ((pathname === "/" || pathname === "/login") && isLocale(preference) && preference !== "en") {
     const destination = request.nextUrl.clone();
-    destination.pathname = localizedPath("/", preference);
+    destination.pathname = localizedPath(pathname, preference);
     const redirect = NextResponse.redirect(destination, 307);
     redirect.headers.set("Cache-Control", "private, no-store");
     redirect.headers.set("Vary", "Cookie");
@@ -21,6 +22,7 @@ export async function middleware(request: NextRequest) {
   const forwardedHeaders = new Headers(request.headers);
   const publicPage = publicRoute(pathname);
   forwardedHeaders.set("x-mzs-locale", publicPage?.locale || "en");
+  forwardedHeaders.set("x-mzs-client-overview", (pathname === "/private" || pathname.startsWith("/private/")) ? "true" : "false");
   const next = () => NextResponse.next({request: {headers: forwardedHeaders}});
 
   // Recovery and invitation confirmation handle their own one-time OTP and

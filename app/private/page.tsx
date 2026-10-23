@@ -1,5 +1,8 @@
 "use client";
 
+import {useTranslations, useLocale} from "next-intl";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import {localizedPath} from "../../i18n/public-routing";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,26 +34,6 @@ type Offering = {
 };
 type Opportunity = Project & { offerings: Offering[] };
 
-const categories: { id: Category; title: string; description: string; shortTitle: string }[] = [
-  {
-    id: "rentals",
-    title: "Rental Properties",
-    shortTitle: "Private stays",
-    description: "Private residences available exclusively to your account.",
-  },
-  {
-    id: "investments",
-    title: "Investments",
-    shortTitle: "Investments",
-    description: "Selected property and investment opportunities.",
-  },
-  {
-    id: "capital",
-    title: "Private Capital",
-    shortTitle: "Private capital",
-    description: "Individually selected private financing opportunities.",
-  },
-];
 
 function categoryFor(type: string): Category | null {
   if (type === "investment" || type === "sale") return "investments";
@@ -79,26 +62,49 @@ function imageFor(project: Project): string | null {
   return fallbackImages[project.slug] ?? null;
 }
 
-function regionFor(project: Project): string {
+function regionFor(project: Project, t: (key: string) => string): string {
   if (project.slug === "villa-la-nucia") return "COSTA BLANCA · SPAIN";
   if (project.slug === "marina-botafoch-apartment") return "IBIZA · SPAIN";
-  return project.location || "PRIVATE COLLECTION";
+  return project.location || t("collection");
 }
 
-function offeringLabel(type: string): string {
+function offeringLabel(type: string, t: (key: string) => string): string {
   const labels: Record<string, string> = {
-    rental: "Private rental",
-    investment: "Investment",
-    sale: "Private sale",
-    financing: "Private capital",
+    rental: t("private_rental"),
+    investment: t("investment"),
+    sale: t("sale"),
+    financing: t("capital_short"),
   };
   return labels[type] ?? type.replaceAll("_", " ");
 }
 
 export default function PrivatePage() {
   const router = useRouter();
+  const t = useTranslations("Private");
+  const locale = useLocale();
+const categories: { id: Category; title: string; description: string; shortTitle: string }[] = [
+  {
+    id: "rentals",
+    title: t("rentals"),
+    shortTitle: t("stays"),
+    description: t("rental_description"),
+  },
+  {
+    id: "investments",
+    title: t("investments"),
+    shortTitle: t("investments"),
+    description: t("investment_description"),
+  },
+  {
+    id: "capital",
+    title: t("capital"),
+    shortTitle: t("capital_short"),
+    description: t("capital_description"),
+  },
+];
+
   const [viewState, setViewState] = useState<ViewState>("loading");
-  const [name, setName] = useState("Member");
+  const [name, setName] = useState("");
   const [role, setRole] = useState<MemberRole>("client");
   const [items, setItems] = useState<Opportunity[]>([]);
   const [capitalDossierCount, setCapitalDossierCount] = useState<number | null>(null);
@@ -115,7 +121,7 @@ export default function PrivatePage() {
         const { data: auth, error: authError } = await supabase.auth.getUser();
         if (!mounted) return;
         if (authError || !auth.user) {
-          router.replace("/login?role=client");
+          window.location.replace(localizedPath("/login", locale));
           return;
         }
 
@@ -139,7 +145,7 @@ export default function PrivatePage() {
         }
 
         setRole(profile.role);
-        setName(profile.full_name?.trim().split(/\s+/)[0] || "Member");
+        setName(profile.full_name?.trim().split(/\s+/)[0] || "");
         if (profile.is_active !== true) {
           setViewState("pending");
           return;
@@ -165,7 +171,7 @@ export default function PrivatePage() {
         ]);
         if (!mounted) return;
         if (projectGrants.error || offeringGrants.error) {
-          setError("Unable to load your private permissions.");
+          setError("permission_error");
           setViewState("error");
           return;
         }
@@ -188,7 +194,7 @@ export default function PrivatePage() {
         ]);
         if (!mounted) return;
         if (projectResult.error || offeringResult.error) {
-          setError("Unable to load your selected opportunities.");
+          setError("opportunity_error");
           setViewState("error");
           return;
         }
@@ -206,7 +212,7 @@ export default function PrivatePage() {
         setViewState("ready");
       } catch {
         if (mounted) {
-          setError("Your collection is temporarily unavailable. Please try again.");
+          setError("unavailable");
           setViewState("error");
         }
       }
@@ -214,19 +220,18 @@ export default function PrivatePage() {
 
     void load();
     return () => { mounted = false; };
-  }, [router]);
+  }, [router, locale]);
 
   async function signOut() {
     if (signingOut) return;
     setSigningOut(true);
     const { error: signOutError } = await createClient().auth.signOut();
     if (signOutError) {
-      setError("Unable to sign out right now. Please try again.");
+      setError("signout_error");
       setSigningOut(false);
       return;
     }
-    router.replace("/");
-    router.refresh();
+    window.location.replace(localizedPath("/", locale));
   }
 
   const groups = categories.map((category) => ({
@@ -244,26 +249,27 @@ export default function PrivatePage() {
     <main className={styles.page}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Link href="/" className={styles.brand} aria-label="MZS Group — Home">
+          <a href={localizedPath("/", locale)} className={styles.brand} aria-label={t("home")}>
             <span className={styles.brandMzs}>MZS</span>
             <span className={styles.brandGroup}>GROUP</span>
-          </Link>
+          </a>
           <div className={styles.headerRight}>
             <span className={styles.accessLabel}>
-              {role === "partner" ? "PARTNER ACCESS" : "PRIVATE CLIENT"}
+              {role === "partner" ? t("partner") : t("client")}
             </span>
             {viewState === "ready" && (
               <>
                 <Link className={styles.headerLink} href="/private/profile">
-                  My Profile <span aria-hidden="true">↗</span>
+                  {t("profile")} <span aria-hidden="true">↗</span>
                 </Link>
                 <Link className={styles.headerLink} href="/private/reservations">
-                  My Reservations <span aria-hidden="true">↗</span>
+                  {t("reservations")} <span aria-hidden="true">↗</span>
                 </Link>
               </>
             )}
+            <LanguageSwitcher account />
             <button type="button" className={styles.signout} onClick={signOut} disabled={signingOut}>
-              {signingOut ? "Signing out…" : "Sign out"}
+              {signingOut ? t("signing_out") : t("signout")}
             </button>
           </div>
         </div>
@@ -272,52 +278,51 @@ export default function PrivatePage() {
       <div className={styles.main}>
         <div className={styles.overline}>
           <span className={styles.overlineDot} aria-hidden="true" />
-          MZS PRIVATE COLLECTION <span className={styles.overlineDivider}>/</span> BY INVITATION ONLY
+          {t("mzs_collection")} <span className={styles.overlineDivider}>/</span> {t("invitation")}
         </div>
 
         {viewState !== "ready" ? (
           <section className={styles.stateSection} role="status" aria-live="polite">
             <h1>
-              {viewState === "loading" && "Preparing your private collection…"}
-              {viewState === "denied" && "Access restricted."}
-              {viewState === "pending" && "Access pending."}
-              {viewState === "error" && "Unable to continue."}
+              {viewState === "loading" && t("preparing")}
+              {viewState === "denied" && t("restricted")}
+              {viewState === "pending" && t("pending")}
+              {viewState === "error" && t("continue_error")}
             </h1>
-            {viewState === "denied" && <p>Please contact MZS Group for assistance.</p>}
-            {viewState === "pending" && <p>Your private account is awaiting activation.</p>}
-            {viewState === "error" && <p>{error}</p>}
+            {viewState === "denied" && <p>{t("assistance")}</p>}
+            {viewState === "pending" && <p>{t("activation")}</p>}
+            {viewState === "error" && <p>{t(error)}</p>}
           </section>
         ) : (
           <>
             <section className={styles.welcome} aria-labelledby="private-welcome">
               <div className={styles.welcomeContent}>
-                <p className={styles.welcomeKicker}>YOUR PERSONAL COLLECTION</p>
-                <h1 id="private-welcome">Welcome <em>{name}</em></h1>
+                <p className={styles.welcomeKicker}>{t("personal")}</p>
+                <h1 id="private-welcome">{t("welcome")} <em>{name || t("member")}</em></h1>
                 <p className={styles.welcomeIntro}>
-                  Discover a carefully selected collection of private residences, investments and opportunities,
-                  reserved exclusively for your account.
+                  {t("intro")}
                 </p>
               </div>
-              <aside className={styles.welcomeAside} aria-label="Collection overview">
-                <span className={styles.asideKicker}>YOUR PRIVATE ACCESS</span>
+              <aside className={styles.welcomeAside} aria-label={t("overview")}>
+                <span className={styles.asideKicker}>{t("access")}</span>
                 <div className={styles.asideNumber}>{String(items.length)}</div>
                 <p className={styles.asideDescription}>
-                  {items.length === 1 ? "Personally selected property" : "Personally selected properties"}
+                  {items.length === 1 ? t("property_one") : t("property_many")}
                 </p>
                 <span className={styles.asideLine} aria-hidden="true" />
-                <p className={styles.asideNote}>Personal. Confidential. By invitation only.</p>
+                <p className={styles.asideNote}>{t("aside")}</p>
               </aside>
             </section>
 
             <section className={styles.collection} aria-labelledby="explore-heading">
               <div className={styles.collectionHeading}>
                 <div>
-                  <p className={styles.sectionKicker}>THE PRIVATE COLLECTION</p>
-                  <h2 id="explore-heading">Explore your opportunities.</h2>
+                  <p className={styles.sectionKicker}>{t("the_collection")}</p>
+                  <h2 id="explore-heading">{t("explore")}</h2>
                 </div>
-                <p className={styles.collectionHint}>Select a category to view the opportunities available to you.</p>
+                <p className={styles.collectionHint}>{t("hint")}</p>
               </div>
-              <div className={styles.categories} role="group" aria-label="Opportunity categories">
+              <div className={styles.categories} role="group" aria-label={t("categories")}>
                 {groups.map((group, index) => (
                   <button
                     key={group.id}
@@ -338,10 +343,10 @@ export default function PrivatePage() {
                 ))}
               </div>
 
-              <div id="private-opportunities-panel" className={styles.opportunities} role="region" aria-live="polite" aria-label={`${selected.title} opportunities`}>
+              <div id="private-opportunities-panel" className={styles.opportunities} role="region" aria-live="polite" aria-label={t("opportunities_named", {title: selected.title})}>
                 <div className={styles.opportunitiesHeading}>
                   <div>
-                    <p className={styles.sectionKicker}>SELECTED EXCLUSIVELY FOR YOU</p>
+                    <p className={styles.sectionKicker}>{t("exclusive")}</p>
                     <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.id === "capital" ? (capitalDossierCount ?? "—") : selected.projects.length)}</span></h2>
                   </div>
                   <p>{selected.description}</p>
@@ -352,8 +357,8 @@ export default function PrivatePage() {
                     <div className={styles.emptyState}>
                       <span className={styles.emptyMark} aria-hidden="true">✦</span>
                       <div>
-                        <h3>No opportunities assigned yet.</h3>
-                        <p>Your MZS relationship manager will notify you when selected opportunities become available.</p>
+                        <h3>{t("none")}</h3>
+                        <p>{t("notify")}</p>
                       </div>
                     </div>
                   )
@@ -365,7 +370,7 @@ export default function PrivatePage() {
                       return (
                         <article key={project.id} className={styles.property}>
                           {picture ? (
-                            <Link href={href} className={styles.propertyPicture} aria-label={`Explore ${project.title}`}>
+                            <Link href={href} className={styles.propertyPicture} aria-label={t("explore_named", {title: project.title})}>
                               <Image
                                 src={picture}
                                 alt={project.title}
@@ -373,32 +378,32 @@ export default function PrivatePage() {
                                 sizes="(max-width: 720px) 100vw, (max-width: 1050px) 50vw, 560px"
                                 className={styles.propertyImage}
                               />
-                              <span className={styles.photoCorner} aria-hidden="true">MZS PRIVATE COLLECTION</span>
+                              <span className={styles.photoCorner} aria-hidden="true">{t("mzs_collection")}</span>
                             </Link>
                           ) : (
-                            <Link href={href} className={styles.propertyNoPicture} aria-label={`Explore ${project.title}`}>
+                            <Link href={href} className={styles.propertyNoPicture} aria-label={t("explore_named", {title: project.title})}>
                               <span className={styles.noPictureMonogram} aria-hidden="true">MZS</span>
-                              <span className={styles.photoCorner} aria-hidden="true">PRIVATE OPPORTUNITY</span>
+                              <span className={styles.photoCorner} aria-hidden="true">{t("private_opportunity")}</span>
                             </Link>
                           )}
                           <div className={styles.propertyDetails}>
                             <div className={styles.propertyTopline}>
-                              <span>{regionFor(project)}</span>
-                              <span>PRIVATE ACCESS</span>
+                              <span>{regionFor(project, t)}</span>
+                              <span>{t("private_access")}</span>
                             </div>
                             <h3><Link href={href}>{project.title}</Link></h3>
                             <p className={styles.propertySubtitle}>
-                              {project.subtitle || "Privately selected for your MZS account."}
+                              {project.subtitle || t("subtitle")}
                             </p>
                             <div className={styles.offeringTags}>
                               {project.offerings.map((offering) => (
                                 <span key={offering.id} className={styles.offeringTag}>
-                                  {offeringLabel(offering.offering_type)}
+                                  {offeringLabel(offering.offering_type, t)}
                                 </span>
                               ))}
                             </div>
                             <Link className={styles.propertyAction} href={href}>
-                              Explore property <span aria-hidden="true">↗</span>
+                              {t("property")} <span aria-hidden="true">↗</span>
                             </Link>
                           </div>
                         </article>
@@ -415,21 +420,21 @@ export default function PrivatePage() {
                 <div className={styles.emptyState}>
                   <span className={styles.emptyMark} aria-hidden="true">✦</span>
                   <div>
-                    <h3>No opportunities assigned yet.</h3>
-                    <p>Your MZS relationship manager will notify you when selected opportunities become available.</p>
+                    <h3>{t("none")}</h3>
+                    <p>{t("notify")}</p>
                   </div>
                 </div>
               )}
             </section>
           </>
         )}
-        {error && viewState === "ready" && <p className={styles.notice} role="alert">{error}</p>}
+        {error && viewState === "ready" && <p className={styles.notice} role="alert">{t(error)}</p>}
       </div>
 
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <span>PRIVATE · INDEPENDENT · INTERNATIONAL</span>
-          <span>BY INVITATION ONLY</span>
+          <span>{t("invitation")}</span>
         </div>
       </footer>
     </main>
