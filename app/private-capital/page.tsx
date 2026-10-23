@@ -57,11 +57,11 @@ export default function PrivateCapitalPage() {
             investment opportunities and strategic partnerships.
           </p>
           <div className={styles.heroActions}>
-            {introCallEnabled ? (
+            {!atmospherePreview && (introCallEnabled ? (
               <a className={styles.primaryAction} href="#introductory-call">Request an introductory call <span aria-hidden="true">↗</span></a>
             ) : (
               <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
-            )}
+            ))}
             <a className={styles.quietAction} href="#capital-focus">Discover Our Focus <span aria-hidden="true">↓</span></a>
           </div>
         </div>
