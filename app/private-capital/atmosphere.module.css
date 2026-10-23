@@ -25,3 +25,11 @@
  .conversationImage {aspect-ratio:1.15;}
  .approachCopy {padding-block:50px;}
 }
+
+.sectionNavigation {display:flex;align-items:center;gap:12px clamp(18px,2.3vw,34px);flex-wrap:wrap;margin-top:34px;}
+.sectionNavigation a {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 0 6px;border-bottom:1px solid transparent;color:#e0d9cd;text-decoration:none;text-transform:uppercase;font:500 11px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.115em;white-space:nowrap;transition:border-color .2s,color .2s;}
+.sectionNavigation a:hover {color:#e4cfaa;border-color:rgba(213,192,154,.7);}
+.sectionNavigation a span {color:#d5c09a;font-size:14px;line-height:1;}
+.page section[id] {scroll-margin-top:24px;}
+@media(max-width:540px){.sectionNavigation {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;}.sectionNavigation a {font-size:10px;letter-spacing:.08em;white-space:normal;}}
+@media(prefers-reduced-motion:reduce){.sectionNavigation a {transition:none;}}

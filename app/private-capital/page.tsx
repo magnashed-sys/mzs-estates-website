@@ -56,19 +56,24 @@ export default function PrivateCapitalPage() {
             A discreet and relationship-driven perspective on private financing,
             investment opportunities and strategic partnerships.
           </p>
-          <div className={styles.heroActions}>
+          {atmospherePreview ? <nav className={atmosphere.sectionNavigation} aria-label="Explore Private Capital">
+            <a href="#capital-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
+            <a href="#capital-focus">Our Focus <span aria-hidden="true">↗</span></a>
+            <a href="#capital-method">Our Approach <span aria-hidden="true">↗</span></a>
+            <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
+          </nav> : <div className={styles.heroActions}>
             {!atmospherePreview && (introCallEnabled ? (
               <a className={styles.primaryAction} href="#introductory-call">Request an introductory call <span aria-hidden="true">↗</span></a>
             ) : (
               <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
             ))}
             <a className={styles.quietAction} href="#capital-focus">Discover Our Focus <span aria-hidden="true">↓</span></a>
-          </div>
+          </div>}
         </div>
         <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
       </section>
 
-      <section className={styles.introduction} aria-labelledby="capital-intro">
+      <section id="capital-perspective" className={styles.introduction} aria-labelledby="capital-intro">
         <p className={styles.eyebrow}>OUR PERSPECTIVE / 01</p>
         <div className={styles.introColumns}>
           <h2 id="capital-intro">Capital guided by <em>relationships.</em></h2>
@@ -102,7 +107,7 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      <section className={`${styles.presence} ${atmospherePreview ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
+      <section id="capital-method" className={`${styles.presence} ${atmospherePreview ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
         {atmospherePreview && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt="An illustrative, sunlit setting for a private conversation, with linen armchairs and olive trees." fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>SPACE FOR A PERSONAL PERSPECTIVE</figcaption></figure>}
         <div className={atmospherePreview ? atmosphere.approachCopy : atmosphere.unwrap}>
         <p className={styles.eyebrow}>OUR APPROACH / 03</p>
