@@ -68,3 +68,7 @@
   .confirmation { min-height: 420px; }
 }
 @media (prefers-reduced-motion: reduce) { .submitButton { transition: none; } }
+
+.error { margin: 0; color: #f2b7a7; font-size: 13px; line-height: 1.7; }
+.contactNote summary { cursor: pointer; min-height: 28px; color: #d5c09a; }
+.confirmation .contactNote { overflow-wrap: anywhere; }
