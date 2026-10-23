@@ -42,12 +42,12 @@ const focus = [
 
 export default function PrivateCapitalPage() {
   const introCallEnabled = introCallsEnvironmentAllowed();
-  const atmospherePreview = process.env.VERCEL_ENV === "preview" && introCallEnabled;
+  const atmosphereEnabled = introCallEnabled;
   return (
-    <main className={`${styles.page} ${atmospherePreview ? atmosphere.page : ""}`}>
+    <main className={`${styles.page} ${atmosphereEnabled ? atmosphere.page : ""}`}>
       <div className={styles.headerWrap}><PublicHeader /></div>
-      <section className={`${styles.hero} ${atmospherePreview ? atmosphere.hero : ""}`} aria-labelledby="capital-heading">
-        {atmospherePreview ? <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/images/capital/mediterranean-light.webp" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div> : <div className={styles.capitalImage} aria-hidden="true" />}
+      <section className={`${styles.hero} ${atmosphereEnabled ? atmosphere.hero : ""}`} aria-labelledby="capital-heading">
+        {atmosphereEnabled ? <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/images/capital/mediterranean-light.webp" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div> : <div className={styles.capitalImage} aria-hidden="true" />}
         <div className={styles.heroContent}>
           <p className={styles.eyebrow}>MZS CAPITAL / PRIVATE CAPITAL</p>
           <h1 id="capital-heading">Independent capital.<br /><em>Private opportunities.</em></h1>
@@ -56,14 +56,14 @@ export default function PrivateCapitalPage() {
             A discreet and relationship-driven perspective on private financing,
             investment opportunities and strategic partnerships.
           </p>
-          {atmospherePreview ? <nav className={atmosphere.sectionNavigation} aria-label="Explore Private Capital">
+          {atmosphereEnabled ? <nav className={atmosphere.sectionNavigation} aria-label="Explore Private Capital">
             <a href="#capital-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
             <a href="#capital-focus">Our Focus <span aria-hidden="true">↗</span></a>
             <a href="#capital-method">Our Approach <span aria-hidden="true">↗</span></a>
             <a href="#capital-securities">Securities <span aria-hidden="true">↗</span></a>
             <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
           </nav> : <div className={styles.heroActions}>
-            {!atmospherePreview && (introCallEnabled ? (
+            {!atmosphereEnabled && (introCallEnabled ? (
               <a className={styles.primaryAction} href="#introductory-call">Request an introductory call <span aria-hidden="true">↗</span></a>
             ) : (
               <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
@@ -108,9 +108,9 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      <section id="capital-method" className={`${styles.presence} ${atmospherePreview ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
-        {atmospherePreview && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt="An illustrative, sunlit setting for a private conversation, with linen armchairs and olive trees." fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>SPACE FOR A PERSONAL PERSPECTIVE</figcaption></figure>}
-        <div className={atmospherePreview ? atmosphere.approachCopy : atmosphere.unwrap}>
+      <section id="capital-method" className={`${styles.presence} ${atmosphereEnabled ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
+        {atmosphereEnabled && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt="An illustrative, sunlit setting for a private conversation, with linen armchairs and olive trees." fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>SPACE FOR A PERSONAL PERSPECTIVE</figcaption></figure>}
+        <div className={atmosphereEnabled ? atmosphere.approachCopy : atmosphere.unwrap}>
         <p className={styles.eyebrow}>OUR APPROACH / 03</p>
         <div>
           <h2 id="capital-approach">Discretion first.<br /><em>Independent thinking.</em></h2>
@@ -119,7 +119,7 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      {atmospherePreview && <section id="capital-securities" className={`${styles.activities} ${atmosphere.securities}`} aria-labelledby="securities-heading">
+      {atmosphereEnabled && <section id="capital-securities" className={`${styles.activities} ${atmosphere.securities}`} aria-labelledby="securities-heading">
         <div className={styles.sectionHeading}>
           <p className={styles.eyebrow}>SECURITIES / 04</p>
           <h2 id="securities-heading">Securities</h2>
@@ -148,7 +148,7 @@ export default function PrivateCapitalPage() {
         <p className={atmosphere.securityNote}>The availability, scope and enforceability of security depend on the transaction and applicable law. Security does not eliminate investment risk or guarantee repayment.</p>
       </section>}
 
-      {introCallEnabled ? <IntroCallForm sectionNumber={atmospherePreview ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
+      {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
         <p className={styles.eyebrow}>SELECTED PRIVATE ACCESS</p>
         <h2 id="capital-invitation">A confidential conversation<br />starts here.</h2>
         <p>
@@ -164,7 +164,7 @@ export default function PrivateCapitalPage() {
           a public offer of securities, investment advice or a financing commitment.
         </p>
       </section>}
-      {atmospherePreview && <p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
+      {atmosphereEnabled && <p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
       <div className={styles.bottomNavigation}>
         <Link href="/">← MZS Group</Link>
         <Link href="/real-estate">Explore Real Estate ↗</Link>
