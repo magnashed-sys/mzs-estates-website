@@ -11,13 +11,19 @@ export default function LanguageSwitcher() {
   const t = useTranslations('Language');
   const disclosure = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
-    function closeOutside(event: PointerEvent) {
+    function closeOutside(event: Event) {
       if (event.target instanceof Node && !disclosure.current?.contains(event.target)) {
         disclosure.current?.removeAttribute('open');
       }
     }
     document.addEventListener('pointerdown', closeOutside);
-    return () => document.removeEventListener('pointerdown', closeOutside);
+    // Close on a known outside focus target, not blur: pointer interactions
+    // can blur the summary before a language link receives its click.
+    document.addEventListener('focusin', closeOutside);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('focusin', closeOutside);
+    };
   }, []);
   if (!route) return null;
   return <details className={styles.languages} ref={disclosure}
@@ -26,8 +32,6 @@ export default function LanguageSwitcher() {
         disclosure.current.open = false;
         disclosure.current.querySelector('summary')?.focus();
       }
-    }} onBlur={event => {
-      if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
     }}>
     <summary className={styles.languageToggle} aria-label={t('choose')} title={t('choose')}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
