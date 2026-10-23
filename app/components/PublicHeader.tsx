@@ -23,7 +23,6 @@ const publicNavigation = [
   { href: "/real-estate", label: t('real_estate') },
   { href: "/private-capital", label: t('private_capital') },
   { href: "/login", label: t('client_partner_login') },
-  { href: "/request-access", label: t('request_access') },
 ] as const;
   const [dashboardHref, setDashboardHref] = useState<DashboardHref>(null);
 
@@ -98,7 +97,6 @@ const publicNavigation = [
       </a>
 
       <div className={styles.navigationRegion}>
-        <LanguageSwitcher />
         <nav className={styles.desktopNavigation} aria-label={t('main_navigation')}>
           {publicNavigation.map(({ href, label }) => (
             <a href={localizedPath(href, locale)} className={styles.navLink} key={href}>
@@ -128,6 +126,7 @@ const publicNavigation = [
             )}
           </nav>
         </details>
+        <LanguageSwitcher />
       </div>
     </header>
   );
