@@ -43,10 +43,10 @@ const activities = [
 export default function RealEstatePage() {
   const preview = process.env.VERCEL_ENV === "preview" && process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co";
   return (
-    <main className={`${styles.page} ${preview ? atmosphere.page : ""}`}>
+    <main className={`${styles.page} ${atmosphere.page}`}>
       <div className={styles.headerWrap}><PublicHeader /></div>
-      <section className={`${styles.hero} ${preview ? atmosphere.hero : ""}`} aria-labelledby="estates-heading">
-        {preview ? <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/mzs-hero.png" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div> : <div className={styles.estateImage} aria-hidden="true" />}
+      <section className={`${styles.hero} ${atmosphere.hero}`} aria-labelledby="estates-heading">
+        <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/mzs-hero.png" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div>
         <div className={styles.heroContent}>
           <p className={styles.eyebrow}>MZS ESTATES / REAL ESTATE</p>
           <h1 id="estates-heading">Private real estate.<br /><em>International perspective.</em></h1>
@@ -55,15 +55,12 @@ export default function RealEstatePage() {
             An independent approach to selected property ownership, management,
             private rentals, sales and real estate development.
           </p>
-          {preview ? <nav className={atmosphere.sectionNavigation} aria-label="Explore Real Estate">
+          <nav className={atmosphere.sectionNavigation} aria-label="Explore Real Estate">
             <a href="#estates-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
             <a href="#activities">Our Activities <span aria-hidden="true">↗</span></a>
             <a href="#international-reach">International Reach <span aria-hidden="true">↗</span></a>
             <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
-          </nav> : <div className={styles.heroActions}>
-            <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
-            <a className={styles.quietAction} href="#activities">Explore Our Activities <span aria-hidden="true">↓</span></a>
-          </div>}
+          </nav>
         </div>
         <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
       </section>
@@ -103,31 +100,20 @@ export default function RealEstatePage() {
         </div>
       </section>
 
-      <section id="international-reach" className={`${styles.presence} ${preview ? atmosphere.approach : ""}`} aria-labelledby="estates-presence">
-        {preview && <figure className={atmosphere.conversationImage}><Image src="/images/capital/mediterranean-light.webp" alt="Illustrative Mediterranean stone architecture overlooking the sea at sunset." fill sizes="(max-width: 850px) 100vw, 50vw" /><figcaption>A SENSE OF PLACE. A LONG-TERM PERSPECTIVE.</figcaption></figure>}
-        <div className={preview ? atmosphere.approachCopy : atmosphere.unwrap}>
+      <section id="international-reach" className={`${styles.presence} ${atmosphere.approach}`} aria-labelledby="estates-presence">
+        {<figure className={atmosphere.conversationImage}><Image src="/images/capital/mediterranean-light.webp" alt="Illustrative Mediterranean stone architecture overlooking the sea at sunset." fill sizes="(max-width: 850px) 100vw, 50vw" /><figcaption>A SENSE OF PLACE. A LONG-TERM PERSPECTIVE.</figcaption></figure>}
+        <div className={atmosphere.approachCopy}>
         <p className={styles.eyebrow}>INTERNATIONAL REACH / 03</p>
         <div>
           <h2 id="estates-presence">Local knowledge.<br /><em>International outlook.</em></h2>
           <p>Selected activity across the Netherlands, Spain and the United Arab Emirates.</p>
-          {preview && <p className={estate.regions}>THE NETHERLANDS · SPAIN · UAE</p>}
+          {<p className={estate.regions}>THE NETHERLANDS · SPAIN · UAE</p>}
         </div>
         </div>
       </section>
 
-      {preview ? <IntroCallForm preview source="real-estate" sectionNumber="04" /> : <section className={styles.invitation} aria-labelledby="estates-invitation">
-        <p className={styles.eyebrow}>PERSONAL & CONFIDENTIAL</p>
-        <h2 id="estates-invitation">A more private way<br />to explore property.</h2>
-        <p>
-          Detailed presentations and selected opportunities are shared with authorized
-          clients and partners through our secure private platform.
-        </p>
-        <div className={styles.heroActions}>
-          <Link className={styles.primaryAction} href="/login">Client & Partner Login <span aria-hidden="true">↗</span></Link>
-          <Link className={styles.quietAction} href="/request-access">Request Access <span aria-hidden="true">↗</span></Link>
-        </div>
-      </section>}
-      {preview && <p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
+      <IntroCallForm preview={preview} source="real-estate" sectionNumber="04" />
+      {<p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
 
       <div className={styles.bottomNavigation}>
         <Link href="/">← MZS Group</Link>
