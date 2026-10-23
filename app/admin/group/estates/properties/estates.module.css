@@ -1,0 +1,30 @@
+.section{margin:40px 0;max-width:1200px}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:1000px;margin:36px 0 44px}
+.gallery figure{margin:0;border:1px solid #4c4133;background:#16140f;overflow:hidden}
+.gallery img{display:block;width:100%;height:auto}
+.gallery figcaption{padding:14px 18px;color:#b3a99a;font-size:13px;line-height:1.6}
+.ownershipFacts{display:flex;flex-wrap:wrap;gap:24px 64px;margin:28px 0}
+.ownershipFacts dt{font-size:12px;color:#b3a99a;margin-bottom:10px}
+.ownershipFacts dd{margin:0;color:#e1c796;font-size:21px}
+.agentCard{display:inline-flex;flex-wrap:wrap;align-items:center;gap:24px;padding:20px;border:1px solid #4c4133;color:#d2b887;text-decoration:none;max-width:100%;box-sizing:border-box}
+.agentCard:hover,.agentCard:focus-visible{border-color:#d2b887}
+.agentLogo{display:block;background:#fff;padding:16px;max-width:100%;box-sizing:border-box}
+.agentLogo img{display:block;max-width:100%;height:auto}
+@media(max-width:600px){.gallery{grid-template-columns:1fr}.agentCard{width:100%}}
+.section h2{font:normal 30px Georgia,serif;color:#ede6dc}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:16px;margin:32px 0}
+.facts>div{border:1px solid #4c4133;padding:22px;background:#16140f}
+.facts dt{font-size:12px;color:#b3a99a;line-height:1.6}
+.facts dd{margin:12px 0 0;font-size:23px;color:#e1c796;overflow-wrap:anywhere}
+.note{color:#b3a99a;font-size:13px;line-height:1.8;white-space:pre-line}
+.tableWrap{overflow-x:auto;border:1px solid #4c4133;max-width:100%}
+.table{border-collapse:collapse;width:100%;min-width:730px;text-align:left;font-size:14px}
+.table th,.table td{padding:16px;border-bottom:1px solid #352f26;vertical-align:top;line-height:1.6}
+.table th{color:#d5bd94;font-weight:normal;background:#16140f}
+.table td{color:#d6cfc3}
+.money{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.type{display:block;color:#b3a99a;font-size:12px}
+.link{color:#d2b887;line-height:1.8}
+.history{padding-left:20px;color:#b3a99a;line-height:1.8;font-size:13px}
+.error{border:1px solid #a97766;padding:20px;color:#f1cbbd}
+@media(max-width:600px){.facts{grid-template-columns:1fr 1fr}.facts>div{padding:15px}.facts dd{font-size:18px}.table th,.table td{padding:12px}.section h2{font-size:26px}}
