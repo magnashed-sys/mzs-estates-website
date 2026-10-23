@@ -60,6 +60,7 @@ export default function PrivateCapitalPage() {
             <a href="#capital-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
             <a href="#capital-focus">Our Focus <span aria-hidden="true">↗</span></a>
             <a href="#capital-method">Our Approach <span aria-hidden="true">↗</span></a>
+            <a href="#capital-securities">Securities <span aria-hidden="true">↗</span></a>
             <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
           </nav> : <div className={styles.heroActions}>
             {!atmospherePreview && (introCallEnabled ? (
@@ -118,7 +119,36 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      {introCallEnabled ? <IntroCallForm preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
+      {atmospherePreview && <section id="capital-securities" className={`${styles.activities} ${atmosphere.securities}`} aria-labelledby="securities-heading">
+        <div className={styles.sectionHeading}>
+          <p className={styles.eyebrow}>SECURITIES / 04</p>
+          <h2 id="securities-heading">Securities</h2>
+          <p className={atmosphere.securityIntro}>A considered security structure is an important part of each financing arrangement. Depending on the transaction, the security we provide may include personal guarantees, mortgage rights over real estate or pledges over shares, individually agreed and documented.</p>
+        </div>
+        <div className={styles.activityGrid}>
+          <article className={styles.activity}>
+            <span className={styles.number}>01</span>
+            <p className={styles.activitySubtitle}>Personal commitment</p>
+            <h3>Personal Guarantees</h3>
+            <p>A personal guarantee may form part of the agreed security package, with its scope and terms set out in the transaction documentation.</p>
+          </article>
+          <article className={styles.activity}>
+            <span className={styles.number}>02</span>
+            <p className={styles.activitySubtitle}>Real estate security</p>
+            <h3>Mortgage Rights</h3>
+            <p>Financing may be secured by a mortgage right over specified real estate, with the property, ranking and terms agreed for the individual transaction.</p>
+          </article>
+          <article className={styles.activity}>
+            <span className={styles.number}>03</span>
+            <p className={styles.activitySubtitle}>Share security</p>
+            <h3>Share Pledges</h3>
+            <p>A pledge over shares in a relevant company may be included as security, subject to the agreed structure and transaction documentation.</p>
+          </article>
+        </div>
+        <p className={atmosphere.securityNote}>The availability, scope and enforceability of security depend on the transaction and applicable law. Security does not eliminate investment risk or guarantee repayment.</p>
+      </section>}
+
+      {introCallEnabled ? <IntroCallForm sectionNumber={atmospherePreview ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
         <p className={styles.eyebrow}>SELECTED PRIVATE ACCESS</p>
         <h2 id="capital-invitation">A confidential conversation<br />starts here.</h2>
         <p>
