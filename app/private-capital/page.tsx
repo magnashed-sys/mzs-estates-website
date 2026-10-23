@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import atmosphere from "./atmosphere.module.css";
 import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 import styles from "../public-introductions.module.css";
@@ -40,11 +42,12 @@ const focus = [
 
 export default function PrivateCapitalPage() {
   const introCallEnabled = introCallsEnvironmentAllowed();
+  const atmospherePreview = process.env.VERCEL_ENV === "preview" && introCallEnabled;
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${atmospherePreview ? atmosphere.page : ""}`}>
       <div className={styles.headerWrap}><PublicHeader /></div>
-      <section className={styles.hero} aria-labelledby="capital-heading">
-        <div className={styles.capitalImage} aria-hidden="true" />
+      <section className={`${styles.hero} ${atmospherePreview ? atmosphere.hero : ""}`} aria-labelledby="capital-heading">
+        {atmospherePreview ? <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/images/capital/mediterranean-light.webp" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div> : <div className={styles.capitalImage} aria-hidden="true" />}
         <div className={styles.heroContent}>
           <p className={styles.eyebrow}>MZS CAPITAL / PRIVATE CAPITAL</p>
           <h1 id="capital-heading">Independent capital.<br /><em>Private opportunities.</em></h1>
@@ -99,11 +102,14 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      <section className={styles.presence} aria-labelledby="capital-approach">
+      <section className={`${styles.presence} ${atmospherePreview ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
+        {atmospherePreview && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt="An illustrative, sunlit setting for a private conversation, with linen armchairs and olive trees." fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>SPACE FOR A PERSONAL PERSPECTIVE</figcaption></figure>}
+        <div className={atmospherePreview ? atmosphere.approachCopy : atmosphere.unwrap}>
         <p className={styles.eyebrow}>OUR APPROACH / 03</p>
         <div>
           <h2 id="capital-approach">Discretion first.<br /><em>Independent thinking.</em></h2>
           <p>Every relationship, financing enquiry and opportunity is considered individually and confidentially.</p>
+        </div>
         </div>
       </section>
 
@@ -123,6 +129,7 @@ export default function PrivateCapitalPage() {
           a public offer of securities, investment advice or a financing commitment.
         </p>
       </section>}
+      {atmospherePreview && <p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
       <div className={styles.bottomNavigation}>
         <Link href="/">← MZS Group</Link>
         <Link href="/real-estate">Explore Real Estate ↗</Link>
