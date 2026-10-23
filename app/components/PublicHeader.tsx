@@ -1,16 +1,13 @@
 "use client";
+import {useLocale, useTranslations} from 'next-intl';
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import LanguageSwitcher from "./LanguageSwitcher";
+import {localizedPath} from "../../i18n/public-routing";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./PublicHeader.module.css";
 
-const publicNavigation = [
-  { href: "/real-estate", label: "Real Estate" },
-  { href: "/private-capital", label: "Private Capital" },
-  { href: "/login", label: "Client & Partner Login" },
-  { href: "/request-access", label: "Request Access" },
-] as const;
+
 
 type DashboardHref = "/admin" | "/private" | null;
 
@@ -20,6 +17,14 @@ type DashboardHref = "/admin" | "/private" | null;
  * The dashboard pages themselves remain protected by their own access checks.
  */
 export default function PublicHeader() {
+  const t = useTranslations('Header');
+  const locale = useLocale();
+const publicNavigation = [
+  { href: "/real-estate", label: t('real_estate') },
+  { href: "/private-capital", label: t('private_capital') },
+  { href: "/login", label: t('client_partner_login') },
+  { href: "/request-access", label: t('request_access') },
+] as const;
   const [dashboardHref, setDashboardHref] = useState<DashboardHref>(null);
 
   useEffect(() => {
@@ -83,44 +88,43 @@ export default function PublicHeader() {
 
   return (
     <header className={`${styles.header} mzs-home-header`}>
-      <Link
-        href="/"
+      <a
+        href={localizedPath("/", locale)}
         className={`${styles.wordmark} mzs-wordmark`}
-        aria-label="MZS Group — Home"
+        aria-label={t('mzs_group_home')}
       >
         <span className={`${styles.monogram} mzs-monogram`}>MZS</span>
         <span className={`${styles.groupLabel} mzs-group-label`}>GROUP</span>
-      </Link>
+      </a>
 
       <div className={styles.navigationRegion}>
-        <nav className={styles.desktopNavigation} aria-label="Main navigation">
+        <LanguageSwitcher />
+        <nav className={styles.desktopNavigation} aria-label={t('main_navigation')}>
           {publicNavigation.map(({ href, label }) => (
-            <Link href={href} className={styles.navLink} key={href}>
+            <a href={localizedPath(href, locale)} className={styles.navLink} key={href}>
               {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
-            </Link>
+            </a>
           ))}
           {dashboardHref && (
-            <Link href={dashboardHref} className={styles.dashboardLink}>
-              My Dashboard <span className={styles.navArrow} aria-hidden="true">↗</span>
-            </Link>
+            <a href={dashboardHref} className={styles.dashboardLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true">↗</span>
+            </a>
           )}
         </nav>
 
         <details className={styles.mobileNavigation}>
           <summary className={styles.menuToggle}>
-            <span>Menu</span>
+            <span>{t('menu')}</span>
             <span className={styles.menuIcon} aria-hidden="true">☰</span>
           </summary>
-          <nav className={styles.mobilePanel} aria-label="Mobile main navigation">
+          <nav className={styles.mobilePanel} aria-label={t('mobile_main_navigation')}>
             {publicNavigation.map(({ href, label }) => (
-              <Link href={href} className={styles.mobileLink} key={href}>
+              <a href={localizedPath(href, locale)} className={styles.mobileLink} key={href}>
                 {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
-              </Link>
+              </a>
             ))}
             {dashboardHref && (
-              <Link href={dashboardHref} className={styles.mobileLink}>
-                My Dashboard <span className={styles.navArrow} aria-hidden="true">↗</span>
-              </Link>
+              <a href={dashboardHref} className={styles.mobileLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true">↗</span>
+              </a>
             )}
           </nav>
         </details>

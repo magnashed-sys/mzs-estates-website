@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+import {localizedPath} from "../../i18n/public-routing";
+import {publicMetadata} from "../../i18n/metadata";
+export const generateMetadata = () => publicMetadata("estates", "/real-estate");
+import {getLocale, getTranslations} from 'next-intl/server';
 import Link from "next/link";
 import Image from "next/image";
 import IntroCallForm from "../private-capital/IntroCallForm";
@@ -8,39 +11,35 @@ import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 import styles from "../public-introductions.module.css";
 
-export const metadata: Metadata = {
-  title: "Real Estate | MZS Estates",
-  description: "Discover the independent international real estate activities of MZS Estates: property ownership, private rentals, sales and development.",
-  alternates: { canonical: "/real-estate" },
-  ...(process.env.VERCEL_ENV === "preview" ? { robots: { index: false, follow: false } } : {}),
-  openGraph: { title: "MZS Estates | Real Estate", description: "Private real estate. International perspective.", url: "/real-estate" },
-};
 
+
+
+export default async function RealEstatePage() {
+  const locale = await getLocale();
+  const t = await getTranslations('Estates');
 const activities = [
   {
     number: "01",
-    title: "Ownership & Management",
-    subtitle: "An enduring perspective",
+    title: t('ownership_management'),
+    subtitle: t('an_enduring_perspective'),
     description:
-      "Managing selected privately and corporately held real estate with a considered approach to quality, continuity and long-term value.",
+      t('managing_selected_privately_and_corporately_held'),
   },
   {
     number: "02",
-    title: "Private Rentals & Sales",
-    subtitle: "A personal approach",
+    title: t('private_rentals_sales'),
+    subtitle: t('a_personal_approach'),
     description:
-      "Presenting selected residential properties for private rental or acquisition, with discretion and personal attention throughout.",
+      t('presenting_selected_residential_properties_for_private'),
   },
   {
     number: "03",
-    title: "Development & Investment",
-    subtitle: "Opportunities with purpose",
+    title: t('development_investment'),
+    subtitle: t('opportunities_with_purpose'),
     description:
-      "Evaluating development projects and strategic real estate opportunities in carefully selected international markets.",
+      t('evaluating_development_projects_and_strategic_real'),
   },
 ];
-
-export default function RealEstatePage() {
   const preview = process.env.VERCEL_ENV === "preview" && process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co";
   return (
     <main className={`${styles.page} ${atmosphere.page}`}>
@@ -48,45 +47,35 @@ export default function RealEstatePage() {
       <section className={`${styles.hero} ${atmosphere.hero}`} aria-labelledby="estates-heading">
         <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/mzs-hero.png" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div>
         <div className={styles.heroContent}>
-          <p className={styles.eyebrow}>MZS ESTATES / REAL ESTATE</p>
-          <h1 id="estates-heading">Private real estate.<br /><em>International perspective.</em></h1>
+          <p className={styles.eyebrow}>{t('mzs_estates_real_estate')}</p>
+          <h1 id="estates-heading">{t('private_real_estate')}<br /><em>{t('international_perspective')}</em></h1>
           <div className={styles.rule} aria-hidden="true" />
-          <p className={styles.heroLead}>
-            An independent approach to selected property ownership, management,
-            private rentals, sales and real estate development.
-          </p>
-          <nav className={atmosphere.sectionNavigation} aria-label="Explore Real Estate">
-            <a href="#estates-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
-            <a href="#activities">Our Activities <span aria-hidden="true">↗</span></a>
-            <a href="#international-reach">International Reach <span aria-hidden="true">↗</span></a>
-            <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
+          <p className={styles.heroLead}> {t('an_independent_approach_to_selected_property')} </p>
+          <nav className={atmosphere.sectionNavigation} aria-label={t('explore_real_estate')}>
+            <a href="#estates-perspective">{t('our_perspective')} <span aria-hidden="true">↗</span></a>
+            <a href="#activities">{t('our_activities')} <span aria-hidden="true">↗</span></a>
+            <a href="#international-reach">{t('international_reach')} <span aria-hidden="true">↗</span></a>
+            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true">↗</span></a>
           </nav>
         </div>
         <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
       </section>
 
       <section id="estates-perspective" className={styles.introduction} aria-labelledby="estates-intro">
-        <p className={styles.eyebrow}>OUR PERSPECTIVE / 01</p>
+        <p className={styles.eyebrow}>{t('our_perspective_01')}</p>
         <div className={styles.introColumns}>
-          <h2 id="estates-intro">Real estate, with <em>a long-term view.</em></h2>
+          <h2 id="estates-intro">{t('real_estate_with')} <em>{t('a_longterm_view')}</em></h2>
           <div className={styles.introBody}>
-            <p>
-              MZS Estates is an independent international real estate company focused on
-              the acquisition, ownership, management and development of selected properties.
-            </p>
-            <p>
-              Our activities encompass residential and investment real estate across
-              carefully selected markets, combining local perspective with a personal,
-              long-term approach.
-            </p>
+            <p> {t('mzs_estates_is_an_independent_international')} </p>
+            <p> {t('our_activities_encompass_residential_and_investment')} </p>
           </div>
         </div>
       </section>
 
       <section id="activities" className={styles.activities} aria-labelledby="estates-activities">
         <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>WHAT WE DO / 02</p>
-          <h2 id="estates-activities">Our activities.</h2>
+          <p className={styles.eyebrow}>{t('what_we_do_02')}</p>
+          <h2 id="estates-activities">{t('our_activities_2')}</h2>
         </div>
         <div className={styles.activityGrid}>
           {activities.map((item) => (
@@ -101,23 +90,23 @@ export default function RealEstatePage() {
       </section>
 
       <section id="international-reach" className={`${styles.presence} ${atmosphere.approach}`} aria-labelledby="estates-presence">
-        {<figure className={atmosphere.conversationImage}><Image src="/images/capital/mediterranean-light.webp" alt="Illustrative Mediterranean stone architecture overlooking the sea at sunset." fill sizes="(max-width: 850px) 100vw, 50vw" /><figcaption>A SENSE OF PLACE. A LONG-TERM PERSPECTIVE.</figcaption></figure>}
+        {<figure className={atmosphere.conversationImage}><Image src="/images/capital/mediterranean-light.webp" alt={t('illustrative_mediterranean_stone_architecture_overlooking_the')} fill sizes="(max-width: 850px) 100vw, 50vw" /><figcaption>{t('a_sense_of_place_a_longterm')}</figcaption></figure>}
         <div className={atmosphere.approachCopy}>
-        <p className={styles.eyebrow}>INTERNATIONAL REACH / 03</p>
+        <p className={styles.eyebrow}>{t('international_reach_03')}</p>
         <div>
-          <h2 id="estates-presence">Local knowledge.<br /><em>International outlook.</em></h2>
-          <p>Selected activity across the Netherlands, Spain and the United Arab Emirates.</p>
-          {<p className={estate.regions}>THE NETHERLANDS · SPAIN · UAE</p>}
+          <h2 id="estates-presence">{t('local_knowledge')}<br /><em>{t('international_outlook')}</em></h2>
+          <p>{t('selected_activity_across_the_netherlands_spain')}</p>
+          {<p className={estate.regions}>{t('the_netherlands_spain_uae')}</p>}
         </div>
         </div>
       </section>
 
       <IntroCallForm preview={preview} source="real-estate" sectionNumber="04" />
-      {<p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
+      {<p className={atmosphere.imageNote}>{t('illustrative_atmosphere_imagery')}</p>}
 
       <div className={styles.bottomNavigation}>
-        <Link href="/">← MZS Group</Link>
-        <Link href="/private-capital">Explore Private Capital ↗</Link>
+        <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
+        <Link href={localizedPath("/private-capital", locale)}>{t('explore_private_capital')}</Link>
       </div>
       <div className={styles.footerWrap}><HomeContactFooter email="info@mzsgroup.eu" /></div>
     </main>

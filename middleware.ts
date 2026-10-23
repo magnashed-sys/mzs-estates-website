@@ -1,8 +1,27 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {publicRoute, isLocale, localizedPath} from "./i18n/public-routing";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // A saved explicit choice applies only at the language-neutral entry point.
+  // Language-specific URLs always win; auth, API and private paths are untouched.
+  const preference = request.cookies.get("MZS_LOCALE")?.value;
+  if (pathname === "/" && isLocale(preference) && preference !== "en") {
+    const destination = request.nextUrl.clone();
+    destination.pathname = localizedPath("/", preference);
+    const redirect = NextResponse.redirect(destination, 307);
+    redirect.headers.set("Cache-Control", "private, no-store");
+    redirect.headers.set("Vary", "Cookie");
+    return redirect;
+  }
+
+  // Never trust a caller-supplied locale header on private or machine routes.
+  const forwardedHeaders = new Headers(request.headers);
+  const publicPage = publicRoute(pathname);
+  forwardedHeaders.set("x-mzs-locale", publicPage?.locale || "en");
+  const next = () => NextResponse.next({request: {headers: forwardedHeaders}});
 
   // Recovery and invitation confirmation handle their own one-time OTP and
   // cookie/session state. Do not refresh an existing session on these routes.
@@ -12,10 +31,10 @@ export async function middleware(request: NextRequest) {
     pathname === "/forgot-password" ||
     pathname === "/accept-invitation"
   ) {
-    return NextResponse.next();
+    return next();
   }
 
-  let response = NextResponse.next({ request });
+  let response = next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,7 +49,8 @@ export async function middleware(request: NextRequest) {
             request.cookies.set(name, value);
           });
 
-          response = NextResponse.next({ request });
+          forwardedHeaders.set("cookie", request.headers.get("cookie") || "");
+          response = next();
 
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);

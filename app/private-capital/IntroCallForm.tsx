@@ -1,11 +1,12 @@
 "use client";
+import {useTranslations} from 'next-intl';
 
-import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./intro-call.module.css";
 
 /** Public contact request; no account is created. */
 export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital" }: { preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" }) {
+  const t = useTranslations('Call');
   const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
     const form = event.currentTarget;
     const name = nameInput.current;
     if (name && !name.value.trim()) {
-      name.setCustomValidity("Please enter your name.");
+      name.setCustomValidity(t('please_enter_your_name'));
       name.reportValidity();
       return;
     }
@@ -47,7 +48,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
       });
       const result = await response.json();
       if (!response.ok || result.recorded !== true || typeof result.id !== "string") {
-        setError(typeof result.error === "string" ? result.error : "We could not confirm your request. Please try again.");
+        setError(response.status === 429 ? t("rateLimit") : response.status === 400 ? t("checkDetails") : response.status === 413 ? t("shortenMessage") : t("we_could_not_confirm_your_request"));
         return;
       }
       setReference(result.id);
@@ -55,7 +56,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
       requestKey.current = null;
       setSubmitted(true);
     } catch {
-      setError("We could not confirm your request. Please try again, or email info@mzsgroup.eu. Your details remain in the form.");
+      setError(t("networkError"));
     } finally { setBusy(false); }
   }
 
@@ -63,77 +64,75 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
     <section id="introductory-call" className={styles.section} aria-labelledby="intro-call-heading">
       <div className={styles.layout}>
         <div className={styles.introduction}>
-          <p className={styles.eyebrow}>A FIRST CONVERSATION / {sectionNumber}</p>
-          <h2 id="intro-call-heading">Let’s start with<br /><em>a conversation.</em></h2>
+          <p className={styles.eyebrow}>{t('a_first_conversation')} {sectionNumber}</p>
+          <h2 id="intro-call-heading">{t('lets_start_with')}<br /><em>{t('a_conversation')}</em></h2>
           <p className={styles.lead}>
-            {source === "real-estate" ? "Looking to rent, acquire or discuss a property opportunity?" : "Have a financing need, an investment interest or a potential partnership in mind?"}
-            Let’s get acquainted and explore whether there is a fit.
-          </p>
+            {source === "real-estate" ? t('looking_to_rent_acquire_or_discuss') : t('have_a_financing_need_an_investment')} {t('lets_get_acquainted_and_explore_whether')} </p>
           <div className={styles.callDetails}>
             <span className={styles.clock} aria-hidden="true">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
             </span>
-            <div><strong>A 15-minute introduction</strong><span>Private. Personal. Without obligation.</span></div>
+            <div><strong>{t('a_15minute_introduction')}</strong><span>{t('private_personal_without_obligation')}</span></div>
           </div>
           <ol className={styles.steps}>
-            <li><span aria-hidden="true">01</span><div><strong>Tell us a little about yourself</strong><p>Just your name and email to get started.</p></div></li>
-            <li><span aria-hidden="true">02</span><div><strong>Find a convenient time</strong><p>We’ll arrange your call personally by email.</p></div></li>
-            <li><span aria-hidden="true">03</span><div><strong>Explore the possibilities</strong><p>A first conversation, with no commitment.</p></div></li>
+            <li><span aria-hidden="true">01</span><div><strong>{t('tell_us_a_little_about_yourself')}</strong><p>{t('just_your_name_and_email_to')}</p></div></li>
+            <li><span aria-hidden="true">02</span><div><strong>{t('find_a_convenient_time')}</strong><p>{t('well_arrange_your_call_personally_by')}</p></div></li>
+            <li><span aria-hidden="true">03</span><div><strong>{t('explore_the_possibilities')}</strong><p>{t('a_first_conversation_with_no_commitment')}</p></div></li>
           </ol>
-          <p className={styles.noAccount}>No account or application required.</p>
+          <p className={styles.noAccount}>{t('no_account_or_application_required')}</p>
         </div>
 
         <div className={styles.formPanel}>
-          {preview && <p className={styles.previewNotice} id="intro-preview-note">Test environment · Requests are stored for testing; no emails are sent</p>}
+          {preview && <p className={styles.previewNotice} id="intro-preview-note">{t('test_environment_requests_are_stored_for')}</p>}
           {submitted ? (
             <div className={styles.confirmation} ref={confirmation} tabIndex={-1} role="status" aria-labelledby="intro-call-confirmation">
               <span className={styles.confirmationMark} aria-hidden="true">✓</span>
-              <p className={styles.eyebrow}>REQUEST RECEIVED</p>
-              <h3 id="intro-call-confirmation">Thank you for<br />reaching out.</h3>
-              <p>Thank you for your interest in {source === "real-estate" ? "MZS Estates" : "MZS Capital"}. Our team will contact you by email to arrange a convenient time for your introductory call.</p>
-              <p className={styles.confirmationNote}>Your request has been received. A call time will be agreed with you personally.</p>
-              <p className={styles.contactNote}>Reference: {reference}</p>
-              <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>Back to the form <span aria-hidden="true">↗</span></button>
+              <p className={styles.eyebrow}>{t('request_received')}</p>
+              <h3 id="intro-call-confirmation">{t('thank_you_for')}<br />{t('reaching_out')}</h3>
+              <p>{t("confirmationBody", {brand: source === "real-estate" ? "MZS Estates" : "MZS Capital"})}</p>
+              <p className={styles.confirmationNote}>{t('your_request_has_been_received_a')}</p>
+              <p className={styles.contactNote}>{t('reference')} {reference}</p>
+              <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>{t('back_to_the_form')} <span aria-hidden="true">↗</span></button>
             </div>
           ) : (
             <>
-              <h3>Request an introductory call</h3>
-              <p className={styles.formLead}>A simple first step. A personal response.</p>
-              <form onSubmit={submitRequest} onInput={() => { requestKey.current = null; }} method="post" aria-label="Introductory call request" aria-describedby={preview ? "intro-preview-note" : undefined}>
+              <h3>{t('request_an_introductory_call')}</h3>
+              <p className={styles.formLead}>{t('a_simple_first_step_a_personal')}</p>
+              <form onSubmit={submitRequest} onInput={() => { requestKey.current = null; }} method="post" aria-label={t('introductory_call_request')} aria-describedby={preview ? "intro-preview-note" : undefined}>
                 <fieldset disabled={!ready || busy} className={styles.fields}>
-                  <legend className={styles.srOnly}>Your contact details</legend>
-                  <div className={styles.srOnly} aria-hidden="true"><label>Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
+                  <legend className={styles.srOnly}>{t('your_contact_details')}</legend>
+                  <div className={styles.srOnly} aria-hidden="true"><label>{t('leave_this_field_empty')}<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
                   <div className={styles.fieldRow}>
-                    <label htmlFor="intro-name">Full name <span className={styles.required} aria-hidden="true">*</span>
-                      <input ref={nameInput} id="intro-name" name="name" autoComplete="name" placeholder="Your full name" maxLength={120} required onInput={(event) => event.currentTarget.setCustomValidity("")} />
+                    <label htmlFor="intro-name">{t('full_name')} <span className={styles.required} aria-hidden="true">*</span>
+                      <input ref={nameInput} id="intro-name" name="name" autoComplete="name" placeholder={t('your_full_name')} maxLength={120} required onInput={(event) => event.currentTarget.setCustomValidity("")} />
                     </label>
-                    <label htmlFor="intro-email">Email address <span className={styles.required} aria-hidden="true">*</span>
-                      <input id="intro-email" name="email" type="email" autoComplete="email" placeholder="you@example.com" maxLength={254} required />
+                    <label htmlFor="intro-email">{t('email_address')} <span className={styles.required} aria-hidden="true">*</span>
+                      <input id="intro-email" name="email" type="email" autoComplete="email" placeholder={t('youexamplecom')} maxLength={254} required />
                     </label>
                   </div>
-                  <label htmlFor="intro-phone">Phone number <span className={styles.optional}>(optional)</span>
-                    <input id="intro-phone" name="phone" type="tel" autoComplete="tel" placeholder="Including country code" maxLength={40} />
+                  <label htmlFor="intro-phone">{t('phone_number')} <span className={styles.optional}>{t('optional')}</span>
+                    <input id="intro-phone" name="phone" type="tel" autoComplete="tel" placeholder={t('including_country_code')} maxLength={40} />
                   </label>
-                  <label htmlFor="intro-message">What would you like to discuss? <span className={styles.optional}>(optional)</span>
-                    <textarea id="intro-message" name="message" rows={3} maxLength={1000} placeholder="A short introduction, or a convenient time to reach you…" />
+                  <label htmlFor="intro-message">{t('what_would_you_like_to_discuss')} <span className={styles.optional}>{t('optional')}</span>
+                    <textarea id="intro-message" name="message" rows={3} maxLength={1000} placeholder={t('a_short_introduction_or_a_convenient')} />
                   </label>
-                  <p className={styles.contactNote}>We’ll use your contact details to arrange this conversation. No account is created.</p>
-                  <details className={styles.contactNote}><summary>How we use your details</summary><p>MZS Group stores the details you provide to respond to your enquiry and arrange your call. Access is limited to authorised administrators. This does not subscribe you to marketing. To ask about your information or request its deletion, contact <a href="mailto:info@mzsgroup.eu">info@mzsgroup.eu</a>.</p></details>
+                  <p className={styles.contactNote}>{t('well_use_your_contact_details_to')}</p>
+                  <details className={styles.contactNote}><summary>{t('how_we_use_your_details')}</summary><p>{t('mzs_group_stores_the_details_you')} <a href="mailto:info@mzsgroup.eu">{t('infomzsgroupeu')}</a>.</p></details>
                   {error && <p role="alert" className={styles.error}>{error}</p>}
-                  <button className={styles.submitButton} type="submit" disabled={busy}>{busy ? "Sending your request…" : "Request an introductory call"} <span aria-hidden="true">↗</span></button>
-                  <p className={styles.requiredNote}>* Required fields</p>
+                  <button className={styles.submitButton} type="submit" disabled={busy}>{busy ? t('sending_your_request') : t('request_an_introductory_call')} <span aria-hidden="true">↗</span></button>
+                  <p className={styles.requiredNote}>{t('required_fields')}</p>
                 </fieldset>
-                <noscript><p className={styles.contactNote}>Please enable JavaScript to use this form, or email info@mzsgroup.eu to request a call.</p></noscript>
+                <noscript><p className={styles.contactNote}>{t('please_enable_javascript_to_use_this')}</p></noscript>
               </form>
             </>
           )}
         </div>
       </div>
       <div className={styles.memberAccess}>
-        <p>Already part of our network?</p>
-        <div><Link href="/login">Client & Partner Login <span aria-hidden="true">↗</span></Link><Link href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link></div>
+        <p>{t('already_part_of_our_network')}</p>
+        <div><a href="/login">{t('client_partner_login')} <span aria-hidden="true">↗</span></a><a href="/request-access">{t('request_private_access')} <span aria-hidden="true">↗</span></a></div>
       </div>
-      <p className={styles.disclaimer}>Information on this page is introductory only and does not constitute a public offer of securities, investment advice or a financing commitment.</p>
+      <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>
     </section>
   );
 }

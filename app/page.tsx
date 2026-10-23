@@ -1,9 +1,13 @@
+import {publicMetadata} from "../i18n/metadata";
+export const generateMetadata = () => publicMetadata("home", "/");
+import {getTranslations} from 'next-intl/server';
 import PublicHeader from "./components/PublicHeader";
 import HomeContactFooter from "./components/HomeContactFooter";
 import polish from "./homepage-polish.module.css";
 import "./homepage-refinements.css";
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations('Home');
   return (
     <main className={`mzs-home mzs-home-image mzs-home-refined ${polish.home}`}>
       <PublicHeader />
@@ -19,15 +23,9 @@ export default function Home() {
 
         <div className="mzs-separator" aria-hidden="true" />
 
-        <p className="mzs-intro">
-          MZS Group is an independent international real estate and investment
-          group, providing selected clients and partners with access to private
-          opportunities across Europe and the UAE.
-        </p>
+        <p className="mzs-intro"> {t('mzs_group_is_an_independent_international')} </p>
 
-        <p className="mzs-selective">
-          New relationships are considered on a selective basis.
-        </p>
+        <p className="mzs-selective"> {t('new_relationships_are_considered_on_a')} </p>
       </section>
 
       <HomeContactFooter email="info@mzsgroup.eu" />

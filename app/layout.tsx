@@ -1,3 +1,5 @@
+import {NextIntlClientProvider} from "next-intl";
+import {getLocale, getMessages} from "next-intl/server";
 import type { Metadata } from "next";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
@@ -24,8 +26,8 @@ export const metadata: Metadata = {
   },
 
   robots: {
-    index: true,
-    follow: true,
+    index: process.env.VERCEL_ENV === "production",
+    follow: process.env.VERCEL_ENV === "production",
   },
 
   openGraph: {
@@ -51,15 +53,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const all = await getMessages();
+  const messages = {Header: all.Header, Footer: all.Footer, Call: all.Call, Language: all.Language};
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>
         <PublicWebAnalytics />
       </body>
     </html>

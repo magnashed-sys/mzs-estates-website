@@ -102,3 +102,23 @@
 @media (prefers-reduced-motion: reduce) {
   .header .navLink,.header .dashboardLink {transition:none;}
 }
+
+/* Compact language navigation keeps the existing logo and menu hierarchy. */
+.navigationRegion {gap:20px;}
+.languages {display:flex;align-items:center;gap:3px;flex-shrink:0;}
+.languages a {display:grid;place-items:center;min-width:34px;min-height:44px;
+  color:#bdb7ad;text-decoration:none;font:500 10px/1 Arial,Helvetica,sans-serif;letter-spacing:.08em;
+  border-bottom:1px solid transparent;}
+.languages a[aria-current="page"] {color:#e4cfaa;border-bottom-color:#d5c09a;}
+.languages a:hover {color:#fff;}
+.languages a:focus-visible {outline:2px solid #d5c09a;outline-offset:2px;}
+@media (max-width:1250px) {
+ .desktopNavigation {display:none;}
+ .mobileNavigation {display:block;}
+}
+@media (max-width:480px) {
+ .navigationRegion {gap:8px;}
+ .languages {gap:0;}
+ .languages a {min-width:29px;}
+ .menuToggle {gap:7px;padding:7px;letter-spacing:.07em;}
+}

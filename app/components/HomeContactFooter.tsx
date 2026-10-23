@@ -1,3 +1,5 @@
+"use client";
+import {useTranslations} from 'next-intl';
 import styles from "./HomeContactFooter.module.css";
 
 // Prepared component only: do not wire into app/page.tsx until the homepage
@@ -5,6 +7,7 @@ import styles from "./HomeContactFooter.module.css";
 type Props = { email: string };
 
 export default function HomeContactFooter({ email }: Props) {
+  const t = useTranslations('Footer');
   const address = email.trim();
   if (!/^[^\s@?:]+@[^\s@?:]+\.[^\s@?:]+$/.test(address)) {
     throw new Error("Configure the confirmed public MZS contact email.");
@@ -12,10 +15,10 @@ export default function HomeContactFooter({ email }: Props) {
   return (
     <footer className={styles.footer}>
       <span className={styles.locations}>AMSTERDAM · IBIZA · DUBAI</span>
-      <a className={styles.contact} href={`mailto:${address}`} aria-label={`Contact MZS Group by email: ${address}`}>
-        <span>Contact MZS</span><span aria-hidden="true">↗</span>
+      <a className={styles.contact} href={`mailto:${address}`} aria-label={t("contactEmail", {address})}>
+        <span>{t('contact_mzs')}</span><span aria-hidden="true">↗</span>
       </a>
-      <span className={styles.invitation}>PRIVATE ACCESS</span>
+      <span className={styles.invitation}>{t('private_access')}</span>
     </footer>
   );
 }
