@@ -1,6 +1,6 @@
-# Rental change notifications — Staging review
+# Rental change notifications — validation and release
 
-Implemented on `feature/rental-admin-client-notifications`, based on main `79c77da` (PR #33). Production is not authorised. Draft PR: https://github.com/magnashed-sys/mzs-estates-website/pull/35
+Implemented on `feature/rental-admin-client-notifications`, based on PR #33 and integrated with main `aaeba059` (PR #34). PR: https://github.com/magnashed-sys/mzs-estates-website/pull/35. The owner approved both notification previews and the dashboard workflow, then explicitly authorised Production release on 23 October 2026.
 
 ## Behaviour
 
@@ -24,7 +24,7 @@ The original admin mutation RPCs, validation, price calculation, availability ex
 
 Preview must use `https://senonkpxdtlhyhrubicg.supabase.co`, `MZS_RENTAL_NOTIFICATIONS_ENABLED=true`, `MZS_RENTAL_MAIL_MODE=capture`, and a valid Preview deployment hostname. Capture uses Nodemailer's in-memory stream transport and cannot connect to SMTP even if SMTP credentials are inherited. Other application mail remains blocked by the branch-specific `MZS_SMTP_PORT=0`; registration is disabled on this branch.
 
-Production mail requires all three: Production Vercel environment, the Production database URL, and explicit `smtp` mode plus the enable flag. No Production configuration, migration, merge or deployment was performed.
+Production mail requires all three: Production Vercel environment, the Production database URL, and explicit `smtp` mode plus the enable flag. Release order: validate the combined main/feature revision, apply the additive migration to Production without a backfill, set the two Production-only feature variables, merge PR #35, and verify the Production deployment and access controls. Existing SMTP and Supabase credentials are reused. Record the deployed revision and final checks in PR #35. The previous Production deployment is `dpl_3a2TTddd3GJNPPj7LmcGS39XK8s6` (`aaeba059`) for rollback; retain the additive outbox and any queued events if a rollback becomes necessary.
 
 **Credential blocker resolved on 23 October 2026:** the owner replaced the branch-scoped `SUPABASE_SERVICE_ROLE_KEY` in Vercel. A fresh Preview deployment accepts both Staging keys. The key remains a server-only Secret scoped exclusively to this feature branch's Preview environment; it was not copied into source code or chat.
 
@@ -42,7 +42,7 @@ Production mail requires all three: Production Vercel environment, the Productio
 - Anonymous users received HTTP 401; clients and inactive administrators received 403. Foreign-origin mutations were rejected with 403 and the cron endpoint rejected calls without its secret with 401. The scheduled invocation with the actual cron secret was not exercised.
 - Captured HTML was visually reviewed in Chrome at desktop and 375-pixel iframe widths: readable light text, gold labels, current booking details, wrapping references and clear cancellation language. This is browser rendering of the exact captured HTML, not a test in external email clients.
 - Cleanup confirmed zero remaining synthetic users, project, booking and outbox records. Resolution and booking-audit fixtures were removed before their parent records, and the disposable Sandbox was stopped.
-- Remaining acceptance: owner review of the dashboard interaction and email appearance. The signed-in dashboard click flow was not automated; the actual deployed endpoints were exercised with authenticated sessions. No real guest emails or external inbox-delivery test were performed. SMTP failure classifications remain covered by the local Nodemailer integration tests.
+- Owner acceptance completed on 23 October 2026: the owner exercised the Staging dashboard and approved the update and cancellation email appearance. The signed-in dashboard click flow was not automated; the actual deployed endpoints were exercised with authenticated sessions. No real guest emails or external inbox-delivery test were performed. SMTP failure classifications remain covered by the local Nodemailer integration tests. The separate owner demonstration fixture remains in isolated Staging.
 
 ## Owner acceptance in Preview
 
@@ -50,4 +50,4 @@ Production mail requires all three: Production Vercel environment, the Productio
 2. In Bookings, use only a fictitious future confirmed Staging reservation. Records marked `is_test=true` intentionally do not generate client notifications.
 3. Edit dates or guest count. Expand **Client notification status** and open **Preview email** to review the captured message and intended recipient. Capture mode does not deliver to an inbox.
 4. Change only internal notes, then cancel with a reason. Verify that the notes-only edit adds no email and the cancellation preview clearly invalidates the reservation without exposing the reason.
-5. Keep this PR Draft until owner acceptance is complete. Production requires separate explicit approval, followed by its migration/environment configuration and a controlled delivery check.
+5. Owner acceptance and separate Production approval are complete. After deployment, inspect delivery states during the next authorised real booking change; `accepted` confirms SMTP acceptance only. Do not mutate an existing real booking solely as a deployment test.

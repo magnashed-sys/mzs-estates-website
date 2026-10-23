@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const js=ts.transpileModule(readFileSync(new URL('../lib/mzs/intro-calls.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+const exports={}; vm.runInNewContext(js,{exports,process:{env:{}}});
+const valid={requestKey:'3895f2ce-6ffd-4426-b551-043663dcdd17',name:' Visitor ',email:'VISITOR@example.invalid'};
+test('Normalizes contact details and allows omitted optional fields',()=>{const v=exports.parseIntroCall(valid);assert.equal(v.name,'Visitor');assert.equal(v.email,'visitor@example.invalid');assert.equal(v.phone,'');assert.equal(v.message,'')});
+test('Rejects malformed, excessive and header-injected input',()=>{for(const v of [null,[],{}, {...valid,requestKey:'bad'},{...valid,name:' '},{...valid,email:'a@b'},{...valid,email:'a@example.com\r\nBcc:x@example.com'},{...valid,name:'x'.repeat(121)},{...valid,message:'x'.repeat(1001)},{...valid,phone:42}])assert.equal(exports.parseIntroCall(v),null)});
+test('Accepts only matched deployment and database environments',()=>{for(const env of ['preview','production','development'])for(const url of ['https://senonkpxdtlhyhrubicg.supabase.co','https://ptrnjzmcehrhbsfxntgw.supabase.co','wrong']){const e={};vm.runInNewContext(js,{exports:e,process:{env:{VERCEL_ENV:env,NEXT_PUBLIC_SUPABASE_URL:url}}});assert.equal(e.introCallsEnvironmentAllowed(),(env==='preview'&&url.includes('senonk'))||(env==='production'&&url.includes('ptrnj'))) }});
