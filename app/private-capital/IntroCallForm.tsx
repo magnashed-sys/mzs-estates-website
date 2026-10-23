@@ -5,7 +5,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./intro-call.module.css";
 
 /** Public contact request; no account is created. */
-export default function IntroCallForm({ preview = false }: { preview?: boolean }) {
+export default function IntroCallForm({ preview = false, sectionNumber = "04" }: { preview?: boolean; sectionNumber?: string }) {
   const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -63,7 +63,7 @@ export default function IntroCallForm({ preview = false }: { preview?: boolean }
     <section id="introductory-call" className={styles.section} aria-labelledby="intro-call-heading">
       <div className={styles.layout}>
         <div className={styles.introduction}>
-          <p className={styles.eyebrow}>A FIRST CONVERSATION / 04</p>
+          <p className={styles.eyebrow}>A FIRST CONVERSATION / {sectionNumber}</p>
           <h2 id="intro-call-heading">Let’s start with<br /><em>a conversation.</em></h2>
           <p className={styles.lead}>
             Have a financing need, an investment interest or a potential partnership in mind?
