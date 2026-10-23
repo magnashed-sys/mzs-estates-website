@@ -26,7 +26,7 @@ Preview must use `https://senonkpxdtlhyhrubicg.supabase.co`, `MZS_RENTAL_NOTIFIC
 
 Production mail requires all three: Production Vercel environment, the Production database URL, and explicit `smtp` mode plus the enable flag. No Production configuration, migration, merge or deployment was performed.
 
-**Remaining blocker:** the branch-scoped `SUPABASE_SERVICE_ROLE_KEY` currently contains the disabled placeholder used in an earlier photo Preview. A valid key from **MZS Staging only** must be configured as a server secret for this feature branch, followed by redeployment. Do not paste it in chat, put it in source code or use a Production key. The Supabase connector can run SQL and provide public keys, but does not expose a server-key provisioning operation.
+**Credential blocker resolved on 23 October 2026:** the owner replaced the branch-scoped `SUPABASE_SERVICE_ROLE_KEY` in Vercel. A fresh Preview deployment accepts both Staging keys. The key remains a server-only Secret scoped exclusively to this feature branch's Preview environment; it was not copied into source code or chat.
 
 ## Evidence and limits
 
@@ -34,15 +34,20 @@ Production mail requires all three: Production Vercel environment, the Productio
 - `npm run build` and `npm run typecheck` passed. Build retains pre-existing CSS compatibility warnings outside this change.
 - The additive migration was applied only to MZS Staging. `supabase/tests/rental_change_notifications.sql` passed there and in a minimal local PostgreSQL/PGlite rehearsal. Tests check repricing, unchanged audit, pending/notes-only/no-op suppression, cancellation, correct recipient, stale edits, anonymous/client/inactive-admin denial, exclusive claims, expired work, manual resolution and supersession. All fixtures are rolled back; zero QA users, outbox events and resolution rows remained after testing.
 - Advisor findings on the two new tables are intentional: RLS enabled, no end-user policies, service-only grants. The explicitly authenticated resolution RPC is a security definer with an active-admin check and empty search path; anonymous access is revoked. Existing unrelated Staging advisor findings were not changed.
-- Preview build `dpl_7k6gzsW3d2nd47vj8xH7pA37WQJB`, code commit `f84c67086618781857b0ee1b8e46850313a10638`, is READY: https://mzs-group-bzgvx7bxl-mzs3.vercel.app
-- Full authenticated browser → API → Staging → captured email verification and visual acceptance are **not complete**, because of the server-key blocker. No real guest emails or external inbox-delivery test were performed.
+- Verified Preview build `dpl_2jpWVv31vcKk2VT1mQ944rh98XSo`, commit `b42eeef62ba1e23f9cedbfd0f39f22e074915453`: https://mzs-group-64yyslukb-mzs3.vercel.app . `/api/staging/readiness` returned HTTP 200 with `isolatedStagingDatabase`, `publicKeyAccepted`, `serviceKeyAccepted` and `readyForIsolatedTesting` all true.
+- Authenticated deployed API → Staging → captured email tests passed on 23 October 2026. Temporary admin, client and inactive-admin fixtures authenticated through Supabase Auth; no server key was copied out of Vercel. A disposable Vercel Sandbox ran the tests with network access restricted to this Preview and MZS Staging.
+- A confirmed synthetic booking changed from seven nights/two guests/€2,100 to eight nights/four guests/€2,400, keeping its €300 nightly rate. The stored audit was retained. Exactly one update was captured for the actual Auth email; an injected browser recipient was ignored. Identical edits and notes-only edits created no extra mail; stale edits were rejected.
+- Cancellation required a reason, retained the booking and audit, and released the occupied dates. Its captured email explicitly invalidated the earlier confirmation and omitted both the cancellation reason and internal notes. Repeated cancellation was rejected without another event.
+- An intentionally mismatched synthetic recipient failed with `recipient_requires_review` and did not retry automatically. Recovery required verified logs and a reason. Two concurrent dispatch requests then returned exactly one `captured` and one `none`. An injected expired claim became `uncertain`, stayed unsent on repeated dispatch, and required explicit audited resolution. The saved booking change survived these failures.
+- Anonymous users received HTTP 401; clients and inactive administrators received 403. Foreign-origin mutations were rejected with 403 and the cron endpoint rejected calls without its secret with 401. The scheduled invocation with the actual cron secret was not exercised.
+- Captured HTML was visually reviewed in Chrome at desktop and 375-pixel iframe widths: readable light text, gold labels, current booking details, wrapping references and clear cancellation language. This is browser rendering of the exact captured HTML, not a test in external email clients.
+- Cleanup confirmed zero remaining synthetic users, project, booking and outbox records. Resolution and booking-audit fixtures were removed before their parent records, and the disposable Sandbox was stopped.
+- Remaining acceptance: owner review of the dashboard interaction and email appearance. The signed-in dashboard click flow was not automated; the actual deployed endpoints were exercised with authenticated sessions. No real guest emails or external inbox-delivery test were performed. SMTP failure classifications remain covered by the local Nodemailer integration tests.
 
-## Resume after the Staging key is set
+## Owner acceptance in Preview
 
-1. Redeploy this feature branch only; verify `/api/staging/readiness` accepts both Staging keys.
-2. Create synthetic Staging admin/client and a future confirmed booking; never reuse actual client bookings.
-3. Edit dates/guest count and verify the changed quote, unchanged nightly calculation, one audit row and one captured email to the synthetic client. Review desktop/mobile email appearance.
-4. Repeat identical edits and notes-only edits: no new email. Exercise concurrent dispatch and verify one capture.
-5. Cancel and verify invalidation language, released dates, retained booking/audit and no leaked reason.
-6. Exercise recipient mismatch, a definite send rejection, ambiguous outcome and log-verified recovery. Check endpoint authorisation, origin protection and the cron secret.
-7. Remove only the synthetic fixture records and accounts. Keep this PR Draft until acceptance is complete. Production requires separate explicit owner approval.
+1. Open the verified Preview and sign in with a Staging administrator account.
+2. In Bookings, use only a fictitious future confirmed Staging reservation. Records marked `is_test=true` intentionally do not generate client notifications.
+3. Edit dates or guest count. Expand **Client notification status** and open **Preview email** to review the captured message and intended recipient. Capture mode does not deliver to an inbox.
+4. Change only internal notes, then cancel with a reason. Verify that the notes-only edit adds no email and the cancellation preview clearly invalidates the reservation without exposing the reason.
+5. Keep this PR Draft until owner acceptance is complete. Production requires separate explicit approval, followed by its migration/environment configuration and a controlled delivery check.
