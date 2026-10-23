@@ -5,7 +5,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./intro-call.module.css";
 
 /** Public contact request; no account is created. */
-export default function IntroCallForm({ preview = false, sectionNumber = "04" }: { preview?: boolean; sectionNumber?: string }) {
+export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital" }: { preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" }) {
   const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -42,7 +42,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04" }:
     try {
       const response = await fetch("/api/intro-calls", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestKey: requestKey.current, name: fields.get("name"), email: fields.get("email"), phone: fields.get("phone"), message: fields.get("message"), website: fields.get("website") }),
+        body: JSON.stringify({ requestKey: requestKey.current, source, name: fields.get("name"), email: fields.get("email"), phone: fields.get("phone"), message: fields.get("message"), website: fields.get("website") }),
         signal: AbortSignal.timeout(25000),
       });
       const result = await response.json();
@@ -66,7 +66,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04" }:
           <p className={styles.eyebrow}>A FIRST CONVERSATION / {sectionNumber}</p>
           <h2 id="intro-call-heading">Let’s start with<br /><em>a conversation.</em></h2>
           <p className={styles.lead}>
-            Have a financing need, an investment interest or a potential partnership in mind?
+            {source === "real-estate" ? "Looking to rent, acquire or discuss a property opportunity?" : "Have a financing need, an investment interest or a potential partnership in mind?"}
             Let’s get acquainted and explore whether there is a fit.
           </p>
           <div className={styles.callDetails}>
@@ -90,7 +90,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04" }:
               <span className={styles.confirmationMark} aria-hidden="true">✓</span>
               <p className={styles.eyebrow}>REQUEST RECEIVED</p>
               <h3 id="intro-call-confirmation">Thank you for<br />reaching out.</h3>
-              <p>Thank you for your interest in MZS Capital. Our team will contact you by email to arrange a convenient time for your introductory call.</p>
+              <p>Thank you for your interest in {source === "real-estate" ? "MZS Estates" : "MZS Capital"}. Our team will contact you by email to arrange a convenient time for your introductory call.</p>
               <p className={styles.confirmationNote}>Your request has been received. A call time will be agreed with you personally.</p>
               <p className={styles.contactNote}>Reference: {reference}</p>
               <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>Back to the form <span aria-hidden="true">↗</span></button>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import IntroCallForm from "../private-capital/IntroCallForm";
 import atmosphere from "../private-capital/atmosphere.module.css";
 import estate from "./atmosphere.module.css";
 import PublicHeader from "../components/PublicHeader";
@@ -58,7 +59,7 @@ export default function RealEstatePage() {
             <a href="#estates-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
             <a href="#activities">Our Activities <span aria-hidden="true">↗</span></a>
             <a href="#international-reach">International Reach <span aria-hidden="true">↗</span></a>
-            <a href="#private-access">Private Access <span aria-hidden="true">↗</span></a>
+            <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
           </nav> : <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
             <a className={styles.quietAction} href="#activities">Explore Our Activities <span aria-hidden="true">↓</span></a>
@@ -114,21 +115,7 @@ export default function RealEstatePage() {
         </div>
       </section>
 
-      {preview ? <section id="private-access" className={estate.access} aria-labelledby="estates-access-heading">
-        <div>
-          <p className={styles.eyebrow}>PRIVATE ACCESS / 04</p>
-          <h2 id="estates-access-heading">A more private way<br /><em>to explore property.</em></h2>
-          <p className={estate.lead}>Detailed presentations and selected opportunities are shared with authorized clients and partners through our secure private platform.</p>
-          <p className={estate.personal}>Private. Personal. By invitation.</p>
-        </div>
-        <div className={estate.accessPanel}>
-          <h3>Your private collection.</h3>
-          <p>Sign in to explore the properties and opportunities selected for you. New to MZS Estates? Request access to start a personal introduction.</p>
-          <Link className={estate.accessButton} href="/login">Client & Partner Login <span aria-hidden="true">↗</span></Link>
-          <Link className={estate.requestLink} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
-          <p className={estate.note}>Access is reviewed individually for selected clients and partners.</p>
-        </div>
-      </section> : <section className={styles.invitation} aria-labelledby="estates-invitation">
+      {preview ? <IntroCallForm preview source="real-estate" sectionNumber="04" /> : <section className={styles.invitation} aria-labelledby="estates-invitation">
         <p className={styles.eyebrow}>PERSONAL & CONFIDENTIAL</p>
         <h2 id="estates-invitation">A more private way<br />to explore property.</h2>
         <p>
