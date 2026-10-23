@@ -1,13 +1,18 @@
 "use client";
-import {useEffect, useRef} from 'react';
-import {useTranslations} from 'next-intl';
+import {useEffect, useRef, useState} from 'react';
+import {useLocale, useTranslations} from 'next-intl';
 import {usePathname} from 'next/navigation';
 import {locales, publicRoute, localizedPath} from '../../i18n/public-routing';
+import {createClient} from '../../lib/supabase/client';
+import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({account = false}: {account?: boolean}) {
+  const currentLocale = useLocale();
+  const [busy, setBusy] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const pathname = usePathname();
-  const route = publicRoute(pathname);
+  const route = account ? {locale: currentLocale, path: pathname} : publicRoute(pathname);
   const t = useTranslations('Language');
   const disclosure = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -44,7 +49,20 @@ export default function LanguageSwitcher() {
     {locales.map(locale => <a key={locale} href={localizedPath(route.path, locale)}
       hrefLang={locale} lang={locale} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
-      onClick={event => {
+      aria-disabled={busy || undefined}
+      onClick={async event => {
+        if (account) {
+          event.preventDefault();
+          if (busy) return;
+          setBusy(true); setSaveError(false);
+          try {
+            const {error} = await createClient().auth.updateUser({data: {preferred_language: locale}});
+            if (error) throw error;
+            rememberLocale(locale);
+            location.assign(pathname + location.search + location.hash);
+          } catch {setSaveError(true); setBusy(false);}
+          return;
+        }
         // Use a document navigation so the root HTML language changes immediately.
         document.cookie = `MZS_LOCALE=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
         if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
@@ -53,6 +71,8 @@ export default function LanguageSwitcher() {
         }
       }}><span>{{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
+      {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
+      {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}
     </nav>
   </details>;
 }

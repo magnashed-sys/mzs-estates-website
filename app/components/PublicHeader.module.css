@@ -129,3 +129,5 @@
  .navigationRegion {gap:8px;}
  .menuToggle {gap:7px;padding:7px;letter-spacing:.07em;}
 }
+
+.languageStatus {max-width:220px;padding:8px 12px;color:#e4cfaa;font:12px/1.5 Arial,sans-serif;}

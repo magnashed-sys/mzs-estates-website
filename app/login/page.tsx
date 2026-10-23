@@ -5,13 +5,14 @@ import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
+import {useLocale, useTranslations} from "next-intl";
+import {rememberLocale} from "../../i18n/client-preference";
 import recoveryStyles from "../account-recovery.module.css";
-import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const t = useTranslations("Login");
+  const locale = useLocale();
   const background = "/images/client-login-bg.webp";
 
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ export default function LoginPage() {
         });
 
       if (authError || !data.user) {
-        setError("Invalid email or password.");
+        setError(t('invalid'));
         return;
       }
 
@@ -49,7 +50,7 @@ export default function LoginPage() {
       if (profileError || !profile) {
         await supabase.auth.signOut();
         setError(
-          "Unable to verify your account. Please contact MZS Group."
+          t('verify')
         );
         return;
       }
@@ -57,14 +58,16 @@ export default function LoginPage() {
       if (!profile.is_active) {
         await supabase.auth.signOut();
         setError(
-          "Your account is currently inactive. Please contact MZS Group."
+          t('inactive')
         );
         return;
       }
 
+      rememberLocale(locale);
+
       switch (profile.role) {
         case "admin":
-          router.replace("/admin");
+          window.location.replace("/admin");
           break;
         case "client":
         case "partner": {
@@ -76,21 +79,21 @@ export default function LoginPage() {
             "mzs_has_department_scope",
             { p_department: "capital" }
           );
-          router.replace(!scopeError && capitalScope === true
+          window.location.replace(!scopeError && capitalScope === true
             ? "/admin/group/capital"
             : "/private");
           break;
         }
         default:
           await supabase.auth.signOut();
-          setError("Your account does not have a valid access role.");
+          setError(t('role'));
           return;
       }
 
-      router.refresh();
+
     } catch (err) {
       console.error("Login error:", err);
-      setError("Unable to sign in at this time. Please try again.");
+      setError(t('failed'));
     } finally {
       setLoading(false);
     }
@@ -127,10 +130,10 @@ export default function LoginPage() {
         className="login-container"
         style={{ position: "relative" }}
       >
-        <p className="eyebrow">Private Access</p>
-        <h1 className={styles.loginTitle}>Client &amp; Partner Login</h1>
+        <p className="eyebrow">{t("private_access")}</p>
+        <h1 className={styles.loginTitle}>{t("title")}</h1>
         <p className="login-intro">
-          Access your private MZS environment.
+          {t("intro")}
         </p>
 
         <form
@@ -139,7 +142,7 @@ export default function LoginPage() {
           aria-busy={loading}
         >
           <label>
-            Email
+            {t("email")}
             <input
               type="email"
               name="email"
@@ -152,7 +155,7 @@ export default function LoginPage() {
           </label>
 
           <label>
-            Password
+            {t("password")}
             <input
               type="password"
               name="password"
@@ -165,12 +168,12 @@ export default function LoginPage() {
           </label>
 
           <div className={recoveryStyles.forgotLinkRow}>
-            <Link
+            <a
               href="/forgot-password"
               className={recoveryStyles.textLink}
             >
-              Forgot your password? →
-            </Link>
+              {t("forgot")} →
+            </a>
           </div>
 
           {error && (
@@ -180,12 +183,12 @@ export default function LoginPage() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "Signing in..." : "Login →"}
+            {loading ? t("signing_in") : t("login") + " →"}
           </button>
         </form>
 
         <p className="login-note">
-          Access is available to selected MZS clients and partners only.
+          {t("note")}
         </p>
       </section>
 

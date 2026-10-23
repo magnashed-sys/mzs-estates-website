@@ -7,17 +7,18 @@ import {createTranslator} from 'next-intl';
 const code = ts.transpileModule(readFileSync(new URL('../i18n/public-routing.ts', import.meta.url), 'utf8'), {compilerOptions: {module: ts.ModuleKind.CommonJS}}).outputText;
 const routing = {}; vm.runInNewContext(code, {exports: routing});
 const catalogs = Object.fromEntries(['en', 'nl', 'es'].map(locale => [locale, JSON.parse(readFileSync(new URL(`../messages/${locale}.json`, import.meta.url)))]));
-test('Only the nine public language routes are localized; private and machine routes stay excluded', () => {
-  for (const locale of routing.locales) for (const path of routing.publicPaths) {
+test('Marketing and login routes are localized; private and machine route aliases stay excluded', () => {
+  for (const locale of routing.locales) for (const path of routing.localizedPaths) {
     const result = routing.publicRoute(routing.localizedPath(path, locale));
     assert.equal(result.locale, locale); assert.equal(result.path, path);
   }
-  for (const path of ['/login', '/admin', '/private', '/auth/confirm', '/api/intro-calls', '/api/rental/notifications/dispatch', '/reset-password', '/nl/private', '/es/admin', '/nl/login', '/fr', '/es/api/intro-calls', '/nl/real-estate/extra']) assert.equal(routing.publicRoute(path), null);
+  for (const path of ['/admin', '/private', '/auth/confirm', '/api/intro-calls', '/api/rental/notifications/dispatch', '/reset-password', '/nl/private', '/es/admin', '/fr', '/es/api/intro-calls', '/nl/real-estate/extra']) assert.equal(routing.publicRoute(path), null);
 });
 test('Locale links preserve existing English URLs and never create private aliases', () => {
   assert.equal(routing.localizedPath('/real-estate', 'en'), '/real-estate');
   assert.equal(routing.localizedPath('/', 'nl'), '/nl');
-  for (const path of ['/login', '/private', '/api/intro-calls']) assert.equal(routing.localizedPath(path, 'es'), path);
+  for (const path of ['/private', '/api/intro-calls']) assert.equal(routing.localizedPath(path, 'es'), path);
+  assert.equal(routing.localizedPath('/login', 'es'), '/es/login');
   assert.equal(routing.languageAlternates('/private-capital')['x-default'], '/private-capital');
 });
 test('All translation catalogues are complete and every ICU message renders without errors', () => {
@@ -29,7 +30,7 @@ test('All translation catalogues are complete and every ICU message renders with
       assert.deepEqual(Object.keys(messages[namespace]).sort(), Object.keys(values).sort());
       for (const key of Object.keys(values)) {
         assert.ok(messages[namespace][key].trim());
-        const rendered = t(`${namespace}.${key}`, {brand: 'MZS Estates', address: 'test@example.invalid'});
+        const rendered = t(`${namespace}.${key}`, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference'});
         assert.ok(rendered.length > 0);
       }
     }

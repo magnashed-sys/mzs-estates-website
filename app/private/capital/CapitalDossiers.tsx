@@ -1,9 +1,12 @@
-'use client';
+"use client";
+import {useTranslations, useLocale} from "next-intl";
+
 import {useEffect,useState} from 'react';
 import {createClient} from '../../../lib/supabase/client';
 import SummaryCards,{type Summary} from './SummaryCards';
 import s from './summary.module.css';
 export default function CapitalDossiers(){
+ const t = useTranslations("CapitalUI");
  const [items,setItems]=useState<Summary[]>([]);
  const [state,setState]=useState<'loading'|'ready'|'error'>('loading');
  useEffect(()=>{
@@ -24,7 +27,7 @@ export default function CapitalDossiers(){
   return ()=>{live=false;subscription.unsubscribe();};
  },[]);
  return <section aria-labelledby="capital-dossiers-heading" aria-busy={state==='loading'}>
-  <p className={s.eyebrow}>YOUR PRIVATE DOSSIERS</p><h2 id="capital-dossiers-heading">Your Capital dossiers</h2>
-  {state==='loading'?<p className={s.note} role="status">Loading your dossiers…</p>:state==='error'?<p className={s.note} role="alert">Your dossiers could not be loaded. Please refresh the page to try again.</p>:items.length?<SummaryCards items={items}/>:<p className={s.note}>No loan dossiers have been shared with you yet.</p>}
+  <p className={s.eyebrow}>{t("private_dossiers")}</p><h2 id="capital-dossiers-heading">{t("dossiers")}</h2>
+  {state==='loading'?<p className={s.note} role="status">{t("loading")}</p>:state==='error'?<p className={s.note} role="alert">{t("load_error")}</p>:items.length?<SummaryCards items={items}/>:<p className={s.note}>{t("no_dossiers")}</p>}
  </section>;
 }
