@@ -2,7 +2,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {useLocale, useTranslations} from 'next-intl';
 import {usePathname} from 'next/navigation';
-import {locales, publicRoute, localizedPath} from '../../i18n/public-routing';
+import {locales, publicRoute, localizedPath, isAccountPath} from '../../i18n/public-routing';
 import {createClient} from '../../lib/supabase/client';
 import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
@@ -12,7 +12,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const pathname = usePathname();
-  const route = account ? {locale: currentLocale, path: pathname} : publicRoute(pathname);
+  const route = account || isAccountPath(pathname) ? {locale: currentLocale, path: pathname} : publicRoute(pathname);
   const t = useTranslations('Language');
   const disclosure = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
             const {error} = await createClient().auth.updateUser({data: {preferred_language: locale}});
             if (error) throw error;
             rememberLocale(locale);
-            location.assign(pathname + location.search + location.hash);
+            location.reload();
           } catch {setSaveError(true); setBusy(false);}
           return;
         }
@@ -67,7 +67,10 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
         document.cookie = `MZS_LOCALE=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
         if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
           event.preventDefault();
-          location.assign(localizedPath(route.path, locale) + location.hash);
+          // A same-URL navigation with a fragment can skip the document reload.
+          // Neutral account routes need a reload to apply the new server-side locale.
+          if (isAccountPath(pathname)) location.reload();
+          else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
       }}><span>{{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}

@@ -1,3 +1,4 @@
+import {isClientMail, localizedAccountMail} from "./localized-account-mail";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
@@ -279,7 +280,18 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
         return {status:"failed",id:event.id};
       }
     }
-    const message = template(event, profile.full_name || "Member");
+    // Read the recipient's preference on the server, never from event payload or actor metadata.
+    // This optional presentation lookup cannot grant access or change the recipient.
+    let locale: unknown = "en";
+    if (isClientMail(event.event_type)) {
+      try {
+        const {data, error} = await admin.auth.admin.getUserById(event.user_id);
+        if (!error) locale = data.user?.user_metadata?.preferred_language;
+      } catch { /* Preserve English delivery if the optional lookup is unavailable. */ }
+    }
+    const message = (locale === "nl" || locale === "es")
+      ? localizedAccountMail(event, profile.full_name || "", locale, siteForNotification())
+      : template(event, profile.full_name || "Member");
     const mailer = nodemailer.createTransport({
       host: config.host, port: config.port, secure: config.port === 465,
       requireTLS: config.port === 587,

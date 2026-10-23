@@ -1,7 +1,8 @@
 "use client";
+import {useTranslations, useLocale} from "next-intl";
+import {localizedPath} from "../../i18n/public-routing";
 
 import { FormEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import { createClient } from "../../lib/supabase/client";
 import RecoveryLayout from "../components/RecoveryLayout";
 import recoveryStyles from "../account-recovery.module.css";
@@ -10,6 +11,8 @@ type Status = "checking" | "ready" | "saving" | "success" | "invalid";
 type Role = "client" | "partner";
 
 export default function AcceptInvitationPage() {
+  const t = useTranslations("AccountUI");
+  const locale = useLocale();
   const [status, setStatus] = useState<Status>("checking");
   const [role, setRole] = useState<Role>("client");
   const [fullName, setFullName] = useState("");
@@ -58,15 +61,15 @@ export default function AcceptInvitationPage() {
     setError("");
     const name = fullName.trim().replace(/\s+/g, " ");
     if (name.length < 3 || name.length > 120 || name.split(" ").length < 2) {
-      setError("Please enter your full first and last name.");
+      setError(t("a038"));
       return;
     }
     if (password.length < 8) {
-      setError("Please use at least 8 characters.");
+      setError(t("a039"));
       return;
     }
     if (password !== confirmation) {
-      setError("Passwords do not match.");
+      setError(t("a012"));
       return;
     }
 
@@ -77,14 +80,14 @@ export default function AcceptInvitationPage() {
         "has_mzs_verified_auth_action", { p_purpose: "invite" }
       );
       if (proofError || proof !== true) {
-        throw new Error("Invitation expired. Please contact MZS Group for assistance.");
+        throw new Error(t("a040"));
       }
 
       const { data: nameSaved, error: nameError } = await supabase.rpc(
         "complete_invitation_name", { p_full_name: name }
       );
       if (nameError || nameSaved !== true) {
-        setError("Unable to save your details. Please try again.");
+        setError(t("a041"));
         setStatus("ready");
         return;
       }
@@ -92,8 +95,8 @@ export default function AcceptInvitationPage() {
       const { error: passwordError } = await supabase.auth.updateUser({ password });
       if (passwordError) {
         setError(passwordError.code === "same_password"
-          ? "Your new password must be different from the previous password."
-          : "Unable to set your password. Please try again.");
+          ? t("a042")
+          : t("a043"));
         setStatus("ready");
         return;
       }
@@ -104,7 +107,7 @@ export default function AcceptInvitationPage() {
       if (activationError || activated !== true) {
         setPassword("");
         setConfirmation("");
-        setError("Your password was saved, but activation could not be completed. Please contact MZS Group. Do not create another account.");
+        setError(t("a044"));
         setStatus("invalid");
         return;
       }
@@ -113,65 +116,62 @@ export default function AcceptInvitationPage() {
       setConfirmation("");
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
-        setError("Your account is active, but sign out could not be completed. Please sign out before logging in again.");
+        setError(t("a045"));
       }
       setStatus("success");
     } catch (cause) {
       setPassword("");
       setConfirmation("");
-      setError(cause instanceof Error ? cause.message : "Unable to complete registration. Please contact MZS Group.");
+      setError(cause instanceof Error && cause.message === t("a040") ? t("a040") : t("a046"));
       setStatus("invalid");
     }
   }
 
-  const loginHref = role === "partner" ? "/login?role=partner" : "/login?role=client";
-  const firstName = fullName.trim().split(/\s+/)[0] || "Member";
+  const loginHref = localizedPath("/login", locale) + (role === "partner" ? "?role=partner" : "?role=client");
+  const firstName = fullName.trim().split(/\s+/)[0] || t("a047");
 
   return (
     <RecoveryLayout role={role}>
-      <p className="eyebrow">By invitation only</p>
+      <p className="eyebrow">{t("a048")}</p>
       {status === "checking" && (
-        <><h1>Verifying invitation.</h1>
-          <p className="login-intro">Please wait while we verify your personal invitation.</p></>
+        <><h1>{t("a049")}</h1>
+          <p className="login-intro">{t("a050")}</p></>
       )}
       {status === "invalid" && (
-        <><h1>Registration unavailable.</h1>
-          <p className="login-intro">Your invitation may have expired or is no longer available. Please contact MZS Group.</p>
+        <><h1>{t("a051")}</h1>
+          <p className="login-intro">{t("a052")}</p>
           {error && <p className="login-error" role="alert">{error}</p>}
-          <Link href="/" className={recoveryStyles.backLink}>Return to MZS Group →</Link></>
+          <a href={localizedPath("/", locale)} className={recoveryStyles.backLink}>{t("a053")}</a></>
       )}
       {(status === "ready" || status === "saving") && (
-        <><h1>Welcome to MZS.</h1>
-          <p className="login-intro">Complete your details and create a secure password to activate your private account.</p>
+        <><h1>{t("a054")}</h1>
+          <p className="login-intro">{t("a055")}</p>
           <form className="login-form" onSubmit={activate} aria-busy={status === "saving"}>
-            <label>Full Name
-              <input type="text" autoComplete="name" maxLength={120} required
+            <label>{t("a056")}<input type="text" autoComplete="name" maxLength={120} required
                 value={fullName} onChange={(e) => setFullName(e.target.value)}
                 disabled={status === "saving"}/>
             </label>
-            <label>New Password
-              <input type="password" autoComplete="new-password" minLength={8} required
+            <label>{t("a028")}<input type="password" autoComplete="new-password" minLength={8} required
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 disabled={status === "saving"}/>
             </label>
-            <label>Confirm Password
-              <input type="password" autoComplete="new-password" minLength={8} required
+            <label>{t("a029")}<input type="password" autoComplete="new-password" minLength={8} required
                 value={confirmation} onChange={(e) => setConfirmation(e.target.value)}
                 disabled={status === "saving"}/>
             </label>
             {error && <p className="login-error" role="alert">{error}</p>}
             <button type="submit" disabled={status === "saving"}>
-              {status === "saving" ? "Activating..." : "Activate My Account →"}
+              {status === "saving" ? t("a057") : t("a058")}
             </button>
           </form></>
       )}
       {status === "success" && (
-        <><h1>Welcome, {firstName}.</h1>
-          <p className="login-intro">Your MZS account has been activated. Your approved project selection has already been attached to your account.</p>
+        <><h1>{t("welcomeName", {name: firstName})}</h1>
+          <p className="login-intro">{t("a060")}</p>
           {error && <p className="login-error" role="alert">{error}</p>}
-          <Link href={loginHref} className={recoveryStyles.backLink}>
-            Continue to {role === "partner" ? "Partner" : "Client"} Login →
-          </Link></>
+          <a href={loginHref} className={recoveryStyles.backLink}>
+            {t("loginRole", {role: role === "partner" ? t("a062") : t("a063")})}
+          </a></>
       )}
     </RecoveryLayout>
   );

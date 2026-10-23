@@ -5,16 +5,18 @@ import vm from 'node:vm';
 import ts from 'typescript';
 const source=readFileSync(new URL('../lib/mzs/notifications.ts',import.meta.url),'utf8');
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
-function harness({grant=true,preview=false,accepted=true,intro=false,admin=true}={}) {
+const localized = {}; vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../lib/mzs/localized-account-mail.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:localized});
+function harness({grant=true,preview=false,accepted=true,intro=false,admin=true,locale,lookupError=false,eventType,fullName="Client"}={}) {
  const sent=[],updates=[];
- const event={id:'event',user_id:'user',event_type:intro?'intro_call_requested':'capital_access_granted',payload:{grant_id:'grant',revision:2,amount:'SECRET_AMOUNT',project:'SECRET_NAME'},attempts:1};
- const db={rpc:async()=>({data:[event]}),from(table){
+ const event={id:'event',user_id:'user',event_type:eventType || (intro?'intro_call_requested':'capital_access_granted'),payload:{grant_id:'grant',revision:2,amount:'SECRET_AMOUNT',project:'SECRET_NAME'},attempts:1};
+ const db={auth:{admin:{getUserById:async(userId)=>{assert.equal(userId,'user');if(lookupError)throw Error('unavailable');return {data:{user:{user_metadata:{preferred_language:locale}}}};}}},rpc:async()=>({data:[event]}),from(table){
   const q={select(){return q},eq(){return q},update(value){updates.push({table,value});return q},
-   single:async()=>({data:{full_name:'Client',email:'client@example.invalid',is_active:true,role:intro&&admin?'admin':'client'}}),
+   single:async()=>({data:{full_name:fullName,email:'client@example.invalid',is_active:true,role:intro&&admin?'admin':'client'}}),
    maybeSingle:async()=>({data:grant?{id:'grant'}:null}),then(resolve){resolve({error:null})}};return q;
  }};
  const exports={};
  vm.runInNewContext(js,{exports,console:{error(){}},process:{env:{VERCEL_ENV:preview?'preview':'production',NEXT_PUBLIC_SUPABASE_URL:preview?'https://senonkpxdtlhyhrubicg.supabase.co':'https://ptrnjzmcehrhbsfxntgw.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'mock',MZS_SMTP_HOST:'mock',MZS_SMTP_USER:'mock',MZS_SMTP_PASSWORD:'mock',MZS_SMTP_FROM:'mock@example.invalid'}},require(name){
+  if(name==='./localized-account-mail')return localized;
   if(name==='@supabase/supabase-js')return {createClient:()=>db};
   if(name==='nodemailer')return {default:{createTransport:()=>({sendMail:async(message)=>{sent.push(message);return {accepted:accepted?['client@example.invalid']:[]}},close(){}})}};
   throw new Error(name);
@@ -39,3 +41,29 @@ test('SMTP rejection leaves mail pending without reporting sent',async()=>{
 
 test('Introductory calls notify administrators using a protected link',async()=>{const h=harness({intro:true});assert.equal((await h.exports.deliverOnce()).status,'sent');assert.match(h.sent[0].text,/https:\/\/www.mzsgroup.com\/admin\/intro-calls/);assert.doesNotMatch(JSON.stringify(h.sent),/SECRET_AMOUNT|SECRET_NAME/)});
 test('Introductory call mail is blocked in preview and for non-admin recipients',async()=>{for(const options of [{intro:true,preview:true},{intro:true,admin:false}]){const h=harness(options);assert.equal((await h.exports.deliverOnce()).status,'failed');assert.equal(h.sent.length,0)}});
+
+test('Client mail uses the recipient language, escapes names and keeps capital details private',async()=>{
+ for(const locale of ['nl','es']) for(const eventType of ['account_activated','new_project_access','capital_access_granted']) {
+  const h=harness({locale,eventType,fullName:'<script> Tester'});
+  assert.equal((await h.exports.deliverOnce()).status,'sent');
+  const m=h.sent[0];assert.ok(m.html.includes('lang="'+locale+'"'));assert.ok(m.html.includes('&lt;script&gt;'));
+  assert.doesNotMatch(m.html,/<script>/);assert.equal(m.to,'client@example.invalid');
+  if(eventType==='capital_access_granted')assert.doesNotMatch(JSON.stringify(m),/SECRET_AMOUNT|SECRET_NAME/);
+  assert.equal(h.updates.at(-1).value.status,'sent');
+ }
+});
+test('Missing, unsupported or unavailable preferences preserve English delivery',async()=>{
+ for(const options of [{},{locale:'fr'},{locale:{role:'admin'}},{lookupError:true}]) {
+  const h=harness(options);assert.equal((await h.exports.deliverOnce()).status,'sent');assert.ok(h.sent[0].html.includes("lang='en'"));
+ }
+});
+test('Language never bypasses revoked access, preview restrictions or SMTP rejection',async()=>{
+ for(const locale of ['nl','es']) for(const options of [{grant:false},{preview:true},{accepted:false}]) {
+  const h=harness({locale,...options});assert.equal((await h.exports.deliverOnce()).status,'failed');
+  if(options.accepted!==false)assert.equal(h.sent.length,0);
+  else assert.equal(h.updates.at(-1).value.status,'pending');
+ }
+});
+test('Administrative mail stays English regardless of recipient preference',async()=>{
+ const h=harness({intro:true,locale:'es'});assert.equal((await h.exports.deliverOnce()).status,'sent');assert.ok(h.sent[0].html.includes("lang='en'"));
+});
