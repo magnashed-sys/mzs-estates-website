@@ -1,4 +1,6 @@
 "use client";
+import {useLocale, useTranslations} from "next-intl";
+import {isLocale, localizedPath} from "../../../i18n/public-routing";
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -32,6 +34,8 @@ const CONTACT_KEYS = [
 ] as const;
 
 export default function MemberProfilePage() {
+  const t = useTranslations("MemberUI");
+  const locale = useLocale();
   const router = useRouter();
   const [status, setStatus] = useState<Status>("loading");
   const [section, setSection] = useState<Section>("personal");
@@ -66,14 +70,14 @@ export default function MemberProfilePage() {
         if (previewHost &&
             process.env.NEXT_PUBLIC_SUPABASE_URL !==
               "https://senonkpxdtlhyhrubicg.supabase.co") {
-          setError("This Preview is not yet linked to MZS Staging. Profile editing is disabled.");
+          setError(t("thisPreviewIsNotYetLinkedToMzs"));
           setStatus("error");
           return;
         }
         const supabase = createClient();
         const { data: auth, error: authError } = await supabase.auth.getUser();
         if (authError || !auth.user) {
-          router.replace("/login");
+          window.location.replace(localizedPath("/login", isLocale(locale) ? locale : "en"));
           return;
         }
         const user = auth.user;
@@ -106,14 +110,14 @@ export default function MemberProfilePage() {
         setStatus("ready");
       } catch {
         if (mounted) {
-          setError("Unable to load your personal account information.");
+          setError(t("unableToLoadYourPersonalAccountInformation"));
           setStatus("error");
         }
       }
     }
     void load();
     return () => { mounted = false; };
-  }, [router]);
+  }, [router, t, locale]);
 
   function switchSection(next: Section) {
     if (saving || emailSaving || passwordSaving) return;
@@ -126,7 +130,7 @@ export default function MemberProfilePage() {
     setNotice(""); setError("");
     const fullName = personal.full_name.trim().replace(/\s+/g," ");
     if (fullName.length < 3 || fullName.length > 120) {
-      setError("Please enter a full name of 3–120 characters.");
+      setError(t("pleaseEnterAFullNameOf3120Characters"));
       return;
     }
     setSaving(true);
@@ -144,9 +148,9 @@ export default function MemberProfilePage() {
       });
       if (failure || data !== true) throw new Error("Save unconfirmed");
       setPersonal(current => ({ ...current, full_name: fullName }));
-      setNotice("Your personal and address information has been saved.");
+      setNotice(t("yourPersonalAndAddressInformationHasBeenSaved"));
     } catch {
-      setError("We could not confirm the update. Please try again later.");
+      setError(t("weCouldNotConfirmTheUpdatePleaseTry"));
     } finally {
       setSaving(false);
     }
@@ -158,11 +162,11 @@ export default function MemberProfilePage() {
     setNotice(""); setError("");
     const requested = nextEmail.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requested) || requested.length > 254) {
-      setError("Please enter a valid email address.");
+      setError(t("pleaseEnterAValidEmailAddress"));
       return;
     }
     if (requested === email.toLowerCase()) {
-      setError("This is already your current email address.");
+      setError(t("thisIsAlreadyYourCurrentEmailAddress"));
       return;
     }
     setEmailSaving(true);
@@ -174,9 +178,9 @@ export default function MemberProfilePage() {
       if (failure) throw failure;
       setPendingEmail(requested);
       setNextEmail("");
-      setNotice("Your email change was requested. Follow the confirmation email(s). Your current address remains active until the change is verified.");
+      setNotice(t("yourEmailChangeWasRequestedFollowTheConfirmation"));
     } catch {
-      setError("We could not request this email change. Check the address or contact MZS Group.");
+      setError(t("weCouldNotRequestThisEmailChangeCheck"));
     } finally {
       setEmailSaving(false);
     }
@@ -187,19 +191,19 @@ export default function MemberProfilePage() {
     if (passwordSaving) return;
     setNotice(""); setError("");
     if (!passwordCurrent) {
-      setError("Enter your current password to continue.");
+      setError(t("enterYourCurrentPasswordToContinue"));
       return;
     }
     if (passwordNext.length < 8 || passwordNext.length > 128) {
-      setError("Your new password must contain at least 8 characters.");
+      setError(t("yourNewPasswordMustContainAtLeast8"));
       return;
     }
     if (passwordNext !== passwordRepeat) {
-      setError("The new passwords do not match.");
+      setError(t("theNewPasswordsDoNotMatch"));
       return;
     }
     if (passwordCurrent === passwordNext) {
-      setError("Choose a password different from your current password.");
+      setError(t("chooseAPasswordDifferentFromYourCurrentPassword"));
       return;
     }
     setPasswordSaving(true);
@@ -215,11 +219,11 @@ export default function MemberProfilePage() {
         password: passwordNext,
       });
       if (updateError) throw updateError;
-      setNotice("Your password has been changed successfully.");
+      setNotice(t("yourPasswordHasBeenChangedSuccessfully"));
       setPasswordCurrent(""); setPasswordNext(""); setPasswordRepeat("");
     } catch {
       setPasswordCurrent(""); setPasswordNext(""); setPasswordRepeat("");
-      setError("Password change not confirmed. Check your current password and try again.");
+      setError(t("passwordChangeNotConfirmedCheckYourCurrentPassword"));
     } finally {
       setPasswordSaving(false);
     }
@@ -231,10 +235,9 @@ export default function MemberProfilePage() {
     try {
       const { error: signOutError } = await createClient().auth.signOut();
       if (signOutError) throw signOutError;
-      router.replace("/");
-      router.refresh();
+      window.location.replace(localizedPath("/", isLocale(locale) ? locale : "en"));
     } catch {
-      setError("Unable to sign out. Please try again.");
+      setError(t("unableToSignOutPleaseTryAgain"));
       setSigningOut(false);
     }
   }
@@ -242,74 +245,62 @@ export default function MemberProfilePage() {
   return <main className={dash.page}>
     <header className={dash.header}>
       <div className={dash.headerInner}>
-        <Link href="/" className={dash.brand} aria-label="MZS Group Home">
+        <a href={localizedPath("/", isLocale(locale) ? locale : "en")} className={dash.brand} aria-label={t("mzsGroupHome")}>
           <span className={dash.brandMzs}>MZS</span>
           <span className={dash.brandGroup}>GROUP</span>
-        </Link>
+        </a>
         <div className={dash.headerRight}>
           <span className={dash.accessLabel}>
-            {role === "partner" ? "PARTNER ACCESS" : "PRIVATE CLIENT"}
+            {role === "partner" ? t("partnerAccess") : t("privateClient")}
           </span>
-          <Link className={dash.headerLink} href="/private">
-            My Dashboard <span aria-hidden="true">↗</span>
+          <Link className={dash.headerLink} href="/private"> {t("myDashboard")} <span aria-hidden="true">↗</span>
           </Link>
           <button className={dash.signout} type="button" disabled={signingOut}
             onClick={() => void signOut()}>
-            {signingOut ? "Signing out…" : "Sign out"}
+            {signingOut ? t("signingOut") : t("signOut")}
           </button>
         </div>
       </div>
     </header>
 
     <div className={styles.shell}>
-      <nav className={styles.crumb} aria-label="Breadcrumb">
-        <Link href="/private">Private Collection</Link><span>/</span>
-        <span>My Profile</span>
+      <nav className={styles.crumb} aria-label={t("breadcrumb")}>
+        <Link href="/private">{t("privateCollection")}</Link><span>/</span>
+        <span>{t("myProfile")}</span>
       </nav>
       <section className={styles.hero}>
         <div>
-          <p className={styles.kicker}>MZS GROUP · PRIVATE ACCESS</p>
-          <h1>My Profile.</h1>
-          <p className={styles.intro}>
-            Your personal information, business relationships and account security —
-            managed privately in one place.
-          </p>
+          <p className={styles.kicker}>{t("mzsGroupPrivateAccess")}</p>
+          <h1>{t("myProfileLabel")}</h1>
+          <p className={styles.intro}> {t("yourPersonalInformationBusinessRelationshipsAndAccountSecurity")} </p>
         </div>
         <div className={styles.heroAside}>
-          <strong>Private. Independent. International.</strong>
-          Only you and authorised MZS administrators can review your account
-          details. Your project access stays independent of these settings.
-        </div>
+          <strong>Private. Independent. International.</strong> {t("onlyYouAndAuthorisedMzsAdministratorsCanReview")} </div>
       </section>
 
-      {status === "loading" && <p className={styles.empty} role="status">
-        Preparing your private profile…
-      </p>}
+      {status === "loading" && <p className={styles.empty} role="status"> {t("preparingYourPrivateProfile")} </p>}
       {status === "denied" && <section className={styles.panel}>
-        <h2 className={styles.panelTitle}>Account access is pending.</h2>
-        <p className={styles.note}>Please contact MZS Group if you need assistance.</p>
+        <h2 className={styles.panelTitle}>{t("accountAccessIsPending")}</h2>
+        <p className={styles.note}>{t("pleaseContactMzsGroupIfYouNeedAssistance")}</p>
       </section>}
       {status === "error" && <p className={styles.error} role="alert">{error}</p>}
 
       {status === "ready" && <>
-        <nav className={styles.tabs} aria-label="Profile sections">
+        <nav className={styles.tabs} aria-label={t("profileSections")}>
           <button className={styles.tab} type="button" aria-pressed={section === "personal"}
-            onClick={() => switchSection("personal")}>Personal Details</button>
+            onClick={() => switchSection("personal")}>{t("personalDetails")}</button>
           <button className={styles.tab} type="button" aria-pressed={section === "companies"}
-            onClick={() => switchSection("companies")}>My Companies</button>
+            onClick={() => switchSection("companies")}>{t("myCompanies")}</button>
           <button className={styles.tab} type="button" aria-pressed={section === "security"}
-            onClick={() => switchSection("security")}>Email &amp; Security</button>
+            onClick={() => switchSection("security")}>{t("emailAmpSecurity")}</button>
         </nav>
 
         {section === "personal" && <section className={styles.panel}>
           <div className={styles.panelHead}>
             <div>
-              <p className={styles.kicker}>PERSONAL INFORMATION</p>
-              <h2 className={styles.panelTitle}>Contact &amp; Address.</h2>
-              <p className={styles.panelDescription}>
-                Keep your name, contact information and postal address up to date.
-                All fields except your name are optional.
-              </p>
+              <p className={styles.kicker}>{t("personalInformation")}</p>
+              <h2 className={styles.panelTitle}>{t("contactAmpAddress")}</h2>
+              <p className={styles.panelDescription}> {t("keepYourNameContactInformationAndPostalAddress")} </p>
             </div>
           </div>
           {notice && <p className={styles.success} role="status">{notice}</p>}
@@ -317,55 +308,46 @@ export default function MemberProfilePage() {
           <form className={styles.form} style={{ marginTop: 25 }}
             onSubmit={savePersonal} aria-busy={saving}>
             <div className={styles.grid}>
-              <label className={styles.field}>Full name *
-                <input value={personal.full_name} maxLength={120} minLength={3}
+              <label className={styles.field}>{t("fullName")} <input value={personal.full_name} maxLength={120} minLength={3}
                   autoComplete="name" required disabled={saving}
                   onChange={e => setField("full_name",e.target.value)}/>
               </label>
-              <label className={styles.field}>Telephone
-                <input value={personal.phone} maxLength={40} type="tel"
+              <label className={styles.field}>{t("telephone")} <input value={personal.phone} maxLength={40} type="tel"
                   autoComplete="tel" disabled={saving}
                   onChange={e => setField("phone",e.target.value)} />
               </label>
-              <label className={styles.field}>Street name
-                <input value={personal.street_address} maxLength={160}
+              <label className={styles.field}>{t("streetName")} <input value={personal.street_address} maxLength={160}
                   autoComplete="address-line1" disabled={saving}
                   onChange={e => setField("street_address",e.target.value)}/>
               </label>
-              <label className={styles.field}>House / building number
-                <input value={personal.house_number} maxLength={24}
+              <label className={styles.field}>{t("houseBuildingNumber")} <input value={personal.house_number} maxLength={24}
                   disabled={saving}
                   onChange={e => setField("house_number",e.target.value)}/>
               </label>
-              <label className={styles.field}>Apartment / additional address
-                <input value={personal.address_addition} maxLength={80}
+              <label className={styles.field}>{t("apartmentAdditionalAddress")} <input value={personal.address_addition} maxLength={80}
                   autoComplete="address-line2" disabled={saving}
                   onChange={e => setField("address_addition",e.target.value)}/>
               </label>
-              <label className={styles.field}>Postal code
-                <input value={personal.postal_code} maxLength={24}
+              <label className={styles.field}>{t("postalCode")} <input value={personal.postal_code} maxLength={24}
                   autoComplete="postal-code" disabled={saving}
                   onChange={e => setField("postal_code",e.target.value)}/>
               </label>
-              <label className={styles.field}>City
-                <input value={personal.city} maxLength={120}
+              <label className={styles.field}>{t("city")} <input value={personal.city} maxLength={120}
                   autoComplete="address-level2" disabled={saving}
                   onChange={e => setField("city",e.target.value)}/>
               </label>
-              <label className={styles.field}>State / Province / Region
-                <input value={personal.region} maxLength={120}
+              <label className={styles.field}>{t("stateProvinceRegion")} <input value={personal.region} maxLength={120}
                   autoComplete="address-level1" disabled={saving}
                   onChange={e => setField("region",e.target.value)}/>
               </label>
-              <label className={styles.field + " " + styles.fieldFull}>Country
-                <input value={personal.country} maxLength={120}
+              <label className={styles.field + " " + styles.fieldFull}>{t("country")} <input value={personal.country} maxLength={120}
                   autoComplete="country-name" disabled={saving}
                   onChange={e => setField("country",e.target.value)}/>
               </label>
             </div>
             <div className={styles.actions}>
               <button type="submit" className={styles.primary} disabled={saving}>
-                {saving ? "Saving…" : "Save Personal Details →"}
+                {saving ? t("saving") : t("savePersonalDetails")}
               </button>
             </div>
           </form>
@@ -377,73 +359,57 @@ export default function MemberProfilePage() {
           <section className={styles.panel}>
             <div className={styles.panelHead}>
               <div>
-                <p className={styles.kicker}>EMAIL ADDRESS</p>
-                <h2 className={styles.panelTitle}>Your Email.</h2>
-                <p className={styles.panelDescription}>
-                  We will send verification instructions when you request a change.
-                </p>
+                <p className={styles.kicker}>{t("emailAddress")}</p>
+                <h2 className={styles.panelTitle}>{t("yourEmail")}</h2>
+                <p className={styles.panelDescription}> {t("weWillSendVerificationInstructionsWhenYouRequest")} </p>
               </div>
             </div>
             {notice && <p className={styles.success} role="status">{notice}</p>}
             {error && <p className={styles.error} role="alert">{error}</p>}
             <form className={styles.form} style={{ marginTop: 22 }}
               onSubmit={saveEmail} aria-busy={emailSaving}>
-              <label className={styles.field}>Current email address
-                <span className={styles.readOnly}>{email}</span>
+              <label className={styles.field}>{t("currentEmailAddress")} <span className={styles.readOnly}>{email}</span>
               </label>
               {pendingEmail && pendingEmail.toLowerCase() !== email.toLowerCase() &&
-                <p className={styles.note}>Awaiting confirmation: {pendingEmail}</p>}
-              <label className={styles.field}>New email address
-                <input type="email" value={nextEmail} maxLength={254}
+                <p className={styles.note}>{t("awaitingConfirmation")} {pendingEmail}</p>}
+              <label className={styles.field}>{t("newEmailAddress")} <input type="email" value={nextEmail} maxLength={254}
                   autoComplete="email" required disabled={emailSaving}
                   onChange={e => setNextEmail(e.target.value)} />
               </label>
               <button className={styles.primary} type="submit" disabled={emailSaving}>
-                {emailSaving ? "Requesting…" : "Request Email Change →"}
+                {emailSaving ? t("requesting") : t("requestEmailChange")}
               </button>
-              <p className={styles.note}>
-                Depending on your security settings, both the old and new
-                address may need confirmation. Your project access will remain unchanged.
-              </p>
+              <p className={styles.note}> {t("dependingOnYourSecuritySettingsBothTheOld")} </p>
             </form>
           </section>
           <section className={styles.panel}>
             <div className={styles.panelHead}>
               <div>
-                <p className={styles.kicker}>ACCOUNT SECURITY</p>
-                <h2 className={styles.panelTitle}>Change Password.</h2>
-                <p className={styles.panelDescription}>
-                  Confirm your current password, then create a new one
-                  containing at least 8 characters.
-                </p>
+                <p className={styles.kicker}>{t("accountSecurity")}</p>
+                <h2 className={styles.panelTitle}>{t("changePassword")}</h2>
+                <p className={styles.panelDescription}> {t("confirmYourCurrentPasswordThenCreateANew")} </p>
               </div>
             </div>
             {notice && <p className={styles.success} role="status">{notice}</p>}
             {error && <p className={styles.error} role="alert">{error}</p>}
             <form className={styles.form} style={{ marginTop: 22 }}
               onSubmit={savePassword} aria-busy={passwordSaving}>
-              <label className={styles.field}>Current password
-                <input type="password" required autoComplete="current-password"
+              <label className={styles.field}>{t("currentPassword")} <input type="password" required autoComplete="current-password"
                   value={passwordCurrent} disabled={passwordSaving}
                   onChange={e => setPasswordCurrent(e.target.value)} />
               </label>
-              <label className={styles.field}>New password
-                <input type="password" minLength={8} maxLength={128} required
+              <label className={styles.field}>{t("newPassword")} <input type="password" minLength={8} maxLength={128} required
                   autoComplete="new-password" value={passwordNext}
                   disabled={passwordSaving} onChange={e => setPasswordNext(e.target.value)} />
               </label>
-              <label className={styles.field}>Confirm new password
-                <input type="password" minLength={8} maxLength={128} required
+              <label className={styles.field}>{t("confirmNewPassword")} <input type="password" minLength={8} maxLength={128} required
                   autoComplete="new-password" value={passwordRepeat}
                   disabled={passwordSaving} onChange={e => setPasswordRepeat(e.target.value)} />
               </label>
               <button className={styles.primary} type="submit" disabled={passwordSaving}>
-                {passwordSaving ? "Updating…" : "Update Password →"}
+                {passwordSaving ? t("updating") : t("updatePassword")}
               </button>
-              <p className={styles.note}>
-                Your password is handled by Supabase Auth, not stored in your
-                personal information or company records.
-              </p>
+              <p className={styles.note}> {t("yourPasswordIsHandledBySupabaseAuthNot")} </p>
             </form>
           </section>
         </div>}
