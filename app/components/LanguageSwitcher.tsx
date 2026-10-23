@@ -48,6 +48,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
     <nav className={styles.languagePanel} aria-label={t('choose')}>
     {locales.map(locale => <a key={locale} href={localizedPath(route.path, locale)}
       hrefLang={locale} lang={locale} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}
+      title={{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
       aria-disabled={busy || undefined}
       onClick={async event => {
@@ -72,7 +73,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
           if (isAccountPath(pathname)) location.reload();
           else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
-      }}><span>{{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}</span>
+      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}
