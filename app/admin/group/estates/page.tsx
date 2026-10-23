@@ -13,12 +13,14 @@ export default async function EstatesHome() {
   return <><p className="mzsEyebrow">MZS ESTATES / MANAGEMENT</p><h1>Property Cockpit</h1>
     <p className="mzsIntro">Rental, sales and developments — integrated with the existing protected project management.</p>
     <section className="mzsCards">
+      <Link href="/admin/group/estates/properties"><small>PROPERTY REGISTER</small><h2>Ownership &amp; units</h2>
+        <p>View property owners, individual units, recorded tenants and rental amounts.</p><span>Open property register →</span></Link>
       <Link href="/admin?tab=projects"><small>EXISTING ADMINISTRATION</small><h2>Projects & access</h2>
         <p>Continue managing existing property presentations, project content and client permissions.</p><span>Open existing projects →</span></Link>
       <Link href="/admin?tab=bookings"><small>PROTECTED WORKFLOWS</small><h2>Rental bookings</h2>
         <p>Existing calendars and reservation workflows remain in their original administration.</p><span>Open bookings →</span></Link>
     </section>
-    <p className="mzsFootnote">No ownership, calendar or booking data has been migrated. Estates-only administration remains under development.</p>
+    <p className="mzsFootnote">The ownership register is available to active Group Administrators.</p>
     <Link href="/admin/group">← Group overview</Link>
   </>;
 }
