@@ -135,7 +135,6 @@ const focus = [
             <p>{t('a_pledge_over_shares_in_a')}</p>
           </article>
         </div>
-        <p className={atmosphere.securityNote}>{t('the_availability_scope_and_enforceability_of')}</p>
       </section>}
 
       {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
