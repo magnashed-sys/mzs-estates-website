@@ -32,3 +32,8 @@
 .lightboxHint{text-align:center;font-size:9px;letter-spacing:.15em;color:#918a7f;padding:9px 0 2px}
 .lightbox button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:650px){.lightboxViewport{gap:5px;padding:8px 0}.galleryArrow{padding:13px 8px;font-size:17px}.lightboxHeader{min-height:60px}.lightboxClose{padding:10px}.lightboxFooter{align-items:flex-start;padding-top:10px}.lightboxFooter>div{display:block}.lightboxFooter p{margin-top:5px;font-size:11px}.zoomButton{padding:10px;font-size:9px}.lightboxHint{font-size:8px}}
+
+/* Translation lengths must not expand narrow investment cards. */
+.project{overflow-wrap:anywhere}
+.cards article{min-width:0}
+.cards article>*{max-width:100%}

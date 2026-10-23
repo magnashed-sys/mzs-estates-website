@@ -32,11 +32,25 @@ test('All translation catalogues are complete and every ICU message renders with
         const path = prefix ? `${prefix}.${key}` : key;
         if (typeof value === 'object') { check(value, actual[key], path); continue; }
         assert.ok(actual[key].trim());
-        const rendered = t(path, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference', name: 'Test company', message: 'Saved', start: '1 Jan', end: '3 Jan', explanation: 'Test', date: '1 Jan'});
+        const rendered = t(path, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference', name: 'Test company', message: 'Saved', start: '1 Jan', end: '3 Jan', explanation: 'Test', date: '1 Jan', count: 2, bedrooms: 2, bathrooms: 1, price: '€400', index: 1, total: 5, caption: 'Photo', kind: 'investment'});
         assert.ok(rendered.length > 0);
       }
     }
     check(catalogs.en, messages);
     assert.deepEqual(errors, [], `${locale}: ${errors.map(error => error.message).join(', ')}`);
   }
+});
+
+test('Project client catalogue includes UI copy but excludes server-only loan/project narratives', () => {
+  const keySource = readFileSync(new URL('../i18n/project-client-keys.ts', import.meta.url), 'utf8');
+  const keys = new Set([...keySource.matchAll(/"([^"]+)"/g)].map(match => match[1]));
+  for (const name of ['AmsterdamFlorawegInvestment', 'ConfiguredRentalCalendar', 'RentalCalendar', 'ProjectResources', 'PropertyGallery', 'PropertyWalkthrough']) {
+    const source = readFileSync(new URL(`../app/private/projects/[slug]/${name}.tsx`, import.meta.url), 'utf8');
+    for (const match of source.matchAll(/\bt\("([^"]+)"/g)) assert.ok(keys.has(match[1]), `${name}: missing client key ${match[1]}`);
+  }
+  for (const key of ['investmentKind', 'acquisitionKind', 'documentCategories']) assert.ok(keys.has(key));
+  const photoSource = readFileSync(new URL('../app/private/projects/[slug]/localizedPhotoChapters.ts', import.meta.url), 'utf8');
+  for (const match of photoSource.matchAll(/: "(p\d+)"/g)) assert.ok(keys.has(match[1]));
+  for (const key of keys) for (const locale of ['en', 'nl', 'es']) assert.ok(catalogs[locale].ProjectUI[key]);
+  for (const privateKey of ['p223', 'p240', 'p247', 'p286', 'p297', 'p447', 'p449', 'p451', 'p453', 'p454', 'loanTerm', 'loanMinimum']) assert.ok(!keys.has(privateKey), privateKey);
 });

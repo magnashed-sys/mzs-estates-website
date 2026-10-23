@@ -1,5 +1,8 @@
-
 "use client";
+
+import {useTranslations, useLocale} from "next-intl";
+
+
 
 import { useEffect, useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
@@ -61,17 +64,22 @@ function nightsBetween(start: string, end: string) {
   );
 }
 
-function money(value: number) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 export default function RentalCalendar({
   projectId,
 }: Props) {
+  const t = useTranslations("ProjectUI");
+  const locale = useLocale();
+  const displayLocale = locale === "en" ? "en-GB" : locale;
+  const displayDate = (key: string) => new Intl.DateTimeFormat(displayLocale, {dateStyle: "long", timeZone: "UTC"}).format(new Date(`${key}T12:00:00Z`));
+  const weekdays = Array.from({length: 7}, (_, i) => new Intl.DateTimeFormat(displayLocale, {weekday: "narrow", timeZone: "UTC"}).format(new Date(Date.UTC(2024, 0, 1 + i))));
+  function money(value: number) {
+    return new Intl.NumberFormat(displayLocale, {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+    }).format(value);
+  }
+
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -108,7 +116,7 @@ export default function RentalCalendar({
       if (!active) return;
 
       if (fetchError || !result) {
-        setError("Availability is temporarily unavailable.");
+        setError(t("p086"));
       } else {
         setData(result as CalendarData);
       }
@@ -121,7 +129,7 @@ export default function RentalCalendar({
     return () => {
       active = false;
     };
-  }, [projectId]);
+  }, [projectId, t]);
 
   const settings = data?.settings;
   const unavailable = data?.unavailable ?? [];
@@ -156,12 +164,12 @@ export default function RentalCalendar({
     const nights = nightsBetween(checkIn, day);
 
     if (nights < (settings?.minimum_nights ?? 1)) {
-      setMessage("Minimum stay is 1 night.");
+      setMessage(t("minimumStay", {count: settings?.minimum_nights ?? 1}));
       return;
     }
 
     if (!rangeAvailable(checkIn, day)) {
-      setMessage("These dates are unavailable.");
+      setMessage(t("p155"));
       return;
     }
 
@@ -233,7 +241,7 @@ export default function RentalCalendar({
       guests < 1 ||
       guests > settings.maximum_guests
     ) {
-      setMessage("Please check your booking details.");
+      setMessage(t("p156"));
       return;
     }
 
@@ -246,26 +254,26 @@ export default function RentalCalendar({
         body: JSON.stringify({ mode: "villa", projectId, checkIn, checkOut, guests,
           arrival: arrivalTime, departure: departureTime, poolHeating, notes }),
       });
-      const result = await response.json();
+      await response.json();
       if (!response.ok) {
-        setMessage(result.error || "Unable to submit your request. Please try again.");
+        setMessage(t("p090"));
       } else {
         setSubmitted(true);
-        setMessage(result.message);
+        setMessage(t("requestReceived"));
       }
     } catch {
-      setMessage("Something went wrong. Please try again.");
+      setMessage(t("p158"));
     } finally {
       setSubmitting(false);
     }
   }
 
   if (loading) {
-    return <p style={{ color: muted }}>Loading availability...</p>;
+    return <p style={{ color: muted }}>{t("p091")}</p>;
   }
 
   if (error || !settings) {
-    return <p style={{ color: muted }}>{error || "Unavailable"}</p>;
+    return <p style={{ color: muted }}>{error || t("p159")}</p>;
   }
 
   return (
@@ -278,7 +286,7 @@ export default function RentalCalendar({
       }}
     >
       <p style={{ color: gold, letterSpacing: ".22em", fontSize: 12 }}>
-        PRIVATE RENTAL · AVAILABILITY
+        {t("p160")}
       </p>
 
       <h2
@@ -288,12 +296,11 @@ export default function RentalCalendar({
           fontSize: "clamp(36px,5vw,60px)",
         }}
       >
-        Plan your stay.
+        {t("p162")}
       </h2>
 
       <p style={{ color: muted, lineHeight: 1.8 }}>
-        Explore available dates and calculate your preferred stay.
-        All reservations require approval by MZS Group.
+        {t("p163")}
       </p>
 
       <div
@@ -317,6 +324,7 @@ export default function RentalCalendar({
             <button
               type="button"
               style={buttonStyle}
+                  aria-label={t("previousMonth")}
               disabled={
                 formatDate(month).slice(0, 7) <= today().slice(0, 7)
               }
@@ -330,7 +338,7 @@ export default function RentalCalendar({
             </button>
 
             <span style={{ fontFamily: "Georgia, serif", fontSize: 23 }}>
-              {month.toLocaleDateString("en-GB", {
+              {month.toLocaleDateString(displayLocale, {
                 month: "long",
                 year: "numeric",
                 timeZone: "UTC",
@@ -340,6 +348,7 @@ export default function RentalCalendar({
             <button
               type="button"
               style={buttonStyle}
+                  aria-label={t("nextMonth")}
               onClick={() =>
                 setMonth(
                   new Date(Date.UTC(year, monthIndex + 1, 1))
@@ -357,7 +366,7 @@ export default function RentalCalendar({
               gap: 5,
             }}
           >
-            {["M", "T", "W", "T", "F", "S", "S"].map(
+            {weekdays.map(
               (day, index) => (
                 <div
                   key={index}
@@ -389,7 +398,7 @@ export default function RentalCalendar({
                   type="button"
                   disabled={past || blocked}
                   onClick={() => selectDate(day)}
-                  aria-label={`${day}${blocked ? ", unavailable" : ""}`}
+                  aria-label={blocked ? t("blockedDate", {date: displayDate(day)}) : displayDate(day)}
                   aria-pressed={selected}
                   style={{
                     padding: "12px 3px",
@@ -419,23 +428,23 @@ export default function RentalCalendar({
           </div>
 
           <p style={{ color: muted, fontSize: 12, marginTop: 20 }}>
-            □ Available &nbsp; ■ Selected &nbsp; ■ Unavailable
+            {t("p164")}
           </p>
         </div>
 
         <div>
           <p style={{ color: gold, letterSpacing: ".16em" }}>
-            YOUR SELECTION
+            {t("p107")}
           </p>
 
           <div style={{ display: "flex", gap: 40, margin: "25px 0" }}>
             <div>
-              <p style={{ color: muted }}>Check-in</p>
-              <strong>{checkIn || "Select date"}</strong>
+              <p style={{ color: muted }}>{t("p165")}</p>
+              <strong>{checkIn ? displayDate(checkIn) : t("p166")}</strong>
             </div>
             <div>
-              <p style={{ color: muted }}>Check-out</p>
-              <strong>{checkOut || "Select date"}</strong>
+              <p style={{ color: muted }}>{t("p167")}</p>
+              <strong>{checkOut ? displayDate(checkOut) : t("p166")}</strong>
             </div>
           </div>
 
@@ -448,9 +457,7 @@ export default function RentalCalendar({
                 setPoolHeating(event.target.checked)
               }
             />
-            {" "}Pool heating (
-            {money(Number(settings.pool_heating_surcharge_eur ?? 0))}
-            /day)
+            {" "}{t("heatingRate", {price: money(Number(settings.pool_heating_surcharge_eur ?? 0))})}
           </label>
 
           <div
@@ -462,11 +469,11 @@ export default function RentalCalendar({
             }}
           >
             <div>
-              {nights} nights × {money(Number(settings.nightly_rate_eur))}
+              {t("nightlyCalculation", {count: nights, price: money(Number(settings.nightly_rate_eur))})}
             </div>
 
             {poolHeating && (
-              <div>Pool heating: {money(heatingTotal)}</div>
+              <div>{t("p170")} {money(heatingTotal)}</div>
             )}
 
             <div
@@ -480,7 +487,7 @@ export default function RentalCalendar({
             </div>
 
             <p style={{ color: muted, fontSize: 12 }}>
-              Estimated total · Stays from {settings.minimum_nights} night{settings.minimum_nights === 1 ? "" : "s"}
+              {t("estimatedMinimum", {count: settings.minimum_nights})}
             </p>
           </div>
 
@@ -495,11 +502,11 @@ export default function RentalCalendar({
               }}
             >
               <p style={{ color: gold, letterSpacing: ".16em" }}>
-                REQUEST YOUR STAY
+                {t("p114")}
               </p>
 
               <label>
-                Number of guests
+                {t("p115")}
                 <input
                   style={inputStyle}
                   type="number"
@@ -513,7 +520,7 @@ export default function RentalCalendar({
               </label>
 
               <label>
-                Preferred check-in time (optional)
+                {t("p116")}
                 <input
                   style={inputStyle}
                   type="time"
@@ -525,7 +532,7 @@ export default function RentalCalendar({
               </label>
 
               <label>
-                Preferred check-out time (optional)
+                {t("p117")}
                 <input
                   style={inputStyle}
                   type="time"
@@ -537,7 +544,7 @@ export default function RentalCalendar({
               </label>
 
               <label>
-                Special requests (optional)
+                {t("p118")}
                 <textarea
                   style={inputStyle}
                   rows={4}
@@ -563,13 +570,12 @@ export default function RentalCalendar({
                 }}
               >
                 {submitting
-                  ? "SUBMITTING..."
-                  : "SEND BOOKING REQUEST →"}
+                  ? t("p119")
+                  : t("p120")}
               </button>
 
               <p style={{ color: muted, fontSize: 12 }}>
-                Test mode only. This request does not reserve
-                or block the selected dates.
+                {t("p121")}
               </p>
             </div>
           )}

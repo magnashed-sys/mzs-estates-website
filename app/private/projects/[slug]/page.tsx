@@ -1,3 +1,4 @@
+import {getLocale, getTranslations} from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -7,7 +8,7 @@ import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import ProjectResources from "./ProjectResources";
 import PropertyWalkthrough from "./PropertyWalkthrough";
-import villaPhotoChapters from "./villaLaNuciaPhotos.json";
+import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
@@ -60,113 +61,117 @@ type Presentation = {
   locationDetail: string;
 };
 
-const villaBase = "/properties/villa-la-nucia";
-const marinaBase = "/properties/marina-botafoch-apartment";
-
-// Labels refer to the photo contents, not the original (sometimes misleading)
-// filename. This allows the existing media files to remain untouched.
-const villaPhotos = Array.from(new Map(
-  villaPhotoChapters.flatMap((chapter) => chapter.photos).map((photo) => [photo.src, photo]),
-).values()).map((photo) => ({
-  ...photo,
-  caption: photo.retouched ? `${photo.caption} · Bed linen digitally tidied` : photo.caption,
-}));
-const villaHighlights = ["6883", "6845", "6852", "6865", "6877"];
-const villaGallery: PropertyPhoto[] = [
-  ...villaHighlights.map((id) => villaPhotos.find((photo) => photo.src.endsWith(`/${id}.webp`))!),
-  ...villaPhotos.filter((photo) => !villaHighlights.some((id) => photo.src.endsWith(`/${id}.webp`))),
-];
-
-const marinaGallery: PropertyPhoto[] = [
-  { src: `${marinaBase}/residence-pool.webp`, alt: "Swimming pool in the Marina Botafoch residential complex", caption: "Residence pool" },
-  { src: `${marinaBase}/living-terrace.webp`, alt: "Bright living room opening onto the terrace", caption: "Living & terrace" },
-  { src: `${marinaBase}/terrace-pool-view.webp`, alt: "Private terrace overlooking the neighbourhood and pool", caption: "Views from the terrace" },
-  { src: `${marinaBase}/hero-living-kitchen.webp`, alt: "Contemporary fitted kitchen and living space", caption: "Contemporary kitchen" },
-  { src: `${marinaBase}/building-exterior.webp`, alt: "Exterior of the Marina Botafoch residence", caption: "The residence" },
-  { src: `${marinaBase}/private-terrace.webp`, alt: "Terrace doors and exterior seating area", caption: "Private terrace" },
-  { src: `${marinaBase}/bedroom-one.webp`, alt: "Light double bedroom with a window", caption: "Bedroom" },
-  { src: `${marinaBase}/bedroom-view.webp`, alt: "View from a bedroom window", caption: "Bedroom view" },
-  { src: `${marinaBase}/bathroom-two.webp`, alt: "Contemporary bathroom with shower", caption: "Bathroom" },
-  { src: `${marinaBase}/bathroom-detail.webp`, alt: "Bathroom detail in the apartment", caption: "Bathroom details" },
-  { src: `${marinaBase}/residence-gym.webp`, alt: "Shared gym with fitness machines", caption: "Residence gym" },
-  { src: `${marinaBase}/underground-parking.webp`, alt: "Underground car parking area", caption: "Parking" },
-  { src: `${marinaBase}/building-entrance.webp`, alt: "Entrance to the Benizamid 8 residence", caption: "Residence entrance" },
-];
-
-const presentations: Record<string, Presentation> = {
-  "villa-la-nucia": {
-    label: "COSTA BLANCA · PRIVATE RENTAL",
-    destination: "La Nucía · Costa Blanca, Spain",
-    title: "Villa La Nucia",
-    introduction: "A Mediterranean hideaway made for unhurried days, private gatherings and the freedom to unwind.",
-    hero: `${villaBase}/2026-10/6883.webp`,
-    heroAlt: "Villa La Nucia swimming pool, terraces and mountain views",
-    facts: [
-      { number: "04", label: "Bedrooms" },
-      { number: "03", label: "Bathrooms" },
-      { number: "08", label: "Maximum guests*" },
-      { number: "01", label: "Private pool" },
-    ],
-    gallery: villaGallery,
-    storyKicker: "THE VILLA",
-    storyTitle: "Together, with space to make it your own.",
-    storyParagraphs: [
-      "Set around a private pool and spacious terraces, Villa La Nucia balances an easy-going Mediterranean atmosphere with the privacy of separate living spaces.",
-      "The main residence has two double bedrooms, a bathroom, an inviting lounge and dining area, and a kitchen. Two independent guest accommodations each provide a double bedroom and their own bathroom — ideal for those who appreciate being together without sharing every moment.",
-    ],
-    featuresTitle: "The art of staying together, privately.",
-    features: [
-      { number: "01", title: "Main residence", description: "Two double bedrooms, a bathroom, living and dining space, and a fitted kitchen." },
-      { number: "02", title: "Guest accommodation", description: "Two independent guest spaces, each with a double bedroom and private bathroom." },
-      { number: "03", title: "Outdoors, all day", description: "A private swimming pool, sun terraces and an outdoor shower, with a quieter atmosphere after dark." },
-    ],
-    bookingKicker: "PRIVATE RENTAL",
-    bookingTitle: "Stay a little longer.",
-    bookingIntro: "Entire villa from €400 per night, with stays available from one night. Optional pool heating is available at €50 per day. Arrival and departure preferences can be included in your request; every booking is personally reviewed by MZS Group.",
-    locationHeading: "Your place on the Costa Blanca.",
-    locationDescription: "Enjoy the Costa Blanca's mountain scenery and Mediterranean towns from a private base in La Nucía.",
-    locationDetail: "Carrer Serra del Ferrer 3 · 03530 La Nucía · Alicante, Spain",
-  },
-  "marina-botafoch-apartment": {
-    label: "IBIZA · PRIVATE RENTAL",
-    destination: "Marina Botafoch · Ibiza, Spain",
-    title: "Marina Botafoch Apartment",
-    introduction: "A contemporary private residence, where bright interiors, a personal terrace and Ibiza's marina lifestyle come together.",
-    hero: `${marinaBase}/hero-living-kitchen.webp`,
-    heroAlt: "Sunlit kitchen and living area of Marina Botafoch Apartment",
-    facts: [
-      { number: "02–03", label: "Bedrooms" },
-      { number: "01–02", label: "Bathrooms" },
-      { number: "04–06", label: "Guests" },
-      { number: "01", label: "Residence pool" },
-    ],
-    gallery: marinaGallery,
-    storyKicker: "THE RESIDENCE",
-    storyTitle: "A quiet address, moments from the marina.",
-    storyParagraphs: [
-      "Step inside a light-filled apartment with an open living space, contemporary kitchen and private terrace. Its position within the Marina Botafoch area offers a comfortable starting point for an Ibiza stay.",
-      "The residential complex provides a swimming pool, fitness area and dedicated parking. Inside, the apartment can be reserved in either a two-bedroom or full three-bedroom configuration — always as a private, exclusive-use stay.",
-    ],
-    featuresTitle: "The ease of a private Ibiza residence.",
-    features: [
-      { number: "01", title: "Private terrace", description: "An extension of the living space, ideal for taking time outside without leaving home." },
-      { number: "02", title: "Residence amenities", description: "Access to the shared residence swimming pool, fitness room and a dedicated parking space." },
-      { number: "03", title: "Flexible configuration", description: "Choose two or three bedrooms. Both options refer to the same apartment and share one availability calendar." },
-    ],
-    bookingKicker: "YOUR IBIZA STAY",
-    bookingTitle: "Choose how you stay.",
-    bookingIntro: "Both options offer exclusive use of the apartment for stays from one night. Select the configuration in the live calendar below to request your preferred dates.",
-    rentalOptions: [
-      { title: "Two-bedroom residence", price: "€400", details: "2 bedrooms · 1 bathroom · Up to 4 guests", description: "Third bedroom and second bathroom remain closed." },
-      { title: "Three-bedroom residence", price: "€600", details: "3 bedrooms · 2 bathrooms · Up to 6 guests", description: "Full apartment configuration, for a larger party." },
-    ],
-    locationHeading: "Marina Botafoch, Ibiza.",
-    locationDescription: "An appealing contemporary address with the marina, the waterfront and Ibiza Town within reach.",
-    locationDetail: "Carrer de Benizamid 8, apartment 17 · 07800 Eivissa · Ibiza, Spain",
-  },
-};
-
 export default async function PrivateProjectPage({ params }: Props) {
+  const t = await getTranslations("ProjectUI");
+  const locale = await getLocale();
+  const villaPhotoChapters = localizedPhotoChapters(t);
+  const villaBase = "/properties/villa-la-nucia";
+  const marinaBase = "/properties/marina-botafoch-apartment";
+
+  // Labels refer to the photo contents, not the original (sometimes misleading)
+  // filename. This allows the existing media files to remain untouched.
+  const villaPhotos = Array.from(new Map(
+    villaPhotoChapters.flatMap((chapter) => chapter.photos).map((photo) => [photo.src, photo]),
+  ).values()).map((photo) => ({
+    ...photo,
+    caption: photo.retouched ? t("retouchedCaption", {caption: photo.caption}) : photo.caption,
+  }));
+  const villaHighlights = ["6883", "6845", "6852", "6865", "6877"];
+  const villaGallery: PropertyPhoto[] = [
+    ...villaHighlights.map((id) => villaPhotos.find((photo) => photo.src.endsWith(`/${id}.webp`))!),
+    ...villaPhotos.filter((photo) => !villaHighlights.some((id) => photo.src.endsWith(`/${id}.webp`))),
+  ];
+
+  const marinaGallery: PropertyPhoto[] = [
+    { src: `${marinaBase}/residence-pool.webp`, alt: t("p307"), caption: t("p308") },
+    { src: `${marinaBase}/living-terrace.webp`, alt: t("p309"), caption: t("p310") },
+    { src: `${marinaBase}/terrace-pool-view.webp`, alt: t("p311"), caption: t("p312") },
+    { src: `${marinaBase}/hero-living-kitchen.webp`, alt: t("p313"), caption: t("p314") },
+    { src: `${marinaBase}/building-exterior.webp`, alt: t("p315"), caption: t("p316") },
+    { src: `${marinaBase}/private-terrace.webp`, alt: t("p317"), caption: t("p318") },
+    { src: `${marinaBase}/bedroom-one.webp`, alt: t("p319"), caption: t("p320") },
+    { src: `${marinaBase}/bedroom-view.webp`, alt: t("p321"), caption: t("p322") },
+    { src: `${marinaBase}/bathroom-two.webp`, alt: t("p323"), caption: t("p324") },
+    { src: `${marinaBase}/bathroom-detail.webp`, alt: t("p325"), caption: t("p326") },
+    { src: `${marinaBase}/residence-gym.webp`, alt: t("p327"), caption: t("p328") },
+    { src: `${marinaBase}/underground-parking.webp`, alt: t("p329"), caption: t("p330") },
+    { src: `${marinaBase}/building-entrance.webp`, alt: t("p331"), caption: t("p332") },
+  ];
+
+  const presentations: Record<string, Presentation> = {
+    "villa-la-nucia": {
+      label: t("p333"),
+      destination: t("p334"),
+      title: "Villa La Nucia",
+      introduction: t("p336"),
+      hero: `${villaBase}/2026-10/6883.webp`,
+      heroAlt: t("p337"),
+      facts: [
+        { number: "04", label: t("p338") },
+        { number: "03", label: t("p339") },
+        { number: "08", label: t("p340") },
+        { number: "01", label: t("p341") },
+      ],
+      gallery: villaGallery,
+      storyKicker: t("p342"),
+      storyTitle: t("p343"),
+      storyParagraphs: [
+        t("p344"),
+        t("p345"),
+      ],
+      featuresTitle: t("p346"),
+      features: [
+        { number: "01", title: t("p347"), description: t("p348") },
+        { number: "02", title: t("p349"), description: t("p350") },
+        { number: "03", title: t("p351"), description: t("p352") },
+      ],
+      bookingKicker: t("p353"),
+      bookingTitle: t("p354"),
+      bookingIntro: t("p355"),
+      locationHeading: t("p356"),
+      locationDescription: t("p357"),
+      locationDetail: t("p358"),
+    },
+    "marina-botafoch-apartment": {
+      label: t("p359"),
+      destination: t("p360"),
+      title: "Marina Botafoch Apartment",
+      introduction: t("p362"),
+      hero: `${marinaBase}/hero-living-kitchen.webp`,
+      heroAlt: t("p363"),
+      facts: [
+        { number: "02–03", label: t("p338") },
+        { number: "01–02", label: t("p339") },
+        { number: "04–06", label: t("p364") },
+        { number: "01", label: t("p308") },
+      ],
+      gallery: marinaGallery,
+      storyKicker: t("p365"),
+      storyTitle: t("p366"),
+      storyParagraphs: [
+        t("p367"),
+        t("p368"),
+      ],
+      featuresTitle: t("p369"),
+      features: [
+        { number: "01", title: t("p318"), description: t("p370") },
+        { number: "02", title: t("p371"), description: t("p372") },
+        { number: "03", title: t("p373"), description: t("p374") },
+      ],
+      bookingKicker: t("p375"),
+      bookingTitle: t("p376"),
+      bookingIntro: t("p377"),
+      rentalOptions: [
+        { title: t("p378"), price: "€400", details: t("twoBedroomDetails"), description: t("p379") },
+        { title: t("p380"), price: "€600", details: t("threeBedroomDetails"), description: t("p381") },
+      ],
+      locationHeading: "Marina Botafoch, Ibiza.",
+      locationDescription: t("p383"),
+      locationDetail: t("p384"),
+    },
+  };
+
+
   const { slug } = await params;
   const supabase = await createClient();
   const { data: auth, error: authError } = await supabase.auth.getUser();
@@ -241,11 +246,11 @@ export default async function PrivateProjectPage({ params }: Props) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="MZS Group — homepage">
+        <a href={locale === "en" ? "/" : `/${locale}`} className={styles.brand} aria-label={t("p385")}>
           <span className={styles.brandMain}>MZS</span>
           <span className={styles.brandSub}>GROUP</span>
-        </Link>
-        <Link href="/private" className={styles.headerBack}>← BACK TO PRIVATE COLLECTION</Link>
+        </a>
+        <Link href="/private" className={styles.headerBack}>{t("p388")}</Link>
       </header>
 
       {slug === "amsterdam-floraweg" ? (
@@ -256,7 +261,7 @@ export default async function PrivateProjectPage({ params }: Props) {
         <VillaCanJuanInvestment allowInvestment={visibleOfferings.some((o) => o.offering_type === "investment")} allowAcquisition={visibleOfferings.some((o) => o.offering_type === "sale")} />
       ) : presentation ? (
         <>
-          <section className={styles.hero} aria-label={`${presentation.title} introduction`}>
+          <section className={styles.hero} aria-label={t("introduction", {title: presentation.title})}>
             <div className={styles.heroImage}>
               <Image src={presentation.hero} alt={presentation.heroAlt} fill priority sizes="100vw" className={styles.heroPhoto} />
             </div>
@@ -266,25 +271,25 @@ export default async function PrivateProjectPage({ params }: Props) {
               <h1>{presentation.title}</h1>
               <p className={styles.heroIntro}>{presentation.introduction}</p>
               <div className={styles.heroActions}>
-                <a href="#availability" className={styles.primaryButton}>CHECK AVAILABILITY <span aria-hidden="true">↗</span></a>
-                <a href="#gallery" className={styles.secondaryButton}>EXPLORE THE PROPERTY <span aria-hidden="true">↓</span></a>
+                <a href="#availability" className={styles.primaryButton}>{t("p389")} <span aria-hidden="true">↗</span></a>
+                <a href="#gallery" className={styles.secondaryButton}>{t("p390")} <span aria-hidden="true">↓</span></a>
               </div>
             </div>
-            <div className={styles.heroIndex} aria-hidden="true">MZS PRIVATE COLLECTION&nbsp; / &nbsp;{presentation.destination}</div>
+            <div className={styles.heroIndex} aria-hidden="true">{t("p391")}{presentation.destination}</div>
           </section>
 
-          <nav className={styles.anchorNav} aria-label="Explore this property">
+          <nav className={styles.anchorNav} aria-label={t("p392")}>
             <span className={styles.anchorName}>{presentation.title}</span>
             <div className={styles.anchorLinks}>
-              <a href="#gallery">PHOTOGRAPHY</a>
-              {slug === "villa-la-nucia" && <a href="#walkthrough">PHOTO TOUR</a>}
-              <a href="#experience">THE RESIDENCE</a>
-              <a href="#stay">THE STAY</a>
-              <a href="#availability" className={styles.anchorBook}>CHECK DATES ↗</a>
+              <a href="#gallery">{t("p393")}</a>
+              {slug === "villa-la-nucia" && <a href="#walkthrough">{t("p394")}</a>}
+              <a href="#experience">{t("p365")}</a>
+              <a href="#stay">{t("p395")}</a>
+              <a href="#availability" className={styles.anchorBook}>{t("p396")}</a>
             </div>
           </nav>
 
-          <section className={styles.facts} aria-label="Property highlights">
+          <section className={styles.facts} aria-label={t("p397")}>
             {presentation.facts.map((fact) => (
               <div className={styles.fact} key={fact.label}>
                 <span className={styles.factNumber}>{fact.number}</span>
@@ -296,10 +301,10 @@ export default async function PrivateProjectPage({ params }: Props) {
           <section id="gallery" className={styles.gallerySection}>
             <div className={styles.sectionHeader}>
               <div>
-                <p className={styles.kicker}>THE PRIVATE COLLECTION</p>
-                <h2>A closer look.</h2>
+                <p className={styles.kicker}>{t("p398")}</p>
+                <h2>{t("p399")}</h2>
               </div>
-              <p className={styles.sectionAside}>A considered selection of photographs of the property and its surroundings.</p>
+              <p className={styles.sectionAside}>{t("p400")}</p>
             </div>
             <PropertyGallery photos={presentation.gallery} title={presentation.title} />
           </section>
@@ -314,24 +319,24 @@ export default async function PrivateProjectPage({ params }: Props) {
                 <p className={styles.bodyCopy} key={text}>{text}</p>
               ))}
               {slug === "villa-la-nucia" && (
-                <p className={styles.disclaimer}>*Maximum occupancy is subject to confirmation of permitted rental use.</p>
+                <p className={styles.disclaimer}>{t("p401")}</p>
               )}
             </div>
             <div className={styles.storyVisual}>
               <Image
                 src={slug === "villa-la-nucia" ? `${villaBase}/2026-10/6845.webp` : `${marinaBase}/residence-pool.webp`}
-                alt={slug === "villa-la-nucia" ? "Villa La Nucia main residence interior" : "Shared pool at Marina Botafoch residence"}
+                alt={slug === "villa-la-nucia" ? t("p402") : t("p403")}
                 fill
                 sizes="(max-width: 900px) 100vw, 44vw"
                 className={styles.storyPhoto}
               />
-              <span className={styles.photoCredit}>{slug === "villa-la-nucia" ? "THE MAIN RESIDENCE" : "RESIDENCE AMENITIES"}</span>
+              <span className={styles.photoCredit}>{slug === "villa-la-nucia" ? t("p404") : t("p405")}</span>
             </div>
           </section>
 
           <section className={styles.experienceSection}>
             <div className={styles.experienceHeading}>
-              <p className={styles.kicker}>THE EXPERIENCE</p>
+              <p className={styles.kicker}>{t("p406")}</p>
               <h2>{presentation.featuresTitle}</h2>
             </div>
             <div className={styles.experienceGrid}>
@@ -353,10 +358,10 @@ export default async function PrivateProjectPage({ params }: Props) {
                 <p className={styles.bodyCopy}>{presentation.bookingIntro}</p>
               </div>
               <div className={styles.stayPrice}>
-                <span>FROM</span>
+                <span>{t("p407")}</span>
                 <strong>€400</strong>
-                <small>PER NIGHT · STAYS FROM 1 NIGHT</small>
-                <a href="#availability">SELECT YOUR DATES ↗</a>
+                <small>{t("p408")}</small>
+                <a href="#availability">{t("p409")}</a>
               </div>
             </div>
 
@@ -366,30 +371,30 @@ export default async function PrivateProjectPage({ params }: Props) {
                   <article className={styles.rentalOption} key={option.title}>
                     <div className={styles.optionTop}>
                       <h3>{option.title}</h3>
-                      <strong>{option.price}<span> / night</span></strong>
+                      <strong>{option.price}<span> {t("p410")}</span></strong>
                     </div>
                     <p className={styles.optionDetail}>{option.details}</p>
                     <p className={styles.optionNote}>{option.description}</p>
-                    <a href="#availability">CHECK THIS STAY ↗</a>
+                    <a href="#availability">{t("p411")}</a>
                   </article>
                 ))}
               </div>
             ) : (
               <div className={styles.villaNotes}>
-                <span>ENTIRE VILLA · EXCLUSIVE USE</span>
-                <span>POOL HEATING: €50 / DAY (OPTIONAL)</span>
-                <span>PERSONAL APPROVAL FOR EVERY REQUEST</span>
+                <span>{t("p412")}</span>
+                <span>{t("p413")}</span>
+                <span>{t("p414")}</span>
               </div>
             )}
           </section>
 
           <section id="availability" className={styles.calendarSection}>
             <div className={styles.calendarIntro}>
-              <p className={styles.kicker}>PERSONAL BOOKING REQUEST</p>
-              <h2>Plan your stay.</h2>
-              <p>Select your preferred dates below. Your request is reviewed individually by MZS Group.</p>
+              <p className={styles.kicker}>{t("p415")}</p>
+              <h2>{t("p162")}</h2>
+              <p>{t("p416")}</p>
             </div>
-            {/* Existing tested booking components: left entirely unchanged. */}
+            {/* Calendar presentation is localized; booking rules and API contracts are unchanged. */}
             {slug === "villa-la-nucia" ? (
               <RentalCalendar projectId={property.id} />
             ) : (
@@ -399,20 +404,20 @@ export default async function PrivateProjectPage({ params }: Props) {
 
           <section className={styles.locationSection}>
             <div>
-              <p className={styles.kicker}>LOCATION & SURROUNDINGS</p>
+              <p className={styles.kicker}>{t("p417")}</p>
               <h2>{presentation.locationHeading}</h2>
               <p>{presentation.locationDescription}</p>
             </div>
             <div className={styles.locationInfo}>
-              <span>THE ADDRESS</span>
+              <span>{t("p418")}</span>
               <p>{presentation.locationDetail}</p>
-              <a href="mailto:info@mzsgroup.eu?subject=MZS%20Private%20Collection%20%E2%80%94%20Property%20Enquiry">ENQUIRE PRIVATELY ↗</a>
+              <a href="mailto:info@mzsgroup.eu?subject=MZS%20Private%20Collection%20%E2%80%94%20Property%20Enquiry">{t("p419")}</a>
             </div>
           </section>
         </>
       ) : (
         <section className={styles.fallback}>
-          <p className={styles.kicker}>MZS PRIVATE COLLECTION</p>
+          <p className={styles.kicker}>{t("p420")}</p>
           <h1>{property.title}</h1>
           {property.subtitle && <p>{property.subtitle}</p>}
           {property.location && <p>{property.location}</p>}
@@ -432,9 +437,9 @@ export default async function PrivateProjectPage({ params }: Props) {
       {showStagingTestCalendar && (
         <section id="availability" className={styles.calendarSection}>
           <div className={styles.calendarIntro}>
-            <p className={styles.kicker}>STAGING TEST RESIDENCE</p>
-            <h2>Plan your test stay.</h2>
-            <p>Fictional availability and rates for testing. Select dates to check the calendar; do not submit a booking during this review.</p>
+            <p className={styles.kicker}>{t("p421")}</p>
+            <h2>{t("p422")}</h2>
+            <p>{t("p423")}</p>
           </div>
           <RentalCalendar projectId={property.id} />
         </section>
@@ -442,8 +447,8 @@ export default async function PrivateProjectPage({ params }: Props) {
 
       <footer className={styles.footer}>
         <span>PRIVATE · INDEPENDENT · INTERNATIONAL</span>
-        <a href="mailto:info@mzsgroup.eu">CONTACT MZS ↗</a>
-        <Link href="/private">BACK TO PRIVATE COLLECTION →</Link>
+        <a href="mailto:info@mzsgroup.eu">{t("p425")}</a>
+        <Link href="/private">{t("p426")}</Link>
       </footer>
     </main>
   );
