@@ -1,98 +1,101 @@
+import {useTranslations} from "next-intl";
 import Image from "next/image";
 import ProjectTimeline from "../../../components/projects/ProjectTimeline";
 import IbizaLoanTerms from "../../../components/projects/IbizaLoanTerms";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import styles from "./villaCanJuanInvestment.module.css";
 
-const base = "/properties/villa-can-juan-ibiza";
-const visionCaptions = [
-  "Open-air bathroom concept", "Kitchen concept", "Primary bedroom concept", "Garden shower concept",
-  "Living and dining concept", "Cinema room concept", "Living room and fireplace concept",
-  "Exterior terrace concept", "Landscape and entrance concept", "Outdoor bathing concept",
-  "Pool and terrace concept", "Poolside entertaining concept", "Pool at dusk concept",
-  "Estate and garden concept", "Garden courtyard concept", "Private outdoor lounge concept",
-  "Stone façade and landscape concept", "Shaded dining terrace concept",
-];
-const progressCaptions = [
-  "Pool excavation and construction · aerial view",
-  "Restoration works · aerial view",
-  "Existing stone structure and site works",
-  "Restoration works · overhead view",
-];
-const vision: PropertyPhoto[] = visionCaptions.map((caption, i) => ({
-  src: `${base}/vision-${String(i + 1).padStart(2, "0")}.webp`, alt: caption, caption,
-}));
-const progress: PropertyPhoto[] = progressCaptions.map((caption, i) => ({
-  // progress-01.webp is a future-state visualisation and intentionally excluded.
-  src: `${base}/progress-${String(i + 2).padStart(2, "0")}.webp`, alt: caption, caption,
-}));
-
-const enquiry = (kind: "investment" | "acquisition") => {
-  const subject = kind === "investment"
-    ? "Villa Can Juan Ibiza — Investment Enquiry"
-    : "Villa Can Juan Ibiza — Acquisition Enquiry";
-  const body = kind === "investment"
-    ? "Dear MZS Group,\n\nI would like to receive information about participation in Villa Can Juan Ibiza.\n\nName:\nTelephone:\n\nKind regards,"
-    : "Dear MZS Group,\n\nI would like to receive information about purchasing Villa Can Juan Ibiza.\n\nName:\nTelephone:\n\nKind regards,";
-  return `mailto:info@mzsgroup.eu?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-};
-
 export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisition }: { allowInvestment: boolean; allowAcquisition: boolean }) {
+  const t = useTranslations("ProjectUI");
+  const base = "/properties/villa-can-juan-ibiza";
+  const visionCaptions = [
+    t("p172"), t("p173"), t("p174"), t("p175"),
+    t("p176"), t("p177"), t("p178"),
+    t("p179"), t("p180"), t("p181"),
+    t("p182"), t("p183"), t("p184"),
+    t("p185"), t("p186"), t("p187"),
+    t("p188"), t("p189"),
+  ];
+  const progressCaptions = [
+    t("p190"),
+    t("p191"),
+    t("p192"),
+    t("p193"),
+  ];
+  const vision: PropertyPhoto[] = visionCaptions.map((caption, i) => ({
+    src: `${base}/vision-${String(i + 1).padStart(2, "0")}.webp`, alt: caption, caption,
+  }));
+  const progress: PropertyPhoto[] = progressCaptions.map((caption, i) => ({
+    // progress-01.webp is a future-state visualisation and intentionally excluded.
+    src: `${base}/progress-${String(i + 2).padStart(2, "0")}.webp`, alt: caption, caption,
+  }));
+
+  const enquiry = (kind: "investment" | "acquisition") => {
+    const subject = kind === "investment"
+      ? t("p194")
+      : t("p195");
+    const body = kind === "investment"
+      ? t("p196")
+      : t("p197");
+    return `mailto:info@mzsgroup.eu?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+
   return (
     <div className={styles.investment}>
-      <section className={styles.hero} aria-label="Villa Can Juan Ibiza investment introduction">
-        <Image src={`${base}/vision-09.webp`} alt="Architectural visualisation of Villa Can Juan Ibiza and Mediterranean gardens" fill priority sizes="100vw" className={styles.heroImage} />
+      <section className={styles.hero} aria-label={t("p198")}>
+        <Image src={`${base}/vision-09.webp`} alt={t("p199")} fill priority sizes="100vw" className={styles.heroImage} />
         <div className={styles.heroShade} />
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>MZS GROUP / PRIVATE INVESTMENTS / IBIZA</p>
+          <p className={styles.eyebrow}>{t("p200")}</p>
           <h1>Villa Can Juan <em>Ibiza</em></h1>
-          <p className={styles.lead}>A private countryside estate opportunity in Santa Gertrudis, available through a private offering.</p>
+          <p className={styles.lead}>{t("p203")}</p>
           <div className={styles.actions}>
-            <a href="#opportunity" className={styles.goldButton}>EXPLORE THE OPPORTUNITY ↗</a>
-            <a href="#acquisition" className={styles.outlineButton}>INVEST OR ACQUIRE ↓</a>
+            <a href="#opportunity" className={styles.goldButton}>{t("p025")}</a>
+            <a href="#acquisition" className={styles.outlineButton}>{t("p204")}</a>
           </div>
         </div>
-        <span className={styles.heroFoot}>ARCHITECTURAL VISUALISATION · PROPOSED DESIGN</span>
+        <span className={styles.heroFoot}>{t("p205")}</span>
       </section>
-      <nav className={styles.nav} aria-label="Project sections">
+      <nav className={styles.nav} aria-label={t("p028")}>
         <span>VILLA CAN JUAN IBIZA</span>
-        <div><a href="#opportunity">OVERVIEW</a><a href="#architecture">DESIGN</a><a href="#timeline">TIMELINE</a><a href="#progress">PROGRESS</a><a href="#acquisition">ENQUIRE ↗</a></div>
+        <div><a href="#opportunity">{t("p030")}</a><a href="#architecture">{t("p031")}</a><a href="#timeline">{t("p207")}</a><a href="#progress">{t("p208")}</a><a href="#acquisition">{t("p209")}</a></div>
       </nav>
-      <section className={styles.metrics} aria-label="Documented property details">
-        <div><strong>18,400 <small>m²</small></strong><span>REGISTERED PLOT AREA</span></div>
-        <div><strong>343.35 <small>m²</small></strong><span>TOTAL FLOOR AREA · AFTER RENOVATION</span></div>
-        <div><strong>IBIZA</strong><span>SANTA GERTRUDIS AREA</span></div>
-        <div><strong>{allowInvestment && allowAcquisition ? "2 WAYS" : "PRIVATE"}</strong><span>{allowInvestment && allowAcquisition ? "INVESTMENT / ACQUISITION" : allowInvestment ? "INVESTMENT" : "ACQUISITION"}</span></div>
+      <section className={styles.metrics} aria-label={t("p210")}>
+        <div><strong>18,400 <small>m²</small></strong><span>{t("p212")}</span></div>
+        <div><strong>343.35 <small>m²</small></strong><span>{t("p213")}</span></div>
+        <div><strong>IBIZA</strong><span>{t("p215")}</span></div>
+        <div><strong>{allowInvestment && allowAcquisition ? "2 WAYS" : t("p216")}</strong><span>{allowInvestment && allowAcquisition ? t("p217") : allowInvestment ? t("p033") : t("p218")}</span></div>
       </section>
       <section className={styles.intro} id="opportunity">
-        <div className={styles.introAside}><p className={styles.eyebrow}>01 / THE OPPORTUNITY</p><p className={styles.smallNote}>A considered real-estate opportunity presented through MZS Group's private collection.</p></div>
+        <div className={styles.introAside}><p className={styles.eyebrow}>{t("p219")}</p><p className={styles.smallNote}>{t("p220")}</p></div>
         <div className={styles.introMain}>
-          <h2>A distinctive estate. <em>A private opportunity.</em></h2>
-          <p>Villa Can Juan Ibiza is a rural property in the Santa Gertrudis area of Ibiza, combining traditional stone architecture with a contemporary design vision. The site is offered as an opportunity for investors interested in participating in a property project, subject to the offering access granted to each private client.</p>
-          <p>The concept imagery illustrates an aspirational architectural direction. Separate photographs document physical works at the site. The extent, status and permissibility of works shown in either set of images require independent technical and legal verification.</p>
+          <h2>{t("p221")} <em>{t("p222")}</em></h2>
+          <p>{t("p223")}</p>
+          <p>{t("p224")}</p>
         </div>
       </section>
       <div id="timeline"><ProjectTimeline milestones={{site:{date:"2022",status:"completed"},permit:{date:"2025",status:"completed"},construction:{date:"2026",status:"current"},completion:{date:"Q4 2027",status:"planned"}}} /></div>
       {allowInvestment && <IbizaLoanTerms />}
       <section className={styles.galleryBlock} id="architecture">
-        <header className={styles.sectionHead}><div><p className={styles.eyebrow}>02 / ARCHITECTURAL VISION</p><h2>A refined Mediterranean <em>expression.</em></h2></div><p>Concept visualisations · not photographs of the completed property.</p></header>
-        <PropertyGallery photos={vision} title="Villa Can Juan Ibiza — architectural vision" />
+        <header className={styles.sectionHead}><div><p className={styles.eyebrow}>{t("p226")}</p><h2><em>{t("canJuanExpression")}</em></h2></div><p>{t("p229")}</p></header>
+        <PropertyGallery photos={vision} title={t("p230")} />
       </section>
       <section className={styles.galleryBlockAlt} id="progress">
-        <header className={styles.sectionHead}><div><p className={styles.eyebrow}>03 / DEVELOPMENT PROGRESS</p><h2>The project <em>on site.</em></h2></div><p>Site photography supplied by the project representative. Photography date and current completion status are not independently verified.</p></header>
-        <PropertyGallery photos={progress} title="Villa Can Juan Ibiza — development progress" />
+        <header className={styles.sectionHead}><div><p className={styles.eyebrow}>{t("p231")}</p><h2>{t("p232")} <em>{t("p233")}</em></h2></div><p>{t("p234")}</p></header>
+        <PropertyGallery photos={progress} title={t("p235")} />
       </section>
       <section className={styles.detailSection} id="location">
-        <div><p className={styles.eyebrow}>04 / PROPERTY & LOCATION</p><h2>Santa Gertrudis, <em>Ibiza.</em></h2></div>
-        <div><p>The land is registered in the municipality of Santa Eulària des Riu, in the Santa Gertrudis parish, under property registration number 1643 and cadastral reference 07054A027000510000WK.</p><p>The registered parcel measures 1.84 hectares. The project’s total floor area after renovation is 343.35 m²: 255.35 m² on the ground floor and 88 m² underground. The 40 m² swimming pool is additional and is not included in the total floor area. Project areas supplied by the owner.</p><p className={styles.fine}>The land registry extract includes access and utility easements. Title, encumbrances, planning permissions, building licences, technical drawings, budgets and project status should be assessed during due diligence. Current project areas should be read alongside the approved plans and updated property records.</p></div>
+        <div><p className={styles.eyebrow}>{t("p236")}</p><h2>Santa Gertrudis, <em>Ibiza.</em></h2></div>
+        <div><p>{t("p239")}</p><p>{t("p240")}</p><p className={styles.fine}>{t("p241")}</p></div>
       </section>
       <section className={styles.opportunities} id="acquisition">
-        <div className={styles.centerHeader}><p className={styles.eyebrow}>05 / PRIVATE ENQUIRY</p><h2>Explore your <em>opportunity.</em></h2><p>Full transaction terms and supporting documentation are available for discussion directly with MZS Group. Any financing remains subject to final agreement.</p></div>
+        <div className={styles.centerHeader}><p className={styles.eyebrow}>{t("p242")}</p><h2>{t("p243")} <em>{t("p244")}</em></h2><p>{t("p245")}</p></div>
         <div className={styles.optionGrid}>
-          {allowInvestment && <article><span>01 / PARTICIPATION</span><h3>Investment Opportunity</h3><p>Discuss the proposed €1 million loan at 10% annual interest for an initial 12-month term. Participation covers the full initial amount; any additional financing is optional and separately agreed.</p><a href={enquiry("investment")} className={styles.goldButton}>REQUEST INVESTMENT DETAILS ↗</a></article>}
-          {allowAcquisition && <article><span>02 / FULL OWNERSHIP</span><h3>Acquisition Opportunity</h3><p>Enquire about acquiring the entire property. Price, scope of sale, conditions and the status of construction and permits will be discussed privately and verified as part of due diligence.</p><a href={enquiry("acquisition")} className={styles.outlineButton}>ENQUIRE ABOUT ACQUISITION ↗</a></article>}
+          {allowInvestment && <article><span>{t("p246")}</span><h3>{t("p066")}</h3><p>{t("p247")}</p><a href={enquiry("investment")} className={styles.goldButton}>{t("p248")}</a></article>}
+          {allowAcquisition && <article><span>{t("p249")}</span><h3>{t("p250")}</h3><p>{t("p251")}</p><a href={enquiry("acquisition")} className={styles.outlineButton}>{t("p074")}</a></article>}
         </div>
-        <p className={styles.legal}>PRIVATE INFORMATION · Images are illustrative concept visualisations or supplied site photographs, as labelled. This presentation is not a public offer, financial forecast, guarantee of return or legal confirmation of permitted works.</p>
+        <p className={styles.legal}>{t("p252")}</p>
       </section>
     </div>
   );

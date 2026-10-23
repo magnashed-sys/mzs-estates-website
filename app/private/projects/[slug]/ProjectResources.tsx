@@ -1,5 +1,8 @@
 "use client";
 
+import {useTranslations} from "next-intl";
+
+
 import { useEffect, useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
 import styles from "./projectResources.module.css";
@@ -14,6 +17,8 @@ const BUCKET = "mzs-private-project-documents";
 export default function ProjectResources({ projectId, editorial }: {
   projectId: string; editorial: Editorial[];
 }) {
+  const t = useTranslations("ProjectUI");
+
   const [documents, setDocuments] = useState<Document[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState("");
@@ -29,14 +34,14 @@ export default function ProjectResources({ projectId, editorial }: {
         .order("position").order("created_at");
       if (!mounted) return;
       if (failure) {
-        setStatus("error"); setError("Private documents are temporarily unavailable."); return;
+        setStatus("error"); setError(t("p122")); return;
       }
       setDocuments((data || []) as Document[]);
       setStatus("ready");
     }
     void load();
     return () => { mounted = false; };
-  }, [projectId]);
+  }, [projectId, t]);
 
   async function openDocument(document: Document) {
     if (opening) return;
@@ -44,7 +49,7 @@ export default function ProjectResources({ projectId, editorial }: {
     // short-lived signed URL. Browsers otherwise tend to block async popups.
     const newTab = window.open("about:blank", "_blank");
     if (!newTab) {
-      setError("Your browser blocked the new tab. Allow pop-ups for MZS Group and try again.");
+      setError(t("p123"));
       return;
     }
     // Avoid giving the destination page access to the client dashboard.
@@ -53,21 +58,21 @@ export default function ProjectResources({ projectId, editorial }: {
     try {
       const { data, error: failure } = await createClient().storage
         .from(BUCKET).createSignedUrl(document.file_path, 60);
-      if (failure || !data?.signedUrl) throw new Error("Your private document link could not be verified.");
+      if (failure || !data?.signedUrl) throw new Error(t("p124"));
       newTab.location.replace(data.signedUrl);
     } catch {
       newTab.close();
-      setError("This document could not be opened. Please try again or contact MZS Group.");
+      setError(t("p125"));
     } finally {
       setOpening(null);
     }
   }
 
   if (editorial.length === 0 && status === "ready" && documents.length === 0) return null;
-  return <section className={styles.section} aria-label="Private project updates and resources">
+  return <section className={styles.section} aria-label={t("p126")}>
     {editorial.length > 0 && <div className={styles.group}>
-      <p className={styles.eyebrow}>MZS Private Collection</p>
-      <h2>Project updates.</h2>
+      <p className={styles.eyebrow}>{t("p127")}</p>
+      <h2>{t("p128")}</h2>
       <div className={styles.grid}>
         {editorial.map(block => <article key={block.id} className={styles.card}>
           <h3>{block.heading}</h3>
@@ -76,21 +81,21 @@ export default function ProjectResources({ projectId, editorial }: {
       </div>
     </div>}
     {documents.length > 0 && <div className={styles.group}>
-      <p className={styles.eyebrow}>Restricted documents</p>
-      <h2>Private resources.</h2>
-      <p className={styles.description}>Only materials assigned to your account are listed. Download links expire after 60 seconds.</p>
+      <p className={styles.eyebrow}>{t("p129")}</p>
+      <h2>{t("p130")}</h2>
+      <p className={styles.description}>{t("p131")}</p>
       <div className={styles.grid}>
         {documents.map(doc => <article key={doc.id} className={styles.card}>
-          <p className={styles.kicker}>{doc.category} · {Math.ceil(doc.file_size_bytes / 1024)} KB</p>
+          <p className={styles.kicker}>{["presentation", "financial", "floorplan", "permit", "legal", "photo", "other"].includes(doc.category) ? t(`documentCategories.${doc.category}`) : doc.category} · {Math.ceil(doc.file_size_bytes / 1024)} KB</p>
           <h3>{doc.title}</h3>
           {doc.description && <p className={styles.body}>{doc.description}</p>}
           <button type="button" disabled={!!opening} onClick={()=>void openDocument(doc)} className={styles.button}>
-            {opening === doc.id ? "Checking access…" : "Open document in new tab ↗"}
+            {opening === doc.id ? t("p133") : t("p134")}
           </button>
         </article>)}
       </div>
     </div>}
-    {status === "error" && editorial.length === 0 && <p className={styles.description} role="status">Private resources are currently unavailable.</p>}
+    {status === "error" && editorial.length === 0 && <p className={styles.description} role="status">{t("p135")}</p>}
     {error && <p role="alert" className={styles.error}>{error}</p>}
   </section>;
 }

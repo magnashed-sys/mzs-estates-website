@@ -1,5 +1,8 @@
 "use client";
 
+import {useTranslations} from "next-intl";
+
+
 import Image from "next/image";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import styles from "./propertyPresentation.module.css";
@@ -13,6 +16,8 @@ export type PropertyPhoto = {
 type Props = { photos: PropertyPhoto[]; title: string };
 
 export default function PropertyGallery({ photos, title }: Props) {
+  const t = useTranslations("ProjectUI");
+
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
   const closeButton = useRef<HTMLButtonElement | null>(null);
@@ -84,7 +89,7 @@ export default function PropertyGallery({ photos, title }: Props) {
             type="button"
             className={`${styles.galleryTile} ${index === 0 ? styles.galleryTileLarge : ""}`}
             onClick={(event) => open(index, event)}
-            aria-label={`View photo ${index + 1} of ${total}: ${photo.caption}`}
+            aria-label={t("viewPhoto", {index: index + 1, total, caption: photo.caption})}
           >
             <Image
               src={photo.src}
@@ -94,19 +99,19 @@ export default function PropertyGallery({ photos, title }: Props) {
               className={styles.galleryTileImage}
             />
             <span className={styles.galleryTileLabel}>
-              {index === 4 ? `VIEW ALL ${total} PHOTOS ↗` : photo.caption}
+              {index === 4 ? t("viewAll", {count: total}) : photo.caption}
             </span>
           </button>
         ))}
       </div>
       <div className={styles.galleryUnder}>
-        <span>{total} PHOTOGRAPHS</span>
+        <span>{t("photoCount", {count: total})}</span>
         <button
           type="button"
           onClick={(event) => open(0, event)}
           className={styles.galleryAllButton}
         >
-          OPEN FULL GALLERY <span aria-hidden="true">↗</span>
+          {t("p137")} <span aria-hidden="true">↗</span>
         </button>
       </div>
 
@@ -116,7 +121,7 @@ export default function PropertyGallery({ photos, title }: Props) {
           ref={lightbox}
           role="dialog"
           aria-modal="true"
-          aria-label={`${title} photo gallery`}
+          aria-label={t("galleryTitle", {title})}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) close();
           }}
@@ -126,7 +131,7 @@ export default function PropertyGallery({ photos, title }: Props) {
               <strong>{title}</strong>
               <span>{activeIndex + 1} / {total}</span>
             </div>
-            <button type="button" onClick={close} ref={closeButton} aria-label="Close photo gallery" className={styles.lightboxClose}>CLOSE ✕</button>
+            <button type="button" onClick={close} ref={closeButton} aria-label={t("p138")} className={styles.lightboxClose}>{t("p139")}</button>
           </div>
 
           <div className={styles.lightboxCanvas}>
@@ -140,12 +145,12 @@ export default function PropertyGallery({ photos, title }: Props) {
             />
           </div>
           <div className={styles.lightboxBottom}>
-            <button type="button" aria-label="Previous photo" onClick={() => setActiveIndex((activeIndex - 1 + total) % total)}>
-              ← PREVIOUS
+            <button type="button" aria-label={t("p140")} onClick={() => setActiveIndex((activeIndex - 1 + total) % total)}>
+              {t("p141")}
             </button>
             <p aria-live="polite">{activePhoto.caption}</p>
-            <button type="button" aria-label="Next photo" onClick={() => setActiveIndex((activeIndex + 1) % total)}>
-              NEXT →
+            <button type="button" aria-label={t("p142")} onClick={() => setActiveIndex((activeIndex + 1) % total)}>
+              {t("p143")}
             </button>
           </div>
         </div>
