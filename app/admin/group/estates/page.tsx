@@ -13,6 +13,7 @@ export default async function EstatesHome() {
   return <><p className="mzsEyebrow">MZS ESTATES / MANAGEMENT</p><h1>Property Cockpit</h1>
     <p className="mzsIntro">Rental, sales and developments — integrated with the existing protected project management.</p>
     <section className="mzsCards">
+      <Link href="/admin/group/estates/units"><small>RENTAL REGISTER</small><h2>Rental units</h2><p>Open individual rental units and their linked properties, tenants and rental amounts.</p><span>Open rental units →</span></Link>
       <Link href="/admin/group/estates/properties"><small>PROPERTY REGISTER</small><h2>Ownership &amp; units</h2>
         <p>View property owners, individual units, recorded tenants and rental amounts.</p><span>Open property register →</span></Link>
       <Link href="/admin?tab=projects"><small>EXISTING ADMINISTRATION</small><h2>Projects & access</h2>

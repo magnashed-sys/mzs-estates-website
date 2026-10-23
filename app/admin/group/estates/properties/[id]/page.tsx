@@ -65,7 +65,7 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
           <table className={s.table}>
             <thead><tr><th scope="col">Unit / address</th><th scope="col">Recorded tenant</th><th scope="col" className={s.money}>Monthly rent</th><th scope="col" className={s.money}>Annual rent</th></tr></thead>
             <tbody>{units.map(unit => <tr key={unit.id}>
-              <td>{unit.address}<span className={s.type}>{unitTypes[unit.unit_type] || unit.unit_type}</span></td>
+              <td><Link className={s.link} href={`/admin/group/estates/units/${unit.id}`}>{unit.address}</Link><span className={s.type}>{unitTypes[unit.unit_type] || unit.unit_type}</span></td>
               <td>{unit.tenant_name || 'Not provided'}</td>
               <td className={s.money}>{unit.rent_included ? 'Included*' : euros(unit.monthly_rent)}</td>
               <td className={s.money}>{unit.rent_included ? 'Included*' : euros(Math.round(Number(unit.monthly_rent) * 100) * 12 / 100)}</td>
