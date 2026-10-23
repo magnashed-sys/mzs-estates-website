@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+import {localizedPath} from "../../i18n/public-routing";
+import {publicMetadata} from "../../i18n/metadata";
+export const generateMetadata = () => publicMetadata("capital", "/private-capital");
+import {getLocale, getTranslations} from 'next-intl/server';
 import Link from "next/link";
 import Image from "next/image";
 import atmosphere from "./atmosphere.module.css";
@@ -8,39 +11,35 @@ import styles from "../public-introductions.module.css";
 import IntroCallForm from "./IntroCallForm";
 import { introCallsEnvironmentAllowed } from "../../lib/mzs/intro-calls";
 
-export const metadata: Metadata = {
-  title: "Private Capital | MZS Capital",
-  description: "MZS Capital explores select private financing, investment and strategic partnership opportunities across real estate and businesses.",
-  alternates: { canonical: "/private-capital" },
-  openGraph: { title: "MZS Capital | Private Capital", description: "Independent capital. Private opportunities.", url: "/private-capital" },
-  ...(process.env.VERCEL_ENV === "preview" ? { robots: { index: false, follow: false } } : {}),
-};
 
+
+
+export default async function PrivateCapitalPage() {
+  const locale = await getLocale();
+  const t = await getTranslations('Capital');
 const focus = [
   {
     number: "01",
-    title: "Private Financing",
-    subtitle: "Capital with perspective",
+    title: t('private_financing'),
+    subtitle: t('capital_with_perspective'),
     description:
-      "Considering privately structured financing opportunities, including real estate-backed lending, corporate finance and selected debt transactions.",
+      t('considering_privately_structured_financing_opportunities_including'),
   },
   {
     number: "02",
-    title: "Private Investments",
-    subtitle: "Selected opportunities",
+    title: t('private_investments'),
+    subtitle: t('selected_opportunities'),
     description:
-      "Exploring private investment opportunities in real estate, businesses, participations and other alternative assets.",
+      t('exploring_private_investment_opportunities_in_real'),
   },
   {
     number: "03",
-    title: "Strategic Partnerships",
-    subtitle: "Relationships that matter",
+    title: t('strategic_partnerships'),
+    subtitle: t('relationships_that_matter'),
     description:
-      "Working with selected parties on potential joint ventures and individually structured transactions built on a long-term perspective.",
+      t('working_with_selected_parties_on_potential'),
   },
 ];
-
-export default function PrivateCapitalPage() {
   const introCallEnabled = introCallsEnvironmentAllowed();
   const atmosphereEnabled = introCallEnabled;
   return (
@@ -49,52 +48,43 @@ export default function PrivateCapitalPage() {
       <section className={`${styles.hero} ${atmosphereEnabled ? atmosphere.hero : ""}`} aria-labelledby="capital-heading">
         {atmosphereEnabled ? <div className={atmosphere.heroImage} aria-hidden="true"><Image src="/images/capital/mediterranean-light.webp" alt="" fill priority sizes="100vw" /><div className={atmosphere.heroShade} /></div> : <div className={styles.capitalImage} aria-hidden="true" />}
         <div className={styles.heroContent}>
-          <p className={styles.eyebrow}>MZS CAPITAL / PRIVATE CAPITAL</p>
-          <h1 id="capital-heading">Independent capital.<br /><em>Private opportunities.</em></h1>
+          <p className={styles.eyebrow}>{t('mzs_capital_private_capital')}</p>
+          <h1 id="capital-heading">{t('independent_capital')}<br /><em>{t('private_opportunities')}</em></h1>
           <div className={styles.rule} aria-hidden="true" />
-          <p className={styles.heroLead}>
-            A discreet and relationship-driven perspective on private financing,
-            investment opportunities and strategic partnerships.
-          </p>
-          {atmosphereEnabled ? <nav className={atmosphere.sectionNavigation} aria-label="Explore Private Capital">
-            <a href="#capital-perspective">Our Perspective <span aria-hidden="true">↗</span></a>
-            <a href="#capital-focus">Our Focus <span aria-hidden="true">↗</span></a>
-            <a href="#capital-method">Our Approach <span aria-hidden="true">↗</span></a>
-            <a href="#capital-securities">Securities <span aria-hidden="true">↗</span></a>
-            <a href="#introductory-call">Introductory Call <span aria-hidden="true">↗</span></a>
+          <p className={styles.heroLead}> {t('a_discreet_and_relationshipdriven_perspective_on')} </p>
+          {atmosphereEnabled ? <nav className={atmosphere.sectionNavigation} aria-label={t('explore_private_capital')}>
+            <a href="#capital-perspective">{t('our_perspective')} <span aria-hidden="true">↗</span></a>
+            <a href="#capital-focus">{t('our_focus')} <span aria-hidden="true">↗</span></a>
+            <a href="#capital-method">{t('our_approach')} <span aria-hidden="true">↗</span></a>
+            <a href="#capital-securities">{t('securities')} <span aria-hidden="true">↗</span></a>
+            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true">↗</span></a>
           </nav> : <div className={styles.heroActions}>
             {!atmosphereEnabled && (introCallEnabled ? (
-              <a className={styles.primaryAction} href="#introductory-call">Request an introductory call <span aria-hidden="true">↗</span></a>
+              <a className={styles.primaryAction} href="#introductory-call">{t('request_an_introductory_call')} <span aria-hidden="true">↗</span></a>
             ) : (
-              <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
+              <a className={styles.primaryAction} href="/request-access">{t('request_private_access')} <span aria-hidden="true">↗</span></a>
             ))}
-            <a className={styles.quietAction} href="#capital-focus">Discover Our Focus <span aria-hidden="true">↓</span></a>
+            <a className={styles.quietAction} href="#capital-focus">{t('discover_our_focus')} <span aria-hidden="true">↓</span></a>
           </div>}
         </div>
         <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
       </section>
 
       <section id="capital-perspective" className={styles.introduction} aria-labelledby="capital-intro">
-        <p className={styles.eyebrow}>OUR PERSPECTIVE / 01</p>
+        <p className={styles.eyebrow}>{t('our_perspective_01')}</p>
         <div className={styles.introColumns}>
-          <h2 id="capital-intro">Capital guided by <em>relationships.</em></h2>
+          <h2 id="capital-intro">{t('capital_guided_by')} <em>{t('relationships')}</em></h2>
           <div className={styles.introBody}>
-            <p>
-              MZS Capital focuses on private investment and financing opportunities
-              across real estate, businesses and selected alternative assets.
-            </p>
-            <p>
-              Our independent approach includes both group-related initiatives
-              and potential third-party transactions, considered on an individual basis.
-            </p>
+            <p> {t('mzs_capital_focuses_on_private_investment')} </p>
+            <p> {t('our_independent_approach_includes_both_grouprelated')} </p>
           </div>
         </div>
       </section>
 
       <section id="capital-focus" className={styles.activities} aria-labelledby="capital-activities">
         <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>OUR FOCUS / 02</p>
-          <h2 id="capital-activities">Private by nature.</h2>
+          <p className={styles.eyebrow}>{t('our_focus_02')}</p>
+          <h2 id="capital-activities">{t('private_by_nature')}</h2>
         </div>
         <div className={styles.activityGrid}>
           {focus.map((item) => (
@@ -109,65 +99,59 @@ export default function PrivateCapitalPage() {
       </section>
 
       <section id="capital-method" className={`${styles.presence} ${atmosphereEnabled ? atmosphere.approach : ""}`} aria-labelledby="capital-approach">
-        {atmosphereEnabled && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt="An illustrative, sunlit setting for a private conversation, with linen armchairs and olive trees." fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>SPACE FOR A PERSONAL PERSPECTIVE</figcaption></figure>}
+        {atmosphereEnabled && <figure className={atmosphere.conversationImage}><Image src="/images/capital/personal-conversation.webp" alt={t('an_illustrative_sunlit_setting_for_a')} fill sizes="(max-width: 850px) 100vw, 48vw" /><figcaption>{t('space_for_a_personal_perspective')}</figcaption></figure>}
         <div className={atmosphereEnabled ? atmosphere.approachCopy : atmosphere.unwrap}>
-        <p className={styles.eyebrow}>OUR APPROACH / 03</p>
+        <p className={styles.eyebrow}>{t('our_approach_03')}</p>
         <div>
-          <h2 id="capital-approach">Discretion first.<br /><em>Independent thinking.</em></h2>
-          <p>Every relationship, financing enquiry and opportunity is considered individually and confidentially.</p>
+          <h2 id="capital-approach">{t('discretion_first')}<br /><em>{t('independent_thinking')}</em></h2>
+          <p>{t('every_relationship_financing_enquiry_and_opportunity')}</p>
         </div>
         </div>
       </section>
 
       {atmosphereEnabled && <section id="capital-securities" className={`${styles.activities} ${atmosphere.securities}`} aria-labelledby="securities-heading">
         <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>SECURITIES / 04</p>
-          <h2 id="securities-heading">Securities</h2>
-          <p className={atmosphere.securityIntro}>A considered security structure is an important part of each financing arrangement. Depending on the transaction, the security we provide may include personal guarantees, mortgage rights over real estate or pledges over shares, individually agreed and documented.</p>
+          <p className={styles.eyebrow}>{t('securities_04')}</p>
+          <h2 id="securities-heading">{t('securities')}</h2>
+          <p className={atmosphere.securityIntro}>{t('a_considered_security_structure_is_an')}</p>
         </div>
         <div className={styles.activityGrid}>
           <article className={styles.activity}>
             <span className={styles.number}>01</span>
-            <p className={styles.activitySubtitle}>Personal commitment</p>
-            <h3>Personal Guarantees</h3>
-            <p>A personal guarantee may form part of the agreed security package, with its scope and terms set out in the transaction documentation.</p>
+            <p className={styles.activitySubtitle}>{t('personal_commitment')}</p>
+            <h3>{t('personal_guarantees')}</h3>
+            <p>{t('a_personal_guarantee_may_form_part')}</p>
           </article>
           <article className={styles.activity}>
             <span className={styles.number}>02</span>
-            <p className={styles.activitySubtitle}>Real estate security</p>
-            <h3>Mortgage Rights</h3>
-            <p>Financing may be secured by a mortgage right over specified real estate, with the property, ranking and terms agreed for the individual transaction.</p>
+            <p className={styles.activitySubtitle}>{t('real_estate_security')}</p>
+            <h3>{t('mortgage_rights')}</h3>
+            <p>{t('financing_may_be_secured_by_a')}</p>
           </article>
           <article className={styles.activity}>
             <span className={styles.number}>03</span>
-            <p className={styles.activitySubtitle}>Share security</p>
-            <h3>Share Pledges</h3>
-            <p>A pledge over shares in a relevant company may be included as security, subject to the agreed structure and transaction documentation.</p>
+            <p className={styles.activitySubtitle}>{t('share_security')}</p>
+            <h3>{t('share_pledges')}</h3>
+            <p>{t('a_pledge_over_shares_in_a')}</p>
           </article>
         </div>
-        <p className={atmosphere.securityNote}>The availability, scope and enforceability of security depend on the transaction and applicable law. Security does not eliminate investment risk or guarantee repayment.</p>
+        <p className={atmosphere.securityNote}>{t('the_availability_scope_and_enforceability_of')}</p>
       </section>}
 
       {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
-        <p className={styles.eyebrow}>SELECTED PRIVATE ACCESS</p>
-        <h2 id="capital-invitation">A confidential conversation<br />starts here.</h2>
-        <p>
-          Authorized clients and partners can view selected opportunities and submit
-          private capital enquiries within our secure platform.
-        </p>
+        <p className={styles.eyebrow}>{t('selected_private_access')}</p>
+        <h2 id="capital-invitation">{t('a_confidential_conversation')}<br />{t('starts_here')}</h2>
+        <p> {t('authorized_clients_and_partners_can_view')} </p>
         <div className={styles.heroActions}>
-          <Link className={styles.primaryAction} href="/login">Client & Partner Login <span aria-hidden="true">↗</span></Link>
-          <Link className={styles.quietAction} href="/request-access">Request Access <span aria-hidden="true">↗</span></Link>
+          <a className={styles.primaryAction} href="/login">{t('client_partner_login')} <span aria-hidden="true">↗</span></a>
+          <a className={styles.quietAction} href="/request-access">{t('request_access')} <span aria-hidden="true">↗</span></a>
         </div>
-        <p className={styles.disclaimer}>
-          Information on this page is introductory only and does not constitute
-          a public offer of securities, investment advice or a financing commitment.
-        </p>
+        <p className={styles.disclaimer}> {t('information_on_this_page_is_introductory')} </p>
       </section>}
-      {atmosphereEnabled && <p className={atmosphere.imageNote}>Illustrative atmosphere imagery.</p>}
+      {atmosphereEnabled && <p className={atmosphere.imageNote}>{t('illustrative_atmosphere_imagery')}</p>}
       <div className={styles.bottomNavigation}>
-        <Link href="/">← MZS Group</Link>
-        <Link href="/real-estate">Explore Real Estate ↗</Link>
+        <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
+        <Link href={localizedPath("/real-estate", locale)}>{t('explore_real_estate')}</Link>
       </div>
       <div className={styles.footerWrap}><HomeContactFooter email="info@mzsgroup.eu" /></div>
     </main>

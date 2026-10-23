@@ -1,5 +1,6 @@
+import createNextIntlPlugin from 'next-intl/plugin';
 /** Basic headers compatible with existing images, galleries and external links. */
-export default {
+export default createNextIntlPlugin()({
  async headers() {
   return [{source:'/:path*',headers:[
    {key:'X-Content-Type-Options',value:'nosniff'},
@@ -8,4 +9,4 @@ export default {
    {key:'Referrer-Policy',value:'strict-origin-when-cross-origin'}
   ]}];
  }
-};
+});

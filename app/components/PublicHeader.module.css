@@ -102,3 +102,30 @@
 @media (prefers-reduced-motion: reduce) {
   .header .navLink,.header .dashboardLink {transition:none;}
 }
+
+/* Compact language navigation keeps the existing logo and menu hierarchy. */
+.navigationRegion {gap:20px;}
+ .languages {position:relative;flex-shrink:0;}
+.languageToggle {display:grid;place-items:center;width:44px;height:44px;cursor:pointer;
+  list-style:none;color:#d5c09a;border:1px solid rgba(213,192,154,.4);border-radius:50%;
+  background:rgba(10,10,10,.3);}
+.languageToggle::-webkit-details-marker {display:none;}
+.languageToggle:hover,.languages[open] .languageToggle {color:#fff;border-color:#d5c09a;}
+.languageToggle:focus-visible,.languagePanel a:focus-visible {outline:2px solid #d5c09a;outline-offset:3px;}
+.languagePanel {position:absolute;top:calc(100% + 10px);right:0;z-index:30;
+  display:flex;flex-direction:column;min-width:180px;padding:6px;
+  border:1px solid rgba(213,192,154,.55);background:#0c0d0d;
+  box-shadow:0 20px 45px rgba(0,0,0,.4);}
+.languagePanel a {display:flex;align-items:center;justify-content:space-between;gap:24px;
+  min-height:44px;padding:10px 12px;color:#e0d9cd;text-decoration:none;
+  font:500 13px/1.5 Arial,Helvetica,sans-serif;}
+.languagePanel a[aria-current="page"] {color:#e4cfaa;background:rgba(213,192,154,.1);}
+.languagePanel a:hover {color:#fff;background:rgba(213,192,154,.15);}
+@media (max-width:1250px) {
+ .desktopNavigation {display:none;}
+ .mobileNavigation {display:block;}
+}
+@media (max-width:480px) {
+ .navigationRegion {gap:8px;}
+ .menuToggle {gap:7px;padding:7px;letter-spacing:.07em;}
+}
