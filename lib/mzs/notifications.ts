@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted";
+type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted" | "intro_call_requested";
 type EventRow = {
   id: string;
   user_id: string;
@@ -197,6 +197,13 @@ function template(event: EventRow, recipientName: string) {
       " Sign in to review your updated collection.";
     link = site + "/private";
     linkTitle = "EXPLORE MY COLLECTION";
+  } else if (event.event_type === "intro_call_requested") {
+    subject = "New introductory call request | MZS Capital";
+    headline = "A new conversation starts here.";
+    intro = "A visitor has requested an introductory call without creating an account. Please review their contact details and arrange a convenient time.";
+    plain = intro + " Reference: " + str(event.payload.request_id);
+    link = site + "/admin/intro-calls";
+    linkTitle = "VIEW INTRODUCTORY CALLS";
   } else if (event.event_type === "capital_access_granted") {
     subject = "Your Private Capital access | MZS Group";
     headline = "Your private dossier is available.";
@@ -213,7 +220,7 @@ function template(event: EventRow, recipientName: string) {
     "<div style='text-align:center;color:" + GOLD + ";font-family:Georgia,serif;font-size:35px;letter-spacing:5px'>MZS</div>" +
     "<div style='text-align:center;letter-spacing:5px;font-size:10px;color:#d0c6b8;margin:10px 0 35px'>GROUP</div>" +
     "<p style='text-align:center;letter-spacing:3px;color:" + GOLD + ";font-size:11px'>PRIVATE ACCESS</p>" +
-    "<h1 style='font-family:Georgia,serif;font-weight:normal;text-align:center;font-size:33px'>" + escapeHtml(headline) + "</h1>" +
+    "<h1 style='color:#f4f0e7;font-family:Georgia,serif;font-weight:normal;text-align:center;font-size:33px'>" + escapeHtml(headline) + "</h1>" +
     "<p style='line-height:1.9;color:#d0c6b8'>Dear " + eName + ",</p>" +
     "<p style='line-height:1.9;color:#d0c6b8'>" + escapeHtml(intro) + "</p>" +
     detailsHtml +
@@ -255,6 +262,10 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       .select("full_name,email,is_active,role").eq("id", event.user_id).single();
     if (profileError || !profile?.email || profile.is_active !== true) {
       throw new Error("Recipient profile unavailable");
+    }
+    if (event.event_type === "intro_call_requested") {
+      if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Introductory call mail requires production");
+      if (profile.role !== "admin") throw new Error("Recipient is no longer an administrator");
     }
     if (event.event_type === "capital_access_granted") {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Capital mail requires production");

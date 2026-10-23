@@ -1,0 +1,74 @@
+.section {
+  padding: clamp(76px, 8vw, 120px) max(var(--mzs-public-inset), calc((100vw - var(--mzs-public-content)) / 2)) 44px;
+  scroll-margin-top: 24px;
+  background: radial-gradient(ellipse at 8% 25%, rgba(213,192,154,.045), transparent 60%), #0b0b0a;
+}
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(40px, 6vw, 90px); align-items: start; }
+.eyebrow { margin: 0; color: #d5c09a; font-size: 10px; letter-spacing: .2em; line-height: 1.7; }
+.introduction h2 { margin: 24px 0; font: 400 clamp(40px, 4.4vw, 64px)/1.09 Georgia, 'Times New Roman', serif; letter-spacing: -.035em; }
+.introduction h2 em { font-style: normal; color: #d5c09a; }
+.lead { max-width: 430px; color: #c5beb3; font-size: 15px; line-height: 1.9; }
+.callDetails { display: flex; gap: 15px; align-items: center; margin: 30px 0 34px; padding: 20px 0; border-block: 1px solid #38342c; }
+.clock { color: #d5c09a; display: flex; }
+.callDetails strong { display: block; color: #e9e1d3; font-size: 14px; font-weight: 400; }
+.callDetails div > span { display: block; color: #b3a99b; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 23px; }
+.steps li { display: flex; gap: 19px; align-items: baseline; }
+.steps li > span { color: #b6a17e; font-size: 10px; letter-spacing: .13em; }
+.steps strong { font-size: 13px; font-weight: 400; color: #ede5d9; }
+.steps p { color: #b3a99b; font-size: 12px; line-height: 1.7; margin: 6px 0 0; }
+.noAccount { color: #d5c09a; font: italic 15px/1.6 Georgia, 'Times New Roman', serif; margin: 29px 0 0; }
+.formPanel { border: 1px solid #4b4438; padding: clamp(25px, 3vw, 42px); background: linear-gradient(140deg, #1d1d19, #131412); }
+.previewNotice { margin: 0 0 25px; padding-bottom: 15px; border-bottom: 1px solid #39362f; color: #c6b18d; font-size: 11px; line-height: 1.7; letter-spacing: .02em; }
+.formPanel h3 { margin: 0; font: 400 clamp(25px, 2.5vw, 33px)/1.2 Georgia, 'Times New Roman', serif; letter-spacing: -.025em; }
+.formLead { color: #b9b0a3; font-size: 13px; line-height: 1.7; margin: 12px 0 29px; }
+.fields { min-width: 0; border: 0; margin: 0; padding: 0; display: grid; gap: 21px; }
+.fieldRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.fields label { display: block; min-width: 0; color: #e2d9cb; font-size: 12px; line-height: 1.7; }
+.optional { color: #afa698; font-size: 11px; }
+.required { color: #d5c09a; }
+.fields input, .fields textarea { display: block; width: 100%; margin-top: 8px; padding: 13px 14px; border: 1px solid #565145; border-radius: 0; background: #11120f; color: #f0ebe2; font: 400 16px/1.5 Arial, Helvetica, sans-serif; color-scheme: dark; }
+.fields input::placeholder, .fields textarea::placeholder { color: #a59f93; opacity: 1; font-size: 13px; }
+.fields textarea { resize: vertical; min-height: 104px; max-height: 360px; }
+.fields input:focus-visible, .fields textarea:focus-visible { outline: 2px solid #d5c09a; outline-offset: 2px; }
+.fields input:disabled, .fields textarea:disabled { opacity: .65; }
+.contactNote { margin: -1px 0 0; color: #b7ae9f; font-size: 11px; line-height: 1.8; }
+.submitButton { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px 20px; min-height: 55px; border: 1px solid #d5c09a; background: #d5c09a; color: #171610; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; text-align: left; cursor: pointer; transition: background .2s; }
+.submitButton:hover { background: #e6d4b5; }
+.submitButton:disabled { cursor: default; opacity: .65; }
+.submitButton > span { font-size: 19px; font-weight: 400; }
+.submitButton:focus-visible, .resetButton:focus-visible { outline: 2px solid #f0ebe2; outline-offset: 5px; }
+.requiredNote { margin: -10px 0 0; color: #aaa192; font-size: 10px; }
+.memberAccess { margin-top: 60px; border-top: 1px solid #38342c; padding-top: 25px; display: flex; justify-content: space-between; align-items: center; gap: 22px; }
+.memberAccess p { margin: 0; font-size: 13px; color: #bbb2a3; }
+.memberAccess > div { display: flex; gap: 30px; flex-wrap: wrap; }
+.memberAccess a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 10px; color: #d5c09a !important; letter-spacing: .07em; text-transform: uppercase; }
+.memberAccess a:hover { color: #fff !important; }
+.disclaimer { color: #aba293; font-size: 11px; line-height: 1.8; max-width: 650px; margin: 32px auto 0; text-align: center; }
+.confirmation { min-height: 474px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; outline: none; }
+.confirmationMark { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid #bba37b; border-radius: 50%; color: #d5c09a; font-size: 20px; margin-bottom: 29px; }
+.confirmation h3 { margin: 16px 0 10px; font-size: 40px; }
+.confirmation > p:not(.eyebrow) { color: #c5beb3; line-height: 1.9; font-size: 14px; }
+.confirmation .confirmationNote { font-size: 12px !important; color: #d5c09a !important; }
+.resetButton { display: inline-flex; gap: 25px; align-items: center; min-height: 44px; margin-top: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #a18b65; background: transparent; color: #d5c09a; font-size: 12px; cursor: pointer; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 38px; }
+  .lead { max-width: 600px; }
+  .callDetails { max-width: 600px; }
+  .introduction h2 { font-size: clamp(43px, 7vw, 64px); }
+  .memberAccess { align-items: flex-start; flex-direction: column; gap: 12px; }
+}
+@media (max-width: 540px) {
+  .fieldRow { grid-template-columns: 1fr; gap: 21px; }
+  .formPanel { padding: 24px 20px; }
+  .formPanel h3 { font-size: 28px; }
+  .submitButton { padding-inline: 14px; font-size: 9px; letter-spacing: .07em; }
+  .memberAccess > div { flex-direction: column; gap: 4px; }
+  .confirmation { min-height: 420px; }
+}
+@media (prefers-reduced-motion: reduce) { .submitButton { transition: none; } }
+
+.error { margin: 0; color: #f2b7a7; font-size: 13px; line-height: 1.7; }
+.contactNote summary { cursor: pointer; min-height: 28px; color: #d5c09a; }
+.confirmation .contactNote { overflow-wrap: anywhere; }

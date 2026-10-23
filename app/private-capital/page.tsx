@@ -3,12 +3,15 @@ import Link from "next/link";
 import PublicHeader from "../components/PublicHeader";
 import HomeContactFooter from "../components/HomeContactFooter";
 import styles from "../public-introductions.module.css";
+import IntroCallForm from "./IntroCallForm";
+import { introCallsEnvironmentAllowed } from "../../lib/mzs/intro-calls";
 
 export const metadata: Metadata = {
   title: "Private Capital | MZS Capital",
   description: "MZS Capital explores select private financing, investment and strategic partnership opportunities across real estate and businesses.",
   alternates: { canonical: "/private-capital" },
   openGraph: { title: "MZS Capital | Private Capital", description: "Independent capital. Private opportunities.", url: "/private-capital" },
+  ...(process.env.VERCEL_ENV === "preview" ? { robots: { index: false, follow: false } } : {}),
 };
 
 const focus = [
@@ -36,6 +39,7 @@ const focus = [
 ];
 
 export default function PrivateCapitalPage() {
+  const introCallEnabled = introCallsEnvironmentAllowed();
   return (
     <main className={styles.page}>
       <div className={styles.headerWrap}><PublicHeader /></div>
@@ -50,7 +54,11 @@ export default function PrivateCapitalPage() {
             investment opportunities and strategic partnerships.
           </p>
           <div className={styles.heroActions}>
-            <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
+            {introCallEnabled ? (
+              <a className={styles.primaryAction} href="#introductory-call">Request an introductory call <span aria-hidden="true">↗</span></a>
+            ) : (
+              <Link className={styles.primaryAction} href="/request-access">Request Private Access <span aria-hidden="true">↗</span></Link>
+            )}
             <a className={styles.quietAction} href="#capital-focus">Discover Our Focus <span aria-hidden="true">↓</span></a>
           </div>
         </div>
@@ -99,7 +107,7 @@ export default function PrivateCapitalPage() {
         </div>
       </section>
 
-      <section className={styles.invitation} aria-labelledby="capital-invitation">
+      {introCallEnabled ? <IntroCallForm preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
         <p className={styles.eyebrow}>SELECTED PRIVATE ACCESS</p>
         <h2 id="capital-invitation">A confidential conversation<br />starts here.</h2>
         <p>
@@ -114,7 +122,7 @@ export default function PrivateCapitalPage() {
           Information on this page is introductory only and does not constitute
           a public offer of securities, investment advice or a financing commitment.
         </p>
-      </section>
+      </section>}
       <div className={styles.bottomNavigation}>
         <Link href="/">← MZS Group</Link>
         <Link href="/real-estate">Explore Real Estate ↗</Link>
