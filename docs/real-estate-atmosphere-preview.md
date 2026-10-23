@@ -1,0 +1,5 @@
+# Real Estate visual alignment
+
+Staging-only example, based on approved Private Capital design. Four section links: Our Perspective, Our Activities, International Reach, Introductory Call. Existing property image becomes an optimized Next Image hero; the existing illustrative coastal asset accompanies International Reach. Final section reuses the introductory-call form with MZS Estates copy and existing login/request-access links beneath it.
+
+Public text and workflows are retained. No Securities section is included. Shared call intake validates the source, records it in the request and notification payload, and labels it in the admin overview. Apply 20261023082734_intro_call_source.sql before release; applied to Staging only. Existing Capital RPC remains compatible. Preview never sends email. Full browser submission needs a valid branch-scoped Staging service-role key; this branch currently has only the public Staging settings. Database source/idempotency/notification assertions passed in a rollback transaction. Preview requires the staging Supabase URL and is noindex. Production keeps its original appearance. Do not merge without owner review.

@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
       if (error) throw new Error("rate");
       if (data !== true) return response(429, { error: "Too many requests. Please try again in an hour or contact us by email." });
     }
-    const { data, error } = await db.rpc("mzs_submit_intro_call", {
+    const { data, error } = await db.rpc(input.source === "real-estate" ? "mzs_submit_intro_call_with_source" : "mzs_submit_intro_call", {
+      ...(input.source === "real-estate" ? { p_source: input.source } : {}),
       p_request_key: input.requestKey, p_name: input.name, p_email: input.email, p_phone: input.phone, p_message: input.message,
     });
     if (error || !data?.id) throw new Error("save");

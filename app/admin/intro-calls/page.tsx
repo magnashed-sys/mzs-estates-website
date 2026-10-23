@@ -30,11 +30,11 @@ export default async function IntroCallsAdmin({ searchParams }: { searchParams: 
   const query = await searchParams;
   const page = Math.max(1, Math.min(100000, Number.parseInt(query.page || "1", 10) || 1));
   const { data, error, count } = await db.from("mzs_intro_call_requests")
-    .select("id,full_name,email,phone,message,status,created_at", { count: "exact" })
+    .select("id,full_name,email,phone,message,status,created_at,source", { count: "exact" })
     .order("created_at", { ascending: false }).range((page - 1) * 30, page * 30 - 1);
   return <main className={styles.page}>
     <Link href="/admin/group/capital">← MZS Capital Cockpit</Link>
-    <p className={styles.kicker}>MZS CAPITAL / FIRST CONVERSATIONS</p>
+    <p className={styles.kicker}>MZS GROUP / FIRST CONVERSATIONS</p>
     <h1>Introductory Calls</h1>
     <p>Public enquiries received without a private account. Contact the requester personally to arrange a time.</p>
     {query.updated && <p role="status">Status updated.</p>}
@@ -43,6 +43,7 @@ export default async function IntroCallsAdmin({ searchParams }: { searchParams: 
       <p>{count || 0} requests · Page {page}</p>
       <div className={styles.list}>{data?.map(item => <article className={styles.card} key={item.id}>
         <div className={styles.top}><strong>{item.status}</strong><span>{new Date(item.created_at).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })}</span></div>
+        <p>{item.source === "real-estate" ? "Real Estate" : "Private Capital"}</p>
         <h2>{item.full_name}</h2>
         <p><a href={"mailto:" + item.email}>{item.email}</a>{item.phone && <><br />{item.phone}</>}</p>
         {item.message && <p className={styles.explanation}>{item.message}</p>}
