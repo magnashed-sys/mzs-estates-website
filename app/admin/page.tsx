@@ -397,6 +397,7 @@ export default function AdminPage() {
 
 
       {tab === "estates" && <>
+        <Link onClick={guardLink} className="admin-button admin-button-primary" href="/admin/group/estates/contracts">Rental relationships, contracts &amp; invoices →</Link>
         <div className="admin-section-heading"><div><p className="eyebrow">MZS Estates</p><h2>Properties &amp; rental units.</h2></div></div>
         <div className="admin-project-grid">
           <article className="admin-panel"><p className="eyebrow">Property register</p><h3 className="admin-subtitle">Ownership &amp; properties.</h3><p className="admin-intro">View your properties, photographs, ownership details and managing agents.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/properties">Open properties →</Link></article>

@@ -1,40 +1,32 @@
-# Rental contracts and monthly concept invoices — Staging
+# Rental relationships, contracts and monthly invoice drafts
 
-This first release links agreements to the existing 22 rental units and prepares monthly concept invoices. It is guarded to Vercel Preview with the exact MZS Staging project URL. Production remains unavailable even if the branch is accidentally merged; removing that guard is a separate owner-approved release.
+The owner approved publishing the administration module on 24 October 2026 so real relationships and agreements can be entered and reviewed. Production and Preview each require their exact matching Supabase project. Only active full Group administrators may use the routes, server actions, data and private documents. Saving a rental relationship does not create an Auth account, activate a client, grant access or send an invitation.
 
-## Delivered workflow
+## Current workflow
 
-- Active Group administrators can create/edit draft contracts, select one or multiple units from the same property, optionally link an existing account, record a person/company tenant, and set the issuing landlord, address and bank details. Creating a lease does not create a login or change client rights.
-- Separate contract date, lease dates, first invoice month in MZS, and first preparation date prevent historical re-invoicing at cutover. Frequency is monthly, with optional maximum terms. Billing day stays anchored across short months.
-- Recurring subject uses `{unitadres}`, `{maand}`, `{jaar}` from the rental period, with EN/NL/ES month names. The unused periodic assignment subject is omitted.
-- Separate line amounts and VAT choices; optional calendar-day proration; deposit is recorded outside recurring charges. Unknown utility advances remain unknown when suggesting unit amounts.
-- Activation locks terms. Active contracts can stop billing without deleting history or implying legal termination. Revised terms require a replacement draft with the next uninvoiced period. Overlapping active unit agreements and replacement billing of already drafted periods are rejected.
-- Daily Supabase Cron on Staging catches up due months. Manual preparation uses the same function. Database uniqueness and locks prevent repeated processing from duplicating a period. Stored snapshots preserve calculated amounts and parties.
-- Draft review notes/status and append-only contract/invoice audit history. Checking a draft is not invoice issuing. No final numbers, payment collection, emails or credit notes exist in this release.
-- Private PDF attachment bucket, 10 MB/file, active Group-admin-only storage policies and 60-second viewing links in a new tab.
+- Rental relationships: create/edit a person or company, with optional billing address, email, phone and reference. Optimistic versions protect concurrent edits. Select a relationship to copy its billing details into a draft contract; later edits do not rewrite existing contract/invoice snapshots.
+- Contracts: one or multiple units within a property, a legal tenant and landlord, optional existing login association, dates, monthly lines/VAT, deposit and notes. Billing addresses and IBAN may be omitted while drafting but are mandatory at activation. Unknown utility advances stay empty until confirmed or removed.
+- Cutover: first MZS invoice period is December 2026 or later. Drafts are prepared on the 14th of the preceding month. December 2026 therefore prepares on 14 November 2026 and has a payment deadline of 30 November 2026 (received before 1 December).
+- Daily scheduler catches up eligible periods; it never prepares a future scheduled period. Only explicitly activated contracts are included. A unique contract/period key and row locks prevent duplicates. The public RPC takes no date or amount input.
+- Partial months use calendar-day proration when selected. VAT is calculated per line. Deposit is not a recurring line. Subject placeholders `{unitadres}`, `{maand}`, `{jaar}` use the rental period and selected NL/EN/ES language.
+- Activated terms are immutable. Stop a schedule, then create a replacement beginning with the next uninvoiced month. Existing drafts and audit records are preserved.
+- Review records who checked a draft. It is not an approval to send. **Final invoice numbering, final PDF generation, issuing, corrections, email delivery and payment tracking are not implemented/enabled in this release.** Complete and test those before the first actual invoice dispatch.
+- Signed agreement attachments: private PDFs, max 10 MB, active Group-admin only; viewing URLs expire after 60 seconds and open in a new tab.
 
-## Staging operations
+## Security changes
 
-Apply `supabase/migrations/20261024081252_estate_contract_drafts.sql` to MZS Staging only. Then explicitly apply `supabase/staging/estate-contract-schedule.sql` to Staging: daily at 05:15 UTC, using Europe/Amsterdam to determine the billing date. Only contracts explicitly activated by an administrator are processed. Production is not scheduled.
+Browser roles have no INSERT permission on invoice drafts or audit records. Invoice generation runs through a private SECURITY DEFINER entry point which requires a non-null `auth.uid()` and the existing active Group-admin check. Its search path is empty and objects are qualified. The public RPC remains SECURITY INVOKER. The date-driven core generator is not executable by authenticated, anonymous or service roles; only the trusted database scheduler/owner can call it. Audit insertion is a private trigger with no browser EXECUTE grant, and actor identity comes from `auth.uid()`. These narrow privileged functions are necessary to remove direct INSERT rights without removing authorization checks.
 
-Check `cron.job_run_details` for execution results. To disable this schedule without deleting data: `select cron.unschedule('mzs-staging-lease-drafts');` on Staging.
+## Deployment
 
-## Validation
+Apply migrations in order: `20261024081252_estate_contract_drafts.sql`, then `20261024085449_lease_production_controls.sql`. Staging already had the first migration. No Staging contract, profile or test fixture is imported to Production.
 
-`npm test` includes a real PostgreSQL-compatible PGlite run of the migration and lifecycle, duplicate/overlap controls, old-platform cutover, catch-up, term limits, end dates, leap/month ends, calendar-day prorating, VAT rounding, placeholders, locked terms, review audit and admin/client/inactive/anonymous access tests.
+After checking schema/policies, run the appropriate operational SQL: `supabase/staging/estate-contract-schedule.sql` or `supabase/production/estate-contract-schedule.sql`. Jobs run daily at 05:15 UTC and determine the business date in Europe/Amsterdam. Actual processing starts on each contract's 14th; a daily catch-up allows recovery from missed runs. Check `cron.job_run_details`. The Production job can be stopped with `cron.unschedule('mzs-production-lease-drafts')`; this preserves saved relationships/contracts/invoices. Reverting the application to the previous release hides the module without deleting data.
 
-`MZS_PLAYWRIGHT_MODULE=/path/to/playwright node tests/browser/lease-contracts.cjs` runs the built application with local in-memory Supabase/auth fixtures: create → activate → prepare → review → repeat, empty unknown advances, live subject preview, mobile/desktop overflow and access denial. It never connects to real client accounts or sends messages.
+## Verification
 
-The month-entry regression covers the plain-text fallback used by browsers without a native month picker. Typing `2` previously crashed the production build with `Invalid time value`; partial/invalid/cleared values now leave the form intact, block submission and can be corrected to a complete `YYYY-MM`. The subject preview formats only a validated month. The browser test explicitly simulates that fallback in Chromium; it does not establish a native Safari test. Set `MZS_BROWSER=webkit` with an installed WebKit runtime to run the same flow there.
+`npm test` runs the actual ordered migrations in PGlite. Coverage includes forbidden direct invoice/audit inserts even for admins, denied private generator calls, client/inactive/anonymous denial, offline relationship creation, incomplete draft versus activation, pre-cutover rejection, month/year boundaries, proration/VAT, invoice uniqueness, immutable terms and audit attribution.
 
-Run optimized build and TypeScript. After Staging migration, verify table policies, private storage bucket, zero imported/activated contracts and security advisors. Existing unrelated advisor findings are outside this change; no lease-module finding was reported. Advisor references: https://supabase.com/docs/guides/database/database-linter and https://supabase.com/docs/guides/auth/password-security.
+`MZS_PLAYWRIGHT_MODULE=/path/to/playwright node tests/browser/lease-contracts.cjs` tests the built application with in-memory local Auth/database fixtures: create rental relationship, select it on a contract, safely type invalid/partial month values, save → activate → prepare → review → repeat, and mobile/desktop layouts. It never sends emails or accesses actual client accounts. Chromium explicitly simulates unsupported month input fallback. Native Safari and real signed-in PDF upload remain user acceptance checks.
 
-## Owner acceptance and next increment
-
-- Open Property Cockpit → Contracts & invoices with the existing Staging Group-admin account.
-- Create a test draft using one or more units. Check landlord, tenant, starting period, amounts, VAT choice and subject preview.
-- Activate only the intended test agreement. Use a due first preparation date to review concepts immediately; future dates wait until due.
-- Confirm signed PDF upload and opening with the real Staging account (automated browser tests use synthetic auth and do not upload real agreements).
-- Before Production: approve invoice design, final numbering per issuer, editable concept corrections/credit workflow, legal/tax settings, historical migration scope and cutover month. Issuing/email delivery, automatic indexation, tenant access, entity master data and banking/accounting integrations are later increments, not silently enabled.
-
-Do not stop the old billing platform until the Production cutover and comparison have been approved. Existing contract documents, start dates and VAT treatment have not been guessed or imported.
+Before release: optimized build, TypeScript, GitHub CI, rolled-back Staging database workflow and security advisors. After release: matching Production commit/READY deployment, anonymous route denial, empty initial production contract/relationship/invoice tables, private PDF bucket and active scheduler. A future scheduled run cannot be claimed as already tested live.

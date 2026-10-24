@@ -11,3 +11,9 @@ export function leaseSubjectPreview(subject: string, period: string, language: s
   const month = new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' }).format(new Date(`${start}T12:00:00Z`));
   return subject.replaceAll('{unitadres}', addresses || '[unit]').replaceAll('{maand}', month).replaceAll('{jaar}', period.slice(0, 4));
 }
+
+export function leasePreparationDate(period: string): string {
+ const start=invoiceMonthStart(period);if(!start)return '';
+ const d=new Date(`${start}T12:00:00Z`);d.setUTCMonth(d.getUTCMonth()-1);d.setUTCDate(14);
+ return d.toISOString().slice(0,10);
+}

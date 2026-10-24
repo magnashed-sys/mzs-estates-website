@@ -6,7 +6,7 @@ import { requireContractAdmin } from '../../../../../lib/security/estate-contrac
 const path = '/admin/group/estates/contracts';
 export async function saveContract(input: Record<string, unknown>, id?: string, version?: number) {
   const { db } = await requireContractAdmin();
-  const allowed = ['title','property_id','unit_ids','tenant_profile_id','tenant_name','tenant_address','tenant_email','issuer_name','issuer_address','issuer_iban','issuer_tax_id','contract_date','lease_start','lease_end','first_period','first_generation_date','max_terms','payment_days','payment_conditions','customer_reference','invoice_subject','invoice_language','planning_color','deposit','prorate','lines','notes'];
+  const allowed = ['title','property_id','unit_ids','tenant_profile_id','tenant_relationship_id','tenant_name','tenant_address','tenant_email','issuer_name','issuer_address','issuer_iban','issuer_tax_id','contract_date','lease_start','lease_end','first_period','first_generation_date','max_terms','payment_days','payment_conditions','customer_reference','invoice_subject','invoice_language','planning_color','deposit','prorate','lines','notes'];
   const payload = Object.fromEntries(allowed.filter(key => key in input).map(key => [key,input[key]]));
   const q = id ? db.from('mzs_lease_contracts').update(payload).eq('id',id).eq('version',version).eq('status','draft') : db.from('mzs_lease_contracts').insert(payload);
   const { data,error } = await q.select('id').maybeSingle();
@@ -44,4 +44,14 @@ export async function leaseDocuments(id: string) {
     return {name:file.name.replace(/^[0-9a-f-]{36}-/,''),url:signed?.signedUrl || ''};
   }));
   return { documents };
+}
+
+export async function saveLeaseRelationship(input: Record<string, unknown>, id?: string, version?: number) {
+ const {db}=await requireContractAdmin();
+ const allowed=['name','kind','address','email','phone','reference'];
+ const payload=Object.fromEntries(allowed.filter(key=>key in input).map(key=>[key,input[key]]));
+ const q=id?db.from('mzs_lease_relationships').update(payload).eq('id',id).eq('version',version):db.from('mzs_lease_relationships').insert(payload);
+ const {data,error}=await q.select('id').maybeSingle();
+ if(error||!data)return {error:error?.message||'This relationship has changed. Refresh the page.'};
+ revalidatePath(path);return {id:data.id as string};
 }

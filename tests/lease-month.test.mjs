@@ -23,3 +23,5 @@ test('complete invoice months preserve period, placeholders and selected languag
  assert.equal(api.leaseSubjectPreview('{maand} {jaar}','0001-01','en',''),'January 0001');
  assert.equal(api.leaseSubjectPreview('{maand} {jaar}','9999-12','en',''),'December 9999');
 });
+
+test('preparation is the 14th of the preceding month, including year rollover',()=>{assert.equal(api.leasePreparationDate('2026-12'),'2026-11-14');assert.equal(api.leasePreparationDate('2027-01'),'2026-12-14');assert.equal(api.leasePreparationDate('2028-03'),'2028-02-14');assert.equal(api.leasePreparationDate('2026-'),'');});
