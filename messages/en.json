@@ -114,6 +114,8 @@
     "mobile_main_navigation": "Mobile main navigation"
   },
   "Footer": {
+    "contact_short": "Contact",
+    "request_short": "Request",
     "contact_mzs": "Contact MZS",
     "private_access": "PRIVATE ACCESS",
     "contactEmail": "Contact MZS Group by email: {address}"

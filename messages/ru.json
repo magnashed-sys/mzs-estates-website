@@ -114,6 +114,8 @@
     "mobile_main_navigation": "Основная навигация на мобильном устройстве"
   },
   "Footer": {
+    "contact_short": "Контакт",
+    "request_short": "Запрос",
     "contact_mzs": "Связаться с MZS",
     "private_access": "ЧАСТНЫЙ ДОСТУП",
     "contactEmail": "Связаться с MZS Group по электронной почте: {address}"

@@ -114,6 +114,8 @@
     "mobile_main_navigation": "Mobiele hoofdnavigatie"
   },
   "Footer": {
+    "contact_short": "Contact",
+    "request_short": "Aanvragen",
     "contact_mzs": "Contact met MZS",
     "private_access": "PRIVATE TOEGANG",
     "contactEmail": "Neem per e-mail contact op met MZS Group: {address}"

@@ -18,6 +18,8 @@
     "mobile_main_navigation": "Navegação principal móvel"
   },
   "Footer": {
+    "contact_short": "Contato",
+    "request_short": "Solicitar",
     "contact_mzs": "Fale com a MZS",
     "private_access": "ACESSO PRIVADO",
     "contactEmail": "Entre em contato com o MZS Group por e-mail: {address}"
