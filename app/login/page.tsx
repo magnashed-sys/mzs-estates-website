@@ -64,6 +64,11 @@ export default function LoginPage() {
         return;
       }
 
+      if (["admin", "client", "partner"].includes(profile.role)) {
+        // Best effort: telemetry must never block sign-in or expose credentials.
+        void fetch('/api/visitor-activity', {method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({kind:'login',event_id:crypto.randomUUID()}),keepalive:true}).catch(()=>{});
+      }
       rememberLocale(locale);
 
       switch (profile.role) {
