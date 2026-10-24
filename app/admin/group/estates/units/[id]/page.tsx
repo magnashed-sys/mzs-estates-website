@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { contractsAvailable } from '../../../../../../lib/security/estate-contracts';
 import { notFound } from 'next/navigation';
 import { requireEstateAdmin } from '../../../../../../lib/security/estate-properties';
 import { euros } from '../../../../../../lib/estates/rent';
@@ -46,6 +47,7 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
       <p className={s.note}>Current availability, lease dates and contract terms have not been registered. This unit is not offered for online booking.</p>
     </section>
     <section className={s.section}><h2>Source</h2><p className={s.note}>{unit.source_reference}</p></section>
+    {contractsAvailable() && <p><Link className={s.link} href="/admin/group/estates/contracts">Manage rental contracts &amp; invoice drafts →</Link></p>}
     <Link href="/admin/group/estates/units">← All rental units</Link>
   </>;
 }
