@@ -18,10 +18,10 @@ export default function HomeContactFooter({ email }: Props) {
       <div className={styles.languages}><LanguageSwitcher inline /></div>
       <div className={styles.links}>
       <a className={styles.contact} href={`mailto:${address}`} aria-label={t("contactEmail", {address})}>
-        <span>{t('contact_short')}</span><span aria-hidden="true">↗</span>
+        <span>{t('contact_mzs')}</span><span aria-hidden="true">↗</span>
       </a>
       <a className={styles.contact} href="/request-access" aria-label={navigation("request_access")}>
-        <span>{t('request_short')}</span><span aria-hidden="true">↗</span>
+        <span>{navigation('request_access')}</span><span aria-hidden="true">↗</span>
       </a>
       </div>
     </footer>
