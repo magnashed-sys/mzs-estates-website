@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
+import RentalSummary from "./RentalSummary";
 import BookingManagement from "./BookingManagement";
 import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
@@ -405,16 +406,19 @@ export default function AdminPage() {
       </>}
 
       {tab === "contracts" && <>
+        <RentalSummary key={refreshVersion}/>
         <div className="admin-section-heading"><div><p className="eyebrow">MZS Estates / Long-term rental</p><h2>Rental Contracts.</h2><p className="admin-intro">Manage your tenants, rental agreements and monthly invoice drafts.</p></div></div>
         <div className="admin-project-grid">
           <article className="admin-panel"><p className="eyebrow">Rental relationships</p><h3 className="admin-subtitle">Your tenants.</h3><p className="admin-intro">Record people and companies, then reuse their details when preparing a contract. A rental relationship does not require a login account.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=relationships">Open rental relationships →</Link></article>
           <article className="admin-panel"><p className="eyebrow">Rental agreements</p><h3 className="admin-subtitle">Your contracts.</h3><p className="admin-intro">Link agreements to properties and units, record the rent and activate the monthly billing schedule.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary admin-space-top" href="/admin/group/estates/contracts?view=contracts">Open rental contracts →</Link></article>
-          <article className="admin-panel"><p className="eyebrow">Monthly billing</p><h3 className="admin-subtitle">Invoice drafts.</h3><p className="admin-intro">Review the concepts prepared for each rental month. Final invoice issuing and sending are not yet enabled.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=invoices">Review invoice drafts →</Link></article>
+          <article className="admin-panel"><p className="eyebrow">Monthly billing</p><h3 className="admin-subtitle">Invoice drafts.</h3><p className="admin-intro">Review the concepts prepared for each rental month. Approve checked concepts to issue numbered invoices, then send them separately.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=invoices">Review invoice drafts →</Link></article>
         </div>
+        <p><Link onClick={guardLink} className="admin-button" href="/admin/group/estates/contracts?view=issuers">Issuing entities →</Link>{" "}<Link onClick={guardLink} className="admin-button" href="/admin/group/estates/contracts?view=billing">Invoices &amp; cashflow →</Link></p>
         <p className="admin-help">For active contracts, drafts are prepared on the 14th for the following month, starting with December 2026. Payment must be received before the first day of that rental month.</p>
       </>}
 
       {tab === "overview" && <>
+        <RentalSummary key={refreshVersion}/>
         <div className="admin-metrics">
           <button disabled={locked} onClick={() => openRequests("pending")}><span>Access requests</span><strong>{pending.length}</strong><small>Awaiting review →</small></button>
           <button disabled={locked} onClick={() => openRequests("approved")}><span>Approved requests</span><strong>{approved.length}</strong><small>Awaiting invitation →</small></button>
@@ -436,6 +440,7 @@ export default function AdminPage() {
       </>}
 
       {tab === "relationships" && <>
+        <p><Link className="admin-button" onClick={guardLink} href="/admin/group/estates/contracts?view=relationships">Shared relationship register: tenants, owners &amp; investors →</Link></p>
         <div className="admin-panel" style={{ marginBottom: 28 }}>
           <h3 className="admin-subtitle">Account notification email</h3>
           <p className="admin-help">
@@ -567,6 +572,7 @@ export default function AdminPage() {
       </>}
 
       {tab === "companies" && <>
+        <p><Link className="admin-button" onClick={guardLink} href="/admin/group/estates/contracts?view=issuers">Manage landlord &amp; issuing entities →</Link></p>
         <div className="admin-section-heading"><div><p className="eyebrow">Relationship affiliations</p><h2>Company directory.</h2></div><span>{memberCompanies.length} declared records</span></div>
         <p className="admin-help">Each entry is a relationship self-declared by a client or partner, not a verified legal entity. Company declarations never assign project rights.</p>
         <label className="admin-field admin-search">Search companies and members<input type="search" value={search} disabled={locked} onChange={event => setSearch(event.target.value)} placeholder="Company, member, registration number or country" /></label>

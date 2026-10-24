@@ -1,6 +1,7 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 /** Basic headers compatible with existing images, galleries and external links. */
 export default createNextIntlPlugin()({
+ outputFileTracingIncludes: {'/admin/group/estates/contracts': ['./lib/estates/fonts/DejaVuSans.ttf']},
  async headers() {
   return [{source:'/:path*',headers:[
    {key:'X-Content-Type-Options',value:'nosniff'},
