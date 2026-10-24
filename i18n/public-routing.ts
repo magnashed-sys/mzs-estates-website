@@ -1,7 +1,7 @@
 /** Explicit allowlist: public marketing pages plus login, never private route aliases. */
-export const memberLocales = ['en', 'nl', 'es'] as const;
-export const locales = [...memberLocales, 'ru'] as const;
-/** Russian is public-only for now; never select a partial catalogue in the portal. */
+export const memberLocales = ['en', 'nl', 'es', 'ru'] as const;
+export const locales = memberLocales;
+/** Presentation preference only; never used for authorization. */
 export function memberLocale(value: unknown): typeof memberLocales[number] {
   return typeof value === 'string' && (memberLocales as readonly string[]).includes(value)
     ? value as typeof memberLocales[number] : 'en';

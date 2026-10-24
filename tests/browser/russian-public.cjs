@@ -46,11 +46,11 @@ const mock=http.createServer(async(req,res)=>{
  await page.locator('form button[type="submit"]').click();await page.getByText('fixture-reference',{exact:false}).waitFor();assert.equal(payload.name,'Анна Иванова');assert.equal(payload.source,'real-estate');
  await page.goto(base+'/ru/login');await page.locator('input[type="email"]').fill('ru-test@example.invalid');await page.locator('input[type="password"]').fill('fixture-password');active=false;
  await page.locator('button[type="submit"]').click();await page.getByText('Ваш аккаунт сейчас неактивен. Свяжитесь с MZS Group.').waitFor();
- active=true;await page.locator('button[type="submit"]').click();await page.waitForURL('**/private');assert.equal(await page.locator('html').getAttribute('lang'),'en');
- assert.equal(await page.getByRole('link',{name:'Русский',exact:true}).count(),0);
+ active=true;await page.locator('button[type="submit"]').click();await page.waitForURL('**/private');assert.equal(await page.locator('html').getAttribute('lang'),'ru');
+ assert.equal(await page.getByRole('link',{name:'Русский',exact:true}).count(),1);
  for(const path of ['/ru/private','/ru/admin','/ru/reset-password']){const response=await page.goto(base+path);assert.equal(response.status(),404,path);}
  await page.goto(base+'/ru/real-estate');await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/mzs-ru-desktop.png',fullPage:true});
  await page.goto(base+'/ru/login');await page.setViewportSize({width:375,height:950});await page.screenshot({path:'/tmp/mzs-ru-mobile.png',fullPage:true});
- assert.deepEqual(errors,[]);console.log('PASS Russian public pages, widths 375/768/1440, SEO, query/hash, neutral token routes, Cyrillic form fixture, inactive denial, private English fallback, blocked aliases');
+ assert.deepEqual(errors,[]);console.log('PASS Russian public pages, widths 375/768/1440, SEO, query/hash, neutral token routes, Cyrillic form fixture, inactive denial, Russian private area, blocked aliases');
  } finally {if(browser)await browser.close();if(server)server.kill();mock.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

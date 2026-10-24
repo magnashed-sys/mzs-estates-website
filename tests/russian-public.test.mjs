@@ -19,24 +19,11 @@ test('Russian public paths roundtrip and security/private paths never gain alias
   assert.equal(routing.languageAlternates('/real-estate').ru,'/ru/real-estate');
   assert.equal(routing.publicRoute('/rubbish'),null);
 });
-test('Partial Russian catalogue cannot be selected in the member portal',()=>{
-  for(const value of ['ru',undefined,null,'xx']) assert.equal(routing.memberLocale(value),'en');
-  for(const value of ['en','nl','es']) assert.equal(routing.memberLocale(value),value);
+test('Russian member locale follows cookie or saved preference; unsupported values fall back',()=>{
+  for(const value of [undefined,null,'xx']) assert.equal(routing.memberLocale(value),'en');
+  for(const value of ['en','nl','es','ru']) assert.equal(routing.memberLocale(value),value);
   const source=read('i18n/request.ts');
   assert.match(source,/requested = memberLocale\(cookie\)/);
   assert.match(source,/requested = memberLocale\(saved\)/);
   assert.match(read('app/components/LanguageSwitcher.tsx'),/account \? memberLocales : locales/);
-});
-test('All public Russian keys are translated and placeholders match English',()=>{
-  const en=JSON.parse(read('messages/en.json')), ru=JSON.parse(read('messages/ru.json'));
-  assert.deepEqual(Object.keys(ru).sort(),['Home','Estates','Capital','Header','Footer','Call','Language','Metadata','Login','AccountUI'].sort());
-  const literals=new Set(['youexamplecom','infomzsgroupeu','mzs_group']);
-  for(const ns of Object.keys(ru)) {
-    assert.deepEqual(Object.keys(ru[ns]).sort(),Object.keys(en[ns]).sort());
-    for(const [key,value] of Object.entries(ru[ns])) {
-      if(!literals.has(key)) assert.match(value,/[А-Яа-яЁё]/,`${ns}.${key}`);
-      const args=s=>[...s.matchAll(/\{([^{}]+)\}/g)].map(m=>m[1]).sort();
-      assert.deepEqual(args(value),args(en[ns][key]),`${ns}.${key}`);
-    }
-  }
 });

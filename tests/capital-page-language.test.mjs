@@ -20,12 +20,12 @@ function harness(locale,{active=true,authenticated=true,allowed=true,loadError=f
   throw Error(name);
  }});return {exports,messages,reads:()=>reads};
 }
-test('Capital page localizes surrounding copy and empty/error states in all three languages',async()=>{
- for(const locale of ['en','nl','es'])for(const loadError of [false,true]){
+test('Capital page localizes surrounding copy and empty/error states in all four languages',async()=>{
+ for(const locale of ['en','nl','es','ru'])for(const loadError of [false,true]){
   const h=harness(locale,{loadError});const html=renderToStaticMarkup(await h.exports.default());
   assert.ok(html.includes(h.messages.AccountUI.a101));assert.ok(html.includes(h.messages.AccountUI[loadError?'a105':'a106']));assert.equal(h.reads(),1);
  }
 });
 test('Capital page still denies invalid environments, signed-out and inactive users before loading dossiers',async()=>{
- for(const [options,message] of [[{allowed:false},'404'],[{authenticated:false},'login'],[{active:false},'404']]){const h=harness('es',options);await assert.rejects(h.exports.default(),new RegExp(message));assert.equal(h.reads(),0);}
+ for(const [options,message] of [[{allowed:false},'404'],[{authenticated:false},'login'],[{active:false},'404']]){const h=harness('ru',options);await assert.rejects(h.exports.default(),new RegExp(message));assert.equal(h.reads(),0);}
 });

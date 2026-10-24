@@ -289,7 +289,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
         if (!error) locale = data.user?.user_metadata?.preferred_language;
       } catch { /* Preserve English delivery if the optional lookup is unavailable. */ }
     }
-    const message = (locale === "nl" || locale === "es")
+    const message = (locale === "nl" || locale === "es" || locale === "ru")
       ? localizedAccountMail(event, profile.full_name || "", locale, siteForNotification())
       : template(event, profile.full_name || "Member");
     const mailer = nodemailer.createTransport({
