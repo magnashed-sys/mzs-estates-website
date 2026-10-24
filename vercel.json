@@ -7,6 +7,10 @@
     {
       "path": "/api/rental/notifications/dispatch",
       "schedule": "5 6 * * *"
+    },
+    {
+      "path": "/api/visitor-report",
+      "schedule": "0 22,23 * * *"
     }
   ]
 }

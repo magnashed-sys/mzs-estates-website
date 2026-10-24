@@ -1,6 +1,7 @@
 import {NextIntlClientProvider} from "next-intl";
 import {getLocale, getMessages} from "next-intl/server";
 import type { Metadata } from "next";
+import VisitorActivity from "./components/VisitorActivity";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
 import "./rtl.css";
@@ -68,6 +69,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>
         <PublicWebAnalytics />
+        <VisitorActivity />
       </body>
     </html>
   );
