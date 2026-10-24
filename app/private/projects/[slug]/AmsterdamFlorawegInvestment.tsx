@@ -1,6 +1,6 @@
 "use client";
 
-import {useTranslations} from "next-intl";
+import {useTranslations, useLocale} from "next-intl";
 
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import styles from "./amsterdamFlorawegInvestment.module.css";
 type Props = { allowInvestment: boolean; allowAcquisition: boolean };
 export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquisition}:Props) {
   const t = useTranslations("ProjectUI");
+  const rtl = useLocale() === "ar";
   const base = "/properties/amsterdam-floraweg";
   const visuals = [
     {file:"hero-park-view.webp",label:t("p000")},
@@ -59,12 +60,12 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
     closeButtonRef.current?.focus();
     const onKeyDown = (event:KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); closeImage(); }
-      if (event.key === "ArrowLeft") { event.preventDefault(); stepImage(-1); }
-      if (event.key === "ArrowRight") { event.preventDefault(); stepImage(1); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); stepImage(rtl ? 1 : -1); }
+      if (event.key === "ArrowRight") { event.preventDefault(); stepImage(rtl ? -1 : 1); }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeImage, closeImage, stepImage]);
+  }, [activeImage, closeImage, stepImage, rtl]);
 
   const mail = (kind: "investment" | "acquisition") => {
     const label = t(kind === "investment" ? "investmentKind" : "acquisitionKind");
@@ -132,11 +133,11 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
           <button type="button" className={styles.lightboxClose} ref={closeButtonRef} onClick={closeImage} aria-label={t("p078")}>{t("p079")}</button>
         </div>
         <div className={styles.lightboxViewport}>
-          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(-1)} aria-label={t("p080")}>←</button>
+          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(-1)} aria-label={t("p080")}>{rtl ? "→" : "←"}</button>
           <div className={`${styles.lightboxCanvas} ${zoomed ? styles.lightboxCanvasZoom : ""}`}>
             <Image src={`${base}/${allGalleryItems[activeImage].file}`} alt={allGalleryItems[activeImage].title} fill sizes="100vw" className={styles.lightboxPicture} priority={false}/>
           </div>
-          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(1)} aria-label={t("p081")}>→</button>
+          <button type="button" className={styles.galleryArrow} onClick={() => stepImage(1)} aria-label={t("p081")}>{rtl ? "←" : "→"}</button>
         </div>
         <div className={styles.lightboxFooter}>
           <div><span>{String(activeImage + 1).padStart(2,"0")} / {String(allGalleryItems.length).padStart(2,"0")}</span><p>{allGalleryItems[activeImage].detail}</p></div>

@@ -8,7 +8,7 @@
 .conversationImage {position:relative;min-height:580px;margin:0;overflow:hidden;}
 .conversationImage img {object-fit:cover;object-position:center;}
 .conversationImage::after {content:"";position:absolute;inset:50% 0 0;background:linear-gradient(transparent,rgba(9,11,8,.65));}
-.conversationImage figcaption {position:absolute;z-index:1;bottom:28px;left:clamp(24px,4.5vw,70px);right:24px;font:10px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#f1e7d6;}
+.conversationImage figcaption {position:absolute;z-index:1;bottom:28px;inset-inline-start:clamp(24px,4.5vw,70px);inset-inline-end:24px;font:10px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#f1e7d6;}
 .approachCopy {align-self:center;padding:clamp(45px,6vw,95px);}
 .page .approachCopy h2 {font-size:clamp(36px,4vw,60px);margin-top:30px;}
 .page .approachCopy p {max-width:480px;}

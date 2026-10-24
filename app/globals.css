@@ -102,7 +102,7 @@ button {
 }
 
 .mzs-group-label {
-  padding-left: 2px;
+  padding-inline-start: 2px;
   color: #77736b;
   font-size: 7px;
   letter-spacing: 0.52em;

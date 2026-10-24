@@ -334,7 +334,7 @@ export default function RentalCalendar({
                 )
               }
             >
-              ←
+              {locale === "ar" ? "→" : "←"}
             </button>
 
             <span style={{ fontFamily: "Georgia, serif", fontSize: 23 }}>
@@ -355,7 +355,7 @@ export default function RentalCalendar({
                 )
               }
             >
-              →
+              {locale === "ar" ? "←" : "→"}
             </button>
           </div>
 

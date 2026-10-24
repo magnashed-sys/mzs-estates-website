@@ -21,7 +21,7 @@
 .headerRight { display: flex; gap: clamp(12px, 2.2vw, 32px); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .accessLabel { font-size: 10px; letter-spacing: .18em; color: #aca396; }
 .headerLink { color: #e4cfaa; font-size: 12px; border-bottom: 1px solid rgba(213,192,154,.45); padding: 10px 0; white-space: nowrap; }
-.headerLink span { margin-left: 5px; }
+.headerLink span { margin-inline-start: 5px; }
 .signout { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; padding: 12px 14px; background: transparent; border: 1px solid var(--mzs-border); color: #d5c09a; white-space: nowrap; }
 .signout:hover, .signout:focus-visible { border-color: #d5c09a; }
 .signout:disabled { opacity: .5; cursor: default; }
@@ -47,7 +47,7 @@
 .collectionHeading h2 { font-family: Georgia, 'Times New Roman',serif; font-size: clamp(25px,3vw,39px); letter-spacing: -.02em; font-weight: 400; margin: 0; }
 .collectionHint { margin: 0; max-width: 275px; color: #92897d; font-size: 12px; line-height: 1.6; }
 .categories { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
-.category { color: #eae2d6; background: #131210; border: 1px solid var(--mzs-border); text-align: left; padding: 19px 22px 18px; cursor: pointer; min-height: 115px; transition: background .2s ease,border-color .2s ease; }
+.category { color: #eae2d6; background: #131210; border: 1px solid var(--mzs-border); text-align: start; padding: 19px 22px 18px; cursor: pointer; min-height: 115px; transition: background .2s ease,border-color .2s ease; }
 .category:hover { border-color: rgba(213,192,154,.65); }
 .categoryActive { background: linear-gradient(135deg,#26221b,#181510); border-color: #bba176; }
 .categoryTop, .categoryBody { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -68,7 +68,7 @@
 .propertyPicture:after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg,rgba(0,0,0,.36),transparent 38%); pointer-events: none; }
 .propertyImage { object-fit: cover; transition: transform .6s ease; }
 .property:hover .propertyImage { transform: scale(1.04); }
-.photoCorner { position: absolute; z-index: 1; bottom: 17px; left: 21px; font-size: 9px; color: white; letter-spacing: .2em; text-shadow: 0 1px 5px #000; }
+.photoCorner { position: absolute; z-index: 1; bottom: 17px; inset-inline-start: 21px; font-size: 9px; color: white; letter-spacing: .2em; text-shadow: 0 1px 5px #000; }
 .propertyNoPicture { display: flex; justify-content: center; align-items: center; }
 .noPictureMonogram { font: 400 60px Georgia,serif; letter-spacing: .15em; color: rgba(213,192,154,.43); }
 .propertyDetails { flex: 1; display: flex; flex-direction: column; padding: clamp(23px,2.7vw,35px); }

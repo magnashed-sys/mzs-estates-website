@@ -1,4 +1,4 @@
-import { russianRentalMail } from "../../../../lib/mzs/russian-rental-mail";
+import { localizedRentalMail, isLocalizedRentalLocale } from "../../../../lib/mzs/localized-rental-mail";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as adminClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
       const {data, error} = await service.auth.admin.getUserById(booking.user_id);
       if (!error) guestLocale = data.user?.user_metadata?.preferred_language;
     } catch { /* Optional presentation preference; preserve English delivery on lookup failure. */ }
-    const message = guestLocale === "ru"
-      ? russianRentalMail("confirmed", {property:property.title, checkIn:booking.check_in,
+    const message = isLocalizedRentalLocale(guestLocale)
+      ? localizedRentalMail("confirmed", {property:property.title, checkIn:booking.check_in,
         checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
-        reference:booking.id}, "https://www.mzsgroup.com")
+        reference:booking.id}, "https://www.mzsgroup.com", guestLocale)
       : {subject:"Your reservation is confirmed | MZS Group",text,html};
     const transport = nodemailer.createTransport({
       host, port, secure: port === 465, requireTLS: port === 587,

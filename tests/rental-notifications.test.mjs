@@ -9,6 +9,12 @@ const source=readFileSync(new URL('../lib/mzs/rental-notifications.ts',import.me
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 const russian = {};
 vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../lib/mzs/russian-rental-mail.ts",import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:russian});
+const localized = {};
+vm.runInNewContext(ts.transpileModule(readFileSync(new URL('../lib/mzs/localized-rental-mail.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:localized,require(name){
+ if(name==='./russian-rental-mail')return russian;
+ if(name==='./rental-mail-copy.json')return {default:JSON.parse(readFileSync(new URL('../lib/mzs/rental-mail-copy.json',import.meta.url),'utf8'))};
+ throw Error(name);
+}});
 const event=()=>({id:'event-1',booking_id:'booking-1',recipient_user_id:'guest-1',recipient_email:'guest@example.invalid',kind:'modified',attempts:1,claim_token:'claim-1',payload:{property:'Villa <script>alert(1)</script>',check_in:'2027-02-10',check_out:'2027-02-17',guests:4,total_eur:2100,admin_notes:'SECRET_INTERNAL_NOTE',reason:'SECRET_CANCELLATION_REASON'}});
 function harness(options={}) {
  let claimed=false;
@@ -24,7 +30,7 @@ function harness(options={}) {
  const exports={};
  const env={VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'mock',MZS_RENTAL_NOTIFICATIONS_ENABLED:'true',MZS_RENTAL_MAIL_MODE:'smtp',MZS_SMTP_HOST:'mock',MZS_SMTP_PORT:'587',MZS_SMTP_USER:'mock',MZS_SMTP_PASSWORD:'mock',MZS_SMTP_FROM:'mzs@example.invalid',...options.env};
  vm.runInNewContext(js,{exports,console,process:{env},require(name){
-  if(name==='./russian-rental-mail')return russian;
+  if(name==='./localized-rental-mail')return localized;
   if(name==='@supabase/supabase-js')return {createClient:()=>db};
   if(name==='nodemailer')return {default:{createTransport:config=>{transports.push(config);if(options.transportFactory)return options.transportFactory(config);return {sendMail:async message=>{
     sent.push(message);if(options.sendError)throw options.sendError;
@@ -110,4 +116,14 @@ test('Russian change mail uses actual recipient preference and retains cancellat
  assert.equal(await h.exports.deliverRentalChange(),'accepted');
  assert.match(h.sent[0].subject,/отменено/);assert.match(h.sent[0].text,/Предыдущее подтверждение больше не действует/);
  assert.doesNotMatch(h.sent[0].html,/<script>|SECRET_/);
+});
+
+test('All recipient languages retain owner checks, cancellation semantics and English fallback',async()=>{
+ for(const locale of ['nl','es','ru','de','it','fr','pt-BR','ar']) {
+  const h=harness({locale,event:{kind:'cancelled'}});assert.equal(await h.exports.deliverRentalChange(),'accepted');
+  assert.equal(h.sent[0].to,'guest@example.invalid');assert.match(h.sent[0].html,new RegExp('lang="'+locale+'"'));
+  assert.doesNotMatch(h.sent[0].html,/<script>|SECRET_/);
+  const denied=harness({locale,owner:'other'});assert.equal(await denied.exports.deliverRentalChange(),'failed');assert.equal(denied.sent.length,0);
+ }
+ for(const locale of ['xx',null,{role:'admin'}]){const h=harness({locale});await h.exports.deliverRentalChange();assert.match(h.sent[0].html,/lang="en"/);}
 });

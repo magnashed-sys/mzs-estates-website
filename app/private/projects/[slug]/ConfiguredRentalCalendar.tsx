@@ -145,7 +145,7 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
       <p style={{ color: muted, lineHeight: 1.7 }}>{t("p096")}</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,230px),1fr))", gap: 14, margin: "30px 0 42px" }}>
         {data.configurations.map((item) => (
-          <button key={item.id} type="button" aria-pressed={item.id === selectedId} onClick={() => { setSelectedId(item.id); setGuests((n) => Math.min(n, item.maximum_guests)); setSubmitted(false); setMessage(""); }} style={{ textAlign: "left", padding: 23, border: `2px solid ${item.id === selectedId ? gold : border}`, background: item.id === selectedId ? "#2b261e" : "#11100e", color: "#eeeae2", cursor: "pointer" }}>
+          <button key={item.id} type="button" aria-pressed={item.id === selectedId} onClick={() => { setSelectedId(item.id); setGuests((n) => Math.min(n, item.maximum_guests)); setSubmitted(false); setMessage(""); }} style={{ textAlign: "start", padding: 23, border: `2px solid ${item.id === selectedId ? gold : border}`, background: item.id === selectedId ? "#2b261e" : "#11100e", color: "#eeeae2", cursor: "pointer" }}>
             <span style={{ color: gold, fontSize: 12, letterSpacing: ".12em" }}>{t("rooms", {bedrooms: item.bedrooms, bathrooms: item.bathrooms})}</span>
             <div style={{ fontFamily: "Georgia,serif", fontSize: 36, margin: "14px 0 6px" }}>{euro(Number(item.nightly_rate_eur))}</div>
             <span style={{ color: muted, fontSize: 13 }}>{t("guestLimit", {count: item.maximum_guests})}</span>
@@ -155,9 +155,9 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,320px),1fr))", gap: 44 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
-            <button type="button" style={navButton} aria-label={t("previousMonth")} disabled={keyFromDate(month).slice(0, 7) <= today.slice(0, 7)} onClick={() => setMonth(new Date(Date.UTC(year, monthIndex - 1, 1)))}>←</button>
+            <button type="button" style={navButton} aria-label={t("previousMonth")} disabled={keyFromDate(month).slice(0, 7) <= today.slice(0, 7)} onClick={() => setMonth(new Date(Date.UTC(year, monthIndex - 1, 1)))}>{locale === "ar" ? "→" : "←"}</button>
             <span style={{ fontFamily: "Georgia,serif", fontSize: 22 }}>{month.toLocaleDateString(displayLocale, { month: "long", year: "numeric", timeZone: "UTC" })}</span>
-            <button type="button" style={navButton} aria-label={t("nextMonth")} onClick={() => setMonth(new Date(Date.UTC(year, monthIndex + 1, 1)))}>→</button>
+            <button type="button" style={navButton} aria-label={t("nextMonth")} onClick={() => setMonth(new Date(Date.UTC(year, monthIndex + 1, 1)))}>{locale === "ar" ? "←" : "→"}</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 5 }}>
             {weekdays.map((day, i) => <span key={i} style={{ textAlign: "center", color: gold, fontSize: 12, padding: "8px 0" }}>{day}</span>)}

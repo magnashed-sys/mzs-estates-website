@@ -37,21 +37,46 @@ res.end('[]');});
 const browser=await chromium.launch({headless:true});const errors=[];
 async function ctx(){const context=await browser.newContext();await context.route('**/api/capital-client-summary',r=>r.fulfill({status:200,contentType:'application/json',body:'{"items":[]}'}));const page=await context.newPage();page.setDefaultTimeout(20000);page.setDefaultNavigationTimeout(90000);page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&/MISSING_MESSAGE|FORMATTING_ERROR|IntlError/.test(m.text()))errors.push(m.text())});return {page,context};}
 async function login(page,locale){await page.goto('http://127.0.0.1:3090'+(locale==='en'?'':('/'+locale))+'/login');await page.locator('input[name=email]').fill('test@example.invalid');await page.locator('input[name=password]').fill('local-only-test-password');await page.locator('button[type=submit]').click();}
-let {page,context}=await ctx();const catalogs=Object.fromEntries(['en','nl','es'].map(l=>[l,require('../../messages/'+l+'.json').ProjectUI]));
+let {page,context}=await ctx();const catalogs=Object.fromEntries(['en','nl','es','ru','de','it','fr','pt-BR','ar'].map(l=>[l,require('../../messages/'+l+'.json').ProjectUI]));
 const dateLabel=(l,n)=>new Intl.DateTimeFormat(l==='en'?'en-GB':l,{dateStyle:'long',timeZone:'UTC'}).format(new Date(dateKey(n)+'T12:00:00Z'));
 let requests=[],submitFailure=false;
 await context.route('**/api/rental/booking-request',async route=>{requests.push(route.request().postDataJSON());await route.fulfill({status:submitFailure?409:201,contentType:'application/json',body:JSON.stringify(submitFailure?{error:'English server error'}:{id:'local-request',message:'English success'})});});
 await login(page,'en');await page.waitForURL('**/private',{waitUntil:'domcontentloaded'});
-for(const locale of (process.env.PROJECT_TEST_LOCALE?[process.env.PROJECT_TEST_LOCALE]:['en','nl','es'])){
+for(const locale of (process.env.SKIP_PUBLIC ? [] : ['de','it','fr','pt-BR','ar'])) {
+ const prefix='/'+locale;
+ for(const route of ['', '/real-estate','/private-capital','/login']) {
+  const r=await page.goto('http://127.0.0.1:3090'+prefix+route);assert.equal(r.status(),200);
+  assert.equal(await page.locator('html').getAttribute('lang'),locale);assert.equal(await page.locator('html').getAttribute('dir'),locale==='ar'?'rtl':'ltr');
+  for(const width of [375,768,1440]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'public overflow '+locale+route+' '+width+' '+JSON.stringify(await page.locator('body').evaluate(e=>[...e.querySelectorAll('*')].filter(n=>n.getBoundingClientRect().right>innerWidth+1).map(n=>({tag:n.tagName,cls:n.className,text:n.textContent.slice(0,65),width:n.getBoundingClientRect().width})).slice(-10))));}
+  if(route!='/login')assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),'https://www.mzsgroup.com'+prefix+route);
+ }
+ await page.goto('http://127.0.0.1:3090'+prefix+'/private-capital?campaign=fixture#securities');
+ await page.locator('summary[aria-label]').filter({has:page.locator('svg circle')}).click();
+ await page.getByRole('link',{name:'English',exact:true}).click();await page.waitForURL('**/private-capital?campaign=fixture#securities');
+ await page.locator('summary[aria-label]').filter({has:page.locator('svg circle')}).click();
+ await page.locator('a[hreflang="'+locale+'"]').click();await page.waitForURL('**'+prefix+'/private-capital?campaign=fixture#securities');
+ for(const path of ['/request-access','/registration-pending','/forgot-password','/reset-password','/accept-invitation']){
+  await page.goto('http://127.0.0.1:3090'+path+'?fixture=1#preserved');assert.equal(await page.locator('html').getAttribute('lang'),locale);assert.equal(new URL(page.url()).hash,'#preserved');
+  await page.setViewportSize({width:375,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'account overflow '+locale+path);
+ }
+ for(const path of ['/private','/admin','/auth/confirm'])assert.equal((await page.goto('http://127.0.0.1:3090'+prefix+path)).status(),404);
+ if(locale==='ar') {
+  await page.goto('http://127.0.0.1:3090/ar/real-estate');await page.screenshot({path:'/tmp/mzs-ar-mobile.png',fullPage:true});
+  await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/mzs-ar-desktop.png',fullPage:true});
+ }
+ console.log('PASS '+locale+': public pages, SEO, 375/768/1440 widths, document direction, query/hash and neutral token routes');
+}
+for(const locale of (process.env.PROJECT_TEST_LOCALE?process.env.PROJECT_TEST_LOCALE.split(','):['en','nl','es','ru','de','it','fr','pt-BR','ar'])){
  saved={preferred_language:locale};const c=catalogs[locale];
  for(const slug of ['villa-la-nucia','marina-botafoch-apartment','villa-can-juan-ibiza','villa-des-coloms-ibiza','amsterdam-floraweg']){
   console.log('Checking',locale,slug);
   const response=await page.goto('http://127.0.0.1:3090/private/projects/'+slug,{waitUntil:'domcontentloaded'});assert.equal(response.status(),200,slug);
-  await page.getByText('Original editorial',{exact:true}).waitFor();await page.getByText('Original document title',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),locale);
+  await page.getByText('Original editorial',{exact:true}).waitFor();await page.getByText('Original document title',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),locale);assert.equal(await page.locator('html').getAttribute('dir'),locale==='ar'?'rtl':'ltr');
   assert.ok((await page.locator('main').innerText()).toLowerCase().includes(c.documentCategories.permit.toLowerCase()));
-  for(const width of [375,1440]){await page.setViewportSize({width,height:950});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth ? [...document.querySelectorAll('main *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(-12).map(e=>({tag:e.tagName,cls:e.className,text:e.textContent.slice(0,90),right:e.getBoundingClientRect().right})) : []);assert.deepEqual(overflow,[],'overflow '+locale+' '+slug+' '+JSON.stringify(overflow));}
+  for(const width of [375,1440]){await page.setViewportSize({width,height:950});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth ? [...document.querySelectorAll('main *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1||e.getBoundingClientRect().left < -1).slice(0,18).map(e=>({tag:e.tagName,cls:e.className,text:e.textContent.slice(0,90),right:e.getBoundingClientRect().right})) : []);if(overflow.length)await page.screenshot({path:'/tmp/mzs-overflow.png',fullPage:true});assert.deepEqual(overflow,[],'overflow '+locale+' '+slug+' '+JSON.stringify(overflow));}
+  if(locale==='ar'&&slug==='marina-botafoch-apartment')await page.screenshot({path:'/tmp/mzs-ar-project.png',fullPage:true});
   if(slug==='villa-can-juan-ibiza'){
-   await page.getByRole('heading',{name:c.p446,exact:true}).waitFor();const terms=await page.locator('dl').innerText();assert.match(terms,/1[,.]000[,.]000/);assert.match(terms,/10%/);assert.ok(terms.includes(c.loanTerm));
+   await page.getByRole('heading',{name:c.p446,exact:true}).waitFor();const terms=await page.locator('dl').innerText();assert.match(terms,/1[,.\s]000[,.\s]000|١[٬.,]٠٠٠[٬.,]٠٠٠/);assert.match(terms,/10\s?%|١٠[٪%]/);assert.ok(terms.includes(c.loanTerm));
   }
   if(slug==='amsterdam-floraweg'){
    const href=await page.getByRole('link',{name:c.p069,exact:true}).getAttribute('href');assert.ok(decodeURIComponent(href).includes(c.investmentKind));assert.equal(await page.getByRole('link',{name:c.p074,exact:true}).count(),0,'no sale grant');
@@ -60,7 +85,7 @@ for(const locale of (process.env.PROJECT_TEST_LOCALE?[process.env.PROJECT_TEST_L
    const configured=slug.startsWith('marina');await page.getByRole('button',{name:c.nextMonth,exact:true}).click();
    const day=n=>page.getByRole('button',{name:dateLabel(locale,n),exact:true});
    const blocked=page.getByRole('button',{name:new RegExp('^'+dateLabel(locale,11))});assert.equal(await blocked.isDisabled(),true);
-   await day(2).click();await day(3).click();await page.getByRole('status').waitFor();assert.ok((await page.getByRole('status').innerText()).includes('2'));
+   await day(2).click();await day(3).click();await page.getByRole('status').waitFor();assert.ok((await page.getByRole('status').innerText()).includes(new Intl.NumberFormat(locale).format(2)));
    await day(4).click();await page.getByRole('button',{name:c.p120,exact:true}).waitFor();
    if(!configured)await page.getByRole('checkbox').check();
    const price=new Intl.NumberFormat(locale==='en'?'en-GB':locale,{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(configured?800:900);assert.ok((await page.locator('main').innerText()).includes(price));
@@ -72,7 +97,7 @@ for(const locale of (process.env.PROJECT_TEST_LOCALE?[process.env.PROJECT_TEST_L
    assert.deepEqual(requests.at(-1),configured?{mode:'configured',projectId,configurationId:'config-two',checkIn:dateKey(2),checkOut:dateKey(4),guests:2,arrival:'',departure:'',notes:'Local-only test'}:{mode:'villa',projectId,checkIn:dateKey(2),checkOut:dateKey(4),guests:2,arrival:'',departure:'',poolHeating:true,notes:'Local-only test'});
    // Existing overlap rule and shared calendar remain enforced.
    await day(8).click();await day(14).click();await page.getByText(configured?c.p087:c.p155,{exact:true}).waitFor();
-   if(configured){await page.getByRole('button',{name:/^3 (BEDROOM|SLAAPKAMER|DORMITORIO)/}).click();assert.equal(await blocked.isDisabled(),true);}
+   if(configured){await page.locator('button[aria-pressed]').filter({has:page.locator('div')}).nth(1).click();assert.equal(await blocked.isDisabled(),true);}
    await page.getByRole('button',{name:c.p137,exact:true}).first().click();await page.getByRole('dialog').waitFor();await page.keyboard.press('ArrowRight');await page.keyboard.press('Escape');assert.equal(await page.getByRole('dialog').count(),0);
   }
  }

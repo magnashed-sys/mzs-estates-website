@@ -43,7 +43,7 @@ test('Introductory calls notify administrators using a protected link',async()=>
 test('Introductory call mail is blocked in preview and for non-admin recipients',async()=>{for(const options of [{intro:true,preview:true},{intro:true,admin:false}]){const h=harness(options);assert.equal((await h.exports.deliverOnce()).status,'failed');assert.equal(h.sent.length,0)}});
 
 test('Client mail uses the recipient language, escapes names and keeps capital details private',async()=>{
- for(const locale of ['nl','es','ru']) for(const eventType of ['account_activated','new_project_access','capital_access_granted']) {
+ for(const locale of ['nl','es','ru','de','it','fr','pt-BR','ar']) for(const eventType of ['account_activated','new_project_access','capital_access_granted']) {
   const h=harness({locale,eventType,fullName:'<script> Tester'});
   assert.equal((await h.exports.deliverOnce()).status,'sent');
   const m=h.sent[0];assert.ok(m.html.includes('lang="'+locale+'"'));assert.ok(m.html.includes('&lt;script&gt;'));
@@ -53,12 +53,12 @@ test('Client mail uses the recipient language, escapes names and keeps capital d
  }
 });
 test('Missing, unsupported or unavailable preferences preserve English delivery',async()=>{
- for(const options of [{},{locale:'fr'},{locale:{role:'admin'}},{lookupError:true}]) {
+ for(const options of [{},{locale:'xx'},{locale:{role:'admin'}},{lookupError:true}]) {
   const h=harness(options);assert.equal((await h.exports.deliverOnce()).status,'sent');assert.ok(h.sent[0].html.includes("lang='en'"));
  }
 });
 test('Language never bypasses revoked access, preview restrictions or SMTP rejection',async()=>{
- for(const locale of ['nl','es','ru']) for(const options of [{grant:false},{preview:true},{accepted:false}]) {
+ for(const locale of ['nl','es','ru','de','it','fr','pt-BR','ar']) for(const options of [{grant:false},{preview:true},{accepted:false}]) {
   const h=harness({locale,...options});assert.equal((await h.exports.deliverOnce()).status,'failed');
   if(options.accepted!==false)assert.equal(h.sent.length,0);
   else assert.equal(h.updates.at(-1).value.status,'pending');

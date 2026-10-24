@@ -1,4 +1,4 @@
-import { russianRentalMail } from "./russian-rental-mail";
+import { localizedRentalMail, isLocalizedRentalLocale } from "./localized-rental-mail";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
@@ -47,10 +47,10 @@ export function rentalChangeTemplate(event: RentalEvent, site: string, locale: u
       !/^\d{4}-\d{2}-\d{2}$/.test(p.check_in) || !/^\d{4}-\d{2}-\d{2}$/.test(p.check_out) ||
       !Number.isInteger(p.guests) || p.guests < 1 || typeof p.total_eur !== "number" || !Number.isFinite(p.total_eur) || p.total_eur < 0)
     throw new Error("Invalid notification snapshot");
-  if (locale === "ru") return russianRentalMail(event.kind, {
+  if (isLocalizedRentalLocale(locale)) return localizedRentalMail(event.kind, {
     property:p.property, checkIn:p.check_in, checkOut:p.check_out, guests:p.guests,
     total:p.total_eur, reference:event.booking_id,
-  }, site);
+  }, site, locale);
   const headline = cancelled ? "Your reservation is cancelled." : "Your reservation has been updated.";
   const intro = cancelled
     ? "Your reservation has been cancelled by MZS Group and is no longer valid. Your earlier booking confirmation is no longer valid. Please do not travel on the basis of that confirmation."

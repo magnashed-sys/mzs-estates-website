@@ -1,6 +1,6 @@
 "use client";
 
-import {useTranslations} from "next-intl";
+import {useTranslations, useLocale} from "next-intl";
 
 
 import Image from "next/image";
@@ -10,6 +10,7 @@ import styles from "./propertyWalkthrough.module.css";
 
 export default function PropertyWalkthrough() {
   const t = useTranslations("ProjectUI");
+  const rtl = useLocale() === "ar";
 
   const chapters = localizedPhotoChapters(t);
   const [position, setPosition] = useState({ chapter: 0, photo: 0 });
@@ -40,16 +41,16 @@ export default function PropertyWalkthrough() {
         </nav>
         <div className={styles.viewer}>
           <div className={styles.canvas} tabIndex={0} role="group" aria-label={t("p148")}
-            onKeyDown={(event) => { if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1); } }}
+            onKeyDown={(event) => { if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); move((event.key === "ArrowLeft" ? -1 : 1) * (rtl ? -1 : 1)); } }}
             onTouchStart={(event) => { touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }; }}
-            onTouchEnd={(event) => { const start = touchStart.current; touchStart.current = null; if (!start) return; const dx = event.changedTouches[0].clientX - start.x; const dy = event.changedTouches[0].clientY - start.y; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? 1 : -1); }}>
+            onTouchEnd={(event) => { const start = touchStart.current; touchStart.current = null; if (!start) return; const dx = event.changedTouches[0].clientX - start.x; const dy = event.changedTouches[0].clientY - start.y; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) move((dx < 0 ? 1 : -1) * (rtl ? -1 : 1)); }}>
             <Image key={photo.src} src={photo.src} alt={photo.alt} fill sizes="(max-width: 800px) 100vw, 75vw" className={styles.image} />
             <span className={styles.count}>{position.photo + 1} / {chapter.photos.length}</span>
           </div>
           <div className={styles.controls}>
-            <button type="button" onClick={() => move(-1)} aria-label={t("p149")}>←</button>
+            <button type="button" onClick={() => move(-1)} aria-label={t("p149")}>{rtl ? "→" : "←"}</button>
             <div aria-live="polite" aria-atomic="true"><h3>{photo.caption}</h3><p>{chapter.description}</p></div>
-            <button type="button" onClick={() => move(1)} aria-label={t("p150")}>→</button>
+            <button type="button" onClick={() => move(1)} aria-label={t("p150")}>{rtl ? "←" : "→"}</button>
           </div>
           <div className={styles.thumbnails} aria-label={t("p151")}>
             {chapter.photos.map((item, index) => (

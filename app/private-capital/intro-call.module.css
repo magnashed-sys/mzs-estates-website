@@ -33,7 +33,7 @@
 .fields input:focus-visible, .fields textarea:focus-visible { outline: 2px solid #d5c09a; outline-offset: 2px; }
 .fields input:disabled, .fields textarea:disabled { opacity: .65; }
 .contactNote { margin: -1px 0 0; color: #b7ae9f; font-size: 11px; line-height: 1.8; }
-.submitButton { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px 20px; min-height: 55px; border: 1px solid #d5c09a; background: #d5c09a; color: #171610; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; text-align: left; cursor: pointer; transition: background .2s; }
+.submitButton { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px 20px; min-height: 55px; border: 1px solid #d5c09a; background: #d5c09a; color: #171610; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; text-align: start; cursor: pointer; transition: background .2s; }
 .submitButton:hover { background: #e6d4b5; }
 .submitButton:disabled { cursor: default; opacity: .65; }
 .submitButton > span { font-size: 19px; font-weight: 400; }

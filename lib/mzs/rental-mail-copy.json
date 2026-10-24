@@ -1,0 +1,296 @@
+{
+  "nl": {
+    "title": {
+      "requested": "Uw boekingsaanvraag is ontvangen",
+      "confirmed": "Uw reservering is bevestigd",
+      "modified": "Uw reservering is gewijzigd",
+      "cancelled": "Uw reservering is geannuleerd"
+    },
+    "intro": {
+      "requested": "Wij hebben uw aanvraag ontvangen. Dit is nog geen bevestigde reservering. Na individuele beoordeling en akkoord stuurt MZS Group een aparte bevestiging.",
+      "confirmed": "MZS Group heeft uw reservering goedgekeurd en bevestigd. Wij kijken uit naar uw komst.",
+      "modified": "MZS Group heeft uw bevestigde reservering gewijzigd. De onderstaande gegevens vervangen die van de eerdere bevestiging.",
+      "cancelled": "MZS Group heeft uw reservering geannuleerd. De eerdere bevestiging is niet meer geldig. Reis niet op basis van die bevestiging."
+    },
+    "status": {
+      "requested": "AANVRAAG — NIET BEVESTIGD",
+      "confirmed": "BEVESTIGD",
+      "modified": "BEVESTIGD — GEWIJZIGD",
+      "cancelled": "GEANNULEERD — NIET GELDIG"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Accommodatie",
+      "checkIn": "Aankomst",
+      "checkOut": "Vertrek",
+      "nights": "Nachten",
+      "guests": "Gasten",
+      "estimate": "Geschat bedrag",
+      "confirmed": "Bevestigd bedrag",
+      "previous": "Eerder bevestigd bedrag",
+      "reference": "Boekingsreferentie",
+      "heating": "Zwembadverwarming aangevraagd",
+      "notes": "Bijzondere wensen"
+    },
+    "yes": "Ja",
+    "no": "Nee",
+    "none": "Geen",
+    "greeting": "Beste gast,",
+    "action": "MIJN RESERVERING BEKIJKEN",
+    "motto": "PRIVAAT · ONAFHANKELIJK · INTERNATIONAAL",
+    "cancelFooter": "Eventuele betalingen en terugbetalingen worden afzonderlijk afgehandeld. Neem voor hulp contact op met MZS Group.",
+    "footer": "De actuele status vindt u in uw persoonlijke account. Neem voor hulp contact op met MZS Group."
+  },
+  "es": {
+    "title": {
+      "requested": "Hemos recibido su solicitud de reserva",
+      "confirmed": "Su reserva está confirmada",
+      "modified": "Su reserva se ha modificado",
+      "cancelled": "Su reserva se ha cancelado"
+    },
+    "intro": {
+      "requested": "Hemos recibido su solicitud. La reserva aún no está confirmada. Tras su revisión individual y aprobación, MZS Group enviará una confirmación por separado.",
+      "confirmed": "MZS Group ha aprobado y confirmado su reserva. Será un placer darle la bienvenida.",
+      "modified": "MZS Group ha modificado su reserva confirmada. Los datos siguientes sustituyen a los de la confirmación anterior.",
+      "cancelled": "MZS Group ha cancelado su reserva. La confirmación anterior ya no es válida. No viaje basándose en esa confirmación."
+    },
+    "status": {
+      "requested": "SOLICITUD — SIN CONFIRMAR",
+      "confirmed": "CONFIRMADA",
+      "modified": "CONFIRMADA — MODIFICADA",
+      "cancelled": "CANCELADA — NO VÁLIDA"
+    },
+    "labels": {
+      "status": "Estado",
+      "property": "Alojamiento",
+      "checkIn": "Llegada",
+      "checkOut": "Salida",
+      "nights": "Noches",
+      "guests": "Huéspedes",
+      "estimate": "Importe estimado",
+      "confirmed": "Importe confirmado",
+      "previous": "Importe confirmado anteriormente",
+      "reference": "Referencia de reserva",
+      "heating": "Climatización de piscina solicitada",
+      "notes": "Solicitudes especiales"
+    },
+    "yes": "Sí",
+    "no": "No",
+    "none": "Ninguna",
+    "greeting": "Estimado/a huésped:",
+    "action": "VER MI RESERVA",
+    "motto": "PRIVADO · INDEPENDIENTE · INTERNACIONAL",
+    "cancelFooter": "Cualquier pago o reembolso se gestionará por separado. Contacte con MZS Group si necesita ayuda.",
+    "footer": "Puede consultar el estado actual en su cuenta privada. Contacte con MZS Group si necesita ayuda."
+  },
+  "de": {
+    "title": {
+      "requested": "Ihre Buchungsanfrage ist eingegangen",
+      "confirmed": "Ihre Reservierung ist bestätigt",
+      "modified": "Ihre Reservierung wurde geändert",
+      "cancelled": "Ihre Reservierung wurde storniert"
+    },
+    "intro": {
+      "requested": "Wir haben Ihre Anfrage erhalten. Die Reservierung ist noch nicht bestätigt. Nach individueller Prüfung und Genehmigung sendet MZS Group eine gesonderte Bestätigung.",
+      "confirmed": "MZS Group hat Ihre Reservierung genehmigt und bestätigt. Wir freuen uns auf Ihren Besuch.",
+      "modified": "MZS Group hat Ihre bestätigte Reservierung geändert. Die folgenden Angaben ersetzen die Angaben der früheren Bestätigung.",
+      "cancelled": "MZS Group hat Ihre Reservierung storniert. Die frühere Bestätigung ist nicht mehr gültig. Bitte reisen Sie nicht auf Grundlage dieser Bestätigung an."
+    },
+    "status": {
+      "requested": "ANFRAGE — NICHT BESTÄTIGT",
+      "confirmed": "BESTÄTIGT",
+      "modified": "BESTÄTIGT — GEÄNDERT",
+      "cancelled": "STORNIERT — NICHT GÜLTIG"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Unterkunft",
+      "checkIn": "Anreise",
+      "checkOut": "Abreise",
+      "nights": "Nächte",
+      "guests": "Gäste",
+      "estimate": "Geschätzter Betrag",
+      "confirmed": "Bestätigter Betrag",
+      "previous": "Zuvor bestätigter Betrag",
+      "reference": "Buchungsreferenz",
+      "heating": "Poolheizung angefragt",
+      "notes": "Besondere Wünsche"
+    },
+    "yes": "Ja",
+    "no": "Nein",
+    "none": "Keine",
+    "greeting": "Guten Tag,",
+    "action": "MEINE RESERVIERUNG ANSEHEN",
+    "motto": "PRIVAT · UNABHÄNGIG · INTERNATIONAL",
+    "cancelFooter": "Etwaige Zahlungen oder Erstattungen werden gesondert bearbeitet. Wenden Sie sich bei Fragen an MZS Group.",
+    "footer": "Den aktuellen Status finden Sie in Ihrem privaten Konto. Wenden Sie sich bei Fragen an MZS Group."
+  },
+  "it": {
+    "title": {
+      "requested": "Abbiamo ricevuto la Sua richiesta di prenotazione",
+      "confirmed": "La Sua prenotazione è confermata",
+      "modified": "La Sua prenotazione è stata modificata",
+      "cancelled": "La Sua prenotazione è stata annullata"
+    },
+    "intro": {
+      "requested": "Abbiamo ricevuto la Sua richiesta. La prenotazione non è ancora confermata. Dopo la valutazione individuale e l’approvazione, MZS Group invierà una conferma separata.",
+      "confirmed": "MZS Group ha approvato e confermato la Sua prenotazione. Saremo lieti di accoglierLa.",
+      "modified": "MZS Group ha modificato la Sua prenotazione confermata. I dati seguenti sostituiscono quelli della conferma precedente.",
+      "cancelled": "MZS Group ha annullato la Sua prenotazione. La conferma precedente non è più valida. Non intraprenda il viaggio sulla base di tale conferma."
+    },
+    "status": {
+      "requested": "RICHIESTA — NON CONFERMATA",
+      "confirmed": "CONFERMATA",
+      "modified": "CONFERMATA — MODIFICATA",
+      "cancelled": "ANNULLATA — NON VALIDA"
+    },
+    "labels": {
+      "status": "Stato",
+      "property": "Alloggio",
+      "checkIn": "Arrivo",
+      "checkOut": "Partenza",
+      "nights": "Notti",
+      "guests": "Ospiti",
+      "estimate": "Importo stimato",
+      "confirmed": "Importo confermato",
+      "previous": "Importo precedentemente confermato",
+      "reference": "Riferimento prenotazione",
+      "heating": "Riscaldamento piscina richiesto",
+      "notes": "Richieste particolari"
+    },
+    "yes": "Sì",
+    "no": "No",
+    "none": "Nessuna",
+    "greeting": "Gentile ospite,",
+    "action": "VISUALIZZA LA MIA PRENOTAZIONE",
+    "motto": "PRIVATO · INDIPENDENTE · INTERNAZIONALE",
+    "cancelFooter": "Eventuali pagamenti o rimborsi saranno gestiti separatamente. Contatti MZS Group per assistenza.",
+    "footer": "Può consultare lo stato attuale nel Suo account riservato. Contatti MZS Group per assistenza."
+  },
+  "fr": {
+    "title": {
+      "requested": "Votre demande de réservation a été reçue",
+      "confirmed": "Votre réservation est confirmée",
+      "modified": "Votre réservation a été modifiée",
+      "cancelled": "Votre réservation a été annulée"
+    },
+    "intro": {
+      "requested": "Nous avons reçu votre demande. La réservation n’est pas encore confirmée. Après examen individuel et approbation, MZS Group vous enverra une confirmation distincte.",
+      "confirmed": "MZS Group a approuvé et confirmé votre réservation. Nous serons ravis de vous accueillir.",
+      "modified": "MZS Group a modifié votre réservation confirmée. Les informations ci-dessous remplacent celles de la confirmation précédente.",
+      "cancelled": "MZS Group a annulé votre réservation. La confirmation précédente n’est plus valable. Ne voyagez pas sur la base de cette confirmation."
+    },
+    "status": {
+      "requested": "DEMANDE — NON CONFIRMÉE",
+      "confirmed": "CONFIRMÉE",
+      "modified": "CONFIRMÉE — MODIFIÉE",
+      "cancelled": "ANNULÉE — NON VALABLE"
+    },
+    "labels": {
+      "status": "Statut",
+      "property": "Hébergement",
+      "checkIn": "Arrivée",
+      "checkOut": "Départ",
+      "nights": "Nuits",
+      "guests": "Voyageurs",
+      "estimate": "Montant estimé",
+      "confirmed": "Montant confirmé",
+      "previous": "Montant précédemment confirmé",
+      "reference": "Référence de réservation",
+      "heating": "Chauffage de la piscine demandé",
+      "notes": "Demandes particulières"
+    },
+    "yes": "Oui",
+    "no": "Non",
+    "none": "Aucune",
+    "greeting": "Bonjour,",
+    "action": "VOIR MA RÉSERVATION",
+    "motto": "PRIVÉ · INDÉPENDANT · INTERNATIONAL",
+    "cancelFooter": "Les éventuels paiements ou remboursements seront traités séparément. Contactez MZS Group si vous avez besoin d’aide.",
+    "footer": "Vous pouvez consulter le statut actuel dans votre espace privé. Contactez MZS Group si vous avez besoin d’aide."
+  },
+  "pt-BR": {
+    "title": {
+      "requested": "Recebemos sua solicitação de reserva",
+      "confirmed": "Sua reserva está confirmada",
+      "modified": "Sua reserva foi alterada",
+      "cancelled": "Sua reserva foi cancelada"
+    },
+    "intro": {
+      "requested": "Recebemos sua solicitação. A reserva ainda não está confirmada. Após análise individual e aprovação, a MZS Group enviará uma confirmação separada.",
+      "confirmed": "A MZS Group aprovou e confirmou sua reserva. Será um prazer receber você.",
+      "modified": "A MZS Group alterou sua reserva confirmada. Os dados abaixo substituem os da confirmação anterior.",
+      "cancelled": "A MZS Group cancelou sua reserva. A confirmação anterior não é mais válida. Não viaje com base nessa confirmação."
+    },
+    "status": {
+      "requested": "SOLICITAÇÃO — NÃO CONFIRMADA",
+      "confirmed": "CONFIRMADA",
+      "modified": "CONFIRMADA — ALTERADA",
+      "cancelled": "CANCELADA — SEM VALIDADE"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Acomodação",
+      "checkIn": "Entrada",
+      "checkOut": "Saída",
+      "nights": "Diárias",
+      "guests": "Hóspedes",
+      "estimate": "Valor estimado",
+      "confirmed": "Valor confirmado",
+      "previous": "Valor confirmado anteriormente",
+      "reference": "Referência da reserva",
+      "heating": "Aquecimento da piscina solicitado",
+      "notes": "Pedidos especiais"
+    },
+    "yes": "Sim",
+    "no": "Não",
+    "none": "Nenhum",
+    "greeting": "Olá,",
+    "action": "VER MINHA RESERVA",
+    "motto": "PRIVADO · INDEPENDENTE · INTERNACIONAL",
+    "cancelFooter": "Eventuais pagamentos ou reembolsos serão tratados separadamente. Entre em contato com a MZS Group se precisar de ajuda.",
+    "footer": "Consulte o status atualizado na sua conta privada. Entre em contato com a MZS Group se precisar de ajuda."
+  },
+  "ar": {
+    "title": {
+      "requested": "تم استلام طلب حجزكم",
+      "confirmed": "تم تأكيد حجزكم",
+      "modified": "تم تعديل حجزكم",
+      "cancelled": "تم إلغاء حجزكم"
+    },
+    "intro": {
+      "requested": "استلمنا طلبكم. الحجز غير مؤكد بعد. سترسل MZS Group تأكيدًا منفصلًا بعد مراجعة الطلب بشكل فردي والموافقة عليه.",
+      "confirmed": "وافقت MZS Group على حجزكم وأكدته. يسعدنا استقبالكم.",
+      "modified": "عدّلت MZS Group حجزكم المؤكد. تحل التفاصيل أدناه محل التفاصيل الواردة في التأكيد السابق.",
+      "cancelled": "ألغت MZS Group حجزكم. لم يعد التأكيد السابق صالحًا. يُرجى عدم السفر استنادًا إلى ذلك التأكيد."
+    },
+    "status": {
+      "requested": "طلب — غير مؤكد",
+      "confirmed": "مؤكد",
+      "modified": "مؤكد — معدّل",
+      "cancelled": "ملغى — غير صالح"
+    },
+    "labels": {
+      "status": "الحالة",
+      "property": "العقار",
+      "checkIn": "الوصول",
+      "checkOut": "المغادرة",
+      "nights": "الليالي",
+      "guests": "الضيوف",
+      "estimate": "المبلغ التقديري",
+      "confirmed": "المبلغ المؤكد",
+      "previous": "المبلغ المؤكد سابقًا",
+      "reference": "مرجع الحجز",
+      "heating": "طلب تدفئة المسبح",
+      "notes": "طلبات خاصة"
+    },
+    "yes": "نعم",
+    "no": "لا",
+    "none": "لا يوجد",
+    "greeting": "مرحبًا،",
+    "action": "عرض حجزي",
+    "motto": "خاص · مستقل · دولي",
+    "cancelFooter": "ستُعالَج أي ترتيبات للدفع أو استرداد الأموال بشكل منفصل. يُرجى التواصل مع MZS Group للحصول على المساعدة.",
+    "footer": "يمكنكم الاطلاع على الحالة الحالية في حسابكم الخاص. يُرجى التواصل مع MZS Group للحصول على المساعدة."
+  }
+}
