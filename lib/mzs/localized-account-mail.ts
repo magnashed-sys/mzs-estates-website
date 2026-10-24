@@ -1,5 +1,15 @@
 /** Client-facing copy only. Authorization, claiming and delivery stay in notifications.ts. */
 const copy = {
+  ru: {
+    member: 'клиент', dear: 'Здравствуйте,', access: 'ЛИЧНЫЙ ДОСТУП',
+    confidential: 'Это личное сообщение предназначено указанному получателю. Не пересылайте сообщения о безопасности аккаунта.',
+    motto: 'ЧАСТНАЯ · НЕЗАВИСИМАЯ · МЕЖДУНАРОДНАЯ', invitation: 'ТОЛЬКО ПО ПРИГЛАШЕНИЮ',
+    projects: 'Доступные вам проекты', login: 'ВОЙТИ В ЛИЧНЫЙ КАБИНЕТ', collection: 'ОТКРЫТЬ МОЮ КОЛЛЕКЦИЮ', capital: 'ОТКРЫТЬ PRIVATE CAPITAL',
+    account_activated: ['Ваш аккаунт MZS Group активирован', 'Добро пожаловать в вашу личную коллекцию.', 'Ваш аккаунт MZS Group одобрен и активирован. Теперь вы можете просматривать предложения, отобранные для вас.'],
+    new_project_access: ['Новый доступ к частным проектам | MZS Group', 'Новые возможности в вашей коллекции.', 'Вашему аккаунту MZS Group предоставлен дополнительный доступ к частным проектам.'],
+    capital_access_granted: ['Ваш доступ к Private Capital | MZS Group', 'Ваше личное досье доступно.', 'Вашему аккаунту MZS Group предоставлен доступ к досье Private Capital. Войдите в аккаунт для безопасного просмотра.'],
+    types: {investment: 'Инвестиции', financing: 'Финансирование', sale: 'Частная продажа', rental: 'Частная аренда'},
+  },
   nl: {
     member: 'relatie', dear: 'Beste', access: 'PRIVATE TOEGANG',
     confidential: 'Dit persoonlijke bericht is bestemd voor de genoemde ontvanger. Stuur berichten over accountbeveiliging niet door.',
@@ -27,7 +37,7 @@ export function isClientMail(type: string): type is typeof clientEvents[number] 
 }
 function escape(value: string) { return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!)); }
 function strings(value: unknown): string[] { return Array.isArray(value) ? value.filter((x): x is string => typeof x === 'string') : []; }
-export function localizedAccountMail(event: {event_type: string; payload: Record<string,unknown>}, recipientName: string, locale: 'nl'|'es', site: string) {
+export function localizedAccountMail(event: {event_type: string; payload: Record<string,unknown>}, recipientName: string, locale: 'nl'|'es'|'ru', site: string) {
   if (!isClientMail(event.event_type)) throw Error('Unsupported localized client notification');
   const c = copy[locale], [subject, headline, intro] = c[event.event_type];
   const name = recipientName.trim().split(/\s+/)[0] || c.member;

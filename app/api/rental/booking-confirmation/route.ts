@@ -1,3 +1,4 @@
+import { russianRentalMail } from "../../../../lib/mzs/russian-rental-mail";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as adminClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
@@ -81,6 +82,16 @@ export async function POST(request: NextRequest) {
       ",\n\nYour reservation has been approved and confirmed by MZS Group.\n\n" +
       details.map(([name, value]) => name + ": " + value).join("\n") +
       "\n\nView your reservation: https://www.mzsgroup.com/private/reservations\n\nMZS Group";
+    let guestLocale: unknown = "en";
+    try {
+      const {data, error} = await service.auth.admin.getUserById(booking.user_id);
+      if (!error) guestLocale = data.user?.user_metadata?.preferred_language;
+    } catch { /* Optional presentation preference; preserve English delivery on lookup failure. */ }
+    const message = guestLocale === "ru"
+      ? russianRentalMail("confirmed", {property:property.title, checkIn:booking.check_in,
+        checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
+        reference:booking.id}, "https://www.mzsgroup.com")
+      : {subject:"Your reservation is confirmed | MZS Group",text,html};
     const transport = nodemailer.createTransport({
       host, port, secure: port === 465, requireTLS: port === 587,
       auth: { user, pass }, tls: { minVersion: "TLSv1.2" },
@@ -88,7 +99,7 @@ export async function POST(request: NextRequest) {
     });
     try {
       const sent = await transport.sendMail({
-        from, to: guest.email, subject: "Your reservation is confirmed | MZS Group", text, html,
+        from, to: guest.email, ...message,
       });
       if (!sent.accepted?.some(address => (typeof address === "string" ? address : address.address).toLowerCase() === guest.email.toLowerCase()))
         throw new Error("Message not accepted by SMTP server");

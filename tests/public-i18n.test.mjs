@@ -23,7 +23,7 @@ test('Locale links preserve existing English URLs and never create private alias
 });
 test('All translation catalogues are complete and every ICU message renders without errors', () => {
   for (const [locale, messages] of Object.entries(catalogs)) {
-    const expected = locale === 'ru' ? Object.fromEntries(Object.keys(messages).map(key => [key, catalogs.en[key]])) : catalogs.en;
+    const expected = catalogs.en;
     assert.deepEqual(Object.keys(messages).sort(), Object.keys(expected).sort());
     const errors = [];
     const t = createTranslator({locale, messages, onError: error => errors.push(error)});
@@ -52,7 +52,7 @@ test('Project client catalogue includes UI copy but excludes server-only loan/pr
   for (const key of ['investmentKind', 'acquisitionKind', 'documentCategories']) assert.ok(keys.has(key));
   const photoSource = readFileSync(new URL('../app/private/projects/[slug]/localizedPhotoChapters.ts', import.meta.url), 'utf8');
   for (const match of photoSource.matchAll(/: "(p\d+)"/g)) assert.ok(keys.has(match[1]));
-  for (const key of keys) for (const locale of ['en', 'nl', 'es']) assert.ok(catalogs[locale].ProjectUI[key]);
+  for (const key of keys) for (const locale of routing.locales) assert.ok(catalogs[locale].ProjectUI[key]);
   for (const privateKey of ['p223', 'p240', 'p247', 'p286', 'p297', 'p447', 'p449', 'p451', 'p453', 'p454', 'loanTerm', 'loanMinimum']) assert.ok(!keys.has(privateKey), privateKey);
 });
 
