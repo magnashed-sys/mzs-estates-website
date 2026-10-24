@@ -140,7 +140,7 @@
 /* Footer flags share the same language behavior as the header menu. */
 .languageInline {display:flex;align-items:center;justify-content:center;gap:2px;direction:ltr;letter-spacing:normal;}
 .languageInline a {display:flex;align-items:center;justify-content:center;min-width:24px;min-height:36px;padding:2px;text-decoration:none;border-radius:3px;}
-.languageInline .languageFlag {font-size:14px;}
+.languageInline .languageFlag {font-size:28px;}
 .languageInline a[aria-current="page"] {background:rgba(213,192,154,.14);box-shadow:inset 0 -1px #d5c09a;}
 .languageInline a:hover {background:rgba(213,192,154,.2);}
 .languageInline a:focus-visible {outline:2px solid #d5c09a;outline-offset:2px;}
