@@ -7,7 +7,7 @@ import {createClient} from '../../lib/supabase/client';
 import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
 
-export default function LanguageSwitcher({account = false}: {account?: boolean}) {
+export default function LanguageSwitcher({account = false, inline = false}: {account?: boolean; inline?: boolean}) {
   const currentLocale = useLocale();
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -16,6 +16,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
   const t = useTranslations('Language');
   const disclosure = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
+    if (inline) return;
     function closeOutside(event: Event) {
       if (event.target instanceof Node && !disclosure.current?.contains(event.target)) {
         disclosure.current?.removeAttribute('open');
@@ -29,23 +30,9 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
       document.removeEventListener('pointerdown', closeOutside);
       document.removeEventListener('focusin', closeOutside);
     };
-  }, []);
+  }, [inline]);
   if (!route) return null;
-  return <details className={styles.languages} ref={disclosure}
-    onKeyDown={event => {
-      if (event.key === 'Escape' && disclosure.current?.open) {
-        disclosure.current.open = false;
-        disclosure.current.querySelector('summary')?.focus();
-      }
-    }}>
-    <summary className={styles.languageToggle} aria-label={t('choose')} title={t('choose')}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" />
-        <ellipse cx="12" cy="12" rx="4" ry="9" />
-        <path d="M3 12h18M5 6.5h14M5 17.5h14" />
-      </svg>
-    </summary>
-    <nav className={styles.languagePanel} aria-label={t('choose')}>
+  const languageLinks = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}>
     {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
       hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
       title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
@@ -77,6 +64,22 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}
-    </nav>
+    </nav>);
+  if (inline) return languageLinks;
+  return <details className={styles.languages} ref={disclosure}
+    onKeyDown={event => {
+      if (event.key === 'Escape' && disclosure.current?.open) {
+        disclosure.current.open = false;
+        disclosure.current.querySelector('summary')?.focus();
+      }
+    }}>
+    <summary className={styles.languageToggle} aria-label={t('choose')} title={t('choose')}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <ellipse cx="12" cy="12" rx="4" ry="9" />
+        <path d="M3 12h18M5 6.5h14M5 17.5h14" />
+      </svg>
+    </summary>
+    {languageLinks}
   </details>;
 }

@@ -9,3 +9,6 @@
 
 .links {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 12px;}
 @media(max-width:1100px) {.footer {grid-template-columns:minmax(0,1fr);gap:4px;justify-items:center;} .locations,.invitation {text-align:center;}}
+
+.links {display:grid;grid-template-columns:auto auto auto;gap:4px 12px;}
+@media(max-width:760px) {.links {grid-template-columns:minmax(0,1fr);gap:0;justify-items:center;} .contact {min-height:36px;padding:4px 6px;}}
