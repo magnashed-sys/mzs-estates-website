@@ -18,6 +18,8 @@
     "mobile_main_navigation": "التنقل الرئيسي للهاتف"
   },
   "Footer": {
+    "contact_short": "تواصل",
+    "request_short": "طلب",
     "contact_mzs": "التواصل مع MZS",
     "private_access": "وصول خاص",
     "contactEmail": "تواصل مع MZS Group عبر البريد الإلكتروني: {address}"
