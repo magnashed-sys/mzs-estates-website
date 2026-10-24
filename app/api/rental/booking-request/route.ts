@@ -1,4 +1,4 @@
-import { russianRentalMail } from "../../../../lib/mzs/russian-rental-mail";
+import { localizedRentalMail, isLocalizedRentalLocale } from "../../../../lib/mzs/localized-rental-mail";
 import { NextRequest, NextResponse, after } from "next/server";
 import { createClient as serviceClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
@@ -141,11 +141,12 @@ export async function POST(request: NextRequest) {
     const adminText = "A new private rental request has been registered. It is awaiting approval.\n" +
       "Requester: " + (profile.full_name || "Private client") + "\nEmail: " + clientEmail +
       "\nReference: " + bookingId + "\n\n" + lines;
-    const clientMessage = auth.user.user_metadata?.preferred_language === "ru"
-      ? russianRentalMail("requested", {property:project.title, checkIn:booking.check_in,
+    const clientLocale = auth.user.user_metadata?.preferred_language;
+    const clientMessage = isLocalizedRentalLocale(clientLocale)
+      ? localizedRentalMail("requested", {property:project.title, checkIn:booking.check_in,
         checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
         reference:bookingId, heating:body.mode === "villa" ? booking.pool_heating_requested : undefined,
-        notes:booking.guest_notes}, "https://www.mzsgroup.com")
+        notes:booking.guest_notes}, "https://www.mzsgroup.com", clientLocale)
       : {subject:"Booking request received | MZS Group", text:clientText,
         html:html("Your booking request.", "We have received your request. This is not a confirmed reservation. You will receive a separate confirmation after approval.", "https://www.mzsgroup.com/private/reservations")};
     const settled = await Promise.allSettled([

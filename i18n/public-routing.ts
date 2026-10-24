@@ -1,5 +1,5 @@
 /** Explicit allowlist: public marketing pages plus login, never private route aliases. */
-export const memberLocales = ['en', 'nl', 'es', 'ru'] as const;
+export const memberLocales = ['en', 'nl', 'es', 'ru', 'de', 'it', 'fr', 'pt-BR', 'ar'] as const;
 export const locales = memberLocales;
 /** Presentation preference only; never used for authorization. */
 export function memberLocale(value: unknown): typeof memberLocales[number] {
@@ -13,7 +13,7 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && locales.includes(value as Locale);
 }
 export function publicRoute(pathname: string): {locale: Locale; path: string} | null {
-  const match = pathname.match(/^\/(nl|es|ru)(\/.*)?$/);
+  const match = pathname.match(/^\/(nl|es|ru|de|it|fr|pt-BR|ar)(\/.*)?$/);
   const path = match ? match[2] || '/' : pathname;
   if (!localizedPaths.includes(path as typeof localizedPaths[number])) return null;
   return {locale: match ? match[1] as Locale : 'en', path};
@@ -29,3 +29,5 @@ export function languageAlternates(path: string) {
 /** Account token routes keep their exact URLs; only their presentation follows the cookie. */
 export const accountPaths = ["/request-access", "/registration-pending", "/forgot-password", "/reset-password", "/accept-invitation"] as const;
 export function isAccountPath(path: string) { return (accountPaths as readonly string[]).includes(path); }
+
+export function localeDirection(locale: string): "rtl" | "ltr" { return locale === "ar" ? "rtl" : "ltr"; }

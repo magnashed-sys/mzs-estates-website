@@ -1,6 +1,6 @@
 "use client";
 
-import {useTranslations} from "next-intl";
+import {useTranslations, useLocale} from "next-intl";
 
 
 import Image from "next/image";
@@ -17,6 +17,7 @@ type Props = { photos: PropertyPhoto[]; title: string };
 
 export default function PropertyGallery({ photos, title }: Props) {
   const t = useTranslations("ProjectUI");
+  const rtl = useLocale() === "ar";
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -41,10 +42,10 @@ export default function PropertyGallery({ photos, title }: Props) {
         requestAnimationFrame(() => opener.current?.focus());
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        setActiveIndex((index) => index === null ? null : (index + 1) % total);
+        setActiveIndex((index) => index === null ? null : (index + (rtl ? -1 : 1) + total) % total);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setActiveIndex((index) => index === null ? null : (index - 1 + total) % total);
+        setActiveIndex((index) => index === null ? null : (index + (rtl ? 1 : -1) + total) % total);
       } else if (event.key === "Tab") {
         // Keep keyboard focus inside the modal while it is open.
         const focusable = Array.from(lightbox.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []);
@@ -65,7 +66,7 @@ export default function PropertyGallery({ photos, title }: Props) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen, total]);
+  }, [isOpen, total, rtl]);
 
   // After the lightbox closes, return focus to the original thumbnail.
   const close = () => {

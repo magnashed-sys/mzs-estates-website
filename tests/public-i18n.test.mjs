@@ -12,7 +12,7 @@ test('Marketing and login routes are localized; private and machine route aliase
     const result = routing.publicRoute(routing.localizedPath(path, locale));
     assert.equal(result.locale, locale); assert.equal(result.path, path);
   }
-  for (const path of ['/admin', '/private', '/auth/confirm', '/api/intro-calls', '/api/rental/notifications/dispatch', '/reset-password', '/nl/private', '/es/admin', '/fr', '/es/api/intro-calls', '/nl/real-estate/extra']) assert.equal(routing.publicRoute(path), null);
+  for (const path of ['/admin', '/private', '/auth/confirm', '/api/intro-calls', '/api/rental/notifications/dispatch', '/reset-password', '/nl/private', '/es/admin', '/xx', '/es/api/intro-calls', '/nl/real-estate/extra']) assert.equal(routing.publicRoute(path), null);
 });
 test('Locale links preserve existing English URLs and never create private aliases', () => {
   assert.equal(routing.localizedPath('/real-estate', 'en'), '/real-estate');

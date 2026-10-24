@@ -47,8 +47,8 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
     </summary>
     <nav className={styles.languagePanel} aria-label={t('choose')}>
     {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
-      hrefLang={locale} lang={locale} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский'}[locale]}
-      title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский'}[locale]}
+      hrefLang={locale} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
+      title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
       aria-disabled={busy || undefined}
       onClick={async event => {
@@ -73,7 +73,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
           if (isAccountPath(pathname)) location.reload();
           else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
-      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺'}[locale]}</span>
+      }}><span className={locale === "ar" ? styles.languageArabic : styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: 'ع'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}

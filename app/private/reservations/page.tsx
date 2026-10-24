@@ -331,7 +331,7 @@ export default function MyReservationsPage() {
                             : t("mzsReviewsEachCancellationPersonallyNoRefundIs")}
                       </p>
                       <label htmlFor={`reason-${booking.id}`}>{t("reasonForCancellation")}</label>
-                      <textarea id={`reason-${booking.id}`} value={reason} minLength={5} maxLength={2000} rows={4} required disabled={locked} onChange={event => setReason(event.target.value)} style={{ display: "block", boxSizing: "border-box", width: "100%", background: "#0b0b0a", border: `1px solid ${border}`, color: "#eeeae2", padding: 15, margin: "12px 0", fontSize: 16, fontFamily: "inherit", lineHeight: 1.6 }}/>
+                      <textarea dir="auto" id={`reason-${booking.id}`} value={reason} minLength={5} maxLength={2000} rows={4} required disabled={locked} onChange={event => setReason(event.target.value)} style={{ display: "block", boxSizing: "border-box", width: "100%", background: "#0b0b0a", border: `1px solid ${border}`, color: "#eeeae2", padding: 15, margin: "12px 0", fontSize: 16, fontFamily: "inherit", lineHeight: 1.6 }}/>
                       <div style={rowStyle}>
                         <button type="submit" style={disabledStyle} disabled={locked}>
                           {busyId === booking.id ? t("sending") : booking.is_test ? t("sendTestCancellationRequest") : t("sendCancellationRequest")}

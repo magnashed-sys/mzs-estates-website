@@ -36,7 +36,7 @@
   letter-spacing: .15em;
   color: #d5c09a;
   text-decoration: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 .page :global(.login-header > span),
 .page :global(.request-header > span) {
@@ -83,12 +83,11 @@
   margin: 16px 0 20px;
   overflow-wrap: break-word;
 }
-/* Only the /login heading: fit Client & Partner Login on one line.
-   Fluid typography shrinks gently for narrow phones; recovery/request titles are unchanged. */
+/* Compact login heading; longer translations may wrap on narrow phones. */
 .page :global(.login-container) .loginTitle {
   font-size: clamp(18px, 5.4vw, 34px);
   letter-spacing: -.025em;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .page :global(.login-intro),
@@ -221,7 +220,7 @@
 .page :global(.login-error) {
   margin: 0;
   padding: 13px 14px;
-  border-left: 3px solid #f4b09a;
+  border-inline-start: 3px solid #f4b09a;
   background: #291c19;
   color: #ffd5c9;
   font-size: 14px;

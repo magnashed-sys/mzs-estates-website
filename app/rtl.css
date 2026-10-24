@@ -1,0 +1,10 @@
+/* Arabic presentation only. Auth rules and URL/token formats are unchanged. */
+html[dir="rtl"] body {font-family:Tahoma,Arial,sans-serif;}
+html[dir="rtl"] :is(h1,h2,h3,h4,p,span,a,label,button,summary,small,strong,th,td) {letter-spacing:normal;}
+html[dir="rtl"] :is(h1,h2,h3,h4) {line-height:1.4;}
+html[dir="rtl"] :is(input[type="email"],input[type="tel"],input[type="url"],input[type="number"],input[type="date"],input[type="time"]) {direction:ltr;unicode-bidi:isolate;text-align:start;}
+html[dir="rtl"] :is(input,textarea) {min-width:0;}
+html[dir="rtl"] textarea {text-align:start;}
+html[dir="rtl"] bdi {unicode-bidi:isolate;}
+/* Preserve identifiers and Latin branding; never mirror photography or logos. */
+html[dir="rtl"] :is(code,[data-ltr]) {direction:ltr;unicode-bidi:isolate;}
