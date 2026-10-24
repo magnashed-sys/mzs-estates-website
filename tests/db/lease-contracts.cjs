@@ -1,0 +1,54 @@
+// Run with MZS_PGLITE_MODULE=/path/to/@electric-sql/pglite node tests/db/lease-contracts.cjs
+const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
+const fs=require('node:fs');const assert=require('node:assert/strict');
+(async()=>{const db=new PGlite();await db.exec(`
+create role anon;create role authenticated;create role service_role;
+create schema auth;grant usage on schema auth to authenticated;
+create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+create table public.profiles(id uuid primary key,role text,is_active boolean);
+insert into profiles values ('11111111-1111-4111-8111-111111111111','admin',true),('11111111-1111-4111-8111-111111111112','client',true),('11111111-1111-4111-8111-111111111113','admin',false);
+create function public.is_admin() returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active=true)$$;
+create table public.mzs_estate_properties(id uuid primary key);
+create table public.mzs_estate_units(id uuid primary key,property_id uuid,address text);
+insert into mzs_estate_properties values ('22222222-2222-4222-8222-222222222222');
+insert into mzs_estate_units values ('33333333-3333-4333-8333-333333333333','22222222-2222-4222-8222-222222222222','Fixture Street 1'),('33333333-3333-4333-8333-333333333334','22222222-2222-4222-8222-222222222222','Fixture Street 2');
+grant select on mzs_estate_properties,mzs_estate_units to authenticated;
+create schema storage;create table storage.buckets(id text,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(bucket_id text,name text);
+create function storage.foldername(text) returns text[] language sql as $$select string_to_array($1,'/')$$;
+`);
+await db.exec(fs.readFileSync('supabase/migrations/20261024081252_estate_contract_drafts.sql','utf8'));
+const run=q=>db.query(q);const value=async q=>(await run(q)).rows[0];
+await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);`);
+const insert=`insert into mzs_lease_contracts(title,property_id,unit_ids,tenant_name,tenant_address,issuer_name,issuer_address,issuer_iban,contract_date,lease_start,lease_end,first_period,first_generation_date,max_terms,lines) values ('Fixture lease','22222222-2222-4222-8222-222222222222',array['33333333-3333-4333-8333-333333333333']::uuid[],'Fixture tenant','Test address','Fixture issuer','Test issuer address','NLTESTACCOUNT','2024-01-01','2024-01-16','2024-04-10','2024-01-01','2023-12-31',3,'[{"description":"Rent","amount":"310.00","vat":"exempt"},{"description":"Service","amount":"100.00","vat":"21"}]') returning id`;
+const {id}=await value(insert);
+assert.equal((await value(`select mzs_private.generate_lease_drafts('2024-04-30') as n`)).n,0,'draft inactive');
+await db.exec(`update mzs_lease_contracts set status='active' where id='${id}'`);
+assert.equal((await value(`select mzs_private.generate_lease_drafts('2024-04-30') as n`)).n,3,'max terms/catchup');
+const rows=(await run('select * from mzs_lease_invoice_drafts order by period_start')).rows;
+assert.equal(rows[0].subtotal,'211.61');assert.equal(rows[0].tax_total,'10.84');assert.equal(rows[0].total,'222.45');
+assert.match(rows[0].subject,/januari 2024/);assert.match(rows[0].subject,/Fixture Street 1/);
+assert.equal(rows[2].scheduled_date.toISOString().slice(0,10),'2024-02-29');
+assert.equal((await value(`select mzs_private.lease_month('2024-01-31',2)::text as d`)).d,'2024-03-31');
+assert.equal((await value(`select mzs_private.generate_lease_drafts('2024-04-30') as n`)).n,0,'repeat is idempotent');
+await assert.rejects(db.exec(`update mzs_lease_contracts set first_period='2024-02-01' where id='${id}'`),/locked/);
+const other=(await value(insert)).id;
+await assert.rejects(db.exec(`update mzs_lease_contracts set status='active' where id='${other}'`),/active contract/);
+await db.exec(`update mzs_lease_contracts set status='stopped' where id='${id}'`);
+await assert.rejects(db.exec(`update mzs_lease_contracts set status='active' where id='${other}'`),/invoice draft/);
+await db.exec(`update mzs_lease_contracts set unit_ids=array['33333333-3333-4333-8333-333333333334']::uuid[],first_period='2024-04-01',first_generation_date='2024-03-25',max_terms=null where id='${other}';update mzs_lease_contracts set status='active' where id='${other}';`);
+assert.equal((await value(`select mzs_private.generate_lease_drafts('2024-06-30') as n`)).n,1,'cutover and lease end');
+const last=await value(`select * from mzs_lease_invoice_drafts where contract_id='${other}'`);
+assert.equal(last.subtotal,'136.66');assert.match(last.subject,/april 2024/);
+await db.exec(`update mzs_lease_invoice_drafts set review_status='checked',review_note='Fixture checked' where contract_id='${other}'`);
+assert.equal((await value(`select reviewed_by from mzs_lease_invoice_drafts where contract_id='${other}'`)).reviewed_by,'11111111-1111-4111-8111-111111111111');
+await assert.rejects(db.exec(`update mzs_lease_invoice_drafts set total=0`),/permission denied/);
+for(const uid of ['11111111-1111-4111-8111-111111111112','11111111-1111-4111-8111-111111111113']){
+ await db.exec(`select set_config('request.jwt.claim.sub','${uid}',false)`);
+ assert.equal((await run('select * from mzs_lease_contracts')).rows.length,0);
+ assert.equal((await run('select * from mzs_lease_invoice_drafts')).rows.length,0);
+ await assert.rejects(db.exec(insert),/row-level security/);
+ await assert.rejects(db.exec(`select mzs_private.generate_lease_drafts('2024-04-30')`),/administrator required/);
+}
+await db.exec('set role anon');await assert.rejects(db.exec('select * from mzs_lease_contracts'),/permission denied/);await assert.rejects(db.exec('select public.mzs_generate_lease_drafts()'),/permission denied/);
+await db.close();console.log('PASS lease draft/activation, overlap, replacement duplicate guard, cutover, catch-up, max terms, end date, leap/month ends, prorating, VAT, placeholders, locked terms, review audit, admin/client/inactive/anon permissions');
+})().catch(e=>{console.error(e);process.exit(1)});
