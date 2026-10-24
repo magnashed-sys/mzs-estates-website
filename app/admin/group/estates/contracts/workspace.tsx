@@ -1,6 +1,6 @@
 'use client';
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/client';
 import { euros } from '../../../../../lib/estates/rent';
 import { invoiceMonthStart, leaseSubjectPreview, leasePreparationDate } from '../../../../../lib/estates/lease-month';
@@ -21,7 +21,13 @@ function Field({label,children,wide=false}:{label:string;children:React.ReactNod
 
 export default function ContractWorkspace({relationships,properties,units,members,contracts,invoices}:Props){
  const router=useRouter();const [pending,startTransition]=useTransition();
- const [tab,setTab]=useState<'contracts'|'invoices'|'relationships'>('contracts');
+ const searchParams=useSearchParams();
+ const view=searchParams.get('view');
+ const tab=view==='relationships'||view==='invoices'?view:'contracts';
+ function setTab(next:'contracts'|'invoices'|'relationships'){
+  const url=new URL(window.location.href);url.searchParams.set('view',next);
+  window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+ }
  const [editing,setEditing]=useState<Contract|null|undefined>(undefined);
  const [selected,setSelected]=useState<string|null>(null);
  const [error,setError]=useState('');const [notice,setNotice]=useState('');

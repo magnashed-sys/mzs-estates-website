@@ -16,5 +16,5 @@ export default async function ContractsPage() {
   return <><p className="mzsEyebrow">MZS ESTATES / LONG-TERM RENTAL</p><h1>Contracts &amp; invoices.</h1>
     <p className="mzsIntro">Link your rental units, record the agreement and prepare monthly invoice drafts for review.</p>
     <ContractWorkspace properties={results[0].data || []} units={results[1].data || []} members={results[2].data || []} contracts={results[3].data || []} relationships={results[4].data || []} invoices={results[5].data || []}/>
-    <Link href="/admin/group/estates">← Property Cockpit</Link></>;
+    <Link href="/admin?tab=contracts">← Rental Contracts overview</Link></>;
 }

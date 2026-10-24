@@ -15,10 +15,10 @@ type CompanyAssociation = { id: string; user_id: string; legal_name: string; tra
 type ContactSnapshot = { user_id: string; phone: string | null; city: string | null; country: string | null };
 type Project = { id: string; title: string; location: string | null; status: string };
 type Offering = { id: string; project_id: string; title: string; offering_type: string; status: string };
-type Tab = "overview" | "relationships" | "companies" | "estates" | "projects" | "bookings" | "capital" | "analytics";
+type Tab = "overview" | "relationships" | "companies" | "estates" | "contracts" | "projects" | "bookings" | "capital" | "analytics";
 type PageState = "loading" | "ready" | "denied" | "error";
 const labels: Record<string, string> = { investment: "Investment", financing: "Private Capital", rental: "Private Rental", sale: "Private Sale" };
-const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["companies", "Companies"], ["estates", "Properties & units"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["capital", "Private Capital"], ["analytics", "Analytics"]];
+const tabs: [Tab, string][] = [["overview", "Overview"], ["relationships", "Relationships"], ["companies", "Companies"], ["estates", "Properties & units"], ["contracts", "Rental Contracts"], ["projects", "Projects & access"], ["bookings", "Bookings"], ["capital", "Private Capital"], ["analytics", "Analytics"]];
 const requestFilters: [RequestFilter, string][] = [["pending", "Pending"], ["approved", "Approved"], ["invitations", "Invitations"], ["declined", "Declined"], ["all", "All"]];
 const pageSize = 12;
 const trafficReport = "https://vercel.com/mzs3/mzs-group/analytics";
@@ -383,7 +383,7 @@ export default function AdminPage() {
   return <main className="admin-page">
     <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
     <section className="admin-content">
-      <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
+      <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections">{tabs.map(([key, label]) => <button key={key} disabled={locked} aria-current={tab === key ? "page" : undefined} onClick={() => navigate(key)}>{label}{key === "relationships" && pending.length > 0 && <span className="admin-count">{pending.length}</span>}</button>)}</nav>
       {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
       {notice && <p className="admin-notice" role="status">{notice}</p>}
@@ -397,12 +397,21 @@ export default function AdminPage() {
 
 
       {tab === "estates" && <>
-        <Link onClick={guardLink} className="admin-button admin-button-primary" href="/admin/group/estates/contracts">Rental relationships, contracts &amp; invoices →</Link>
         <div className="admin-section-heading"><div><p className="eyebrow">MZS Estates</p><h2>Properties &amp; rental units.</h2></div></div>
         <div className="admin-project-grid">
           <article className="admin-panel"><p className="eyebrow">Property register</p><h3 className="admin-subtitle">Ownership &amp; properties.</h3><p className="admin-intro">View your properties, photographs, ownership details and managing agents.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/properties">Open properties →</Link></article>
           <article className="admin-panel"><p className="eyebrow">Rental register</p><h3 className="admin-subtitle">Rental units.</h3><p className="admin-intro">View individual units, recorded tenants and rental amounts, linked to each property.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/units">Open rental units →</Link></article>
         </div>
+      </>}
+
+      {tab === "contracts" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">MZS Estates / Long-term rental</p><h2>Rental Contracts.</h2><p className="admin-intro">Manage your tenants, rental agreements and monthly invoice drafts.</p></div></div>
+        <div className="admin-project-grid">
+          <article className="admin-panel"><p className="eyebrow">Rental relationships</p><h3 className="admin-subtitle">Your tenants.</h3><p className="admin-intro">Record people and companies, then reuse their details when preparing a contract. A rental relationship does not require a login account.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=relationships">Open rental relationships →</Link></article>
+          <article className="admin-panel"><p className="eyebrow">Rental agreements</p><h3 className="admin-subtitle">Your contracts.</h3><p className="admin-intro">Link agreements to properties and units, record the rent and activate the monthly billing schedule.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary admin-space-top" href="/admin/group/estates/contracts?view=contracts">Open rental contracts →</Link></article>
+          <article className="admin-panel"><p className="eyebrow">Monthly billing</p><h3 className="admin-subtitle">Invoice drafts.</h3><p className="admin-intro">Review the concepts prepared for each rental month. Final invoice issuing and sending are not yet enabled.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=invoices">Review invoice drafts →</Link></article>
+        </div>
+        <p className="admin-help">For active contracts, drafts are prepared on the 14th for the following month, starting with December 2026. Payment must be received before the first day of that rental month.</p>
       </>}
 
       {tab === "overview" && <>
@@ -421,6 +430,7 @@ export default function AdminPage() {
         </div>
         <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">MZS Capital</p><h3 className="admin-subtitle">Private Capital</h3><p className="admin-help">Loans, agreements, payment schedules and capital requests.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("capital")}>Open Private Capital →</button></div>
         <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">MZS Estates</p><h3 className="admin-subtitle">Properties &amp; rental units</h3><p className="admin-help">Ownership, managing agents, individual units and recorded rent.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("estates")}>Open Properties &amp; units →</button></div>
+        <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">MZS Estates</p><h3 className="admin-subtitle">Rental Contracts</h3><p className="admin-help">Tenants, long-term agreements and monthly invoice drafts.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("contracts")}>Open Rental Contracts →</button></div>
         <BookingManagement key={`summary-${refreshVersion}`} mode="summary" onNavigate={openBookings} />
         <div className="admin-panel admin-analytics-banner"><div><p className="eyebrow">Website insights</p><h3 className="admin-subtitle">Vercel Analytics</h3><p className="admin-help">Open the traffic report for your public website.</p></div><button className="admin-button" disabled={locked} onClick={() => navigate("analytics")}>View analytics →</button></div>
       </>}
