@@ -73,7 +73,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
           if (isAccountPath(pathname)) location.reload();
           else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
-      }}><span className={locale === "ar" ? styles.languageArabic : styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: 'ع'}[locale]}</span>
+      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: '🇦🇪'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}

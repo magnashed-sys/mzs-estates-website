@@ -135,5 +135,4 @@
 
 /* Nine choices remain reachable on short/mobile screens. */
 .languagePanel {max-height:min(70svh,480px);overflow-y:auto;overscroll-behavior:contain;}
-.languageArabic {font:600 25px/1.2 Tahoma,Arial,sans-serif;}
 .wordmark {direction:ltr;unicode-bidi:isolate;}
