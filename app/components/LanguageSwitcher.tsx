@@ -47,7 +47,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
     </summary>
     <nav className={styles.languagePanel} aria-label={t('choose')}>
     {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
-      hrefLang={locale} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
+      hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
       title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
       aria-disabled={busy || undefined}
