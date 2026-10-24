@@ -1,4 +1,5 @@
 "use client";
+import RussianAccessNotice from "../components/RussianAccessNotice";
 
 import styles from "../public-access-refresh.module.css";
 import PublicHeader from "../components/PublicHeader";
@@ -136,6 +137,7 @@ export default function LoginPage() {
           {t("intro")}
         </p>
 
+        <RussianAccessNotice />
         <form
           className="login-form"
           onSubmit={handleLogin}

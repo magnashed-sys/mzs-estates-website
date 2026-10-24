@@ -23,7 +23,7 @@ function harness({enabled=true,rate=true,duplicate=false,application=true}={}) {
 }
 const valid={full_name:'Local Tester',email:'test@example.invalid',password:'local-password',confirm_password:'local-password',interests:['investment']};
 test('Registration stores only an allowlisted language alongside the existing signup metadata',async()=>{
- for(const [input,expected] of [['nl','nl'],['es','es'],['en','en'],['fr','en'],[undefined,'en'],[{role:'admin'},'en']]) {
+ for(const [input,expected] of [['nl','nl'],['ru','ru'],['es','es'],['en','en'],['fr','en'],[undefined,'en'],[{role:'admin'},'en']]) {
   const h=harness();assert.equal((await h.post({...valid,preferred_language:input,role:'admin',is_active:true})).status,201);
   const signup=h.signups[0];assert.equal(signup.options.data.preferred_language,expected);
   assert.equal(signup.options.data.mzs_access_request,'v2');assert.equal(signup.options.data.role,undefined);assert.equal(signup.options.data.is_active,undefined);
@@ -32,7 +32,7 @@ test('Registration stores only an allowlisted language alongside the existing si
 });
 test('Language cannot bypass registration switch, duplicate or rate checks; partial signup stays an error',async()=>{
  for(const [options,status,count] of [[{enabled:false},503,0],[{rate:false},429,0],[{duplicate:true},409,0],[{application:false},503,1]]) {
-  const h=harness(options);const result=await h.post({...valid,preferred_language:'es'});assert.equal(result.status,status);assert.equal(h.signups.length,count);
+  const h=harness(options);const result=await h.post({...valid,preferred_language:'ru'});assert.equal(result.status,status);assert.equal(h.signups.length,count);
   if(count)assert.match(result.body.error,/do not register twice/);
  }
 });

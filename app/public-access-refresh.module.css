@@ -257,3 +257,10 @@
 .page:global(.login-page) { display:flex; flex-direction:column; }
 .page :global(.mzs-private-label) { display:block; }
 @media(max-width:700px) { .publicFooter { padding-top:20px; } }
+
+/* Longer Cyrillic title must remain readable on narrow screens. */
+:global(html[lang="ru"]) .page :global(.login-container) .loginTitle {
+  white-space: normal;
+  font-size: clamp(23px, 4.6vw, 32px);
+  text-wrap: balance;
+}
