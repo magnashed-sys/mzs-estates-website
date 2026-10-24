@@ -10,3 +10,8 @@ test('Staging invoice capture ignores SMTP secrets and attaches PDF without inte
 test('production invoice mail requires explicit release switch and matching database',async()=>{for(const env of [{VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co'},{VERCEL_ENV:'preview',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co',MZS_LEASE_INVOICE_SEND_ENABLED:'true'}])await assert.rejects(mail(env).api.prepareInvoiceDelivery(invoice),/not been enabled/)});
 test('recipient lists and header injection cannot be sent',async()=>{for(const recipient of ['a@example.invalid,b@example.invalid','a@example.invalid\r\nBcc: someone@example.invalid'])await assert.rejects(mail().api.prepareInvoiceDelivery({...invoice,payload:{...invoice.payload,snapshot:{...invoice.payload.snapshot,tenant_email:recipient}}}),/single valid tenant email/)});
 test('unknown delivery and lost acknowledgement remain uncertain',async()=>{for(const outcome of [{throw:true},{persistError:true}]){const h=mail({},outcome);assert.equal(await (await h.api.prepareInvoiceDelivery(invoice))('id','token'),'uncertain')}});
+
+test('forecast rounds exact half cents like PostgreSQL invoice generation',()=>{
+ const c={status:'active',first_period:'2027-04-01',lease_start:'2027-04-16',lease_end:null,max_terms:1,prorate:true,lines:[{amount:'0.29',vat:'exempt'}]};
+ assert.equal(cash.rentalForecast([c],'2027-04'),0.15);
+});
