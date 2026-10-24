@@ -77,7 +77,8 @@ export default function AdminPage() {
       const supabase = createClient();
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (!current()) return;
-      if (authError || !auth.user) { router.replace("/login"); return; }
+      // Reload the public locale provider when leaving the English admin shell.
+      if (authError || !auth.user) { window.location.replace("/login"); return; }
       const { data: profile, error: profileError } = await supabase.from("profiles").select("role,is_active").eq("id", auth.user.id).single();
       if (!current()) return;
       if (profileError || profile?.role !== "admin" || profile.is_active !== true) { setState("denied"); return; }
@@ -123,7 +124,7 @@ export default function AdminPage() {
     } catch (cause) {
       if (current()) { setError(cause instanceof Error ? cause.message : "Unable to load administration."); setState("error"); }
     } finally { if (current()) setRefreshing(false); }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
@@ -376,7 +377,7 @@ export default function AdminPage() {
     <h1>{state === "loading" ? "Preparing your workspace." : state === "denied" ? "Access restricted." : "Unable to load."}</h1>
     <p role={state === "error" ? "alert" : "status"}>{state === "loading" ? "Verifying administrator access…" : state === "denied" ? "Active administrator access is required." : error}</p>
     {state === "error" && <button className="admin-button" disabled={refreshing} onClick={() => void reload()}>Try again</button>}
-    <Link href="/login">Return to login →</Link>
+    <a href="/login">Return to login →</a>
   </div></main>;
 
   return <main className="admin-page">

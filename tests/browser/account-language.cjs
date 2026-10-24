@@ -23,8 +23,30 @@ res.end('[]');});
 (async()=>{await new Promise(r=>mock.listen(3091,'127.0.0.1',r));const server=spawn('npm',['run','dev','--','--hostname','127.0.0.1','--port','3090'],{cwd:process.cwd(),env:{...process.env,NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:3091',NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'local-test-key',VERCEL_ENV:'development'},stdio:'ignore'});process.on('exit',()=>{server.kill();mock.close()});for(let n=0;n<120;n++){try{await fetch('http://127.0.0.1:3090/login');break;}catch{}await new Promise(r=>setTimeout(r,500));}
 const browser=await chromium.launch({headless:true});const errors=[];
 async function ctx(){const context=await browser.newContext();await context.route('**/api/capital-client-summary',r=>r.fulfill({status:200,contentType:'application/json',body:'{"items":[]}'}));const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));return {page,context};}
-async function login(page,locale){await page.goto('http://127.0.0.1:3090'+(locale==='en'?'':('/'+locale))+'/login');await page.locator('input[name=email]').fill('test@example.invalid');await page.locator('input[name=password]').fill('local-only-test-password');await page.locator('button[type=submit]').click();}
+async function login(page,locale,origin='http://127.0.0.1:3090'){await page.goto(origin+(locale==='en'?'':('/'+locale))+'/login');await page.locator('input[name=email]').fill('test@example.invalid');await page.locator('input[name=password]').fill('local-only-test-password');await page.locator('button[type=submit]').click();}
 let {page,context}=await ctx();
+// Crossing from the English-only admin shell must reload the public locale provider.
+// Use the real Next.js routes and cookie handling; auth remains in the local fixture.
+for (const locale of ['en', 'nl', 'es']) {
+ await context.addCookies([{name:'MZS_LOCALE',value:locale,url:'http://localhost:3090'}]);
+ await page.goto('http://localhost:3090/admin');
+ await page.waitForURL('http://localhost:3090'+(locale==='en'?'':('/'+locale))+'/login');
+ assert.equal(await page.locator('html').getAttribute('lang'),locale,'signed-out admin redirect '+locale);
+ await page.getByRole('heading',{name:{en:'Client & Partner Login',nl:'Inloggen cliënten & partners',es:'Acceso de clientes y socios'}[locale],exact:true}).waitFor();
+}
+console.log('PASS signed-out administrator redirects render EN/NL/ES immediately without refresh');
+for (const locale of ['en', 'nl', 'es']) {
+ await context.addCookies([{name:'MZS_LOCALE',value:locale,url:'http://localhost:3090'}]);
+ await login(page,locale,'http://localhost:3090');await page.waitForURL('**/private');
+ await page.goto('http://localhost:3090/admin');
+ await page.getByRole('heading',{name:'Access restricted.',exact:true}).waitFor();
+ await page.getByRole('link',{name:'Return to login →',exact:true}).click();
+ await page.waitForURL('http://localhost:3090'+(locale==='en'?'':('/'+locale))+'/login');
+ assert.equal(await page.locator('html').getAttribute('lang'),locale,'denied admin return link '+locale);
+ await page.getByRole('heading',{name:{en:'Client & Partner Login',nl:'Inloggen cliënten & partners',es:'Acceso de clientes y socios'}[locale],exact:true}).waitFor();
+}
+console.log('PASS denied non-admin return link renders EN/NL/ES immediately without refresh');
+await context.close();({page,context}=await ctx());
 for(const [locale,errorText] of [['en','Invalid email or password.'],['nl','Ongeldig e-mailadres of wachtwoord.'],['es','Correo electrónico o contraseña incorrectos.']]){failLogin=true;await login(page,locale);await page.locator('p[role=alert]').waitFor();assert.equal(await page.locator('p[role=alert]').innerText(),errorText);for(const width of [375,1440]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'login overflow '+locale);}}
 failLogin=false;await login(page,'nl');await page.waitForURL('**/private');await page.getByRole('heading',{name:/Welkom/}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'nl');
 await page.locator('summary[aria-label="Kies je taal"]').click();await page.getByRole('link',{name:'Español',exact:true}).click();await page.getByRole('heading',{name:/Bienvenido/}).waitFor();assert.equal(saved.preferred_language,'es');assert.deepEqual(updates.map(x=>x.data),[{preferred_language:'es'}]);assert.ok(updates.every(x=>!x.email&&!x.password));console.log('PASS login errors in EN/NL/ES, layout widths, NL dashboard and account preference saving');
