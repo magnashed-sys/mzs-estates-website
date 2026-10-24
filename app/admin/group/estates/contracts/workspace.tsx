@@ -3,6 +3,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/client';
 import { euros } from '../../../../../lib/estates/rent';
+import { invoiceMonthStart, leaseSubjectPreview } from '../../../../../lib/estates/lease-month';
 import { saveContract, setContractStatus, generateDrafts, reviewInvoice, leaseDocuments } from './actions';
 import s from './contracts.module.css';
 
@@ -63,10 +64,10 @@ function ContractForm({contract,properties,units,members,pending,onSave,onCancel
  const [subject,setSubject]=useState(contract?.invoice_subject || 'Huur {unitadres} — {maand} {jaar}');
  const [language,setLanguage]=useState(contract?.invoice_language || 'nl');const [period,setPeriod]=useState(contract?.first_period?.slice(0,7)||'');
  const selectedUnits=units.filter(u=>chosen.includes(u.id));
- const example=period?subject.replaceAll('{unitadres}',selectedUnits.map(u=>u.address).sort().join(', ')||'[unit]').replaceAll('{maand}',new Intl.DateTimeFormat(language,{month:'long',timeZone:'UTC'}).format(new Date(period+'-01T12:00:00Z'))).replaceAll('{jaar}',period.slice(0,4)):subject;
+ const example=leaseSubjectPreview(subject,period,language,selectedUnits.map(u=>u.address).sort().join(', '));
  function field(name:keyof Contract){return contract?.[name] as string | undefined;}
  function suggestAmounts(){setLines([{description:'Huur',amount:(selectedUnits.reduce((sum,u)=>sum+Math.round(Number(u.monthly_rent)*100),0)/100).toFixed(2),vat:'exempt'}, {description:'Voorschot nutsvoorzieningen',amount:selectedUnits.every(u=>u.utilities_advance!==null)?(selectedUnits.reduce((sum,u)=>sum+Math.round(Number(u.utilities_advance)*100),0)/100).toFixed(2):'',vat:''}]);if(!tenant)setTenant(selectedUnits[0]?.tenant_name||'');}
- return <form onSubmit={e=>{e.preventDefault();const fd=new FormData(e.currentTarget);onSave({...Object.fromEntries(fd.entries()),property_id:property,unit_ids:chosen,tenant_profile_id:fd.get('tenant_profile_id')||null,tenant_name:tenant,tenant_email:email,issuer_name:issuer,lease_end:fd.get('lease_end')||null,first_period:period+'-01',max_terms:fd.get('max_terms')?Number(fd.get('max_terms')):null,payment_days:Number(fd.get('payment_days')),deposit:Number(fd.get('deposit')||0),prorate:fd.has('prorate'),lines,invoice_subject:subject,invoice_language:language});}}>
+ return <form onSubmit={e=>{e.preventDefault();const firstPeriod=invoiceMonthStart(period);if(!firstPeriod){const input=e.currentTarget.elements.namedItem('first_invoice_month') as HTMLInputElement;input.setCustomValidity('Enter a complete month as YYYY-MM, for example 2026-11.');input.reportValidity();return;}const fd=new FormData(e.currentTarget);onSave({...Object.fromEntries(fd.entries()),property_id:property,unit_ids:chosen,tenant_profile_id:fd.get('tenant_profile_id')||null,tenant_name:tenant,tenant_email:email,issuer_name:issuer,lease_end:fd.get('lease_end')||null,first_period:firstPeriod,max_terms:fd.get('max_terms')?Number(fd.get('max_terms')):null,payment_days:Number(fd.get('payment_days')),deposit:Number(fd.get('deposit')||0),prorate:fd.has('prorate'),lines,invoice_subject:subject,invoice_language:language});}}>
   <fieldset disabled={pending} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <section className={s.panel}><h2>{contract?'Edit contract draft':'New rental contract'}</h2><div className={s.grid}>
    <Field label="Contract subject"><input name="title" required maxLength={200} defaultValue={field('title')}/></Field>
@@ -85,7 +86,7 @@ function ContractForm({contract,properties,units,members,pending,onSave,onCancel
   <section className={s.panel}><h2>Agreement &amp; monthly schedule</h2><div className={s.grid}>
    <Field label="Lease start"><input name="lease_start" type="date" required defaultValue={field('lease_start')}/></Field>
    <Field label="Lease end (optional)"><input name="lease_end" type="date" defaultValue={field('lease_end')||''}/></Field>
-   <Field label="First invoice month in MZS"><input type="month" required value={period} onChange={e=>setPeriod(e.target.value)}/></Field>
+   <Field label="First invoice month in MZS"><input name="first_invoice_month" type="month" required min="0001-01" max="9999-12" pattern="[0-9]{4}-(0[1-9]|1[0-2])" placeholder="YYYY-MM" title="Enter the year and month, for example 2026-11." value={period} onChange={e=>{const input=e.currentTarget;input.setCustomValidity(input.value&&!invoiceMonthStart(input.value)?'Enter a complete month as YYYY-MM, for example 2026-11.':'');setPeriod(input.value);}}/></Field>
    <Field label="First draft preparation date"><input name="first_generation_date" type="date" required defaultValue={field('first_generation_date')}/></Field>
    <p className={`${s.help} ${s.wide}`}>Frequency: every month. Select the first month not already invoiced by your previous platform. The preparation date can fall in that month or the preceding month. A date of 31 repeats on the last day of shorter months.</p>
    <Field label="Maximum invoice periods (blank = ongoing)"><input name="max_terms" type="number" min={1} max={600} defaultValue={contract?.max_terms||''}/></Field>
@@ -101,7 +102,7 @@ function ContractForm({contract,properties,units,members,pending,onSave,onCancel
    <Field label="Periodic invoice subject" wide><input required maxLength={500} value={subject} onChange={e=>setSubject(e.target.value)}/></Field>
    <Field label="Invoice month language"><select value={language} onChange={e=>setLanguage(e.target.value)}><option value="nl">Nederlands</option><option value="en">English</option><option value="es">Español</option></select></Field>
    <p className={s.help}>Available placeholders: {'{unitadres}'}, {'{maand}'}, {'{jaar}'}. The month always comes from the rental period.</p>
-   <div className={`${s.preview} ${s.wide}`}>{example}</div>
+   <div className={`${s.preview} ${s.wide}`}>{example??'Choose a complete first invoice month to preview the subject (YYYY-MM).'}</div>
   </div><div className={s.toolbar}><button type="button" className={s.secondary} disabled={!chosen.length} onClick={suggestAmounts}>Suggest amounts from selected units</button></div>
   <p className={s.help}>Amounts exclude VAT. Check each VAT treatment. Unknown advances remain empty and must be confirmed or removed before saving.</p>
   {lines.map((l,i)=><div className={s.line} key={i}><Field label="Description"><input required maxLength={200} value={l.description} onChange={e=>setLines(prev=>prev.map((x,n)=>n===i?{...x,description:e.target.value}:x))}/></Field><Field label="Monthly amount"><input required type="number" min={0} step="0.01" value={l.amount} onChange={e=>setLines(prev=>prev.map((x,n)=>n===i?{...x,amount:e.target.value}:x))}/></Field><Field label="VAT"><select required value={l.vat} onChange={e=>setLines(prev=>prev.map((x,n)=>n===i?{...x,vat:e.target.value}:x))}><option value="">Choose</option><option value="exempt">Exempt</option><option value="0">0%</option><option value="9">9%</option><option value="21">21%</option></select></Field><button type="button" aria-label={`Remove line ${i+1}`} className={s.secondary} disabled={lines.length===1} onClick={()=>setLines(prev=>prev.filter((_,n)=>n!==i))}>×</button></div>)}

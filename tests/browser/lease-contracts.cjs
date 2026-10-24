@@ -1,6 +1,7 @@
 // Local browser fixture; all auth, database and document calls stay in memory.
 const http=require('node:http'),assert=require('node:assert/strict');
-const {chromium}=require(process.env.MZS_PLAYWRIGHT_MODULE||'playwright');
+const browserName=process.env.MZS_BROWSER||'chromium';
+const browserType=require(process.env.MZS_PLAYWRIGHT_MODULE||'playwright')[browserName];
 const next=require('next');
 const id='11111111-1111-4111-8111-111111111111',pid='22222222-2222-4222-8222-222222222222',uid='33333333-3333-4333-8333-333333333333',cid='44444444-4444-4444-8444-444444444444';
 let role='admin',active=true,contracts=[],invoices=[];
@@ -33,12 +34,24 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  const original=global.fetch;global.fetch=(input,init)=>{const url=typeof input==='string'?input:input instanceof URL?input.href:input.url;if(url.startsWith('https://senonkpxdtlhyhrubicg.supabase.co'))return original(url.replace('https://senonkpxdtlhyhrubicg.supabase.co','http://127.0.0.1:3091'),init);return original(input,init)};
  process.env.VERCEL_ENV='preview';process.env.NEXT_PUBLIC_SUPABASE_URL='https://senonkpxdtlhyhrubicg.supabase.co';process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY='fixture-public-key';
  const app=next({dev:false,hostname:'127.0.0.1',port:3096});await app.prepare();const server=http.createServer(app.getRequestHandler());await new Promise(r=>server.listen(3096,'127.0.0.1',r));
- const browser=await chromium.launch({headless:true});const ctx=await browser.newContext();const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const browser=await browserType.launch({headless:true});const ctx=await browser.newContext();const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await ctx.addCookies([{name:'sb-senonkpxdtlhyhrubicg-auth-token',value:'base64-'+Buffer.from(JSON.stringify({access_token:token,refresh_token:'fixture',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})).toString('base64url'),domain:'127.0.0.1',path:'/'}]);
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');
  await page.getByRole('heading',{name:'Contracts & invoices.'}).waitFor();
  await page.getByRole('button',{name:'New contract',exact:true}).click();
  await page.getByLabel('Contract subject',{exact:true}).fill('Fixture long-term rental');
+ // Unsupported month pickers (desktop Safari/Firefox) expose partial text while typing.
+ const month=page.getByLabel('First invoice month in MZS');
+ console.log(browserName+' native month input type: '+await month.evaluate(el=>el.type));
+ // React restores the declared type on render; reapply the unsupported-browser fallback for each edit.
+ const fillMonth=async value=>{await month.evaluate(el=>{el.type='text'});await month.fill(value);};
+ for(const value of ['2','20','2026-','2026-1','2026-13','11/2026','']){
+  await fillMonth(value);
+  await page.waitForTimeout(50);
+  assert.deepEqual(errors,[],`month input ${JSON.stringify(value)} must not crash`);
+  assert.equal(await month.evaluate(el=>el.checkValidity()),false,'incomplete month cannot be submitted');
+  assert.equal(await page.getByLabel('Contract subject',{exact:true}).inputValue(),'Fixture long-term rental');
+ }
  await page.locator('form select').filter({has:page.locator('option[value="'+pid+'"]')}).selectOption(pid);
  await page.getByLabel(/Fixture Street 1A/).check();
  await page.getByRole('button',{name:'Suggest amounts from selected units'}).click();
@@ -48,8 +61,13 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByLabel('Issuer billing address').fill('Fixture issuer address');
  await page.getByLabel('Issuer IBAN').fill('NLTESTACCOUNT');
  await page.getByLabel('Lease start',{exact:true}).fill('2024-01-01');
- await page.getByLabel('First invoice month in MZS').fill('2026-11');
  await page.getByLabel('First draft preparation date').fill('2026-10-25');
+ await fillMonth('2026-1');
+ await page.getByRole('button',{name:'Save contract draft',exact:true}).click();
+ assert.equal(contracts.length,0,'invalid period never reaches save');
+ assert.equal(await page.getByLabel('Tenant billing address').inputValue(),'Fixture tenant address');
+ await fillMonth('2026-11');
+ assert.equal(await month.evaluate(el=>el.checkValidity()),true,'correcting the month removes validation error');
  await page.getByText('Huur Fixture Street 1A — november 2026',{exact:true}).waitFor();
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-contract-form-'+width+'.png',fullPage:true});}
  await page.getByRole('button',{name:'Save contract draft',exact:true}).click();

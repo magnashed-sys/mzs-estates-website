@@ -25,6 +25,8 @@ Check `cron.job_run_details` for execution results. To disable this schedule wit
 
 `MZS_PLAYWRIGHT_MODULE=/path/to/playwright node tests/browser/lease-contracts.cjs` runs the built application with local in-memory Supabase/auth fixtures: create → activate → prepare → review → repeat, empty unknown advances, live subject preview, mobile/desktop overflow and access denial. It never connects to real client accounts or sends messages.
 
+The month-entry regression covers the plain-text fallback used by browsers without a native month picker. Typing `2` previously crashed the production build with `Invalid time value`; partial/invalid/cleared values now leave the form intact, block submission and can be corrected to a complete `YYYY-MM`. The subject preview formats only a validated month. The browser test explicitly simulates that fallback in Chromium; it does not establish a native Safari test. Set `MZS_BROWSER=webkit` with an installed WebKit runtime to run the same flow there.
+
 Run optimized build and TypeScript. After Staging migration, verify table policies, private storage bucket, zero imported/activated contracts and security advisors. Existing unrelated advisor findings are outside this change; no lease-module finding was reported. Advisor references: https://supabase.com/docs/guides/database/database-linter and https://supabase.com/docs/guides/auth/password-security.
 
 ## Owner acceptance and next increment
