@@ -1,7 +1,10 @@
 {
   "Home": {
     "mzs_group_is_an_independent_international": "MZS Group — независимая международная группа в сфере недвижимости и инвестиций, предоставляющая избранным клиентам и партнёрам доступ к частным возможностям в Европе и ОАЭ.",
-    "new_relationships_are_considered_on_a": "Мы избирательно подходим к установлению новых деловых отношений."
+    "new_relationships_are_considered_on_a": "Мы избирательно подходим к установлению новых деловых отношений.",
+    "sloganPrivate": "Частная.",
+    "sloganIndependent": "Независимая.",
+    "sloganInternational": "Международная."
   },
   "Estates": {
     "ownership_management": "Владение и управление",

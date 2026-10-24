@@ -14,11 +14,11 @@ export default async function Home() {
 
       <section className="mzs-hero">
         <h1>
-          Private.
+          {t('sloganPrivate')}
           <br />
-          Independent.
+          {t('sloganIndependent')}
           <br />
-          International.
+          {t('sloganInternational')}
         </h1>
 
         <div className="mzs-separator" aria-hidden="true" />

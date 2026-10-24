@@ -138,3 +138,11 @@
     margin-top: 10px;
   }
 }
+
+/* Translated words are longer; retain three unclipped lines on phones. */
+@media (max-width: 700px) {
+  :global(html:not([lang="en"])) .home :global(.mzs-hero h1) {
+    font-size: clamp(26px, 9vw, 62px);
+    line-height: 1.04;
+  }
+}
