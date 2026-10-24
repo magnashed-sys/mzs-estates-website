@@ -18,7 +18,7 @@ create function storage.foldername(text) returns text[] language sql as $$select
 `);
 await db.exec(fs.readFileSync('supabase/migrations/20261024081252_estate_contract_drafts.sql','utf8'));
 await db.exec(fs.readFileSync('supabase/migrations/20261024085449_lease_production_controls.sql','utf8'));
-const run=q=>db.query(q);const value=async q=>(await run(q)).rows[0];
+const run=(q,params)=>db.query(q,params);const value=async q=>(await run(q)).rows[0];
 await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);`);
 const generateAt=async day=>{await db.exec('reset role');const r=await value(`select mzs_private.generate_lease_drafts('${day}') as n`);await db.exec('set role authenticated');return r;};
 const insert=`insert into mzs_lease_contracts(title,property_id,unit_ids,tenant_name,tenant_address,issuer_name,issuer_address,issuer_iban,contract_date,lease_start,lease_end,first_period,first_generation_date,max_terms,lines) values ('Fixture lease','22222222-2222-4222-8222-222222222222',array['33333333-3333-4333-8333-333333333333']::uuid[],'Fixture tenant','Test address','Fixture issuer','Test issuer address','NLTESTACCOUNT','2028-01-01','2028-01-16','2028-04-10','2028-01-01','2027-12-31',3,'[{"description":"Rent","amount":"310.00","vat":"exempt"},{"description":"Service","amount":"100.00","vat":"21"}]') returning id`;
@@ -70,9 +70,13 @@ const early=(await value(insert.replaceAll('2028','2026').replaceAll('2027','202
 await assert.rejects(db.exec(`update mzs_lease_contracts set status='active' where id='${early}'`),/December 2026/);
 await db.exec('set role anon');await assert.rejects(db.exec('select * from mzs_lease_contracts'),/permission denied/);await assert.rejects(db.exec('select public.mzs_generate_lease_drafts()'),/permission denied/);
 await db.exec('reset role');
+const baselineTables=['profiles','mzs_estate_properties','mzs_estate_units','mzs_lease_contracts','mzs_lease_relationships','mzs_lease_invoice_drafts','mzs_lease_audit'];
+const snapshots=async(tables,strip={})=>Object.fromEntries(await Promise.all(tables.map(async table=>[table,(await run(`select to_jsonb(t)-$1::text[] as record from ${table} t order by id`,[strip[table]||[]])).rows])));
+const beforeIntegration=await snapshots(baselineTables);
 await db.exec(fs.readFileSync('supabase/migrations/20261024091451_rental_platform_integration.sql','utf8'));
+assert.deepEqual(await snapshots(baselineTables,{mzs_lease_contracts:['issuer_id'],mzs_lease_relationships:['roles','profile_id']}),beforeIntegration,'integration preserves existing records');
 await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)`);
-const issuer=await value(`insert into mzs_lease_issuers(name,address,iban,prefix) values ('Fixture issuer','Fixture address','NLTESTACCOUNT','TEST') returning id`);
+const issuer=await value(`insert into mzs_lease_issuers(name,address,iban,prefix,registration_number) values ('Fixture issuer','Fixture address','NLTESTACCOUNT','TEST','REG-ORIGINAL') returning id`);
 const billed=await value(insert.replaceAll('2028','2030').replaceAll('2027','2029'));
 await assert.rejects(db.exec(`update mzs_lease_contracts set status='active' where id='${billed.id}'`),/registered issuing entity/);
 await db.exec(`update mzs_lease_contracts set issuer_id='${issuer.id}',tenant_email='test@example.invalid' where id='${billed.id}';update mzs_lease_contracts set status='active' where id='${billed.id}'`);
@@ -111,5 +115,43 @@ assert.equal((await value(`select mzs_finish_lease_invoice_mail('${final.id}','$
 await db.exec('reset role');
 assert.equal((await value(`select delivery_status from mzs_lease_invoices where id='${final.id}'`)).delivery_status,'captured');
 console.log('PASS integration: issuer snapshots, permanent numbering, repeat issue, review locks, partial payment/idempotency/reversal, overpayment/future rejection, delivery claims/trusted completion, RLS');
+
+// Rehearse the corrective migration with existing invoices, payments and audit rows.
+const preservedTables=[...baselineTables,'mzs_lease_issuers','mzs_lease_invoices','mzs_lease_payments'];
+const beforeCorrection=await snapshots(preservedTables);
+await db.exec(fs.readFileSync('supabase/migrations/20261024110718_rental_acceptance_snapshot_fix.sql','utf8'));
+assert.deepEqual(await snapshots(preservedTables,{mzs_lease_contracts:['issuer_registration']}),beforeCorrection,'corrective migration preserves all old values and sequence counters');
+await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)`);
+const acceptedIssuer=await value(`insert into mzs_lease_issuers(name,address,iban,prefix,registration_number,relationship_id) values ('Accepted issuer','Accepted address','NLTESTACCOUNT','ACCEPT','REG-ORIGINAL','${relationship.id}') returning id`);
+const acceptedContract=await value(insert.replaceAll('2028','2032').replaceAll('2027','2031'));
+await assert.rejects(db.exec(`update mzs_lease_contracts set unit_ids=array['33333333-3333-4333-8333-333333333333','33333333-3333-4333-8333-333333333333']::uuid[] where id='${acceptedContract.id}'`),/distinct units/);
+await assert.rejects(db.exec(`update mzs_lease_contracts set unit_ids=array['00000000-0000-4000-8000-000000000001']::uuid[] where id='${acceptedContract.id}'`),/distinct units/);
+await db.exec(`update mzs_lease_relationships set profile_id='11111111-1111-4111-8111-111111111112',roles=array['tenant','owner'] where id='${relationship.id}';update mzs_lease_contracts set issuer_id='${acceptedIssuer.id}',tenant_relationship_id='${relationship.id}',tenant_profile_id='11111111-1111-4111-8111-111111111112' where id='${acceptedContract.id}';update mzs_lease_contracts set status='active' where id='${acceptedContract.id}'`);
+await generateAt('2032-01-01');
+const acceptedDraft=await value(`select * from mzs_lease_invoice_drafts where contract_id='${acceptedContract.id}'`);
+assert.equal(acceptedDraft.snapshot.tenant_relationship_id,relationship.id);
+assert.equal(acceptedDraft.snapshot.issuer_registration,'REG-ORIGINAL');
+await db.exec(`update mzs_lease_invoice_drafts set review_status='checked' where id='${acceptedDraft.id}';update mzs_lease_issuers set registration_number='REG-CHANGED',name='Changed issuer master' where id='${acceptedIssuer.id}';update mzs_lease_relationships set name='Changed relationship master' where id='${relationship.id}'`);
+const approved=await value(`select mzs_issue_lease_invoice('${acceptedDraft.id}') as id`);
+const approvedInvoice=await value(`select * from mzs_lease_invoices where id='${approved.id}'`);
+assert.equal(approvedInvoice.payload.issuer_registration,'REG-ORIGINAL','issue uses the reviewed snapshot, never current master data');
+assert.equal(approvedInvoice.payload.snapshot.issuer_name,'Accepted issuer');
+assert.deepEqual(approvedInvoice.payload.snapshot,acceptedDraft.snapshot);
+assert.equal(approvedInvoice.number,'ACCEPT-000001','different entity has an independent sequence');
+await assert.rejects(db.exec(`insert into mzs_lease_issuers(name,address,iban,prefix) values ('Duplicate issuer','Address','NLTESTACCOUNT','ACCEPT')`),/unique/);
+await assert.rejects(db.exec(`update mzs_lease_issuers set prefix='OTHER' where id='${acceptedIssuer.id}'`),/permission denied/);
+const decemberContract=await value(insert.replaceAll('2028-01-01','2026-12-01').replaceAll('2028-01-16','2026-12-01').replaceAll('2028-04-10','2026-12-31'));
+await db.exec(`update mzs_lease_contracts set issuer_id='${acceptedIssuer.id}' where id='${decemberContract.id}';update mzs_lease_contracts set status='active' where id='${decemberContract.id}'`);
+assert.equal((await generateAt('2026-11-13')).n,0,'December concepts must not be prepared before November 14');
+assert.equal((await generateAt('2026-11-14')).n,1);
+assert.equal((await generateAt('2026-11-14')).n,0,'rerunning November 14 does not duplicate December concepts');
+const decemberDraft=await value(`select scheduled_date::text,due_date::text,period_start::text from mzs_lease_invoice_drafts where contract_id='${decemberContract.id}'`);
+assert.deepEqual(decemberDraft,{scheduled_date:'2026-11-14',due_date:'2026-11-30',period_start:'2026-12-01'});
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111112',false)`);
+assert.equal((await run('select * from mzs_lease_contracts')).rows.length,0,'linked tenant still has no admin access');
+await db.exec('reset role');
+assert.equal((await value(`select role from profiles where id='11111111-1111-4111-8111-111111111112'`)).role,'client','relationship link grants no role');
+console.log('PASS acceptance: integration/corrective migrations retain existing data; linked account grants no rights; invalid/duplicate units denied; separate issuer numbering; registration snapshot survives master edits');
+
 await db.close();console.log('PASS lease draft/activation, overlap, replacement duplicate guard, cutover, catch-up, max terms, end date, leap/month ends, prorating, VAT, placeholders, locked terms, review audit, admin/client/inactive/anon permissions');
 })().catch(e=>{console.error(e);process.exit(1)});
