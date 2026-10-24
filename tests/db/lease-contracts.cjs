@@ -96,7 +96,7 @@ await db.exec(`select mzs_record_lease_payment('${final.id}','${pay}',100,curren
 await db.exec(`select mzs_record_lease_payment('${final.id}','${pay}',100,current_date,'Fixture bank receipt')`);
 assert.equal((await value(`select count(*)::int as n from mzs_lease_payments`)).n,1);
 await assert.rejects(db.exec(`select mzs_record_lease_payment('${final.id}',gen_random_uuid(),9999,current_date,'Overpayment')`),/outstanding balance/);
-await assert.rejects(db.exec(`select mzs_record_lease_payment('${final.id}',gen_random_uuid(),1,current_date+1,'Future payment')`),/received payment/);
+await assert.rejects(db.exec(`select mzs_record_lease_payment('${final.id}',gen_random_uuid(),1,(now() at time zone 'Europe/Amsterdam')::date+1,'Future payment')`),/received payment/);
 await db.exec(`select mzs_reverse_lease_payment('${pay}','Fixture entry correction')`);
 assert.ok((await value(`select reversed_at from mzs_lease_payments where id='${pay}'`)).reversed_at);
 const claim=await value(`select mzs_claim_lease_invoice_mail('${final.id}') as token`);
