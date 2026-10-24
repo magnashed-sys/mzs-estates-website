@@ -1,4 +1,5 @@
 "use client";
+import RussianAccessNotice from "../components/RussianAccessNotice";
 import {useTranslations, useLocale} from "next-intl";
 import {localizedPath} from "../../i18n/public-routing";
 
@@ -120,6 +121,7 @@ export default function RequestAccessPage() {
         <h1>{t("a078")}</h1>
         <p className="request-intro">
           {t("a079")}</p>
+        <RussianAccessNotice />
         <form className="request-form" onSubmit={handleSubmit} aria-busy={loading}>
           <div className="request-grid">
             <label>

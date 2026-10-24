@@ -2,7 +2,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {useLocale, useTranslations} from 'next-intl';
 import {usePathname} from 'next/navigation';
-import {locales, publicRoute, localizedPath, isAccountPath} from '../../i18n/public-routing';
+import {locales, memberLocales, publicRoute, localizedPath, isAccountPath} from '../../i18n/public-routing';
 import {createClient} from '../../lib/supabase/client';
 import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
@@ -46,9 +46,9 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
       </svg>
     </summary>
     <nav className={styles.languagePanel} aria-label={t('choose')}>
-    {locales.map(locale => <a key={locale} href={localizedPath(route.path, locale)}
-      hrefLang={locale} lang={locale} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}
-      title={{en: 'English', nl: 'Nederlands', es: 'Español'}[locale]}
+    {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
+      hrefLang={locale} lang={locale} aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский'}[locale]}
+      title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
       aria-disabled={busy || undefined}
       onClick={async event => {
@@ -73,7 +73,7 @@ export default function LanguageSwitcher({account = false}: {account?: boolean})
           if (isAccountPath(pathname)) location.reload();
           else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
-      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸'}[locale]}</span>
+      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}

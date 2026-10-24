@@ -16,6 +16,7 @@ import styles from "../public-introductions.module.css";
 
 export default async function RealEstatePage() {
   const locale = await getLocale();
+  const slogan = await getTranslations('Home');
   const t = await getTranslations('Estates');
 const activities = [
   {
@@ -58,7 +59,7 @@ const activities = [
             <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true">↗</span></a>
           </nav>
         </div>
-        <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
+        <p className={styles.heroSideNote}>{slogan('sloganPrivate')} {slogan('sloganIndependent')} {slogan('sloganInternational')}</p>
       </section>
 
       <section id="estates-perspective" className={styles.introduction} aria-labelledby="estates-intro">

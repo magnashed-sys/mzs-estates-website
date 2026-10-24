@@ -16,6 +16,7 @@ import { introCallsEnvironmentAllowed } from "../../lib/mzs/intro-calls";
 
 export default async function PrivateCapitalPage() {
   const locale = await getLocale();
+  const slogan = await getTranslations('Home');
   const t = await getTranslations('Capital');
 const focus = [
   {
@@ -67,7 +68,7 @@ const focus = [
             <a className={styles.quietAction} href="#capital-focus">{t('discover_our_focus')} <span aria-hidden="true">↓</span></a>
           </div>}
         </div>
-        <p className={styles.heroSideNote}>PRIVATE. INDEPENDENT. INTERNATIONAL.</p>
+        <p className={styles.heroSideNote}>{slogan('sloganPrivate')} {slogan('sloganIndependent')} {slogan('sloganInternational')}</p>
       </section>
 
       <section id="capital-perspective" className={styles.introduction} aria-labelledby="capital-intro">

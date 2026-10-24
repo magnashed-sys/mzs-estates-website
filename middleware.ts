@@ -23,7 +23,17 @@ export async function middleware(request: NextRequest) {
   const publicPage = publicRoute(pathname);
   forwardedHeaders.set("x-mzs-locale", publicPage?.locale || (isAccountPath(pathname) && isLocale(preference) ? preference : "en"));
   forwardedHeaders.set("x-mzs-client-overview", (pathname === "/private" || pathname.startsWith("/private/")) ? "true" : "false");
-  const next = () => NextResponse.next({request: {headers: forwardedHeaders}});
+  const next = () => {
+    const response = NextResponse.next({request: {headers: forwardedHeaders}});
+    // A direct localized landing must carry its language to neutral account
+    // routes too, even when the visitor has never used the language menu.
+    if (publicPage && preference !== publicPage.locale) {
+      response.cookies.set("MZS_LOCALE", publicPage.locale, {
+        path: "/", maxAge: 31536000, sameSite: "lax", secure: request.nextUrl.protocol === "https:",
+      });
+    }
+    return response;
+  };
 
   // Recovery and invitation confirmation handle their own one-time OTP and
   // cookie/session state. Do not refresh an existing session on these routes.

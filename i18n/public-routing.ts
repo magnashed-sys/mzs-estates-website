@@ -1,5 +1,11 @@
 /** Explicit allowlist: public marketing pages plus login, never private route aliases. */
-export const locales = ['en', 'nl', 'es'] as const;
+export const memberLocales = ['en', 'nl', 'es'] as const;
+export const locales = [...memberLocales, 'ru'] as const;
+/** Russian is public-only for now; never select a partial catalogue in the portal. */
+export function memberLocale(value: unknown): typeof memberLocales[number] {
+  return typeof value === 'string' && (memberLocales as readonly string[]).includes(value)
+    ? value as typeof memberLocales[number] : 'en';
+}
 export type Locale = typeof locales[number];
 export const publicPaths = ['/', '/real-estate', '/private-capital'] as const;
 export const localizedPaths = [...publicPaths, '/login'] as const;
@@ -7,13 +13,13 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && locales.includes(value as Locale);
 }
 export function publicRoute(pathname: string): {locale: Locale; path: string} | null {
-  const match = pathname.match(/^\/(nl|es)(\/.*)?$/);
+  const match = pathname.match(/^\/(nl|es|ru)(\/.*)?$/);
   const path = match ? match[2] || '/' : pathname;
   if (!localizedPaths.includes(path as typeof localizedPaths[number])) return null;
   return {locale: match ? match[1] as Locale : 'en', path};
 }
 export function localizedPath(path: string, locale: string) {
-  return localizedPaths.includes(path as typeof localizedPaths[number]) && (locale === 'nl' || locale === 'es')
+  return localizedPaths.includes(path as typeof localizedPaths[number]) && isLocale(locale) && locale !== 'en'
     ? `/${locale}${path === '/' ? '' : path}` : path;
 }
 export function languageAlternates(path: string) {

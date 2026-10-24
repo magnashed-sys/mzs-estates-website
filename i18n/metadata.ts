@@ -9,7 +9,7 @@ export async function publicMetadata(page: 'home' | 'estates' | 'capital', path:
     title: {absolute: title}, description,
     alternates: {canonical: localizedPath(path, locale), languages: languageAlternates(path)},
     robots: {index: process.env.VERCEL_ENV === 'production', follow: process.env.VERCEL_ENV === 'production'},
-    openGraph: {title, description, url: localizedPath(path, locale), siteName: 'MZS Group', type: 'website', locale: {en: 'en_GB', nl: 'nl_NL', es: 'es_ES'}[locale], images: [{url: '/mzs-hero.png', alt: 'MZS Group'}]},
+    openGraph: {title, description, url: localizedPath(path, locale), siteName: 'MZS Group', type: 'website', locale: {en: 'en_GB', nl: 'nl_NL', es: 'es_ES', ru: 'ru_RU'}[locale], images: [{url: '/mzs-hero.png', alt: 'MZS Group'}]},
     twitter: {card: 'summary_large_image', title, description, images: ['/mzs-hero.png']},
   };
 }
