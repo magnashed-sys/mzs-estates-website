@@ -12,3 +12,11 @@
  .links {grid-column:2;grid-row:1;}
  .languages {grid-column:1 / -1;grid-row:2;}
 }
+@media(max-width:760px) {
+ .footer {grid-template-columns:minmax(0,1fr);gap:12px;padding-top:16px;padding-bottom:8px;}
+ .locations {grid-column:1;grid-row:1;text-align:center;overflow-wrap:normal;}
+ .languages {grid-column:1;grid-row:2;width:100%;max-width:100%;}
+ .languages > nav {flex-wrap:wrap;row-gap:6px;}
+ .links {grid-column:1;grid-row:3;justify-self:stretch;justify-content:center;flex-wrap:wrap;gap:0 20px;min-width:0;}
+ .contact {max-width:100%;white-space:normal;text-align:center;}
+}
