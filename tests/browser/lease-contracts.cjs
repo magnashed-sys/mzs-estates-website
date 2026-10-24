@@ -125,7 +125,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByLabel('Amount received',{exact:true}).fill('100');
  await page.getByLabel('Bank reference',{exact:true}).fill('Fixture transfer');
  await page.getByRole('button',{name:'Record payment',exact:true}).click();
- await page.getByText(/Fixture transfer/).waitFor();assert.equal(payments.length,1);
+ await page.getByText(/Fixture transfer/).waitFor();assert.equal(payments.length,1);assert.equal(await page.getByLabel('Amount received',{exact:true}).inputValue(),'');
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-integration-billing-'+width+'.png',fullPage:true});}
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts?view=relationships');
  await page.getByRole('button',{name:'New rental relationship',exact:true}).waitFor();
