@@ -101,3 +101,21 @@ test('Agreed loan with real non-void interest payments counts toward cash and ov
  assert.equal(oct.interestReceived,25);
  assert.equal(d.report.overdueLoanReceivables,75);
 });
+
+test('Loan interest is attributed only to its explicit person/company issuing entity',()=>{
+ const item=input();
+ item.deals[0].entity_id='issuer-a';
+ item.deals[1].entity_id='issuer-b';
+ const person=buildFinancialPhase2({...item,entityId:'issuer-a'});
+ const company=buildFinancialPhase2({...item,entityId:'issuer-b'});
+ const unassigned=buildFinancialPhase2({...item,entityId:'unassigned'});
+ const group=buildFinancialPhase2(item);
+ assert.equal(person.rows.find(r=>r.month==='2026-10').interestIn,100);
+ assert.equal(person.rows.find(r=>r.month==='2026-10').interestReceived,25);
+ assert.equal(person.rows.find(r=>r.month==='2026-10').interestOut,0);
+ assert.equal(company.rows.find(r=>r.month==='2026-10').interestPaid,20);
+ assert.equal(unassigned.rows.find(r=>r.month==='2026-10').interestReceived,0);
+ assert.equal(group.rows.find(r=>r.month==='2026-10').interestReceived,25);
+ assert.equal(group.rows.find(r=>r.month==='2026-10').interestPaid,20);
+ assert.equal(group.report.loanAttributionPending,0);
+});

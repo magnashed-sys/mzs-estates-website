@@ -1,10 +1,11 @@
 import {saveDeal} from './actions';
 import type {Deal} from './model';
 import s from './deals.module.css';
-export default function DealForm({deal}:{deal?:Deal}) {
+export default function DealForm({deal,entities=[]}:{deal?:Deal;entities?:{id:string;name:string;kind:string}[]}) {
  return <form action={saveDeal} className={s.form}>
   <input type="hidden" name="id" value={deal?.id||''}/>
   <label>Deal name<input name="title" defaultValue={deal?.title} required minLength={2} maxLength={160}/></label>
+  <label>Financial reporting entity<select name="entity_id" defaultValue={deal?.entity_id||''}><option value="">Unassigned (not yet linked)</option>{entities.map(e=><option key={e.id} value={e.id}>{e.name} ({e.kind==='person'?'private individual':'company'})</option>)}</select></label>
   <label>Direction<select name="direction" defaultValue={deal?.direction||'provided'}><option value="provided">Loan provided</option><option value="received">Loan received</option></select></label>
   <label>Lender<input name="lender" defaultValue={deal?.lender} required minLength={2} maxLength={200}/></label>
   <label>Borrower<input name="borrower" defaultValue={deal?.borrower} required minLength={2} maxLength={200}/></label>

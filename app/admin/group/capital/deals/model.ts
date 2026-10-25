@@ -1,6 +1,6 @@
 export type Deal = {
  id:string;title:string;direction:'provided'|'received';lender:string;borrower:string;
- principal:number;annual_rate:number;agreement_date:string|null;start_date:string|null;
+ entity_id:string|null;principal:number;annual_rate:number;agreement_date:string|null;start_date:string|null;
  maturity_date:string|null;status:string;review_state:string;notes:string;source_reference:string;
 };
 export type Instalment = {id:string;deal_id:string;kind:string;period_label:string;due_date:string;amount:number;note:string};

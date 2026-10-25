@@ -27,7 +27,9 @@ export async function saveDeal(f:FormData) {
  const {db}=await requireDealsAdmin();let saved:string|null=null;let existing='';
  try {
   existing=str(f,'id',36);if(existing&&!uuid.test(existing))throw new Error('invalid');
-  const row={title:str(f,'title',160,2),direction:choice(f,'direction',['provided','received']),
+  const entity=str(f,'entity_id',36);
+  if(entity){if(!uuid.test(entity))throw new Error('Invalid entity');const {data:issuer,error:issuerError}=await db.from('mzs_lease_issuers').select('id').eq('id',entity).single();if(issuerError||!issuer)throw new Error('Unknown entity');}
+  const row={entity_id:entity||null,title:str(f,'title',160,2),direction:choice(f,'direction',['provided','received']),
    lender:str(f,'lender',200,2),borrower:str(f,'borrower',200,2),principal:decimal(f,'principal',99999999999999),
    annual_rate:decimal(f,'annual_rate',100,true,4),agreement_date:day(f,'agreement_date'),start_date:day(f,'start_date'),
    maturity_date:day(f,'maturity_date'),status:choice(f,'status',['draft','in_discussion','agreed','active','completed']),
