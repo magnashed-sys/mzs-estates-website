@@ -430,6 +430,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? `${pendingBookings} pending bookings · ${pendingCancellations} pending cancellations · all live and test records` : "Booking administration"}</p>
         <ActionButton disabled={loading || busy !== null} onClick={() => void reload()}>Refresh overview</ActionButton>
       </div>
+      <p><a href="/admin/owner-stays" style={{color:"#d5c09a"}}>Property Partners, free owner stays & booking prices ↗</a></p>
       <nav aria-label="Booking administration sections" style={{ ...rowStyle, paddingBottom: 24, borderBottom: `1px solid ${border}`, marginBottom: 28 }}>
         <ActionButton primary={section === "bookings"} selected={section === "bookings"} disabled={busy !== null} onClick={() => setSection("bookings")}>Bookings</ActionButton>
         <ActionButton primary={section === "cancellations"} selected={section === "cancellations"} disabled={busy !== null} onClick={() => setSection("cancellations")}>
