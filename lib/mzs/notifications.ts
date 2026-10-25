@@ -396,3 +396,24 @@ export async function deliverForCapitalGrant(userId: string, grantId: string): P
     return (await deliverOnce(data[0].id)).status === "sent";
   } catch { return false; }
 }
+
+/** Immediately attempt admin notification after a saved owner-stay request.
+ * Database outbox remains authoritative if SMTP is not available.
+ * Preview never sends real messages.
+ */
+export async function deliverOwnerStayAdminNotifications(requestId:string):Promise<void>{
+ if(process.env.VERCEL_ENV!=="production" ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL!=="https://ptrnjzmcehrhbsfxntgw.supabase.co")return;
+ try{
+  const admin=serviceClient();
+  const {data,error}=await admin.from("mzs_mail_outbox").select("id")
+   .eq("event_type","owner_stay_requested").contains("payload",{request_id:requestId})
+   .eq("status","pending").order("created_at").limit(25);
+  if(error)throw new Error("Admin owner-stay notification lookup failed");
+  for(const item of data||[])await deliverOnce(item.id);
+ }catch(error){
+  console.error("[MZS owner stay] admin notification queued for retry",{
+   category:error instanceof Error?error.name:"unknown"
+  });
+ }
+}
