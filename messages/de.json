@@ -205,6 +205,7 @@
     "confirmationBody": "Vielen Dank für Ihr Interesse an {brand}. Unser Team wird Sie per E-Mail kontaktieren, um einen passenden Termin für Ihr Kennenlerngespräch zu vereinbaren."
   },
   "Private": {
+    "marinaApartmentTitle": "Apartment mit 2–3 Schlafzimmern auf Ibiza Spanien",
     "rentals": "Ferienunterkünfte",
     "stays": "Private Aufenthalte",
     "rental_description": "Private Residenzen, die ausschließlich Ihrem Konto zur Verfügung stehen.",
@@ -1153,5 +1154,15 @@
     "chooseCode": "Bitte zuerst eine Ländervorwahl auswählen.",
     "invalidPhone": "Bitte Telefonnummer und Ländervorwahl prüfen.",
     "international": "International"
+  },
+  "MarinaMap": {
+    "heading": "Eine besondere Lage auf Ibiza",
+    "intro": "Entdecken Sie den Yachthafen, den Strand und die historische Altstadt von Ibiza — alles rund um Marina Botafoch.",
+    "note": "Die Karte zeigt das Viertel, nicht die genaue Adresse der Wohnung. Diese teilen wir vertraulich mit.",
+    "open": "Auf Google Maps erkunden",
+    "waterfront": "Yachthafen & Restaurants",
+    "beach": "Strand & Promenade",
+    "heritage": "Historische Altstadt",
+    "nightlife": "Nachtleben & Unterhaltung"
   }
 }
