@@ -1,4 +1,6 @@
 'use client';
+import CountrySelect from "../../components/CountrySelect";
+import PhoneInput from "../../components/PhoneInput";
 import {useState, useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
@@ -60,8 +62,8 @@ export default function RelationshipRegister({relationships, members = [], initi
         <label className={s.field}><span>{draft.kind === 'company' ? 'Legal company name' : 'Full name'}</span><input required minLength={2} maxLength={200} value={draft.name} onChange={e=>change('name',e.target.value)}/></label>
         <label className={s.field}><span>Relationship type</span><select value={draft.kind} onChange={e=>change('kind',e.target.value)}><option value="person">Person</option><option value="company">Company</option></select></label>
         <label className={s.field}><span>Email (optional)</span><input type="email" maxLength={254} value={draft.email} onChange={e=>change('email',e.target.value)}/></label>
-        <label className={s.field}><span>Phone (optional)</span><input type="tel" maxLength={100} value={draft.phone} onChange={e=>change('phone',e.target.value)}/></label>
-        <div className={s.wide}><h3>Billing address (optional)</h3><div className={s.grid}>{Object.entries(addressFields).map(([key,[label,max,autoComplete]])=><label className={s.field} key={key}><span>{label}</span><input maxLength={max} autoComplete={autoComplete} value={draft.billing_address?.[key as keyof typeof addressFields] || ''} onChange={e=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,[key]:e.target.value}}))}/></label>)}</div>
+        <PhoneInput key={editing?.id || draft.profile_id || draft.kind} className={s.field} label="Phone (optional)" value={draft.phone} onChange={value=>change('phone',value)}/>
+        <div className={s.wide}><h3>Billing address (optional)</h3><div className={s.grid}>{Object.entries(addressFields).map(([key,[label,max,autoComplete]])=><label className={s.field} key={key}><span>{label}</span>{key==='country'?<CountrySelect value={draft.billing_address?.country || ''} onChange={value=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,country:value}}))}/>:<input maxLength={max} autoComplete={autoComplete} value={draft.billing_address?.[key as keyof typeof addressFields] || ''} onChange={e=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,[key]:e.target.value}}))}/>}</label>)}</div>
         {!draft.billing_address&&draft.address&&<p className={s.help}>The existing address is retained until you enter separate address fields.</p>}
         <p className={s.preview} style={{whiteSpace:'pre-line'}}>{draft.billing_address?formatBillingAddress(draft.billing_address)||'No billing address supplied.':draft.address||'No billing address supplied.'}</p></div>
         <label className={s.field}><span>Reference (optional)</span><input maxLength={200} value={draft.reference} onChange={e=>change('reference',e.target.value)}/></label>

@@ -1,4 +1,5 @@
 "use client";
+import PhoneInput from "../components/PhoneInput";
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {useTranslations} from 'next-intl';
 
@@ -13,6 +14,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [reference, setReference] = useState("");
+  const [phone, setPhone] = useState("");
   const requestKey = useRef<string | null>(null);
   const confirmation = useRef<HTMLDivElement>(null);
   const nameInput = useRef<HTMLInputElement>(null);
@@ -54,6 +56,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
       }
       setReference(result.id);
       form.reset();
+      setPhone("");
       requestKey.current = null;
       setSubmitted(true);
     } catch {
@@ -111,9 +114,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
                       <input id="intro-email" name="email" type="email" autoComplete="email" placeholder={t('youexamplecom')} maxLength={254} required />
                     </label>
                   </div>
-                  <label htmlFor="intro-phone">{t('phone_number')} <span className={styles.optional}>{t('optional')}</span>
-                    <input id="intro-phone" name="phone" type="tel" autoComplete="tel" placeholder={t('including_country_code')} maxLength={40} />
-                  </label>
+                  <PhoneInput name="phone" value={phone} onChange={value => {setPhone(value);requestKey.current=null;}} label={<>{t('phone_number')} <span className={styles.optional}>{t('optional')}</span></>} disabled={!ready || busy} />
                   <label htmlFor="intro-message">{t('what_would_you_like_to_discuss')} <span className={styles.optional}>{t('optional')}</span>
                     <textarea id="intro-message" name="message" rows={3} maxLength={1000} placeholder={t('a_short_introduction_or_a_convenient')} />
                   </label>

@@ -123,6 +123,7 @@
 }
 .page :global(.login-form input),
 .page :global(.request-form input:not([type="checkbox"])),
+.page :global(.request-form select),
 .page :global(.request-form textarea) {
   display: block;
   width: 100%;

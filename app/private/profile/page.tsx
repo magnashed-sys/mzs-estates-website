@@ -1,4 +1,6 @@
 "use client";
+import CountrySelect from "../../components/CountrySelect";
+import PhoneInput from "../../components/PhoneInput";
 import ArrowUpRightIcon from "../../components/ArrowUpRightIcon";
 import {useLocale, useTranslations} from "next-intl";
 import {isLocale, localizedPath} from "../../../i18n/public-routing";
@@ -313,10 +315,7 @@ export default function MemberProfilePage() {
                   autoComplete="name" required disabled={saving}
                   onChange={e => setField("full_name",e.target.value)}/>
               </label>
-              <label className={styles.field}>{t("telephone")} <input value={personal.phone} maxLength={40} type="tel"
-                  autoComplete="tel" disabled={saving}
-                  onChange={e => setField("phone",e.target.value)} />
-              </label>
+              <PhoneInput className={styles.field} label={t("telephone")} value={personal.phone} disabled={saving} onChange={value => setField("phone",value)} />
               <label className={styles.field}>{t("streetName")} <input value={personal.street_address} maxLength={160}
                   autoComplete="address-line1" disabled={saving}
                   onChange={e => setField("street_address",e.target.value)}/>
@@ -341,9 +340,7 @@ export default function MemberProfilePage() {
                   autoComplete="address-level1" disabled={saving}
                   onChange={e => setField("region",e.target.value)}/>
               </label>
-              <label className={styles.field + " " + styles.fieldFull}>{t("country")} <input value={personal.country} maxLength={120}
-                  autoComplete="country-name" disabled={saving}
-                  onChange={e => setField("country",e.target.value)}/>
+              <label className={styles.field + " " + styles.fieldFull}>{t("country")} <CountrySelect value={personal.country} disabled={saving} onChange={value => setField("country",value)} />
               </label>
             </div>
             <div className={styles.actions}>

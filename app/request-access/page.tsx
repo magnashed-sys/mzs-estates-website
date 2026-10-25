@@ -1,4 +1,5 @@
 "use client";
+import CountrySelect from "../components/CountrySelect";
 import RussianAccessNotice from "../components/RussianAccessNotice";
 import {useTranslations, useLocale} from "next-intl";
 import {localizedPath} from "../../i18n/public-routing";
@@ -137,8 +138,7 @@ export default function RequestAccessPage() {
                 onChange={(event) => setCompany(event.target.value)} disabled={loading} />
             </label>
             <label>
-              {t("a082")}<input type="text" autoComplete="country-name" value={country}
-                onChange={(event) => setCountry(event.target.value)} disabled={loading} />
+              {t("a082")}<CountrySelect value={country} onChange={setCountry} disabled={loading} />
             </label>
             <label>
               {t("a083")}<input type="password" autoComplete="new-password" minLength={8} maxLength={128}
