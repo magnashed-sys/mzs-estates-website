@@ -62,21 +62,21 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('link',{name:'Open rental contracts →',exact:true}).click();
  await page.getByRole('button',{name:'Issuing entities',exact:true}).click();
  await page.getByRole('button',{name:'New issuing entity',exact:true}).click();
- await page.getByLabel('Landlord type',{exact:true}).selectOption('person');
+ await page.getByLabel(/^Landlord type/).selectOption('person');
  await page.getByLabel('Legal name of landlord',{exact:true}).fill('Fixture issuer');
  assert.equal(await page.locator('[name="address"]').count(),0,'legacy full-address input is removed');
  await page.getByLabel('Street',{exact:true}).fill('Fixture Street');
  await page.getByLabel('House number',{exact:true}).fill('12');
  await page.getByLabel('Postal code',{exact:true}).fill('1234 AB');
  await page.getByLabel('City',{exact:true}).fill('Amsterdam');
- await page.getByLabel('Country',{exact:true}).selectOption('NL');
+ await page.locator('select[autocomplete="country"]').selectOption('NL');
  await page.getByLabel('IBAN',{exact:true}).fill('NLTESTACCOUNT');
  const prefix=page.locator('input[name="prefix"]');
  for(const value of ['M','-MN','MN/2026','Magdy Nashed']){await prefix.fill(value);await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();assert.equal(issuers.length,0);assert.equal(await prefix.evaluate(e=>e.checkValidity()),false);}
  await prefix.fill('mn-2026');await prefix.blur();assert.equal(await prefix.inputValue(),'MN-2026');assert.equal(await prefix.evaluate(e=>e.checkValidity()),true);
  await prefix.fill(' test ');await prefix.blur();assert.equal(await prefix.inputValue(),'TEST');
- await page.getByLabel('Country',{exact:true}).selectOption('');await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();assert.equal(issuers.length,0,'incomplete structured address is blocked');
- await page.getByLabel('Country',{exact:true}).selectOption('NL');
+ await page.locator('select[autocomplete="country"]').selectOption('');await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();assert.equal(issuers.length,0,'incomplete structured address is blocked');
+ await page.locator('select[autocomplete="country"]').selectOption('NL');
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-issuer-form-'+browserName+'-'+width+'.png',fullPage:true});}
  await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();
  await page.getByRole('button',{name:'Fixture issuer',exact:true}).waitFor();
@@ -92,7 +92,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();await page.getByRole('button',{name:'Save issuing entity',exact:true}).waitFor({state:'hidden'});
  assert.equal(issuers[1].address,'Saved original address');assert.equal(issuers[1].details.street,'');assert.equal(issuers[1].prefix,'OLD');assert.equal(issuers[1].next_number,8);
  await page.getByRole('button',{name:'Legacy issuer',exact:true}).click();await page.getByRole('button',{name:'Edit address',exact:true}).click();
- await page.getByLabel('Street',{exact:true}).fill('Replacement Street');await page.getByLabel('City',{exact:true}).fill('Madrid');await page.getByLabel('Country',{exact:true}).selectOption('ES');
+ await page.getByLabel('Street',{exact:true}).fill('Replacement Street');await page.getByLabel('City',{exact:true}).fill('Madrid');await page.locator('select[autocomplete="country"]').selectOption('ES');
  await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();await page.getByRole('button',{name:'Save issuing entity',exact:true}).waitFor({state:'hidden'});
  assert.equal(issuers[1].address,'Replacement Street\nMadrid\nSpain');assert.equal(issuers[1].prefix,'OLD');assert.equal(issuers[1].next_number,8);
  await page.getByRole('button',{name:'Contracts',exact:true}).click();
