@@ -141,7 +141,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
      <section className={s.detailPanel}>
       <p className={s.eyebrow}>DATA CONFIDENCE</p><h3>Register coverage.</h3>
       <div className={s.detailRow}><span>Active lease contracts</span><strong>{data.quality.contracts}</strong></div>
-      <div className={s.detailRow}><span>Active loan dossiers</span><strong>{loanAvailable?data.quality.loansActive:'—'}</strong></div>
+      <div className={s.detailRow}><span>Loans active or already receiving interest</span><strong>{loanAvailable?data.quality.loansActive:'—'}</strong></div>
       {loanNotice>0&&<p className={s.warning}>{loanNotice} active loan dossier(s) still need source review; scheduled interest is provisional.</p>}
       <div className={s.detailRow}><span>Unassigned active lease contracts</span><strong>{data.report.unassignedContracts}</strong></div>
       {(data.report.loanAttributionPending>0||data.report.bookingAttributionPending>0)&&<p className={s.warning}>Source attribution is still needed for {data.report.loanAttributionPending} active loan dossier(s) and {data.report.bookingAttributionPending} confirmed booking(s). They remain Unassigned, not assumed to belong to a company.</p>}
