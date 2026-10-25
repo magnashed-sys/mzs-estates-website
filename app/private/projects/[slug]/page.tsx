@@ -1,3 +1,4 @@
+import ArrowUpRightIcon from "../../../components/ArrowUpRightIcon";
 import {getLocale, getTranslations} from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
@@ -271,7 +272,7 @@ export default async function PrivateProjectPage({ params }: Props) {
               <h1>{presentation.title}</h1>
               <p className={styles.heroIntro}>{presentation.introduction}</p>
               <div className={styles.heroActions}>
-                <a href="#availability" className={styles.primaryButton}>{t("p389")} <span aria-hidden="true">↗</span></a>
+                <a href="#availability" className={styles.primaryButton}>{t("p389")} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
                 <a href="#gallery" className={styles.secondaryButton}>{t("p390")} <span aria-hidden="true">↓</span></a>
               </div>
             </div>

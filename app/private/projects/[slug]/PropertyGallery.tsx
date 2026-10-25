@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../../../components/ArrowUpRightIcon";
 
 import {useTranslations, useLocale} from "next-intl";
 
@@ -112,7 +113,7 @@ export default function PropertyGallery({ photos, title }: Props) {
           onClick={(event) => open(0, event)}
           className={styles.galleryAllButton}
         >
-          {t("p137")} <span aria-hidden="true">↗</span>
+          {t("p137")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
         </button>
       </div>
 

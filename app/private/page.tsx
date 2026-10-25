@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 
 import {useTranslations, useLocale} from "next-intl";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -260,10 +261,10 @@ const categories: { id: Category; title: string; description: string; shortTitle
             {viewState === "ready" && (
               <>
                 <Link className={styles.headerLink} href="/private/profile">
-                  {t("profile")} <span aria-hidden="true">↗</span>
+                  {t("profile")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
                 </Link>
                 <Link className={styles.headerLink} href="/private/reservations">
-                  {t("reservations")} <span aria-hidden="true">↗</span>
+                  {t("reservations")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
                 </Link>
               </>
             )}
@@ -333,7 +334,7 @@ const categories: { id: Category; title: string; description: string; shortTitle
                   >
                     <span className={styles.categoryTop}>
                       <span className={styles.categoryIndex}>{index + 1} / {group.shortTitle}</span>
-                      <span className={styles.categoryArrow} aria-hidden="true">↗</span>
+                      <span className={styles.categoryArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
                     </span>
                     <span className={styles.categoryBody}>
                       <span className={styles.categoryTitle}>{group.title}</span>
@@ -403,7 +404,7 @@ const categories: { id: Category; title: string; description: string; shortTitle
                               ))}
                             </div>
                             <Link className={styles.propertyAction} href={href}>
-                              {t("property")} <span aria-hidden="true">↗</span>
+                              {t("property")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
                             </Link>
                           </div>
                         </article>

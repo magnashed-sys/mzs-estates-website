@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../../../components/ArrowUpRightIcon";
 
 import {useTranslations, useLocale} from "next-intl";
 
@@ -103,7 +104,7 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
     </section>
     <section id="architecture" className={styles.section}>
       <div className={styles.heading}><div><p className={styles.eyebrow}>{t("p045")}</p><h2>{t("p046")}</h2></div><p>{t("p047")}</p></div>
-      <div className={styles.visualGrid}>{visuals.map((item,i)=><figure key={item.file} className={i===0?styles.largeVisual:styles.visual}><button type="button" className={styles.galleryTrigger} onClick={event => openImage(i,event.currentTarget)} aria-label={t("viewInGallery", {caption: item.label})}><Image src={`${base}/${item.file}`} alt={item.label} fill sizes={i===0?"(max-width: 800px) 100vw, 70vw":"(max-width: 800px) 100vw, 38vw"} className={styles.image}/></button><figcaption>{item.label} <span>↗</span></figcaption></figure>)}</div>
+      <div className={styles.visualGrid}>{visuals.map((item,i)=><figure key={item.file} className={i===0?styles.largeVisual:styles.visual}><button type="button" className={styles.galleryTrigger} onClick={event => openImage(i,event.currentTarget)} aria-label={t("viewInGallery", {caption: item.label})}><Image src={`${base}/${item.file}`} alt={item.label} fill sizes={i===0?"(max-width: 800px) 100vw, 70vw":"(max-width: 800px) 100vw, 38vw"} className={styles.image}/></button><figcaption>{item.label} <span><ArrowUpRightIcon /></span></figcaption></figure>)}</div>
     </section>
     <section className={styles.story}>
       <div><p className={styles.eyebrow}>{t("p048")}</p><h2>{t("p049")}</h2></div>

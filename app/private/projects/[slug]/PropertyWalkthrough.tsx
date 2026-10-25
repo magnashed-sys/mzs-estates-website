@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../../../components/ArrowUpRightIcon";
 
 import {useTranslations, useLocale} from "next-intl";
 
@@ -35,7 +36,7 @@ export default function PropertyWalkthrough() {
           {chapters.map((item, index) => (
             <button key={item.title} type="button" aria-current={position.chapter === index ? "step" : undefined}
               onClick={() => setPosition({ chapter: index, photo: 0 })}>
-              <span>{String(index + 1).padStart(2, "0")}</span>{item.title}<span aria-hidden="true">↗</span>
+              <span>{String(index + 1).padStart(2, "0")}</span>{item.title}<span aria-hidden="true"><ArrowUpRightIcon /></span>
             </button>
           ))}
         </nav>

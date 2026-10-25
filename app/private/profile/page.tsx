@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../../components/ArrowUpRightIcon";
 import {useLocale, useTranslations} from "next-intl";
 import {isLocale, localizedPath} from "../../../i18n/public-routing";
 
@@ -253,7 +254,7 @@ export default function MemberProfilePage() {
           <span className={dash.accessLabel}>
             {role === "partner" ? t("partnerAccess") : t("privateClient")}
           </span>
-          <Link className={dash.headerLink} href="/private"> {t("myDashboard")} <span aria-hidden="true">↗</span>
+          <Link className={dash.headerLink} href="/private"> {t("myDashboard")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
           </Link>
           <button className={dash.signout} type="button" disabled={signingOut}
             onClick={() => void signOut()}>

@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {useTranslations} from 'next-intl';
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
@@ -92,7 +93,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
               <p>{t("confirmationBody", {brand: source === "real-estate" ? "MZS Estates" : "MZS Capital"})}</p>
               <p className={styles.confirmationNote}>{t('your_request_has_been_received_a')}</p>
               <p className={styles.contactNote}>{t('reference')} {reference}</p>
-              <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>{t('back_to_the_form')} <span aria-hidden="true">↗</span></button>
+              <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>{t('back_to_the_form')} <span aria-hidden="true"><ArrowUpRightIcon /></span></button>
             </div>
           ) : (
             <>
@@ -119,7 +120,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
                   <p className={styles.contactNote}>{t('well_use_your_contact_details_to')}</p>
                   <details className={styles.contactNote}><summary>{t('how_we_use_your_details')}</summary><p>{t('mzs_group_stores_the_details_you')} <a href="mailto:info@mzsgroup.eu">{t('infomzsgroupeu')}</a>.</p></details>
                   {error && <p role="alert" className={styles.error}>{error}</p>}
-                  <button className={styles.submitButton} type="submit" disabled={busy}>{busy ? t('sending_your_request') : t('request_an_introductory_call')} <span aria-hidden="true">↗</span></button>
+                  <button className={styles.submitButton} type="submit" disabled={busy}>{busy ? t('sending_your_request') : t('request_an_introductory_call')} <span aria-hidden="true"><ArrowUpRightIcon /></span></button>
                   <p className={styles.requiredNote}>{t('required_fields')}</p>
                 </fieldset>
                 <noscript><p className={styles.contactNote}>{t('please_enable_javascript_to_use_this')}</p></noscript>
@@ -130,7 +131,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
       </div>
       <div className={styles.memberAccess}>
         <p>{t('already_part_of_our_network')}</p>
-        <div><a href="/login">{t('client_partner_login')} <span aria-hidden="true">↗</span></a><a href="/request-access">{t('request_private_access')} <span aria-hidden="true">↗</span></a></div>
+        <div><a href="/login">{t('client_partner_login')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a><a href="/request-access">{t('request_private_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a></div>
       </div>
       <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>
     </section>

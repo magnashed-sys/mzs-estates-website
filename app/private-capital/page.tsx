@@ -1,3 +1,4 @@
+import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {localizedPath} from "../../i18n/public-routing";
 import {publicMetadata} from "../../i18n/metadata";
 export const generateMetadata = () => publicMetadata("capital", "/private-capital");
@@ -54,16 +55,16 @@ const focus = [
           <div className={styles.rule} aria-hidden="true" />
           <p className={styles.heroLead}> {t('a_discreet_and_relationshipdriven_perspective_on')} </p>
           {atmosphereEnabled ? <nav className={atmosphere.sectionNavigation} aria-label={t('explore_private_capital')}>
-            <a href="#capital-perspective">{t('our_perspective')} <span aria-hidden="true">↗</span></a>
-            <a href="#capital-focus">{t('our_focus')} <span aria-hidden="true">↗</span></a>
-            <a href="#capital-method">{t('our_approach')} <span aria-hidden="true">↗</span></a>
-            <a href="#capital-securities">{t('securities')} <span aria-hidden="true">↗</span></a>
-            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true">↗</span></a>
+            <a href="#capital-perspective">{t('our_perspective')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#capital-focus">{t('our_focus')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#capital-method">{t('our_approach')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#capital-securities">{t('securities')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
           </nav> : <div className={styles.heroActions}>
             {!atmosphereEnabled && (introCallEnabled ? (
-              <a className={styles.primaryAction} href="#introductory-call">{t('request_an_introductory_call')} <span aria-hidden="true">↗</span></a>
+              <a className={styles.primaryAction} href="#introductory-call">{t('request_an_introductory_call')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
             ) : (
-              <a className={styles.primaryAction} href="/request-access">{t('request_private_access')} <span aria-hidden="true">↗</span></a>
+              <a className={styles.primaryAction} href="/request-access">{t('request_private_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
             ))}
             <a className={styles.quietAction} href="#capital-focus">{t('discover_our_focus')} <span aria-hidden="true">↓</span></a>
           </div>}
@@ -143,8 +144,8 @@ const focus = [
         <h2 id="capital-invitation">{t('a_confidential_conversation')}<br />{t('starts_here')}</h2>
         <p> {t('authorized_clients_and_partners_can_view')} </p>
         <div className={styles.heroActions}>
-          <a className={styles.primaryAction} href="/login">{t('client_partner_login')} <span aria-hidden="true">↗</span></a>
-          <a className={styles.quietAction} href="/request-access">{t('request_access')} <span aria-hidden="true">↗</span></a>
+          <a className={styles.primaryAction} href="/login">{t('client_partner_login')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+          <a className={styles.quietAction} href="/request-access">{t('request_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
         </div>
         <p className={styles.disclaimer}> {t('information_on_this_page_is_introductory')} </p>
       </section>}
