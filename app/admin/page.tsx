@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 import RentalSummary from "./RentalSummary";
+import FinancialCockpit from "./FinancialCockpit";
 import BookingManagement from "./BookingManagement";
 import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
@@ -419,7 +420,7 @@ export default function AdminPage() {
       </>}
 
       {tab === "overview" && <>
-        <RentalSummary key={refreshVersion}/>
+        <FinancialCockpit refreshVersion={refreshVersion}/>
         <div className="admin-metrics">
           <button disabled={locked} onClick={() => openRequests("pending")}><span>Access requests</span><strong>{pending.length}</strong><small>Awaiting review →</small></button>
           <button disabled={locked} onClick={() => openRequests("approved")}><span>Approved requests</span><strong>{approved.length}</strong><small>Awaiting invitation →</small></button>
