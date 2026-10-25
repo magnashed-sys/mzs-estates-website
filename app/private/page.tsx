@@ -1,4 +1,5 @@
 "use client";
+import RelationshipOverview from "./RelationshipOverview";
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 
 import {useTranslations, useLocale} from "next-intl";
@@ -314,6 +315,8 @@ const categories: { id: Category; title: string; description: string; shortTitle
                 <p className={styles.asideNote}>{t("aside")}</p>
               </aside>
             </section>
+
+            <RelationshipOverview />
 
             <section className={styles.collection} aria-labelledby="explore-heading">
               <div className={styles.collectionHeading}>

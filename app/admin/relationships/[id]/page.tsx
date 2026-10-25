@@ -293,6 +293,13 @@ export default function RelationshipDossierPage() {
       </div>
 
       <section className={styles.panel}>
+        <div className={styles.panelHeading}><h2>Relationship roles &amp; contracts.</h2></div>
+        <p className={styles.note}>Extend this relationship with a tenant, owner, investor or partner role. Companies and rental contracts reuse this same client account.</p>
+        <Link className="admin-button" href={`/admin/relationships?profile=${encodeURIComponent(person.id)}`}>Manage relationship details &amp; roles →</Link>{" "}
+        <Link className="admin-button" href={`/admin/group/estates/contracts?profile=${encodeURIComponent(person.id)}`}>View rental contracts →</Link>
+      </section>
+
+      <section className={styles.panel}>
         <div className={styles.panelHeading}><h2>Project access.</h2><span>{attached.length} projects</span></div>
         {attached.length === 0 ? <p className={styles.empty}>No project access assigned to this relationship.</p> :
           <div className={styles.projectList}>

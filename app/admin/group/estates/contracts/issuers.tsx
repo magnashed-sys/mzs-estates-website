@@ -25,7 +25,7 @@ function IssuerForm({issuer,companies,relationships,close}:{issuer:Issuer|null;c
  {field('name',values.kind==='person'?'Legal name of landlord':'Official company name',200,true)}
  {(['trading_name','legal_form','country'] as const).map(k=>field(k,issuerFields[k][0],issuerFields[k][1]))}
  {field('registration_number','Registration number / KvK (if applicable)',100)}{field('tax_id','VAT / fiscal number (NIF/CIF, if applicable)',60)}
- <label className={s.field}>Linked rental relationship<select value={values.relationship_id||''} onChange={e=>change('relationship_id',e.target.value)}><option value="">No link</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label></div>
+ <label className={s.field}>Linked relationship<select value={values.relationship_id||''} onChange={e=>change('relationship_id',e.target.value)}><option value="">No link</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label></div>
  <p className={s.help}>Companies are member-provided records. Import is explicit and does not grant access or automatically synchronize later changes. Registration and tax numbers are optional where not applicable.</p>
  <h3>Registered address</h3><div className={s.grid}>{(['street','house_number','address_extra','postal_code','city'] as const).map(k=>field(k,issuerFields[k][0],issuerFields[k][1]))}{!structured&&field('address','Existing / full registered address',1000,true)}{field('billing_address',issuerFields.billing_address[0],1000)}</div>
  <p className={s.help}>Enter street, city and country to replace the full address. A different billing address is optional and does not replace the registered address on the invoice.</p>

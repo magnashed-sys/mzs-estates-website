@@ -1125,5 +1125,25 @@
     "acquisitionKind": "acquisto",
     "canJuanExpression": "Un’espressione mediterranea raffinata.",
     "colomsExpression": "Un’espressione calma e contemporanea."
+  },
+  "RentalAccount": {
+    "title": "Le tue relazioni e i contratti di locazione",
+    "intro": "Le tue aziende e i contratti di locazione collegati a questo account.",
+    "companies": "Aziende",
+    "contracts": "Contratti di locazione",
+    "period": "Periodo di locazione",
+    "landlord": "Locatore",
+    "ongoing": "A tempo indeterminato",
+    "status": "Piano di fatturazione",
+    "active": "Attivo",
+    "stopped": "Interrotto",
+    "invoices": "Fatture emesse",
+    "number": "Fattura",
+    "due": "Scadenza",
+    "total": "Totale",
+    "outstanding": "Da pagare",
+    "noInvoices": "Non sono ancora state emesse fatture.",
+    "error": "Impossibile caricare il riepilogo delle tue relazioni.",
+    "retry": "Riprova"
   }
 }

@@ -1,14 +1,16 @@
 import Link from 'next/link';
+import {redirect} from 'next/navigation';
 import {readRegister} from '../../../../../lib/estates/read-register';
 import { requireContractAdmin } from '../../../../../lib/security/estate-contracts';
 import ContractWorkspace from './workspace';
 export const dynamic='force-dynamic';
-export default async function ContractsPage() {
+export default async function ContractsPage({searchParams}:{searchParams:Promise<{view?:string}>}) {
   const {db}=await requireContractAdmin();
+  if((await searchParams).view==='relationships') redirect('/admin/relationships');
   const results=await Promise.all([
     db.from('mzs_estate_properties').select('id,name,owner_name,address').order('name'),
     db.from('mzs_estate_units').select('id,property_id,address,tenant_name,monthly_rent,utilities_advance,rent_included').order('sort_order'),
-    db.from('profiles').select('id,full_name,email').order('full_name'),
+    db.from('profiles').select('id,full_name,email').in('role',['client','partner']).order('full_name'),
     readRegister(db,'mzs_lease_contracts').then(data=>({data,error:null})).catch(error=>({data:[],error})),
     readRegister(db,'mzs_lease_relationships').then(data=>({data,error:null})).catch(error=>({data:[],error})),
     readRegister(db,'mzs_lease_invoice_drafts').then(data=>({data,error:null})).catch(error=>({data:[],error})),
