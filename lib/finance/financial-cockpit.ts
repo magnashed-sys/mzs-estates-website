@@ -2,7 +2,7 @@
 import {rentalForecast, type ForecastContract} from '../estates/lease-cashflow';
 
 export type LeasePayment = {amount:number|string;received_on:string;reversed_at:string|null};
-export type LoanDeal = {id:string;direction:'provided'|'received';status:string;review_state:string};
+export type LoanDeal = {id:string;direction:'provided'|'received';status:string;review_state:string;entity_id?:string|null};
 export type LoanInstalment = {id:string;deal_id:string;kind:string;due_date:string;amount:number|string};
 export type LoanPayment = {instalment_id:string;amount:number|string;paid_on:string;is_void:boolean};
 export type Booking = {id:string;check_in:string;check_out:string;status:string;is_test:boolean;quoted_total_eur:number|string|null};
