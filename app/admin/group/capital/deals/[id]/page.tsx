@@ -45,7 +45,7 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
    {interest.credits.length>0&&<div className={s.card}><h3>Interest carryforward allocations</h3>
     {interest.credits.map((a,index)=><p key={index}>{money(a.amount)} received for {date(entries.find(x=>x.id===a.sourceId)?.due_date||null)} applied to interest due {date(entries.find(x=>x.id===a.targetId)?.due_date||null)}</p>)}
    </div>}
-   {interest.unappliedCredit>0&&<p className={s.notice}>Unallocated interest advance: {money(interest.unappliedCredit)}. Add a future interest term before the excess can be allocated.</p>
+   {interest.unappliedCredit>0&&<p className={s.notice}>Unallocated interest advance: {money(interest.unappliedCredit)}. Add a future interest term before the excess can be allocated.</p>}
    {entries.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Due / source period</th><th>Type</th><th>Planned</th><th>Confirmed</th><th>Record receipt / payment</th></tr></thead><tbody>{entries.map(i=>{
     const allocation=i.kind==='interest'?interest.byId.get(i.id):null;
     const paid=paidFor(i.id,payments);
