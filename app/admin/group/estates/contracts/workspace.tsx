@@ -7,7 +7,7 @@ import { euros } from '../../../../../lib/estates/rent';
 import { invoiceMonthStart, leaseSubjectPreview, leasePreparationDate } from '../../../../../lib/estates/lease-month';
 import { issueInvoice, saveContract, setContractStatus, generateDrafts, reviewInvoice, leaseDocuments } from './actions';
 import s from './contracts.module.css';
-import LeaseRelationships, {type LeaseRelationship} from './relationships';
+import type {RelationshipRecord as LeaseRelationship} from '../../../../../lib/relationships/model';
 
 import {Issuers,Billing,type Issuer,type Issued,type Payment} from './billing';
 
@@ -26,8 +26,8 @@ export default function ContractWorkspace({relationships,properties,units,member
  const router=useRouter();const [pending,startTransition]=useTransition();
  const searchParams=useSearchParams();
  const view=searchParams.get('view');
- const tab=view==='relationships'||view==='invoices'||view==='issuers'||view==='billing'?view:'contracts';
- function setTab(next:'contracts'|'invoices'|'relationships'|'issuers'|'billing'){
+ const tab=view==='invoices'||view==='issuers'||view==='billing'?view:'contracts';
+ function setTab(next:'contracts'|'invoices'|'issuers'|'billing'){
   const url=new URL(window.location.href);url.searchParams.set('view',next);
   window.history.replaceState(null,'',url.pathname+url.search+url.hash);
  }
@@ -53,12 +53,12 @@ export default function ContractWorkspace({relationships,properties,units,member
   <div className={s.notice}>Monthly draft preparation starts with December 2026. Drafts are prepared on the 14th of the preceding month. Check each draft, explicitly approve its issue, then send the numbered invoice separately. Staging delivery is captured without emailing tenants.</div>
   <div className={s.metrics}><div><span className={s.label}>CONTRACTS</span><strong>{scopedContracts.length}</strong></div><div><span className={s.label}>ACTIVE SCHEDULES</span><strong>{scopedContracts.filter(c=>c.status==='active').length}</strong></div><div><span className={s.label}>DRAFTS TO REVIEW</span><strong>{scopedInvoices.filter(i=>i.review_status==='pending'&&!issued.some(f=>f.draft_id===i.id)).length}</strong></div></div>
   {profileFilter&&<p className={s.notice}>Showing contracts and invoices for {members.find(m=>m.id===profileFilter)?.full_name || 'the selected account'}. <Link href="/admin/group/estates/contracts">Show all relationships →</Link></p>}
-  <div className={s.tabs}><Link className={s.secondary} href="/admin/relationships">Relationships</Link><button className={s.secondary} aria-pressed={tab==='contracts'} onClick={()=>setTab('contracts')}>Contracts</button><button className={s.secondary} aria-pressed={tab==='invoices'} onClick={()=>setTab('invoices')}>Invoice drafts</button><button className={s.secondary} aria-pressed={tab==='issuers'} onClick={()=>setTab('issuers')}>Issuing entities</button><button className={s.secondary} aria-pressed={tab==='billing'} onClick={()=>setTab('billing')}>Invoices &amp; cashflow</button></div>
+  <div className={s.tabs}><button className={s.secondary} aria-pressed={tab==='contracts'} onClick={()=>setTab('contracts')}>Contracts</button><button className={s.secondary} aria-pressed={tab==='invoices'} onClick={()=>setTab('invoices')}>Invoice drafts</button><button className={s.secondary} aria-pressed={tab==='issuers'} onClick={()=>setTab('issuers')}>Issuing entities</button><button className={s.secondary} aria-pressed={tab==='billing'} onClick={()=>setTab('billing')}>Invoices &amp; cashflow</button></div>
   {error&&<p role="alert" className={s.error}>{error}</p>}{notice&&<p role="status" className={s.notice}>{notice}</p>}
-  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies}/>:tab==='billing'?<Billing issued={scopedIssued} payments={scopedPayments}/>:tab==='relationships'?<LeaseRelationships relationships={relationships} members={members}/>:tab==='contracts'?<>
+  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies}/>:tab==='billing'?<Billing issued={scopedIssued} payments={scopedPayments}/>:tab==='contracts'?<>
    <div className={s.toolbar}><button className={s.button} onClick={()=>{setEditing(null);setSelected(null);setError('');setNotice('')}}>New contract</button></div>
    {editing!==undefined&&<ContractForm key={editing?.id || 'new'} contract={editing} properties={properties} units={units} members={members} relationships={relationships} issuers={issuers} pending={pending} onCancel={()=>setEditing(undefined)} onSave={payload=>run(async()=>{const r=await saveContract(payload,editing?.id,editing?.version);if(r.error)return r;setEditing(undefined);setSelected(r.id || null);return {message:'Contract saved as a draft. Review the agreement before activating monthly billing.'};})}/>}
-   <div className={s.grid}><Field label="Search contracts"><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Contract or tenant"/></Field><Field label="Property"><select value={propertyFilter} onChange={e=>setPropertyFilter(e.target.value)}><option value="">All properties</option>{properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field></div>
+   <div className={s.grid}><p className={s.help}>Manage clients, companies and tenant roles in <Link href="/admin/relationships">Relationships</Link>.</p><Field label="Search contracts"><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Contract or tenant"/></Field><Field label="Property"><select value={propertyFilter} onChange={e=>setPropertyFilter(e.target.value)}><option value="">All properties</option>{properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field></div>
    {shown.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Contract / tenant</th><th>First invoice period</th><th>Monthly net amount</th><th>Status</th></tr></thead><tbody>{shown.map(c=><tr key={c.id}><td><button onClick={()=>{setSelected(c.id);setEditing(undefined)}}>{c.title}</button><small>{c.tenant_name}</small></td><td>{date(c.first_period)}</td><td>{euros(c.lines.reduce((sum,l)=>sum+Math.round(Number(l.amount)*100),0)/100)}</td><td><span className={s.badge}>{c.status}</span></td></tr>)}</tbody></table></div>:<p className={s.empty}>No contracts match this view. Start with a draft and link the units covered by the agreement.</p>}
    {selectedContract&&<section className={s.panel}><h2>{selectedContract.title}</h2><div className={s.details}><div><span className={s.label}>TENANT</span><p>{selectedContract.tenant_name}<br/>{selectedContract.tenant_address}<br/>{selectedContract.tenant_email}</p></div><div><span className={s.label}>ISSUER</span><p>{selectedContract.issuer_name}<br/>{selectedContract.issuer_address}<br/>{selectedContract.issuer_iban}</p></div></div>
     <p className={s.status}>{units.filter(u=>selectedContract.unit_ids.includes(u.id)).map(u=>u.address).join(' · ')}</p>

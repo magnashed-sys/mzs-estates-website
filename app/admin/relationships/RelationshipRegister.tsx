@@ -71,7 +71,7 @@ export default function RelationshipRegister({relationships, members = [], initi
         const record=relationships.find(r=>r.kind==='person' && r.profile_id===matchedAccount.id);
         if(draft.kind==='person' && record && record.id!==editing?.id)open(record);else change('profile_id',matchedAccount.id);
       }}>Use existing account</button></p>}
-      <p className={s.help}>Saving a relationship does not create another login or send an invitation. Select an existing account to reuse it. Changes here do not rewrite saved contracts or invoices.</p>
+      <p className={s.help}>Saving a relationship does not create another login or send an invitation. Link an existing account to show its companies and activated contracts. Contracts with an account already recorded keep that account. Saved contracts and invoices are not rewritten.</p>
       <div className={s.toolbar}><button className={s.button} type="submit">{pending?'Saving…':'Save relationship'}</button><button className={s.secondary} type="button" onClick={()=>setEditing(undefined)}>Cancel</button></div>
       </fieldset>
     </form>}

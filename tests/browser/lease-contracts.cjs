@@ -52,7 +52,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await ctx.addCookies([{name:'sb-senonkpxdtlhyhrubicg-auth-token',value:'base64-'+Buffer.from(JSON.stringify({access_token:token,refresh_token:'fixture',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})).toString('base64url'),domain:'127.0.0.1',path:'/'}]);
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');
  await page.getByRole('heading',{name:'Contracts & invoices.'}).waitFor();
- await page.getByRole('link',{name:'Relationships',exact:true}).click();
+ await page.goto('http://127.0.0.1:3096/admin/relationships');
  await page.getByRole('button',{name:'New company',exact:true}).click();
  await page.getByLabel('Legal company name').fill('Fixture tenant company');
  await page.getByRole('button',{name:'Save relationship',exact:true}).click();
