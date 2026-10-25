@@ -30,7 +30,7 @@ export default async function GroupLayout({ children }: { children: React.ReactN
   // A Capital operator never inherits legacy Group or Estates permissions.
   return <main className="mzsGroup">
     <header>
-      <Link href={groupAdmin ? "/admin/group" : "/admin/group/capital"}>MZS GROUP</Link>
+      <Link href={groupAdmin ? "/admin" : "/admin/group/capital"}>MZS GROUP</Link>
       <span>{groupAdmin ? "PRIVATE GROUP ADMINISTRATION" : "SCOPED CAPITAL ADMINISTRATION"}</span>
     </header>
     {children}
