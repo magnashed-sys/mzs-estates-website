@@ -35,7 +35,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  const selected=data?.rows.find(r=>r.month===year+'-'+String(month).padStart(2,'0'));
  const rows=data?.rows||[];
  const loanAvailable=data?.loansAvailable===true;
- const loanAttributed=loanAvailable&&(entity==='all'||entity==='unassigned');
+ const loanAttributed=loanAvailable;
  const entityLabel=entity==='all'?'MZS Group consolidated':data?.entities.find(e=>e.id===entity)?.name||'Selected entity';
  const chartMax=Math.max(1,...rows.flatMap(r=>[r.rentForecast,loanAttributed?r.interestIn:0,loanAttributed?r.interestOut:0]));
  const loanNotice=data?.quality.loansNeedingReview||0;
@@ -57,7 +57,8 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  const cards=[
   {title:'Long-term rental income',line:'Active contract schedules · expected gross billing',value:selected?.rentForecast??0,annual:sum(rows,'rentForecast'),path:'/admin/group/estates/contracts?view=contracts',available:true,accent:'rent'},
   {title:'Interest from loans provided',line:'Scheduled interest · not principal repayment',value:selected?.interestIn??0,annual:sum(rows,'interestIn'),path:'/admin/group/capital/deals',available:loanAttributed,accent:'credit'},
-  {title:'Interest on loans received',line:'Scheduled interest expense · not loan repayment',value:selected?.interestOut??0,annual:sum(rows,'interestOut'),path:'/admin/group/capital/deals',available:loanAttributed,accent:'expense'}
+  {title:'Interest on loans received',line:'Scheduled interest expense · not loan repayment',value:selected?.interestOut??0,annual:sum(rows,'interestOut'),path:'/admin/group/capital/deals',available:loanAttributed,accent:'expense'},
+  {title:'Interest actually received',line:'Confirmed bank receipts · not allocated twice',value:selected?.interestReceived??0,annual:sum(rows,'interestReceived'),path:'/admin/group/capital/deals',available:loanAttributed,accent:'credit'}
  ];
  return <section className={s.cockpit} aria-labelledby="financial-cockpit-heading">
   <div className={s.top}>
@@ -81,7 +82,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   {loading&&<div className={s.status} role="status">Loading verified financial registers…</div>}
   {error&&<div className={s.failure} role="alert">{error}</div>}
   {data&&!loading&&<>
-   <div className={s.scopeNote}>Reporting scope: <strong>{entityLabel}</strong>. Only explicitly registered invoice issuers are attributed. Unlinked records stay visible as Unassigned.</div>
+   <div className={s.scopeNote}>Reporting scope: <strong>{entityLabel}</strong>. Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.</div>
    <div className={s.metrics}>
     {cards.map(card=><div key={card.title} className={s.metric}>
      <div className={s.metricHead}><span className={s.kicker}>{card.title}</span><span className={s.dot} data-kind={card.accent}/></div>
@@ -160,7 +161,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
       <td>{displayEuro(r.rentReceived+r.interestReceived-r.interestPaid)}</td>
      </tr>)}</tbody>
     </table></div>
-    <p className={s.note}>Interest not linked to a legal entity is excluded when an individual issuer is selected. Exports follow the selected reporting scope.</p>
+    <p className={s.note}>Only interest assigned to the selected entity is included; unlinked interest appears under Unassigned. Exports follow the selected reporting scope.</p>
    </section>
    <p className={s.footerNote}>Financial Cockpit · Scope: {entityLabel} · Not a bank statement, operating profit calculation or audited financial report.</p>
   </>}
