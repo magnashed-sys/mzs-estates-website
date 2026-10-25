@@ -370,13 +370,15 @@ const categories: { id: Category; title: string; description?: string; shortTitl
                     {selected.projects.map((project) => {
                       const picture = imageFor(project);
                       const href = `/private/projects/${encodeURIComponent(project.slug)}`;
+                      const displayTitle = project.slug === "marina-botafoch-apartment"
+                        ? t("marinaApartmentTitle") : project.title;
                       return (
                         <article key={project.id} className={styles.property}>
                           {picture ? (
-                            <Link href={href} className={styles.propertyPicture} aria-label={t("explore_named", {title: project.title})}>
+                            <Link href={href} className={styles.propertyPicture} aria-label={t("explore_named", {title: displayTitle})}>
                               <Image
                                 src={picture}
-                                alt={project.title}
+                                alt={displayTitle}
                                 fill
                                 sizes="(max-width: 720px) 100vw, (max-width: 1050px) 50vw, 560px"
                                 className={styles.propertyImage}
@@ -384,7 +386,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
                               <span className={styles.photoCorner} aria-hidden="true">{t("mzs_collection")}</span>
                             </Link>
                           ) : (
-                            <Link href={href} className={styles.propertyNoPicture} aria-label={t("explore_named", {title: project.title})}>
+                            <Link href={href} className={styles.propertyNoPicture} aria-label={t("explore_named", {title: displayTitle})}>
                               <span className={styles.noPictureMonogram} aria-hidden="true">MZS</span>
                               <span className={styles.photoCorner} aria-hidden="true">{t("private_opportunity")}</span>
                             </Link>
@@ -394,7 +396,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
                               <span>{regionFor(project, t)}</span>
                               <span>{t("private_access")}</span>
                             </div>
-                            <h3><Link href={href}>{project.title}</Link></h3>
+                            <h3><Link href={href}>{displayTitle}</Link></h3>
                             <p className={styles.propertySubtitle}>
                               {project.subtitle || t("subtitle")}
                             </p>
