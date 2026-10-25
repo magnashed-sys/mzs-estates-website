@@ -9,6 +9,7 @@ function load(path){
  const result={};
  vm.runInNewContext(transpiled,{exports:result,require:(id)=>{
   if(id==='./financial-cockpit')return load('lib/finance/financial-cockpit.ts');
+  if(id==='../capital/interest-allocation')return load('lib/capital/interest-allocation.ts');
   if(id==='../estates/lease-cashflow')return load('lib/estates/lease-cashflow.ts');
   throw Error('Unexpected test dependency '+id);
  }});
@@ -89,4 +90,14 @@ test('Unknown entity fails closed; reversed payments are excluded',()=>{
  assert.throws(()=>buildFinancialPhase2(input('not-in-register')),/Unknown financial entity/);
  const d=buildFinancialPhase2(input('issuer-a'));
  assert.equal(d.report.recordedNet,400);
+});
+
+test('Agreed loan with real non-void interest payments counts toward cash and overdue ledger',()=>{
+ const item=input();
+ item.deals[0].status='agreed';
+ const d=buildFinancialPhase2(item);
+ const oct=d.rows.find(r=>r.month==='2026-10');
+ assert.equal(oct.interestIn,100);
+ assert.equal(oct.interestReceived,25);
+ assert.equal(d.report.overdueLoanReceivables,75);
 });
