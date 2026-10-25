@@ -68,7 +68,9 @@ export function buildFinancialPhase2(args:{
   const rest=Math.max(0,cents(invoice.total)-(paymentsByInvoice.get(invoice.id)||0));
   outstanding+=rest;if(invoice.due_date<asOf)overdue+=rest;
  }
- const dealById=new Map(chosenDeals.filter(d=>d.status==='active').map(d=>[d.id,d]));
+ const paidTermIds=new Set(chosenLoanPayments.filter(p=>!p.is_void).map(p=>p.instalment_id));
+ const alreadyReceivingDeals=new Set(chosenInstalments.filter(i=>i.kind==='interest'&&paidTermIds.has(i.id)).map(i=>i.deal_id));
+ const dealById=new Map(chosenDeals.filter(d=>d.status==='active'||(d.status==='agreed'&&alreadyReceivingDeals.has(d.id))).map(d=>[d.id,d]));
  const byLoan=new Map<string,ReturnType<typeof allocateInterestCredits>>();
  for(const [id] of dealById){
   const loanTerms=chosenInstalments.filter(i=>i.deal_id===id);
