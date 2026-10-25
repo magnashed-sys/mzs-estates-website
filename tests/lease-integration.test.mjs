@@ -15,3 +15,9 @@ test('forecast rounds exact half cents like PostgreSQL invoice generation',()=>{
  const c={status:'active',first_period:'2027-04-01',lease_start:'2027-04-16',lease_end:null,max_terms:1,prorate:true,lines:[{amount:'0.29',vat:'exempt'}]};
  assert.equal(cash.rentalForecast([c],'2027-04'),0.15);
 });
+
+test('invoice reply-to uses frozen issuer profile and rejects header injection',async()=>{
+ const updated={...invoice,payload:{...invoice.payload,snapshot:{...invoice.payload.snapshot,issuer_details:{reply_to:'billing@example.invalid'}}}};
+ const h=mail();await (await h.api.prepareInvoiceDelivery(updated))('id','token');assert.equal(h.sent[0].replyTo,'billing@example.invalid');
+ await assert.rejects(mail().api.prepareInvoiceDelivery({...updated,payload:{...updated.payload,snapshot:{...updated.payload.snapshot,issuer_details:{reply_to:'a@example.invalid\r\nBcc: b@example.invalid'}}}}),/single valid reply-to/);
+});

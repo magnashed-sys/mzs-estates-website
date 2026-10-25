@@ -1,0 +1,38 @@
+'use client';
+import {useState,useTransition} from 'react';
+import {useRouter} from 'next/navigation';
+import {saveIssuer} from './actions';
+import type {Issuer} from './billing';
+import type {LeaseRelationship} from './relationships';
+import {issuerFields,type CompanySource} from '../../../../../lib/estates/issuer-profile';
+import s from './contracts.module.css';
+export default function Issuers({issuers,relationships,companies}:{issuers:Issuer[];relationships:LeaseRelationship[];companies:CompanySource[]}) {
+ const [editing,setEditing]=useState<Issuer|null|undefined>();
+ return <><h2>Issuing entities</h2><p className={s.help}>Manage the legal and payment details for each landlord. Existing contracts and issued invoices keep their saved details. Each invoice prefix has its own sequence.</p><button className={s.button} onClick={()=>setEditing(null)}>New issuing entity</button>
+ {editing!==undefined&&<IssuerForm key={editing?.id||'new'} issuer={editing} companies={companies} relationships={relationships} close={()=>setEditing(undefined)}/>}
+ <div className={s.tableWrap}><table className={s.table}><thead><tr><th>Entity</th><th>Type / country</th><th>IBAN</th><th>Next number</th></tr></thead><tbody>{issuers.map(i=><tr key={i.id}><td><button onClick={()=>setEditing(i)}>{i.name}</button></td><td>{i.kind==='person'?'Private landlord':'Company'}<small>{i.details?.country}</small></td><td>{i.iban}</td><td>{i.prefix}-{String(i.next_number).padStart(6,'0')}</td></tr>)}</tbody></table></div></>;
+}
+function IssuerForm({issuer,companies,relationships,close}:{issuer:Issuer|null;companies:CompanySource[];relationships:LeaseRelationship[];close:()=>void}) {
+ const [values,setValues]=useState<Record<string,string>>(()=>({...Object.fromEntries(Object.entries(issuer||{}).filter(([,v])=>typeof v==='string')),...issuer?.details,kind:issuer?.kind||'company'}) as Record<string,string>);
+ const [error,setError]=useState('');const [busy,start]=useTransition();const [loadingLogo,setLoadingLogo]=useState(false);const router=useRouter();
+ function change(key:string,value:string){setValues(v=>({...v,[key]:value}));}
+ function field(key:string,label:string,max=200,required=false,type='text') {return <label key={key} className={s.field}>{label}{key==='payment_instructions'||key==='billing_address'||key==='address'?<textarea name={key} value={values[key]||''} maxLength={max} required={required} onChange={e=>change(key,e.target.value)}/>:<input name={key} value={values[key]||''} maxLength={max} required={required} type={type} readOnly={key==='prefix'&&!!issuer} pattern={key==='prefix'?'[A-Z0-9][A-Z0-9-]{1,19}':undefined} onChange={e=>change(key,e.target.value)}/>}</label>}
+ const structured=!!(values.street||values.city||values.house_number||values.postal_code);
+ return <form className={s.panel} onSubmit={e=>{e.preventDefault();setError('');start(async()=>{try{const result=await saveIssuer(values,issuer?.id,issuer?.version);if(result.error)setError(result.error);else{close();router.refresh();}}catch{setError('Saving could not be confirmed. Refresh before retrying.');}});}}>
+ <fieldset disabled={busy||loadingLogo}><h3>Legal identity</h3><div className={s.grid}>
+ <label className={s.field}>Landlord type<select value={values.kind} onChange={e=>change('kind',e.target.value)}><option value="company">Company</option><option value="person">Private landlord</option></select></label>
+ <label className={s.field}>Import company details<select value={values.source_company_id||''} onChange={e=>{const c=companies.find(c=>c.id===e.target.value);if(!c){change('source_company_id','');return;}if(!window.confirm('Copy this company’s name, trading name, registration and country into this form? Verify them before saving.'))return;setValues(v=>({...v,kind:'company',source_company_id:c.id,name:c.legal_name,trading_name:c.trading_name||'',registration_number:c.registration_number||'',country:c.country||''}));}}><option value="">No company source</option>{companies.map(c=><option key={c.id} value={c.id}>{c.legal_name} · {c.registration_number||c.country||c.id.slice(0,8)}</option>)}</select></label>
+ {field('name',values.kind==='person'?'Legal name of landlord':'Official company name',200,true)}
+ {(['trading_name','legal_form','country'] as const).map(k=>field(k,issuerFields[k][0],issuerFields[k][1]))}
+ {field('registration_number','Registration number / KvK (if applicable)',100)}{field('tax_id','VAT / fiscal number (NIF/CIF, if applicable)',60)}
+ <label className={s.field}>Linked rental relationship<select value={values.relationship_id||''} onChange={e=>change('relationship_id',e.target.value)}><option value="">No link</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label></div>
+ <p className={s.help}>Companies are member-provided records. Import is explicit and does not grant access or automatically synchronize later changes. Registration and tax numbers are optional where not applicable.</p>
+ <h3>Registered address</h3><div className={s.grid}>{(['street','house_number','address_extra','postal_code','city'] as const).map(k=>field(k,issuerFields[k][0],issuerFields[k][1]))}{!structured&&field('address','Existing / full registered address',1000,true)}{field('billing_address',issuerFields.billing_address[0],1000)}</div>
+ <p className={s.help}>Enter street, city and country to replace the full address. A different billing address is optional and does not replace the registered address on the invoice.</p>
+ <h3>Contact</h3><div className={s.grid}>{(['contact_name','email','phone','website'] as const).map(k=>field(k,issuerFields[k][0],issuerFields[k][1],false,k==='email'?'email':k==='website'?'url':k==='phone'?'tel':'text'))}</div>
+ <h3>Bank and invoicing</h3><div className={s.grid}>{field('account_holder','Account holder',200)}{field('iban','IBAN',40,true)}{field('bic','BIC / SWIFT',11)}{field('prefix','Unique invoice prefix',20,true)}{field('reply_to','Invoice reply-to email (optional)',200,false,'email')}{field('payment_instructions','Default payment instructions',1000)}</div>
+ <p className={s.help}>The prefix cannot be changed after creation. Payment instructions do not change the agreed payment deadline or authorize automatic email sending.</p>
+ <label className={s.field}>Company logo (PNG/JPEG, up to 200 KB)<input type="file" accept="image/png,image/jpeg" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;setError('');if(file.size>200000||!['image/png','image/jpeg'].includes(file.type)){setError('Choose a PNG or JPEG of at most 200 KB.');e.target.value='';return;}setLoadingLogo(true);try{const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(file);});const image=await createImageBitmap(file);if(image.width>2000||image.height>2000){image.close();throw new Error('Use a logo no larger than 2000 × 2000 pixels.');}image.close();change('logo',data);}catch{setError('The logo could not be read. Use a PNG or JPEG up to 2000 × 2000 pixels.');}finally{setLoadingLogo(false);}}}/></label>
+ {values.logo&&<><img src={values.logo} alt="Issuer logo preview" style={{maxWidth:180,maxHeight:80,objectFit:'contain'}}/><button type="button" className={s.secondary} onClick={()=>change('logo','')}>Remove logo</button></>}
+ {error&&<p className={s.error} role="alert">{error}</p>}<div className={s.toolbar}><button className={s.button}>Save issuing entity</button><button type="button" className={s.secondary} onClick={close}>Cancel</button></div></fieldset></form>;
+}

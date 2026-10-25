@@ -1,23 +1,16 @@
 'use client';
 import {useState,useTransition} from 'react';
 import {useRouter} from 'next/navigation';
-import {saveIssuer,sendInvoice,recordPayment,reversePayment} from './actions';
+import {sendInvoice,recordPayment,reversePayment} from './actions';
 import {euros} from '../../../../../lib/estates/rent';
 import {invoiceBalance,cashflowSummary} from '../../../../../lib/estates/lease-cashflow';
 import type {InvoiceDocument} from '../../../../../lib/estates/invoice-pdf';
-import type {LeaseRelationship} from './relationships';
+import type {IssuerDetails} from '../../../../../lib/estates/issuer-profile';
+export {default as Issuers} from './issuers';
 import s from './contracts.module.css';
-export type Issuer={id:string;name:string;address:string;iban:string;tax_id:string;registration_number:string;prefix:string;next_number:number;relationship_id:string|null;version:number};
+export type Issuer={kind?:string;details?:IssuerDetails;source_company_id?:string|null;id:string;name:string;address:string;iban:string;tax_id:string;registration_number:string;prefix:string;next_number:number;relationship_id:string|null;version:number};
 export type Issued=InvoiceDocument&{id:string;draft_id:string;contract_id:string;delivery_status:string;delivery_started_at:string|null};
 export type Payment={id:string;invoice_id:string;amount:number;received_on:string;reference:string;reversed_at:string|null;reversal_reason:string|null};
-export function Issuers({issuers,relationships}:{issuers:Issuer[];relationships:LeaseRelationship[]}){
- const [editing,setEditing]=useState<Issuer|null|undefined>();const [error,setError]=useState('');const [busy,start]=useTransition();const router=useRouter();
- return <><h2>Issuing entities</h2><p className={s.help}>Register each landlord once. Select it on a draft contract to copy its billing details. Existing contracts and invoices retain their saved details. Each prefix has a separate sequence starting at 000001.</p><button className={s.button} onClick={()=>setEditing(null)}>New issuing entity</button>{error&&<p role="alert">{error}</p>}
- {editing!==undefined&&<form key={editing?.id||'new'} className={s.panel} onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);const input={...Object.fromEntries(f),relationship_id:f.get('relationship_id')||null};start(async()=>{try{const r=await saveIssuer(input,editing?.id,editing?.version);if(r.error)setError(r.error);else{setEditing(undefined);setError('');router.refresh();}}catch{setError('Saving could not be confirmed. Refresh before retrying.');}});}}><fieldset disabled={busy}><div className={s.grid}>
- <label className={s.field}>Linked relationship<select name="relationship_id" defaultValue={editing?.relationship_id||''}><option value="">No link</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
- {(['name','address','iban','tax_id','registration_number','prefix'] as const).map(k=><label key={k} className={s.field}>{({name:'Legal name',address:'Billing address',iban:'IBAN',tax_id:'Tax ID',registration_number:'Registration number',prefix:'Unique invoice prefix'})[k]}<input name={k} required={['name','address','iban','prefix'].includes(k)} maxLength={k==='prefix'?20:k==='address'?1000:200} pattern={k==='prefix'?'[A-Z0-9][A-Z0-9-]{1,19}':undefined} readOnly={k==='prefix'&&!!editing} defaultValue={editing?.[k]||''}/></label>)}</div><div className={s.toolbar}><button className={s.button}>Save issuing entity</button><button type="button" className={s.secondary} onClick={()=>setEditing(undefined)}>Cancel</button></div></fieldset></form>}
- <div className={s.tableWrap}><table className={s.table}><thead><tr><th>Entity</th><th>IBAN</th><th>Next number</th></tr></thead><tbody>{issuers.map(i=><tr key={i.id}><td><button onClick={()=>setEditing(i)}>{i.name}</button></td><td>{i.iban}</td><td>{i.prefix}-{String(i.next_number).padStart(6,'0')}</td></tr>)}</tbody></table></div></>;
-}
 export function Billing({issued,payments}:{issued:Issued[];payments:Payment[]}){
  const router=useRouter();const [busy,start]=useTransition();const [message,setMessage]=useState('');const [selected,setSelected]=useState<string|null>(null);const [paymentKey,setPaymentKey]=useState('');
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const totals=cashflowSummary(issued,payments,today);const invoice=issued.find(i=>i.id===selected);
