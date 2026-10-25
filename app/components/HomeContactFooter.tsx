@@ -1,13 +1,39 @@
 "use client";
 import ArrowUpRightIcon from "./ArrowUpRightIcon";
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import LanguageSwitcher from "./LanguageSwitcher";
 import styles from "./HomeContactFooter.module.css";
 
 type Props = { email: string };
 
+/** Keep Amsterdam as a city; show Spain and UAE in each available language. */
+const spainLabels: Record<string, string> = {
+  en: "SPAIN",
+  nl: "SPANJE",
+  es: "ESPAÑA",
+  de: "SPANIEN",
+  it: "SPAGNA",
+  fr: "ESPAGNE",
+  ru: "ИСПАНИЯ",
+  "pt-BR": "ESPANHA",
+  ar: "إسبانيا",
+};
+
+const uaeLabels: Record<string, string> = {
+  en: "UAE",
+  nl: "VAE",
+  es: "EAU",
+  de: "VAE",
+  it: "EAU",
+  fr: "EAU",
+  ru: "ОАЭ",
+  "pt-BR": "EAU",
+  ar: "الإمارات العربية المتحدة",
+};
+
 export default function HomeContactFooter({ email }: Props) {
   const t = useTranslations('Footer');
+  const locale = useLocale();
   const navigation = useTranslations('Header');
   const address = email.trim();
   if (!/^[^\s@?:]+@[^\s@?:]+\.[^\s@?:]+$/.test(address)) {
@@ -15,7 +41,7 @@ export default function HomeContactFooter({ email }: Props) {
   }
   return (
     <footer className={styles.footer}>
-      <span className={styles.locations}>AMSTERDAM · IBIZA · DUBAI</span>
+      <span className={styles.locations}>AMSTERDAM · {spainLabels[locale] ?? "SPAIN"} · {uaeLabels[locale] ?? "UAE"}</span>
       <div className={styles.languages}><LanguageSwitcher inline /></div>
       <div className={styles.links}>
       <a className={styles.contact} href={`mailto:${address}`} aria-label={t("contactEmail", {address})}>
