@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import type {MonthlyMoney} from '../../lib/finance/financial-cockpit';
-import type {FinancialPhase2} from '../../lib/finance/financial-report';
+import type {FinancialPhase2,FinancialEntity} from '../../lib/finance/financial-report';
 import s from './FinancialCockpit.module.css';
 
 function madridParts(){
@@ -18,6 +18,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  const [year,setYear]=useState(current.year);
  const [month,setMonth]=useState(current.month);
  const [data,setData]=useState<FinancialPhase2|null>(null);
+ const [entityOptions,setEntityOptions]=useState<FinancialEntity[]>([]);
  const [entity,setEntity]=useState('all');
  const [error,setError]=useState('');
  const [loading,setLoading]=useState(true);
@@ -27,7 +28,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   setLoading(true);setError('');setData(null);
   fetch('/api/admin/financial-cockpit?year='+year+'&entity='+encodeURIComponent(entity),{cache:'no-store',signal:ctrl.signal})
    .then(async r=>{if(!r.ok)throw new Error('The complete financial overview could not be loaded.');return r.json() as Promise<FinancialPhase2>;})
-   .then(setData).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
+   .then(next=>{setEntityOptions(next.entities);setData(next);}).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
    .finally(()=>{if(!ctrl.signal.aborted)setLoading(false);});
   return ()=>ctrl.abort();
  },[year,entity,retry,refreshVersion]);
@@ -71,7 +72,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
     </select></label>
     <label>Reporting entity<select aria-label="Reporting entity" value={entity} onChange={e=>setEntity(e.target.value)}>
       <option value="all">MZS Group consolidated</option>
-      {(data?.entities||[]).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
+      {entityOptions.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
      </select></label>
     <button type="button" onClick={()=>setRetry(r=>r+1)} disabled={loading} className={s.refresh}>Refresh ↗</button>
     <button type="button" onClick={exportCsv} disabled={loading||!data} className={s.refresh}>Export CSV ↓</button>
