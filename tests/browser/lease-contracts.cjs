@@ -9,9 +9,23 @@ const user={id,aud:'authenticated',role:'authenticated',email:'fixture@example.i
 const token=[Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'),Buffer.from(JSON.stringify({sub:id,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'fixture'].join('.');
 const properties=[{id:pid,name:'Fixture residence',owner_name:'Fixture landlord',address:'Fixture Street 1'}];
 const units=[{id:uid,property_id:pid,address:'Fixture Street 1A',tenant_name:'Fixture tenant',monthly_rent:1000,utilities_advance:null,rent_included:false}];
+const memberId='12121212-1212-4212-8212-121212121212',personId='13131313-1313-4313-8313-131313131313',offlineId='14141414-1414-4414-8414-141414141414';
+let failPersonContact=false,personReads=0;
+const ownContact={user_id:id,phone:'+31612345678',street_address:'Own Street',house_number:'9',address_addition:'A',postal_code:'1011 AA',city:'Amsterdam',region:'Noord-Holland',country:'Netherlands'};
 const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','application/json');let body='';for await(const chunk of req)body+=chunk;const payload=body?JSON.parse(body):{};const u=new URL(req.url,'http://local');let data=[];
  if(u.pathname==='/auth/v1/user')data=user;
- else if(u.pathname==='/rest/v1/profiles')data=u.searchParams.has('id')?{id,role,is_active:active}:[{id,full_name:'Fixture relationship',email:user.email}];
+ else if(u.pathname==='/rest/v1/profiles'){
+  const own={id,role,is_active:active,full_name:'Fixture self landlord',email:user.email};
+  const member={id:memberId,role:'client',is_active:true,full_name:'Fixture member',email:'member@example.invalid'};
+  let rows=u.searchParams.has('id')?[own,member].filter(p=>'eq.'+p.id===u.searchParams.get('id')):[member];
+  if(u.searchParams.has('role'))rows=rows.filter(p=>u.searchParams.get('role').includes(p.role));
+  data=req.headers.accept?.includes('vnd.pgrst.object')?(rows[0]||null):rows;
+ }
+ else if(u.pathname==='/rest/v1/mzs_member_contact_details'){
+  personReads++;
+  if(failPersonContact){res.statusCode=500;res.end(JSON.stringify({message:'Fixture lookup failure'}));return;}
+  data=u.searchParams.get('user_id')==='eq.'+id?[ownContact]:[];
+ }
  else if(u.pathname==='/rest/v1/mzs_estate_properties')data=properties;
  else if(u.pathname==='/rest/v1/mzs_estate_units')data=units;
  else if(u.pathname==='/rest/v1/mzs_lease_issuers'){
@@ -26,7 +40,9 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  else if(u.pathname==='/rest/v1/rpc/mzs_claim_lease_invoice_mail'){issued[0].delivery_status='sending';data='99999999-9999-4999-8999-999999999999';}
  else if(u.pathname==='/rest/v1/rpc/mzs_finish_lease_invoice_mail'){issued[0].delivery_status=payload.p_status;data=true;}
  else if(u.pathname==='/rest/v1/mzs_lease_relationships'){
-  if(req.method==='POST'){const r={...payload,id:'66666666-6666-4666-8666-666666666666',version:1};relationships.push(r);data={id:r.id};}else data=relationships;
+  if(req.method==='POST'){const r={...payload,id:'66666666-6666-4666-8666-666666666666',version:1};relationships.push(r);data={id:r.id};}else {
+   data=relationships.filter(r=>['id','kind','profile_id'].every(k=>!u.searchParams.has(k)||'eq.'+r[k]===u.searchParams.get(k)));
+  }
  }
  else if(u.pathname==='/rest/v1/mzs_lease_contracts'){
   if(req.method==='POST'){contracts.push({...payload,id:cid,version:1,status:'draft',created_at:new Date().toISOString()});data={id:cid};}
@@ -49,7 +65,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  const original=global.fetch;global.fetch=(input,init)=>{const url=typeof input==='string'?input:input instanceof URL?input.href:input.url;if(url.startsWith('https://senonkpxdtlhyhrubicg.supabase.co'))return original(url.replace('https://senonkpxdtlhyhrubicg.supabase.co','http://127.0.0.1:3091'),init);return original(input,init)};
  process.env.SUPABASE_SERVICE_ROLE_KEY='fixture';process.env.VERCEL_ENV='preview';process.env.NEXT_PUBLIC_SUPABASE_URL='https://senonkpxdtlhyhrubicg.supabase.co';process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY='fixture-public-key';
  const app=next({dev:false,hostname:'127.0.0.1',port:3096});await app.prepare();const server=http.createServer(app.getRequestHandler());await new Promise(r=>server.listen(3096,'127.0.0.1',r));
- const browser=await browserType.launch({headless:true});const ctx=await browser.newContext();const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const browser=await browserType.launch({headless:true});const ctx=await browser.newContext();const page=await ctx.newPage();const errors=[];global.fixturePage=page;page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await ctx.addCookies([{name:'sb-senonkpxdtlhyhrubicg-auth-token',value:'base64-'+Buffer.from(JSON.stringify({access_token:token,refresh_token:'fixture',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})).toString('base64url'),domain:'127.0.0.1',path:'/'}]);
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');
  await page.getByRole('heading',{name:'Contracts & invoices.'}).waitFor();
@@ -59,14 +75,40 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('button',{name:'Save relationship',exact:true}).click();
  await page.getByRole('button',{name:'Fixture tenant company',exact:true}).waitFor();
  assert.equal(relationships.length,1);assert.equal(relationships[0].address,'','only name/type required for offline relationship');
+ relationships.push({id:personId,kind:'person',name:'Fixture linked person',email:'',phone:'',profile_id:memberId,address:'Dossier Street 4, Madrid',billing_address:{street:'Dossier Street',house_number:'4',city:'Madrid',country:'Spain'},version:1});
+ relationships.push({id:offlineId,kind:'person',name:'Fixture offline person',email:'offline@example.invalid',phone:'',profile_id:null,address:'Original unstructured address',billing_address:{},version:1});
  await page.getByRole('link',{name:'Open rental contracts →',exact:true}).click();
  await page.getByRole('button',{name:'Issuing entities',exact:true}).click();
  await page.getByRole('button',{name:'New issuing entity',exact:true}).click();
  await page.getByLabel(/^Landlord type/).selectOption('person');
+ const source=page.getByLabel(/^Copy details from person/);
+ assert.equal(await source.locator(`option[value="profile:${memberId}"]`).count(),0,'linked member appears only as one person');
+ await source.selectOption('self');await page.getByText(/^Personal details copied/).waitFor();
+ assert.equal(await page.getByLabel('Legal name of landlord',{exact:true}).inputValue(),'Fixture self landlord');
+ assert.equal(await page.getByLabel('Street',{exact:true}).inputValue(),'Own Street');
+ assert.equal(await page.getByLabel('Region / province',{exact:true}).inputValue(),'Noord-Holland');
+ assert.equal(await page.getByLabel('Contact email',{exact:true}).inputValue(),user.email);
+ assert.equal(await page.getByLabel('IBAN',{exact:true}).inputValue(),'');
+ assert.equal(issuers.length,0);assert.equal(relationships.length,3,'copy creates no second relationship');
+ await page.getByLabel('IBAN',{exact:true}).fill('NLTESTACCOUNT');await page.locator('input[name="prefix"]').fill('DRAFT');
+ for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-person-import-'+width+'.png',fullPage:true});}
+ await source.selectOption('relationship:'+personId);await page.getByLabel('Street',{exact:true}).waitFor();
+ await page.waitForFunction(()=>document.querySelector('input[name="street"]')?.value==='Dossier Street');
+ assert.equal(await page.getByLabel('Region / province',{exact:true}).inputValue(),'','addresses are not mixed');
+ assert.equal(await page.getByLabel('Contact email',{exact:true}).inputValue(),'member@example.invalid');
+ assert.equal(await page.getByLabel('IBAN',{exact:true}).inputValue(),'NLTESTACCOUNT');assert.equal(await page.locator('input[name="prefix"]').inputValue(),'DRAFT');
+ failPersonContact=true;await source.selectOption('self');await page.getByRole('alert').filter({hasText:/could not be loaded/}).waitFor();
+ assert.equal(await page.getByLabel('Street',{exact:true}).inputValue(),'Dossier Street');assert.equal(await source.inputValue(),'relationship:'+personId);failPersonContact=false;
+ await source.selectOption('relationship:'+offlineId);await page.getByText('Saved address: Original unstructured address',{exact:true}).waitFor();
+ assert.equal(await page.locator('[name="address"]').count(),0);assert.equal(await page.getByLabel('Street',{exact:true}).count(),0);
+ await page.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(issuers.length,0,'cancel creates no issuer');
+ await page.getByRole('button',{name:'New issuing entity',exact:true}).click();await page.getByLabel(/^Landlord type/).selectOption('person');
+ await page.getByLabel(/^Copy details from person/).selectOption('self');await page.getByText(/^Personal details copied/).waitFor();
+ await page.getByLabel('Region / province',{exact:true}).fill('');
  await page.getByLabel('Legal name of landlord',{exact:true}).fill('Fixture issuer');
  assert.equal(await page.locator('[name="address"]').count(),0,'legacy full-address input is removed');
  await page.getByLabel('Street',{exact:true}).fill('Fixture Street');
- await page.getByLabel('House number',{exact:true}).fill('12');
+ await page.getByLabel('House number',{exact:true}).fill('12');await page.getByLabel('Address addition',{exact:true}).fill('');
  await page.getByLabel('Postal code',{exact:true}).fill('1234 AB');
  await page.getByLabel('City',{exact:true}).fill('Amsterdam');
  await page.locator('select[autocomplete="country"]').selectOption('NL');
@@ -161,7 +203,12 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  assert.equal(new URL(page.url()).pathname,'/admin/relationships');
  await page.reload();await page.getByRole('button',{name:'New company',exact:true}).waitFor();
 
+ await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts?view=issuers');
+ await page.getByRole('button',{name:'New issuing entity',exact:true}).click();await page.getByLabel(/^Landlord type/).selectOption('person');
+ role='client';const previousReads=personReads;
+ await page.getByLabel(/^Copy details from person/).selectOption('self');
+ await page.getByText('Access restricted',{exact:true}).waitFor();assert.equal(personReads,previousReads,'unauthorized import never reads personal contact data');role='admin';
  for(const [r,a] of [['client',true],['admin',false]]){role=r;active=a;await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');assert.ok(!(await page.locator('body').innerText()).includes('Fixture long-term rental'));}
  await ctx.clearCookies();await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');assert.ok(!(await page.locator('body').innerText()).includes('Fixture long-term rental'));
  assert.deepEqual(errors,[]);await browser.close();await new Promise(r=>server.close(r));await app.close();mock.close();console.log('PASS browser: relationship + issuer → contract → activation → draft → review → issue → captured PDF email → partial receipt; repeat guards; deep-link reload; mobile/desktop; signed-out/client/inactive denied');process.exit(0);
-})().catch(e=>{console.error(e);process.exit(1)});
+})().catch(async e=>{console.error(e);if(global.fixturePage){console.error((await global.fixturePage.locator('body').innerText()).slice(0,12000));await global.fixturePage.screenshot({path:'/tmp/mzs-person-failure.png',fullPage:true});}process.exit(1)});
