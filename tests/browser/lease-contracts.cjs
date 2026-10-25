@@ -40,7 +40,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  else if(u.pathname==='/rest/v1/rpc/mzs_claim_lease_invoice_mail'){issued[0].delivery_status='sending';data='99999999-9999-4999-8999-999999999999';}
  else if(u.pathname==='/rest/v1/rpc/mzs_finish_lease_invoice_mail'){issued[0].delivery_status=payload.p_status;data=true;}
  else if(u.pathname==='/rest/v1/mzs_lease_relationships'){
-  if(req.method==='POST'){const r={...payload,id:'66666666-6666-4666-8666-666666666666',version:1};relationships.push(r);data={id:r.id};}else {
+  if(req.method==='POST'){const r={...payload,id:'66666666-6666-4666-8666-666666666666',version:1};relationships.push(r);data={id:r.id};}else if(req.method==='PATCH'){const target=relationships.find(r=>'eq.'+r.id===u.searchParams.get('id')&&'eq.'+r.version===u.searchParams.get('version'));if(target){Object.assign(target,payload,{version:target.version+1});data={id:target.id};}else data=null;}else {
    data=relationships.filter(r=>['id','kind','profile_id'].every(k=>!u.searchParams.has(k)||'eq.'+r[k]===u.searchParams.get(k)));
   }
  }
@@ -75,6 +75,28 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('button',{name:'Save relationship',exact:true}).click();
  await page.getByRole('button',{name:'Fixture tenant company',exact:true}).waitFor();
  assert.equal(relationships.length,1);assert.equal(relationships[0].address,'','only name/type required for offline relationship');
+ await page.getByRole('button',{name:'Fixture tenant company',exact:true}).click();
+ await page.getByLabel('VAT / tax number (optional)',{exact:true}).fill('NL123456789B01');
+ await page.getByLabel('Registration number / KvK (optional)',{exact:true}).fill('12345678');
+ await page.getByLabel('Contact person / attention (t.a.v.) (optional)',{exact:true}).fill('Main contact');
+ await page.getByLabel('Email (optional)',{exact:true}).fill('main@example.invalid');
+ await page.getByLabel('Street',{exact:true}).fill('Main Street');await page.getByLabel('City',{exact:true}).fill('Amsterdam');
+ await page.getByText('Different invoice details (optional)',{exact:true}).click();
+ await page.getByLabel('Invoice attention (t.a.v.) (optional)',{exact:true}).fill('Accounts payable');
+ await page.getByLabel('Invoice email (optional)',{exact:true}).fill('invoice@example.invalid');
+ await page.getByLabel('Invoice street',{exact:true}).fill('Billing Street');await page.getByLabel('Invoice city',{exact:true}).fill('Madrid');
+ await page.getByText('Different correspondence details (optional)',{exact:true}).click();
+ await page.getByLabel('Correspondence attention (t.a.v.) (optional)',{exact:true}).fill('Office manager');
+ await page.getByLabel('Correspondence city',{exact:true}).fill('Haarlem');
+ for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-company-details-'+width+'.png',fullPage:true});}
+ await page.getByRole('button',{name:'Save relationship',exact:true}).click();await page.getByRole('heading',{name:'Edit relationship',exact:true}).waitFor({state:'hidden'});
+ await page.reload();await page.getByRole('button',{name:'Fixture tenant company',exact:true}).click();
+ assert.equal(await page.getByLabel('VAT / tax number (optional)',{exact:true}).inputValue(),'NL123456789B01');
+ assert.equal(relationships[0].address,'Main Street\nAmsterdam');assert.equal(relationships[0].company_details.correspondence_address.city,'Haarlem');
+ await page.getByText('Different correspondence details (optional) · entered',{exact:true}).click();
+ await page.getByRole('button',{name:'Use general details for correspondence',exact:true}).click();
+ await page.getByRole('button',{name:'Save relationship',exact:true}).click();await page.getByRole('heading',{name:'Edit relationship',exact:true}).waitFor({state:'hidden'});
+ assert.equal(relationships[0].company_details.correspondence_address,undefined);assert.equal(relationships[0].company_details.invoice_attention,'Accounts payable');
  relationships.push({id:personId,kind:'person',name:'Fixture linked person',email:'',phone:'',profile_id:memberId,address:'Dossier Street 4, Madrid',billing_address:{street:'Dossier Street',house_number:'4',city:'Madrid',country:'Spain'},version:1});
  relationships.push({id:offlineId,kind:'person',name:'Fixture offline person',email:'offline@example.invalid',phone:'',profile_id:null,address:'Original unstructured address',billing_address:{},version:1});
  await page.getByRole('link',{name:'Open rental contracts →',exact:true}).click();
@@ -141,6 +163,10 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('button',{name:'New contract',exact:true}).click();
  await page.getByLabel('Existing relationship (optional)').selectOption(relationships[0].id);
  assert.equal(await page.getByLabel('Tenant / legal company name').inputValue(),'Fixture tenant company');
+ assert.equal(await page.getByLabel('Tenant billing address').inputValue(),'Billing Street\nMadrid');
+ assert.equal(await page.getByLabel('Tenant email',{exact:true}).inputValue(),'invoice@example.invalid');
+ assert.equal(await page.getByLabel('Tenant VAT / tax number (optional)').inputValue(),'NL123456789B01');
+ assert.equal(await page.getByLabel('Invoice attention (t.a.v., optional)').inputValue(),'Accounts payable');
  await page.getByLabel('Contract subject',{exact:true}).fill('Fixture long-term rental');
  // Unsupported month pickers (desktop Safari/Firefox) expose partial text while typing.
  const month=page.getByLabel('First invoice month in MZS');
@@ -177,7 +203,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-contract-form-'+width+'.png',fullPage:true});}
  await page.getByRole('button',{name:'Save contract draft',exact:true}).click();
  await page.getByRole('button',{name:'Activate schedule',exact:true}).waitFor();
- assert.equal(contracts[0].first_period,'2026-12-01');assert.equal(contracts[0].lease_start,'2024-01-01');assert.deepEqual(contracts[0].unit_ids,[uid]);
+ assert.equal(contracts[0].tenant_tax_id,'NL123456789B01');assert.equal(contracts[0].tenant_attention,'Accounts payable');assert.equal(contracts[0].first_period,'2026-12-01');assert.equal(contracts[0].lease_start,'2024-01-01');assert.deepEqual(contracts[0].unit_ids,[uid]);
  await page.getByRole('button',{name:'Activate schedule',exact:true}).click();
  await page.getByRole('button',{name:'Stop billing schedule',exact:true}).waitFor();
  await page.getByRole('button',{name:'Invoice drafts',exact:true}).click();

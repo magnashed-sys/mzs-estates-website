@@ -24,3 +24,17 @@ test('structured addresses format all fields while legacy addresses survive unre
  assert.equal(api.normalizeRelationship({...base,address:'Old',billing_address:{}}).address,'');
  for(const bad of [null,[],{unknown:'x'},{city:1},{street:'line\nbreak'},{postal_code:'x'.repeat(31)}])assert.throws(()=>api.normalizeRelationship({...base,billing_address:bad}));
 });
+
+test('company details are optional, trimmed, bounded and preserved when omitted by an older form',()=>{
+ assert.equal(api.normalizeRelationship({...base,kind:'company'}).company_details,undefined);
+ const r=api.normalizeRelationship({...base,kind:'company',company_details:{tax_id:' NL123 ',attention:' Finance ',invoice_email:' invoice@example.invalid ',invoice_address:{street:' Other ',city:'Madrid'},correspondence_address:{}}});
+ assert.equal(r.company_details.tax_id,'NL123');assert.equal(r.company_details.attention,'Finance');assert.equal(r.company_details.invoice_address.street,'Other');assert.equal(r.company_details.correspondence_address,undefined);
+ for(const company_details of [null,[],{unknown:'x'},{tax_id:4},{tax_id:'x'.repeat(61)},{attention:'x\ny'},{invoice_email:'x@invalid'},{correspondence_email:'one@example.invalid,two@example.invalid'},{website:'javascript:alert(1)'},{invoice_address:{unknown:'x'}},{invoice_address:null},{correspondence_address:{country:'x'.repeat(121)}}])assert.throws(()=>api.normalizeRelationship({...base,company_details}));
+});
+test('delivery details use independent address, email and attention fallbacks without mixing addresses',()=>{
+ const record={...base,kind:'company',address:'Main street\nMain city',email:'main@example.invalid',company_details:{attention:'General contact',invoice_email:'invoice@example.invalid',invoice_address:{city:'Other city'},correspondence_attention:'Post desk'}};
+ const invoice=api.relationshipDelivery(record);assert.equal(invoice.address,'Other city');assert.equal(invoice.email,'invoice@example.invalid');assert.equal(invoice.attention,'General contact');
+ const post=api.relationshipDelivery(record,'correspondence');assert.equal(post.address,record.address);assert.equal(post.email,record.email);assert.equal(post.attention,'Post desk');
+ const cleared=api.relationshipDelivery({...record,company_details:api.normalizeCompanyDetails({invoice_address:{},invoice_email:'',invoice_attention:''})});assert.equal(cleared.address,record.address);assert.equal(cleared.email,record.email);
+ assert.equal(api.relationshipDelivery({...record,kind:'person'}).attention,'');
+});
