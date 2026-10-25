@@ -10,6 +10,8 @@ export async function grantPartner(form:FormData){
  if(!UUID.test(user)||!UUID.test(project))throw Error('Invalid account or property');
  const {data:person}=await db.from('profiles').select('role,is_active').eq('id',user).single();
  if(!person?.is_active||!['client','partner'].includes(person.role))throw Error('Account not eligible');
+ const {data:offering,error:offeringError}=await db.from('offerings').select('id').eq('project_id',project).eq('offering_type','rental').eq('status','active').limit(1);
+ if(offeringError||!offering?.length)throw Error('Only active rental properties can be assigned');
  const {error}=await db.from('mzs_property_partners').upsert({
    profile_id:user,project_id:project,complimentary_owner_stays:true,
    requires_approval:true,is_active:true
@@ -35,7 +37,7 @@ export async function adjustBookingPrice(form:FormData){
  const reason=String(form.get('reason')||'').trim();
  if(!UUID.test(id)||!/^\d+(?:\.\d{1,2})?$/.test(input)||reason.length<5||reason.length>500)throw Error('Invalid amount or reason');
  const expected=initial===''?null:Number(initial);
- if(initial!==''&&(!Number.isFinite(expected)||expected!<0))throw Error('Invalid prior amount');
+ if(initial!==''&&(!Number.isFinite(expected)||expected < 0))throw Error('Invalid prior amount');
  const {error}=await db.rpc('mzs_admin_set_booking_total',{p_booking_id:id,p_expected_total:expected,p_total:Number(input),p_reason:reason});
  if(error)throw Error(error.message||'Price update failed');
  revalidatePath(path);
