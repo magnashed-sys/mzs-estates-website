@@ -7,6 +7,16 @@ export const issuerFields = {
 } as const;
 export type IssuerDetails = Partial<Record<keyof typeof issuerFields | 'logo', string>>;
 export type CompanySource = {id:string;legal_name:string;trading_name:string|null;registration_number:string|null;country:string|null;user_id:string};
+export function normalizeInvoicePrefix(value:unknown) {
+ const prefix=typeof value==='string'?value.trim().toUpperCase():'';
+ if(!/^[A-Z0-9][A-Z0-9-]{1,19}$/.test(prefix))throw new Error('Enter a 2–20 character invoice prefix using letters, numbers or hyphens, starting with a letter or number. For example: MN or MN-2026.');
+ return prefix;
+}
+export function issuerSaveError(error:{code?:string;message:string}) {
+ if(error.code==='23505'&&error.message.includes('mzs_lease_issuers_prefix_key'))return 'This invoice prefix is already in use. Choose a different prefix.';
+ if(error.message.includes('mzs_lease_issuers_prefix_check'))return 'Enter a 2–20 character invoice prefix using letters, numbers or hyphens, starting with a letter or number.';
+ return error.message;
+}
 export function normalizeIssuer(input:Record<string,unknown>) {
  const text=(key:string,max:number)=>{const v=input[key]??'';if(typeof v!=='string'||v.trim().length>max)throw new Error(`Invalid ${key.replaceAll('_',' ')}.`);return v.trim();};
  const kind=text('kind',20)||'company';if(!['company','person'].includes(kind))throw new Error('Select a company or private landlord.');
