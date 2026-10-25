@@ -6,7 +6,7 @@ import styles from "./HomeContactFooter.module.css";
 
 type Props = { email: string };
 
-/** Localized country label; the two city labels intentionally remain unchanged. */
+/** Keep Amsterdam as a city; show Spain and UAE in each available language. */
 const spainLabels: Record<string, string> = {
   en: "SPAIN",
   nl: "SPANJE",
@@ -19,6 +19,18 @@ const spainLabels: Record<string, string> = {
   ar: "إسبانيا",
 };
 
+const uaeLabels: Record<string, string> = {
+  en: "UAE",
+  nl: "VAE",
+  es: "EAU",
+  de: "VAE",
+  it: "EAU",
+  fr: "EAU",
+  ru: "ОАЭ",
+  "pt-BR": "EAU",
+  ar: "الإمارات العربية المتحدة",
+};
+
 export default function HomeContactFooter({ email }: Props) {
   const t = useTranslations('Footer');
   const locale = useLocale();
@@ -29,7 +41,7 @@ export default function HomeContactFooter({ email }: Props) {
   }
   return (
     <footer className={styles.footer}>
-      <span className={styles.locations}>AMSTERDAM · {spainLabels[locale] ?? "SPAIN"} · DUBAI</span>
+      <span className={styles.locations}>AMSTERDAM · {spainLabels[locale] ?? "SPAIN"} · {uaeLabels[locale] ?? "UAE"}</span>
       <div className={styles.languages}><LanguageSwitcher inline /></div>
       <div className={styles.links}>
       <a className={styles.contact} href={`mailto:${address}`} aria-label={t("contactEmail", {address})}>
