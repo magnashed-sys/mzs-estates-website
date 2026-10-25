@@ -143,10 +143,10 @@ export default async function PrivateProjectPage({ params }: Props) {
       hero: `${marinaBase}/hero-living-kitchen.webp`,
       heroAlt: t("p363"),
       facts: [
-        { number: "02–03", label: t("p338") },
-        { number: "01–02", label: t("p339") },
-        { number: "04–06", label: t("p364") },
-        { number: "01", label: t("p308") },
+        { number: t("marinaBedroomsCount"), label: t("p338") },
+        { number: t("marinaBathroomsCount"), label: t("p339") },
+        { number: "4–6", label: t("p364") },
+        { number: "1", label: t("p308") },
       ],
       gallery: marinaGallery,
       storyKicker: t("p365"),
@@ -311,6 +311,30 @@ export default async function PrivateProjectPage({ params }: Props) {
             </div>
             <PropertyGallery photos={presentation.gallery} title={presentation.title} />
           </section>
+
+          {slug === "marina-botafoch-apartment" && (
+            <section id="apartment-video" className={styles.marinaVideoSection} aria-labelledby="marina-apartment-video-heading">
+              <div className={styles.marinaVideoIntro}>
+                <p className={styles.kicker}>{t("marinaVideoKicker")}</p>
+                <h2 id="marina-apartment-video-heading">{t("marinaVideoHeading")}</h2>
+              </div>
+              <div className={styles.marinaVideoPlayer}>
+                <iframe
+                  src="https://www.youtube-nocookie.com/embed/OhuBsCxEDYA?rel=0"
+                  title={t("marinaVideoHeading")}
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <a className={styles.marinaVideoLink}
+                 href="https://youtu.be/OhuBsCxEDYA"
+                 target="_blank" rel="noopener noreferrer">
+                YouTube <span aria-hidden="true">↗</span>
+              </a>
+            </section>
+          )}
 
           {slug === "villa-la-nucia" && <PropertyWalkthrough />}
 
