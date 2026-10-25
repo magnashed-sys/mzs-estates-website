@@ -80,12 +80,11 @@ export function buildFinancialCockpit(args:{
   const total=moneyCents(booking.quoted_total_eur);
   const nights=(finish-start)/86400000;
   const portions=monthWindows(asOf,end);
-  let assigned=0;
   for(const portion of portions){
     const overlap=Math.max(0,Math.min(right,portion.end)-Math.max(left,portion.start))/86400000;
     if(overlap>0){
       const cents=Math.round(total*overlap/nights);
-      addMonth(bookingMonths,portion.month,cents);assigned+=cents;
+      addMonth(bookingMonths,portion.month,cents);
     }
   }
   // Rounding within a reservation can differ by at most a few cents; avoid
