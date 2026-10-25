@@ -1,7 +1,6 @@
 {
   "Home": {
     "mzs_group_is_an_independent_international": "MZS Group ist eine unabhängige internationale Immobilien- und Investmentgruppe, die ausgewählten Kunden und Partnern Zugang zu privaten Möglichkeiten in Europa und den VAE bietet.",
-    "new_relationships_are_considered_on_a": "Neue Geschäftsbeziehungen werden nach sorgfältiger Auswahl eingegangen.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Unabhängig.",
     "sloganInternational": "International."
@@ -9,7 +8,7 @@
   "Header": {
     "real_estate": "Immobilien",
     "private_capital": "Privates Kapital",
-    "client_partner_login": "Anmeldung für Kunden und Partner",
+    "login": "Anmelden",
     "request_access": "Zugang beantragen",
     "mzs_group_home": "MZS Group — Startseite",
     "main_navigation": "Hauptnavigation",
