@@ -1,5 +1,5 @@
 'use server';
-import {normalizeIssuer} from '../../../../../lib/estates/issuer-profile';
+import {normalizeIssuer,normalizeInvoicePrefix,issuerSaveError} from '../../../../../lib/estates/issuer-profile';
 
 import { revalidatePath } from 'next/cache';
 import { requireContractAdmin } from '../../../../../lib/security/estate-contracts';
@@ -50,11 +50,11 @@ export async function leaseDocuments(id: string) {
 
 export async function saveIssuer(input:Record<string,unknown>,id?:string,version?:number){
  const {db}=await requireContractAdmin();
- let normalized;try{normalized=normalizeIssuer(input);}catch(e){return {error:e instanceof Error?e.message:'Invalid issuer details.'};}
+ let normalized,prefix;try{normalized=normalizeIssuer(input);if(!id)prefix=normalizeInvoicePrefix(input.prefix);}catch(e){return {error:e instanceof Error?e.message:'Invalid issuer details.'};}
  if(normalized.details.logo){try{const {PDFDocument}=await import('pdf-lib');const doc=await PDFDocument.create();const value=normalized.details.logo;const bytes=Buffer.from(value.split(',')[1], 'base64');const png=value.startsWith('data:image/png;');if(bytes.length>200000||(png&&(bytes.length<24||bytes.readUInt32BE(16)>2000||bytes.readUInt32BE(20)>2000)))throw new Error();const logo=png?await doc.embedPng(bytes):await doc.embedJpg(bytes);if(logo.width>2000||logo.height>2000)throw new Error();}catch{return {error:'Use a valid PNG/JPEG logo up to 200 KB and 2000 × 2000 pixels.'};}}
- const payload={...normalized,relationship_id:input.relationship_id||null,source_company_id:input.source_company_id||null,...(!id?{prefix:input.prefix}:{})};
+ const payload={...normalized,relationship_id:input.relationship_id||null,source_company_id:input.source_company_id||null,...(!id?{prefix}:{})};
  const q=id?db.from('mzs_lease_issuers').update(payload).eq('id',id).eq('version',version):db.from('mzs_lease_issuers').insert(payload);
- const {data,error}=await q.select('id').maybeSingle();if(error||!data)return {error:error?.message||'Issuer changed. Refresh before editing.'};revalidatePath(path);return {id:data.id};
+ const {data,error}=await q.select('id').maybeSingle();if(error||!data)return {error:error?issuerSaveError(error):'Issuer changed. Refresh before editing.'};revalidatePath(path);return {id:data.id};
 }
 export async function issueInvoice(id:string){const {db}=await requireContractAdmin();const {data,error}=await db.rpc('mzs_issue_lease_invoice',{p_draft:id});if(error)return {error:error.message};revalidatePath(path);return {id:data as string};}
 export async function sendInvoice(id:string){

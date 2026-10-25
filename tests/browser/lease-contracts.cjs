@@ -15,7 +15,8 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  else if(u.pathname==='/rest/v1/mzs_estate_properties')data=properties;
  else if(u.pathname==='/rest/v1/mzs_estate_units')data=units;
  else if(u.pathname==='/rest/v1/mzs_lease_issuers'){
-  if(req.method==='POST'){issuers.push({...payload,id:'77777777-7777-4777-8777-777777777777',version:1,next_number:1});data={id:issuers[0].id};}else data=issuers;
+  if(req.method==='POST'){issuers.push({...payload,id:'77777777-7777-4777-8777-777777777777',version:1,next_number:1});data={id:issuers[0].id};}
+  else if(req.method==='PATCH'){const target=issuers.find(i=>'eq.'+i.id===u.searchParams.get('id'));Object.assign(target,payload,{version:target.version+1});data={id:target.id};}else data=issuers;
  }
  else if(u.pathname==='/rest/v1/mzs_lease_invoices')data=u.searchParams.has('id')?issued[0]:issued;
  else if(u.pathname==='/rest/v1/mzs_lease_payments')data=payments;
@@ -61,13 +62,39 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('link',{name:'Open rental contracts →',exact:true}).click();
  await page.getByRole('button',{name:'Issuing entities',exact:true}).click();
  await page.getByRole('button',{name:'New issuing entity',exact:true}).click();
- await page.getByLabel('Legal name',{exact:true}).fill('Fixture issuer');
- await page.getByLabel('Billing address',{exact:true}).fill('Fixture issuer address');
+ await page.getByLabel(/^Landlord type/).selectOption('person');
+ await page.getByLabel('Legal name of landlord',{exact:true}).fill('Fixture issuer');
+ assert.equal(await page.locator('[name="address"]').count(),0,'legacy full-address input is removed');
+ await page.getByLabel('Street',{exact:true}).fill('Fixture Street');
+ await page.getByLabel('House number',{exact:true}).fill('12');
+ await page.getByLabel('Postal code',{exact:true}).fill('1234 AB');
+ await page.getByLabel('City',{exact:true}).fill('Amsterdam');
+ await page.locator('select[autocomplete="country"]').selectOption('NL');
  await page.getByLabel('IBAN',{exact:true}).fill('NLTESTACCOUNT');
- await page.getByLabel('Unique invoice prefix').fill('TEST');
+ const prefix=page.locator('input[name="prefix"]');
+ for(const value of ['M','-MN','MN/2026','Magdy Nashed']){await prefix.fill(value);await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();assert.equal(issuers.length,0);assert.equal(await prefix.evaluate(e=>e.checkValidity()),false);}
+ await prefix.fill('mn-2026');await prefix.blur();assert.equal(await prefix.inputValue(),'MN-2026');assert.equal(await prefix.evaluate(e=>e.checkValidity()),true);
+ await prefix.fill(' test ');await prefix.blur();assert.equal(await prefix.inputValue(),'TEST');
+ await page.locator('select[autocomplete="country"]').selectOption('');await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();assert.equal(issuers.length,0,'incomplete structured address is blocked');
+ await page.locator('select[autocomplete="country"]').selectOption('NL');
+ for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-issuer-form-'+browserName+'-'+width+'.png',fullPage:true});}
  await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();
  await page.getByRole('button',{name:'Fixture issuer',exact:true}).waitFor();
  assert.equal(issuers.length,1);
+ assert.equal(issuers[0].kind,'person');assert.equal(issuers[0].prefix,'TEST');assert.equal(issuers[0].address,'Fixture Street 12\n1234 AB Amsterdam\nNetherlands');assert.equal(issuers[0].registration_number,'');assert.equal(issuers[0].tax_id,'');
+ issuers.push({id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Legacy issuer',kind:'person',address:'Saved original address',iban:'NLTESTACCOUNT',prefix:'OLD',version:1,next_number:8,details:{}});
+ await page.reload();await page.getByRole('button',{name:'Legacy issuer',exact:true}).click();
+ assert.equal(await page.locator('[name="address"]').count(),0);assert.equal(await page.getByLabel('Street',{exact:true}).count(),0);assert.equal(await page.locator('input[name="prefix"]').isEditable(),false);
+ await page.getByLabel('Contact person',{exact:true}).fill('Updated contact');
+ await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();await page.getByRole('button',{name:'Save issuing entity',exact:true}).waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'Legacy issuer',exact:true}).click();await page.getByRole('button',{name:'Edit address',exact:true}).click();
+ await page.getByLabel('Street',{exact:true}).fill('Partial edit');await page.getByRole('button',{name:'Keep saved address',exact:true}).click();
+ await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();await page.getByRole('button',{name:'Save issuing entity',exact:true}).waitFor({state:'hidden'});
+ assert.equal(issuers[1].address,'Saved original address');assert.equal(issuers[1].details.street,'');assert.equal(issuers[1].prefix,'OLD');assert.equal(issuers[1].next_number,8);
+ await page.getByRole('button',{name:'Legacy issuer',exact:true}).click();await page.getByRole('button',{name:'Edit address',exact:true}).click();
+ await page.getByLabel('Street',{exact:true}).fill('Replacement Street');await page.getByLabel('City',{exact:true}).fill('Madrid');await page.locator('select[autocomplete="country"]').selectOption('ES');
+ await page.getByRole('button',{name:'Save issuing entity',exact:true}).click();await page.getByRole('button',{name:'Save issuing entity',exact:true}).waitFor({state:'hidden'});
+ assert.equal(issuers[1].address,'Replacement Street\nMadrid\nSpain');assert.equal(issuers[1].prefix,'OLD');assert.equal(issuers[1].next_number,8);
  await page.getByRole('button',{name:'Contracts',exact:true}).click();
  await page.getByRole('button',{name:'New contract',exact:true}).click();
  await page.getByLabel('Existing relationship (optional)').selectOption(relationships[0].id);
@@ -92,7 +119,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByRole('button',{name:'Remove line 2'}).click();
  await page.getByLabel('Tenant billing address').fill('Fixture tenant address');
  await page.getByLabel('Registered issuing entity').selectOption(issuers[0].id);
- assert.equal(await page.getByLabel('Issuer billing address').inputValue(),'Fixture issuer address');
+ assert.equal(await page.getByLabel('Issuer billing address').inputValue(),'Fixture Street 12\n1234 AB Amsterdam\nNetherlands');
  assert.equal(await page.getByLabel('Issuer IBAN').inputValue(),'NLTESTACCOUNT');
  await page.getByLabel('Tenant email',{exact:true}).fill('fixture@example.invalid');
  await page.getByLabel('Lease start',{exact:true}).fill('2024-01-01');
