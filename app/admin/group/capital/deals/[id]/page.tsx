@@ -5,7 +5,8 @@ import {requireDealsAdmin} from '../../../../../../lib/security/capital-deals';
 import DealForm from '../DealForm';
 import Documents from '../Documents';
 import ClientAccess,{type ClientGrant,type AccessRelationship} from '../ClientAccess';
-import {addInstalment,recordPayment,voidPayment} from '../actions';
+import {addInstalment,recordPayment,voidPayment,correctInterestReceipt} from '../actions';
+import {allocateInterestCredits} from '../../../../../../lib/capital/interest-allocation';
 import {type Deal,type Instalment,type Payment,type LoanDocument,money,date,label,paidFor} from '../model';
 import s from '../deals.module.css';
 export const dynamic='force-dynamic';
@@ -23,6 +24,7 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
  const entries=(schedule.data||[]) as Instalment[];
  const paymentResult=entries.length?await db.from('mzs_capital_payments').select('*',{count:'exact'}).in('instalment_id',entries.map(x=>x.id)).order('created_at',{ascending:false}).limit(1000):{data:[],error:null,count:0};
  const payments=(paymentResult.data||[]) as Payment[];
+ const interest=allocateInterestCredits(entries,payments);
  const complete=!schedule.error&&!paymentResult.error&&schedule.count===entries.length&&paymentResult.count===payments.length;
  const ids=[id,...entries.map(x=>x.id),...payments.map(x=>x.id),...(docs.data||[]).map(x=>x.id),...(access.data||[]).map(x=>x.id)];
  const audit=await db.from('mzs_capital_deal_audit').select('id,table_name,action,created_at,actor_id,new_record').in('row_id',ids).order('created_at',{ascending:false}).limit(30);
@@ -37,13 +39,21 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
   <section className={s.section}><h2>Terms & source review</h2><p className={s.notes}>{d.notes||'No additional terms recorded.'}</p><h3>Source references</h3><p className={s.notes}>{d.source_reference||'Not yet recorded.'}</p><details><summary>Edit deal details</summary><DealForm deal={d}/></details></section>
   <section className={s.section}><h2>Payment schedule</h2><p>{d.direction==='provided'?'Expected receipts from the borrower.':'Expected payments to the lender.'} Amounts and dates are entered from the supplied schedule; no automatic interest calculation is applied.</p>
    {!complete?<p role="alert">The complete schedule/payment history could not be loaded. Payment actions and totals are unavailable.</p>:<>
-   <div className={s.facts}><div><dt>Scheduled interest</dt><dd>{money(entries.filter(x=>x.kind==='interest').reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Confirmed against schedule</dt><dd>{money(payments.filter(x=>!x.is_void).reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Past due, not confirmed</dt><dd>{entries.filter(x=>x.due_date<today&&paidFor(x.id,payments)<Number(x.amount)).length} instalments</dd></div></div>
+   <div className={s.facts}><div><dt>Scheduled interest</dt><dd>{money(entries.filter(x=>x.kind==='interest').reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Confirmed cash receipts / payments</dt><dd>{money(payments.filter(x=>!x.is_void).reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Past due, not confirmed</dt><dd>{entries.filter(x=>x.due_date<today&&(x.kind==='interest'?(interest.byId.get(x.id)?.remaining??Number(x.amount)):Math.round((Number(x.amount)-paidFor(x.id,payments))*100)/100)>0).length} instalments</dd></div></div>
    <p>“Not confirmed” may mean payment has occurred but has not yet been reconciled here. It is not a declaration of arrears.</p>
+   <p className={s.notice}>Interest advances first clear the oldest unpaid interest (including prior shortfalls), then upcoming instalments. Credits reduce amounts due without recording the cash twice.</p>
+   {interest.credits.length>0&&<div className={s.card}><h3>Interest carryforward allocations</h3>
+    {interest.credits.map((a,index)=><p key={index}>{money(a.amount)} received for {date(entries.find(x=>x.id===a.sourceId)?.due_date||null)} applied to interest due {date(entries.find(x=>x.id===a.targetId)?.due_date||null)}</p>)}
+   </div>}
+   {interest.unappliedCredit>0&&<p className={s.notice}>Unallocated interest advance: {money(interest.unappliedCredit)}. Add a future interest term before the excess can be allocated.</p>
    {entries.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Due / source period</th><th>Type</th><th>Planned</th><th>Confirmed</th><th>Record receipt / payment</th></tr></thead><tbody>{entries.map(i=>{
-    const paid=paidFor(i.id,payments);const remaining=Math.round((Number(i.amount)-paid)*100)/100;
-    return <tr key={i.id}><td>{date(i.due_date)}<small>{i.period_label}</small><small>{i.note}</small></td><td>{label(i.kind)}</td><td>{money(i.amount)}</td><td>{money(paid)}<small>{remaining===0?'Fully confirmed':paid>0?'Partially confirmed':'Not confirmed'}</small></td><td>{remaining>0?<details><summary>Confirm {d.direction==='provided'?'receipt':'payment'}</summary><form action={recordPayment} className={s.inline}>
+    const allocation=i.kind==='interest'?interest.byId.get(i.id):null;
+    const paid=paidFor(i.id,payments);
+    const remaining=allocation?.remaining??Math.round((Number(i.amount)-paid)*100)/100;
+    return <tr key={i.id}><td>{date(i.due_date)}<small>{i.period_label}</small><small>{i.note}</small></td><td>{label(i.kind)}</td><td>{money(i.amount)}</td><td>{money(paid)}{allocation&&allocation.creditApplied>0&&<small>Advance credited: {money(allocation.creditApplied)}</small>}{allocation&&allocation.excessFromThisTerm>0&&<small>Excess receipt: {money(allocation.excessFromThisTerm)} · applied elsewhere: {money(allocation.creditDistributed)}</small>}<small>{remaining===0?'Fully settled (including credit)':paid>0||(allocation?.creditApplied??0)>0?'Partially settled':'Not confirmed'}</small><small>Still due: {money(remaining)}</small></td><td>{remaining>0?<details><summary>Confirm {d.direction==='provided'?'receipt':'payment'}</summary><form action={recordPayment} className={s.inline}>
      <input type="hidden" name="deal_id" value={id}/><input type="hidden" name="instalment_id" value={i.id}/><input type="hidden" name="payment_id" value={randomUUID()}/>
-     <label>Actual amount (EUR)<input name="amount" aria-label="Actual amount" type="number" required min="0.01" max={remaining} step="0.01" defaultValue={remaining}/></label>
+     <label>Actual amount (EUR)<input name="amount" aria-label="Actual amount" type="number" required min="0.01" max={i.kind==='interest'?undefined:remaining} step="0.01" defaultValue={remaining}/></label>
+     {i.kind==='interest'&&<p className={s.notes}>Interest receipts may exceed this term’s balance within the total unpaid schedule. Surplus offsets older shortfalls, then future interest.</p>}
      <label>Actual payment date<input name="paid_on" type="date" required max={today}/></label>
      <label>Evidence / bank reference<input name="reference" required minLength={2} maxLength={300}/></label>
      <button>Record confirmed payment</button></form></details>:'Complete'}</td></tr>;
@@ -53,7 +63,19 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
     <label>Source period / label<input name="period_label" maxLength={120}/></label><label>Due date<input name="due_date" type="date" required/></label><label>Amount (EUR)<input name="amount" type="number" min="0.01" step="0.01" required/></label>
     <label className={s.wide}>Source note<input name="note" maxLength={1000}/></label><p className={s.wide}>This adds a planned obligation, not a confirmed payment. Existing source schedule entries are retained.</p><button>Add planned instalment</button>
    </form></details>
-   <h3>Confirmed payment history</h3>{payments.length?payments.map(p=><div className={s.card} key={p.id}><strong>{money(p.amount)} · {date(p.paid_on)} {p.is_void?'· VOID':''}</strong><p>{p.reference}</p>{p.is_void?<p>Correction reason: {p.void_reason}</p>:<details><summary>Void an incorrect record</summary><form action={voidPayment} className={s.inline}><input type="hidden" name="deal_id" value={id}/><input type="hidden" name="payment_id" value={p.id}/><label>Required correction reason<input name="void_reason" minLength={3} maxLength={500} required/></label><button>Void record and retain history</button></form></details>}</div>):<p>No payments have been confirmed in this module.</p>}
+   <h3>Confirmed payment history</h3>{payments.length?payments.map(p=><div className={s.card} key={p.id}><strong>{money(p.amount)} · {date(p.paid_on)} {p.is_void?'· VOID':''}</strong><p>{p.reference}</p>{p.is_void?<p>Correction reason: {p.void_reason}</p>:<>{entries.find(x=>x.id===p.instalment_id)?.kind==='interest'&&<details><summary>Correct this interest receipt</summary>
+    <form action={correctInterestReceipt} className={s.inline}>
+     <input type="hidden" name="deal_id" value={id}/>
+     <input type="hidden" name="payment_id" value={p.id}/>
+     <input type="hidden" name="replacement_id" value={randomUUID()}/>
+     <input type="hidden" name="expected_amount" value={Number(p.amount).toFixed(2)}/>
+     <label>Actual bank receipt (EUR)<input name="corrected_amount" type="number" required min="0.01" step="0.01" defaultValue={Number(p.amount).toFixed(2)}/></label>
+     <label>Bank reference / correction reason<input name="correction_reason" required minLength={5} maxLength={450} placeholder="Correct to actual received amount"/></label>
+     <p>This voids and replaces the incorrect entry atomically, retaining its payment date and bank reference. Both changes remain in the audit log.</p>
+     <button>Confirm audited correction</button>
+    </form>
+   </details>}
+   <details><summary>Void an incorrect record</summary><form action={voidPayment} className={s.inline}><input type="hidden" name="deal_id" value={id}/><input type="hidden" name="payment_id" value={p.id}/><label>Required correction reason<input name="void_reason" minLength={3} maxLength={500} required/></label><button>Void record and retain history</button></form></details></>}</div>):<p>No payments have been confirmed in this module.</p>}
    </>}
   </section>
   <section className={s.section}><h2>Agreements & documents</h2><p>Retained document versions for full administrators only. Downloads open in a new tab using short-lived private links.</p>{docs.error||docs.count!==(docs.data||[]).length?<p role="alert">Document list could not be loaded completely.</p>:<Documents dealId={id} documents={docs.data as LoanDocument[]}/>}</section>
