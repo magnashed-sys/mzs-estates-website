@@ -47,15 +47,6 @@ export async function leaseDocuments(id: string) {
   return { documents };
 }
 
-export async function saveLeaseRelationship(input: Record<string, unknown>, id?: string, version?: number) {
- const {db}=await requireContractAdmin();
- const allowed=['name','kind','address','email','phone','reference','roles','profile_id'];
- const payload=Object.fromEntries(allowed.filter(key=>key in input).map(key=>[key,input[key]]));
- const q=id?db.from('mzs_lease_relationships').update(payload).eq('id',id).eq('version',version):db.from('mzs_lease_relationships').insert(payload);
- const {data,error}=await q.select('id').maybeSingle();
- if(error||!data)return {error:error?.message||'This relationship has changed. Refresh the page.'};
- revalidatePath(path);return {id:data.id as string};
-}
 
 export async function saveIssuer(input:Record<string,unknown>,id?:string,version?:number){
  const {db}=await requireContractAdmin();

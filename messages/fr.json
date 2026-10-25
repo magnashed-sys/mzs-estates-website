@@ -1125,5 +1125,25 @@
     "acquisitionKind": "acquisition",
     "canJuanExpression": "Une expression méditerranéenne raffinée.",
     "colomsExpression": "Une expression paisible et contemporaine."
+  },
+  "RentalAccount": {
+    "title": "Vos relations et contrats de location",
+    "intro": "Vos entreprises et contrats de location liés à ce compte.",
+    "companies": "Entreprises",
+    "contracts": "Contrats de location",
+    "period": "Période de location",
+    "landlord": "Bailleur",
+    "ongoing": "Durée indéterminée",
+    "status": "Échéancier de facturation",
+    "active": "Actif",
+    "stopped": "Arrêté",
+    "invoices": "Factures émises",
+    "number": "Facture",
+    "due": "Date d’échéance",
+    "total": "Total",
+    "outstanding": "Solde dû",
+    "noInvoices": "Aucune facture n’a encore été émise.",
+    "error": "Impossible de charger le récapitulatif de vos relations.",
+    "retry": "Réessayer"
   }
 }

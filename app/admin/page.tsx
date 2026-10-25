@@ -410,7 +410,7 @@ export default function AdminPage() {
         <RentalSummary key={refreshVersion}/>
         <div className="admin-section-heading"><div><p className="eyebrow">MZS Estates / Long-term rental</p><h2>Rental Contracts.</h2><p className="admin-intro">Manage your tenants, rental agreements and monthly invoice drafts.</p></div></div>
         <div className="admin-project-grid">
-          <article className="admin-panel"><p className="eyebrow">Rental relationships</p><h3 className="admin-subtitle">Your tenants.</h3><p className="admin-intro">Record people and companies, then reuse their details when preparing a contract. A rental relationship does not require a login account.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=relationships">Open rental relationships →</Link></article>
+          <article className="admin-panel"><p className="eyebrow">Relationships</p><h3 className="admin-subtitle">Your clients &amp; companies.</h3><p className="admin-intro">Record people and companies, then reuse their details when preparing a contract. Tenant is a role within the central relationship record.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/relationships">Open Relationships →</Link></article>
           <article className="admin-panel"><p className="eyebrow">Rental agreements</p><h3 className="admin-subtitle">Your contracts.</h3><p className="admin-intro">Link agreements to properties and units, record the rent and activate the monthly billing schedule.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary admin-space-top" href="/admin/group/estates/contracts?view=contracts">Open rental contracts →</Link></article>
           <article className="admin-panel"><p className="eyebrow">Monthly billing</p><h3 className="admin-subtitle">Invoice drafts.</h3><p className="admin-intro">Review the concepts prepared for each rental month. Approve checked concepts to issue numbered invoices, then send them separately.</p><Link onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top" href="/admin/group/estates/contracts?view=invoices">Review invoice drafts →</Link></article>
         </div>
@@ -441,7 +441,7 @@ export default function AdminPage() {
       </>}
 
       {tab === "relationships" && <>
-        <p><Link className="admin-button" onClick={guardLink} href="/admin/group/estates/contracts?view=relationships">Shared relationship register: tenants, owners &amp; investors →</Link></p>
+        <div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" onClick={guardLink} href="/admin/relationships?new=person">New client</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships?new=company">New company</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships">Open central relationship register →</Link></div>
         <div className="admin-panel" style={{ marginBottom: 28 }}>
           <h3 className="admin-subtitle">Account notification email</h3>
           <p className="admin-help">
@@ -573,6 +573,7 @@ export default function AdminPage() {
       </>}
 
       {tab === "companies" && <>
+        <div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" onClick={guardLink} href="/admin/relationships?new=company">New company</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships?kind=company">Open company relationships →</Link></div>
         <p><Link className="admin-button" onClick={guardLink} href="/admin/group/estates/contracts?view=issuers">Manage landlord &amp; issuing entities →</Link></p>
         <div className="admin-section-heading"><div><p className="eyebrow">Relationship affiliations</p><h2>Company directory.</h2></div><span>{memberCompanies.length} declared records</span></div>
         <p className="admin-help">Each entry is a relationship self-declared by a client or partner, not a verified legal entity. Company declarations never assign project rights.</p>

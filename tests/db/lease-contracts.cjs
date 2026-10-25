@@ -184,5 +184,62 @@ await db.exec('set role anon');await assert.rejects(db.exec('select details from
 await db.exec('reset role');
 console.log('PASS issuer profiles: additive migration, private landlord, snapshot immutability, stale update, validation and admin/client/inactive/anon access');
 
+
+const beforeUnified=await snapshots(preservedTables);
+// Match the application's existing profile read permissions in this isolated fixture.
+await db.exec(`grant select on public.profiles to authenticated;alter table public.profiles enable row level security;create policy fixture_profile_read on public.profiles for select to authenticated using(id=auth.uid() or public.is_admin())`);
+await db.exec(fs.readFileSync('supabase/migrations/20261025101902_unified_relationships.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20261025104227_relationship_account_linking.sql','utf8'));
+assert.deepEqual(await snapshots(preservedTables,{mzs_lease_relationships:['email_normalized']}),beforeUnified,'central relationships reuse every existing record and snapshot');
+await db.exec(`insert into profiles values ('11111111-1111-4111-8111-111111111114','client',true),('11111111-1111-4111-8111-111111111115','client',false),('11111111-1111-4111-8111-111111111116','partner',true)`);
+const accountCount=(await value('select count(*)::int as n from profiles')).n;
+await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)`);
+const person=await value(`insert into mzs_lease_relationships(name,kind,email,profile_id,reference) values ('Central person','person',' Person@Example.invalid ','11111111-1111-4111-8111-111111111112','INTERNAL CUSTOMER REFERENCE') returning id,roles`);
+assert.deepEqual(person.roles,['client']);
+await assert.rejects(db.exec(`insert into mzs_lease_relationships(name,kind,profile_id) values ('Duplicate account','person','11111111-1111-4111-8111-111111111112')`),/unique/);
+await assert.rejects(db.exec(`insert into mzs_lease_relationships(name,kind,email) values ('Duplicate email','person','person@example.INVALID')`),/unique/);
+await assert.rejects(db.exec(`insert into mzs_lease_relationships(name,profile_id) values ('Admin is not a client','11111111-1111-4111-8111-111111111111')`),/client or partner/);
+await assert.rejects(db.exec(`insert into mzs_lease_relationships(name,roles) values ('Invalid role',array['admin'])`),/check constraint/);
+const linkedCompany=await value(`insert into mzs_lease_relationships(name,kind,email,profile_id,roles) values ('Own company','company','person@example.invalid','11111111-1111-4111-8111-111111111112',array['client','tenant']) returning id`);
+const otherCompany=await value(`insert into mzs_lease_relationships(name,kind,profile_id) values ('Other company','company','11111111-1111-4111-8111-111111111114') returning id`);
+const centralContract=await value(insert.replaceAll('2028','2050').replaceAll('2027','2049'));
+await db.exec(`update mzs_lease_contracts set tenant_relationship_id='${person.id}',tenant_profile_id=null,issuer_id='${business.id}',notes='INTERNAL CONTRACT NOTE' where id='${centralContract.id}'`);
+assert.equal((await value(`select tenant_profile_id from mzs_lease_contracts where id='${centralContract.id}'`)).tenant_profile_id,'11111111-1111-4111-8111-111111111112');
+await assert.rejects(db.exec(`update mzs_lease_contracts set tenant_profile_id='11111111-1111-4111-8111-111111111114' where id='${centralContract.id}'`),/central relationship/);
+const overview=async()=> (await value('select mzs_member_relationship_overview() as data')).data;
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111112',false)`);
+let own=await overview();assert.equal(own.contracts.some(c=>c.id===centralContract.id),false,'drafts stay private');assert.ok(own.companies.some(c=>c.id===linkedCompany.id));assert.equal(own.companies.some(c=>c.id===otherCompany.id),false);
+assert.ok(own.contracts.some(c=>c.id===acceptedContract.id));assert.ok(own.contracts.flatMap(c=>c.invoices).some(i=>i.id===approved.id));
+assert.equal((await run('select * from mzs_lease_contracts')).rows.length,0,'raw contract records remain admin-only');
+assert.equal((await run('select * from mzs_lease_relationships')).rows.length,0,'raw relationship records remain admin-only');
+await assert.rejects(db.exec(`insert into mzs_lease_relationships(name) values ('Unauthorized write')`),/row-level security/);
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);update mzs_lease_contracts set status='active' where id='${centralContract.id}';select mzs_record_lease_payment('${approved.id}',gen_random_uuid(),1,current_date,'INTERNAL PAYMENT REFERENCE')`);
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111112',false)`);
+own=await overview();assert.ok(own.contracts.some(c=>c.id===centralContract.id));
+const ownInvoice=own.contracts.flatMap(c=>c.invoices).find(i=>i.id===approved.id);assert.equal(Number(ownInvoice.outstanding),Number(approvedInvoice.total)-1);
+assert.doesNotMatch(JSON.stringify(own),/INTERNAL|review_note|delivery_token|issuer_details|payload|next_number/);
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111114',false)`);
+const otherOverview=await overview();assert.equal(otherOverview.contracts.length,0);assert.equal(otherOverview.companies.length,1);assert.equal(otherOverview.companies[0].id,otherCompany.id);
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111116',false)`);assert.deepEqual(await overview(),{companies:[],contracts:[]});
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)`);
+const offlinePerson=await value(`insert into mzs_lease_relationships(name,kind) values ('Later linked person','person') returning id`);
+const offlineContract=await value(insert.replaceAll('2028','2052').replaceAll('2027','2051'));
+await db.exec(`update mzs_lease_contracts set tenant_relationship_id='${offlinePerson.id}',issuer_id='${business.id}' where id='${offlineContract.id}';update mzs_lease_contracts set status='active' where id='${offlineContract.id}'`);
+const offlineBefore=await value(`select to_jsonb(c) as data from mzs_lease_contracts c where id='${offlineContract.id}'`);
+await db.exec(`update mzs_lease_relationships set profile_id='11111111-1111-4111-8111-111111111114' where id='${offlinePerson.id}';update mzs_lease_relationships set profile_id='11111111-1111-4111-8111-111111111116' where id='${person.id}'`);
+assert.deepEqual(await value(`select to_jsonb(c) as data from mzs_lease_contracts c where id='${offlineContract.id}'`),offlineBefore,'later account linkage never rewrites activated contract snapshots');
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111114',false)`);
+assert.ok((await overview()).contracts.some(c=>c.id===offlineContract.id),'later-linked account sees its existing activated contract');
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111116',false)`);
+assert.equal((await overview()).contracts.some(c=>c.id===centralContract.id),false,'changing a relationship contact does not transfer a contract with a frozen account');
+await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111112',false)`);
+assert.ok((await overview()).contracts.some(c=>c.id===centralContract.id),'original frozen account retains its contract');
+for(const uid of ['','11111111-1111-4111-8111-111111111115','11111111-1111-4111-8111-111111111111']){await db.exec(`select set_config('request.jwt.claim.sub','${uid}',false)`);await assert.rejects(overview(),/active client or partner/);}
+await db.exec('set role anon');await assert.rejects(overview(),/permission denied/);
+await db.exec('reset role');assert.equal((await value('select count(*)::int as n from profiles')).n,accountCount,'administrative relationships never create another account');
+assert.equal((await value("select has_function_privilege('anon','public.mzs_member_relationship_overview()','execute') as allowed")).allowed,false);
+assert.equal((await value("select prosecdef from pg_proc where oid='public.mzs_member_relationship_overview()'::regprocedure")).prosecdef,false);
+console.log('PASS unified relationships: old data retained, one person/account, normalized email deduplication, company contacts reuse accounts, safe tenant account propagation, private drafts, account-bound overview, issued invoice balance, no internal data, inactive/anon/admin rejection');
+
 await db.close();console.log('PASS lease draft/activation, overlap, replacement duplicate guard, cutover, catch-up, max terms, end date, leap/month ends, prorating, VAT, placeholders, locked terms, review audit, admin/client/inactive/anon permissions');
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -1,12 +1,13 @@
 'use client';
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/client';
 import { euros } from '../../../../../lib/estates/rent';
 import { invoiceMonthStart, leaseSubjectPreview, leasePreparationDate } from '../../../../../lib/estates/lease-month';
 import { issueInvoice, saveContract, setContractStatus, generateDrafts, reviewInvoice, leaseDocuments } from './actions';
 import s from './contracts.module.css';
-import LeaseRelationships, {type LeaseRelationship} from './relationships';
+import type {RelationshipRecord as LeaseRelationship} from '../../../../../lib/relationships/model';
 
 import {Issuers,Billing,type Issuer,type Issued,type Payment} from './billing';
 
@@ -25,8 +26,8 @@ export default function ContractWorkspace({relationships,properties,units,member
  const router=useRouter();const [pending,startTransition]=useTransition();
  const searchParams=useSearchParams();
  const view=searchParams.get('view');
- const tab=view==='relationships'||view==='invoices'||view==='issuers'||view==='billing'?view:'contracts';
- function setTab(next:'contracts'|'invoices'|'relationships'|'issuers'|'billing'){
+ const tab=view==='invoices'||view==='issuers'||view==='billing'?view:'contracts';
+ function setTab(next:'contracts'|'invoices'|'issuers'|'billing'){
   const url=new URL(window.location.href);url.searchParams.set('view',next);
   window.history.replaceState(null,'',url.pathname+url.search+url.hash);
  }
@@ -35,21 +36,30 @@ export default function ContractWorkspace({relationships,properties,units,member
  const [error,setError]=useState('');const [notice,setNotice]=useState('');
  const [filter,setFilter]=useState('');const [propertyFilter,setPropertyFilter]=useState(searchParams.get('property')||'');
  const [invoiceId,setInvoiceId]=useState<string|null>(null);
- const selectedContract=contracts.find(c=>c.id===selected);
  const unitFilter=searchParams.get('unit');
- const visibleInvoices=unitFilter?invoices.filter(i=>i.snapshot.unit_ids.includes(unitFilter)):invoices;
- const invoice=invoices.find(i=>i.id===invoiceId);
+ const profileFilter=searchParams.get('profile');
+ const profileRelationships=new Set(relationships.filter(r=>r.profile_id===profileFilter).map(r=>r.id));
+ const scopedContracts=profileFilter?contracts.filter(c=>c.tenant_profile_id===profileFilter || (!c.tenant_profile_id && !!c.tenant_relationship_id && profileRelationships.has(c.tenant_relationship_id))):contracts;
+ const contractIds=new Set(scopedContracts.map(c=>c.id));
+ const scopedInvoices=profileFilter?invoices.filter(i=>contractIds.has(i.contract_id)):invoices;
+ const scopedIssued=profileFilter?issued.filter(i=>contractIds.has(i.contract_id)):issued;
+ const issuedIds=new Set(scopedIssued.map(i=>i.id));
+ const scopedPayments=profileFilter?payments.filter(p=>issuedIds.has(p.invoice_id)):payments;
+ const selectedContract=scopedContracts.find(c=>c.id===selected);
+ const visibleInvoices=unitFilter?scopedInvoices.filter(i=>i.snapshot.unit_ids.includes(unitFilter)):scopedInvoices;
+ const invoice=visibleInvoices.find(i=>i.id===invoiceId);
  function run(action:()=>Promise<{error?:string;message?:string}>) {setError('');setNotice('');startTransition(async()=>{try{const r=await action();if(r.error)setError(r.error);else{setNotice(r.message || 'Saved.');router.refresh();}}catch{setError('The action could not be verified. Refresh the page before trying again.');}});}
- const shown=contracts.filter(c=>(!propertyFilter||c.property_id===propertyFilter)&&(!filter||`${c.title} ${c.tenant_name}`.toLowerCase().includes(filter.toLowerCase())));
+ const shown=scopedContracts.filter(c=>(!propertyFilter||c.property_id===propertyFilter)&&(!filter||`${c.title} ${c.tenant_name}`.toLowerCase().includes(filter.toLowerCase())));
  return <>
   <div className={s.notice}>Monthly draft preparation starts with December 2026. Drafts are prepared on the 14th of the preceding month. Check each draft, explicitly approve its issue, then send the numbered invoice separately. Staging delivery is captured without emailing tenants.</div>
-  <div className={s.metrics}><div><span className={s.label}>CONTRACTS</span><strong>{contracts.length}</strong></div><div><span className={s.label}>ACTIVE SCHEDULES</span><strong>{contracts.filter(c=>c.status==='active').length}</strong></div><div><span className={s.label}>DRAFTS TO REVIEW</span><strong>{invoices.filter(i=>i.review_status==='pending'&&!issued.some(f=>f.draft_id===i.id)).length}</strong></div></div>
-  <div className={s.tabs}><button className={s.secondary} aria-pressed={tab==='relationships'} onClick={()=>setTab('relationships')}>Rental relationships</button><button className={s.secondary} aria-pressed={tab==='contracts'} onClick={()=>setTab('contracts')}>Contracts</button><button className={s.secondary} aria-pressed={tab==='invoices'} onClick={()=>setTab('invoices')}>Invoice drafts</button><button className={s.secondary} aria-pressed={tab==='issuers'} onClick={()=>setTab('issuers')}>Issuing entities</button><button className={s.secondary} aria-pressed={tab==='billing'} onClick={()=>setTab('billing')}>Invoices &amp; cashflow</button></div>
+  <div className={s.metrics}><div><span className={s.label}>CONTRACTS</span><strong>{scopedContracts.length}</strong></div><div><span className={s.label}>ACTIVE SCHEDULES</span><strong>{scopedContracts.filter(c=>c.status==='active').length}</strong></div><div><span className={s.label}>DRAFTS TO REVIEW</span><strong>{scopedInvoices.filter(i=>i.review_status==='pending'&&!issued.some(f=>f.draft_id===i.id)).length}</strong></div></div>
+  {profileFilter&&<p className={s.notice}>Showing contracts and invoices for {members.find(m=>m.id===profileFilter)?.full_name || 'the selected account'}. <Link href="/admin/group/estates/contracts">Show all relationships →</Link></p>}
+  <div className={s.tabs}><button className={s.secondary} aria-pressed={tab==='contracts'} onClick={()=>setTab('contracts')}>Contracts</button><button className={s.secondary} aria-pressed={tab==='invoices'} onClick={()=>setTab('invoices')}>Invoice drafts</button><button className={s.secondary} aria-pressed={tab==='issuers'} onClick={()=>setTab('issuers')}>Issuing entities</button><button className={s.secondary} aria-pressed={tab==='billing'} onClick={()=>setTab('billing')}>Invoices &amp; cashflow</button></div>
   {error&&<p role="alert" className={s.error}>{error}</p>}{notice&&<p role="status" className={s.notice}>{notice}</p>}
-  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies}/>:tab==='billing'?<Billing issued={issued} payments={payments}/>:tab==='relationships'?<LeaseRelationships relationships={relationships} members={members}/>:tab==='contracts'?<>
+  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies}/>:tab==='billing'?<Billing issued={scopedIssued} payments={scopedPayments}/>:tab==='contracts'?<>
    <div className={s.toolbar}><button className={s.button} onClick={()=>{setEditing(null);setSelected(null);setError('');setNotice('')}}>New contract</button></div>
    {editing!==undefined&&<ContractForm key={editing?.id || 'new'} contract={editing} properties={properties} units={units} members={members} relationships={relationships} issuers={issuers} pending={pending} onCancel={()=>setEditing(undefined)} onSave={payload=>run(async()=>{const r=await saveContract(payload,editing?.id,editing?.version);if(r.error)return r;setEditing(undefined);setSelected(r.id || null);return {message:'Contract saved as a draft. Review the agreement before activating monthly billing.'};})}/>}
-   <div className={s.grid}><Field label="Search contracts"><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Contract or tenant"/></Field><Field label="Property"><select value={propertyFilter} onChange={e=>setPropertyFilter(e.target.value)}><option value="">All properties</option>{properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field></div>
+   <p className={s.help}>Manage clients, companies and tenant roles in <Link href="/admin/relationships">Relationships</Link>.</p><div className={s.grid}><Field label="Search contracts"><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Contract or tenant"/></Field><Field label="Property"><select value={propertyFilter} onChange={e=>setPropertyFilter(e.target.value)}><option value="">All properties</option>{properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field></div>
    {shown.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Contract / tenant</th><th>First invoice period</th><th>Monthly net amount</th><th>Status</th></tr></thead><tbody>{shown.map(c=><tr key={c.id}><td><button onClick={()=>{setSelected(c.id);setEditing(undefined)}}>{c.title}</button><small>{c.tenant_name}</small></td><td>{date(c.first_period)}</td><td>{euros(c.lines.reduce((sum,l)=>sum+Math.round(Number(l.amount)*100),0)/100)}</td><td><span className={s.badge}>{c.status}</span></td></tr>)}</tbody></table></div>:<p className={s.empty}>No contracts match this view. Start with a draft and link the units covered by the agreement.</p>}
    {selectedContract&&<section className={s.panel}><h2>{selectedContract.title}</h2><div className={s.details}><div><span className={s.label}>TENANT</span><p>{selectedContract.tenant_name}<br/>{selectedContract.tenant_address}<br/>{selectedContract.tenant_email}</p></div><div><span className={s.label}>ISSUER</span><p>{selectedContract.issuer_name}<br/>{selectedContract.issuer_address}<br/>{selectedContract.issuer_iban}</p></div></div>
     <p className={s.status}>{units.filter(u=>selectedContract.unit_ids.includes(u.id)).map(u=>u.address).join(' · ')}</p>
@@ -60,7 +70,7 @@ export default function ContractWorkspace({relationships,properties,units,member
     <Documents key={selectedContract.id} contractId={selectedContract.id}/>
    </section>}
   </>:<>
-   <p className={s.status}>The daily run prepares due periods for active contracts. Re-running it catches up missing periods without creating duplicates. All recorded drafts are shown.</p>
+   <p className={s.status}>The daily run prepares due periods for active contracts. Re-running it catches up missing periods without creating duplicates. The list follows the selected account and unit filters; preparing due drafts processes all active contracts.</p>
    <div className={s.toolbar}><button className={s.button} disabled={pending} onClick={()=>run(async()=>{const r=await generateDrafts();return {...r,message:`${r.count || 0} new invoice draft(s) prepared. Existing drafts were kept.`};})}>Prepare due drafts now</button></div>
    {visibleInvoices.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Invoice subject / tenant</th><th>Period</th><th>Issuer</th><th>Total</th><th>Review</th></tr></thead><tbody>{visibleInvoices.map(i=><tr key={i.id}><td><button onClick={()=>setInvoiceId(i.id)}>{i.subject}</button><small>{i.snapshot.tenant_name}</small></td><td>{date(i.period_start)}</td><td>{i.snapshot.issuer_name}</td><td className={s.money}>{euros(i.total)}</td><td><span className={s.badge}>{i.review_status}</span></td></tr>)}</tbody></table></div>:<p className={s.empty}>No invoice drafts yet. Activate a reviewed contract and prepare its due periods.</p>}
    {invoice&&<InvoiceReview key={invoice.id} invoice={invoice} issued={issued.find(i=>i.draft_id===invoice.id)} onIssue={()=>run(async()=>{const r=await issueInvoice(invoice.id);return {...r,message:'Invoice issued. Open Invoices & cashflow to view the PDF and approve sending.'};})} pending={pending} onReview={(checked,note)=>run(async()=>{const r=await reviewInvoice(invoice.id,checked,note);return {...r,message:'Review saved. This document remains a concept invoice.'};})}/>}
@@ -74,6 +84,7 @@ function ContractForm({contract,properties,units,members,relationships,issuers,p
  const [lines,setLines]=useState<Line[]>(contract?.lines || [{description:'Huur',amount:'',vat:'exempt'}]);
  const [subject,setSubject]=useState(contract?.invoice_subject || 'Huur {unitadres} — {maand} {jaar}');
  const [relationship,setRelationship]=useState(contract?.tenant_relationship_id||'');
+ const [tenantProfile,setTenantProfile]=useState(contract?.tenant_profile_id||'');
  const [issuerId,setIssuerId]=useState(contract?.issuer_id||'');
  const [issuerAddress,setIssuerAddress]=useState(contract?.issuer_address||'');const [issuerIban,setIssuerIban]=useState(contract?.issuer_iban||'');const [issuerTax,setIssuerTax]=useState(contract?.issuer_tax_id||'');
  const [address,setAddress]=useState(contract?.tenant_address||'');
@@ -82,15 +93,16 @@ function ContractForm({contract,properties,units,members,relationships,issuers,p
  const example=leaseSubjectPreview(subject,period,language,selectedUnits.map(u=>u.address).sort().join(', '));
  function field(name:keyof Contract){return contract?.[name] as string | undefined;}
  function suggestAmounts(){setLines([{description:'Huur',amount:(selectedUnits.reduce((sum,u)=>sum+Math.round(Number(u.monthly_rent)*100),0)/100).toFixed(2),vat:'exempt'}, {description:'Voorschot nutsvoorzieningen',amount:selectedUnits.every(u=>u.utilities_advance!==null)?(selectedUnits.reduce((sum,u)=>sum+Math.round(Number(u.utilities_advance)*100),0)/100).toFixed(2):'',vat:''}]);if(!tenant)setTenant(selectedUnits[0]?.tenant_name||'');}
- return <form onSubmit={e=>{e.preventDefault();const firstPeriod=invoiceMonthStart(period);if(!firstPeriod){const input=e.currentTarget.elements.namedItem('first_invoice_month') as HTMLInputElement;input.setCustomValidity('Enter a complete month as YYYY-MM, for example 2026-11.');input.reportValidity();return;}const fd=new FormData(e.currentTarget);onSave({...Object.fromEntries(fd.entries()),property_id:property,unit_ids:chosen,tenant_profile_id:fd.get('tenant_profile_id')||null,tenant_relationship_id:relationship||null,issuer_id:issuerId||null,tenant_address:address,tenant_name:tenant,tenant_email:email,issuer_name:issuer,lease_end:fd.get('lease_end')||null,first_period:firstPeriod,max_terms:fd.get('max_terms')?Number(fd.get('max_terms')):null,payment_days:14,deposit:Number(fd.get('deposit')||0),prorate:fd.has('prorate'),lines,invoice_subject:subject,invoice_language:language});}}>
+ return <form onSubmit={e=>{e.preventDefault();const firstPeriod=invoiceMonthStart(period);if(!firstPeriod){const input=e.currentTarget.elements.namedItem('first_invoice_month') as HTMLInputElement;input.setCustomValidity('Enter a complete month as YYYY-MM, for example 2026-11.');input.reportValidity();return;}const fd=new FormData(e.currentTarget);onSave({...Object.fromEntries(fd.entries()),property_id:property,unit_ids:chosen,tenant_profile_id:tenantProfile||null,tenant_relationship_id:relationship||null,issuer_id:issuerId||null,tenant_address:address,tenant_name:tenant,tenant_email:email,issuer_name:issuer,lease_end:fd.get('lease_end')||null,first_period:firstPeriod,max_terms:fd.get('max_terms')?Number(fd.get('max_terms')):null,payment_days:14,deposit:Number(fd.get('deposit')||0),prorate:fd.has('prorate'),lines,invoice_subject:subject,invoice_language:language});}}>
   <fieldset disabled={pending} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <section className={s.panel}><h2>{contract?'Edit contract draft':'New rental contract'}</h2><p className={s.help}>Addresses and IBAN may be completed later. They are required before activating billing.</p><div className={s.grid}>
    <Field label="Contract subject"><input name="title" required maxLength={200} defaultValue={field('title')}/></Field>
    <Field label="Contract date"><input name="contract_date" type="date" required defaultValue={field('contract_date') || today()}/></Field>
    <Field label="Property" wide><select required value={property} onChange={e=>{setProperty(e.target.value);setChosen([]);if(!issuerId)setIssuer(properties.find(p=>p.id===e.target.value)?.owner_name||'');}}><option value="">Select property</option>{properties.map(p=><option value={p.id} key={p.id}>{p.name}</option>)}</select></Field>
    <div className={s.wide}><p className={s.label}>UNITS COVERED BY THIS CONTRACT</p><div className={s.checks}>{units.filter(u=>u.property_id===property).map(u=><label key={u.id} className={s.check}><input type="checkbox" checked={chosen.includes(u.id)} onChange={e=>setChosen(prev=>e.target.checked?[...prev,u.id]:prev.filter(id=>id!==u.id))}/><span>{u.address}<br/><small className={s.help}>{u.rent_included?'Rent included in another unit':`${euros(u.monthly_rent)} recorded monthly rent`}</small></span></label>)}</div></div>
-   <Field label="Rental relationship (optional)" wide><select value={relationship} onChange={e=>{const id=e.target.value;setRelationship(id);const r=relationships.find(r=>r.id===id);if(r){setTenant(r.name);setEmail(r.email);setAddress(r.address)}}}><option value="">Enter tenant details manually</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></Field>
-   <Field label="Link existing login account (optional)"><select name="tenant_profile_id" defaultValue={contract?.tenant_profile_id||''} onChange={e=>{const m=members.find(x=>x.id===e.target.value);if(m&&!relationship){setTenant(m.full_name||m.email);setEmail(m.email)}}}><option value="">Tenant without linked account</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name||m.email}</option>)}</select></Field>
+   <Field label="Existing relationship (optional)" wide><select value={relationship} onChange={e=>{const id=e.target.value;setRelationship(id);const r=relationships.find(r=>r.id===id);setTenantProfile(r?.profile_id||'');if(r){setTenant(r.name);setEmail(r.email);setAddress(r.address)}}}><option value="">Enter tenant details manually</option>{relationships.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></Field>
+   <Field label="Link existing login account (optional)"><select name="tenant_profile_id" value={tenantProfile} disabled={!!relationship} onChange={e=>{setTenantProfile(e.target.value);const m=members.find(x=>x.id===e.target.value);if(m&&!relationship){setTenant(m.full_name||m.email);setEmail(m.email)}}}><option value="">Tenant without linked account</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name||m.email}</option>)}</select></Field>
+   <p className={s.help}>The linked relationship supplies its existing client account. Activated contracts and issued invoices are visible only to that account. A draft is private to administrators.</p>
    <Field label="Tenant / legal company name"><input required maxLength={200} value={tenant} onChange={e=>setTenant(e.target.value)}/></Field>
    <Field label="Tenant billing address"><textarea name="tenant_address" maxLength={1000} rows={3} value={address} onChange={e=>setAddress(e.target.value)}/></Field>
    <Field label="Tenant email"><input type="email" maxLength={254} value={email} onChange={e=>setEmail(e.target.value)}/></Field>

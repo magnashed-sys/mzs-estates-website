@@ -1125,5 +1125,25 @@
     "registration12": "Your account may have been created, but we could not verify the application record. Contact MZS Group; do not register twice.",
     "registration13": "Registration needs a configuration review. Contact MZS Group; do not register twice.",
     "registration14": "Registration is temporarily unavailable. Please try again later."
+  },
+  "RentalAccount": {
+    "title": "Your relationships & rental contracts",
+    "intro": "Your companies and rental agreements, linked to this account.",
+    "companies": "Companies",
+    "contracts": "Rental contracts",
+    "period": "Rental period",
+    "landlord": "Landlord",
+    "ongoing": "Ongoing",
+    "status": "Billing schedule",
+    "active": "Active",
+    "stopped": "Stopped",
+    "invoices": "Issued invoices",
+    "number": "Invoice",
+    "due": "Due date",
+    "total": "Total",
+    "outstanding": "Outstanding",
+    "noInvoices": "No invoices issued yet.",
+    "error": "Your relationship overview could not be loaded.",
+    "retry": "Try again"
   }
 }

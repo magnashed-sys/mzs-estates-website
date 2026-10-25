@@ -1125,5 +1125,25 @@
     "registration12": "Uw account is mogelijk aangemaakt, maar de aanvraag kon niet worden geverifieerd. Neem contact op met MZS Group; registreer u niet opnieuw.",
     "registration13": "De registratieconfiguratie moet worden gecontroleerd. Neem contact op met MZS Group; registreer u niet opnieuw.",
     "registration14": "Registratie is tijdelijk niet beschikbaar. Probeer het later opnieuw."
+  },
+  "RentalAccount": {
+    "title": "Je relaties & huurcontracten",
+    "intro": "Je bedrijven en huurovereenkomsten, gekoppeld aan dit account.",
+    "companies": "Bedrijven",
+    "contracts": "Huurcontracten",
+    "period": "Huurperiode",
+    "landlord": "Verhuurder",
+    "ongoing": "Onbepaalde tijd",
+    "status": "Facturatieschema",
+    "active": "Actief",
+    "stopped": "Gestopt",
+    "invoices": "Uitgegeven facturen",
+    "number": "Factuur",
+    "due": "Vervaldatum",
+    "total": "Totaal",
+    "outstanding": "Openstaand",
+    "noInvoices": "Er zijn nog geen facturen uitgegeven.",
+    "error": "Je relatieoverzicht kon niet worden geladen.",
+    "retry": "Opnieuw proberen"
   }
 }

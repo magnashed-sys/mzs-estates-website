@@ -1125,5 +1125,25 @@
     "acquisitionKind": "Erwerb",
     "canJuanExpression": "Eine raffinierte mediterrane Ausdrucksform.",
     "colomsExpression": "Eine ruhige, zeitgenössische Ausdrucksform."
+  },
+  "RentalAccount": {
+    "title": "Ihre Beziehungen und Mietverträge",
+    "intro": "Ihre Unternehmen und Mietverträge, die mit diesem Konto verknüpft sind.",
+    "companies": "Unternehmen",
+    "contracts": "Mietverträge",
+    "period": "Mietzeitraum",
+    "landlord": "Vermieter",
+    "ongoing": "Unbefristet",
+    "status": "Abrechnungsplan",
+    "active": "Aktiv",
+    "stopped": "Gestoppt",
+    "invoices": "Ausgestellte Rechnungen",
+    "number": "Rechnung",
+    "due": "Fälligkeitsdatum",
+    "total": "Gesamt",
+    "outstanding": "Offen",
+    "noInvoices": "Es wurden noch keine Rechnungen ausgestellt.",
+    "error": "Ihre Beziehungsübersicht konnte nicht geladen werden.",
+    "retry": "Erneut versuchen"
   }
 }

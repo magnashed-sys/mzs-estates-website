@@ -40,6 +40,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
   if(!invoices.length){const c=contracts[0];invoices.push({id:'55555555-5555-4555-8555-555555555555',contract_id:c.id,period_start:'2026-12-01',period_end:'2026-12-31',scheduled_date:'2026-11-14',due_date:'2026-11-30',subject:'Huur Fixture Street 1A — december 2026',snapshot:{...c,unit_addresses:'Fixture Street 1A',covered_from:'2026-12-01',covered_to:'2026-12-31'},lines:[{description:'Huur',amount:'1000.00',vat:'exempt',net:1000,tax:0,total:1000}],subtotal:1000,tax_total:0,total:1000,review_status:'pending',review_note:''});}
  }
  else if(u.pathname==='/rest/v1/rpc/mzs_has_department_scope')data=false;
+ if(Array.isArray(data)&&req.headers.prefer?.includes('count=exact'))res.setHeader('Content-Range',`0-${Math.max(0,data.length-1)}/${data.length}`);
  res.end(JSON.stringify(data));
 });
 (async()=>{
@@ -51,12 +52,13 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await ctx.addCookies([{name:'sb-senonkpxdtlhyhrubicg-auth-token',value:'base64-'+Buffer.from(JSON.stringify({access_token:token,refresh_token:'fixture',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})).toString('base64url'),domain:'127.0.0.1',path:'/'}]);
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');
  await page.getByRole('heading',{name:'Contracts & invoices.'}).waitFor();
- await page.getByRole('button',{name:'Rental relationships',exact:true}).click();
- await page.getByRole('button',{name:'New rental relationship',exact:true}).click();
- await page.getByLabel('Legal name / person').fill('Fixture tenant company');
- await page.getByRole('button',{name:'Save rental relationship',exact:true}).click();
+ await page.goto('http://127.0.0.1:3096/admin/relationships');
+ await page.getByRole('button',{name:'New company',exact:true}).click();
+ await page.getByLabel('Legal company name').fill('Fixture tenant company');
+ await page.getByRole('button',{name:'Save relationship',exact:true}).click();
  await page.getByRole('button',{name:'Fixture tenant company',exact:true}).waitFor();
  assert.equal(relationships.length,1);assert.equal(relationships[0].address,'','only name/type required for offline relationship');
+ await page.getByRole('link',{name:'Open rental contracts →',exact:true}).click();
  await page.getByRole('button',{name:'Issuing entities',exact:true}).click();
  await page.getByRole('button',{name:'New issuing entity',exact:true}).click();
  await page.getByLabel('Legal name',{exact:true}).fill('Fixture issuer');
@@ -68,7 +70,7 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  assert.equal(issuers.length,1);
  await page.getByRole('button',{name:'Contracts',exact:true}).click();
  await page.getByRole('button',{name:'New contract',exact:true}).click();
- await page.getByLabel('Rental relationship (optional)').selectOption(relationships[0].id);
+ await page.getByLabel('Existing relationship (optional)').selectOption(relationships[0].id);
  assert.equal(await page.getByLabel('Tenant / legal company name').inputValue(),'Fixture tenant company');
  await page.getByLabel('Contract subject',{exact:true}).fill('Fixture long-term rental');
  // Unsupported month pickers (desktop Safari/Firefox) expose partial text while typing.
@@ -128,8 +130,9 @@ const mock=http.createServer(async(req,res)=>{res.setHeader('Content-Type','appl
  await page.getByText(/Fixture transfer/).waitFor();assert.equal(payments.length,1);assert.equal(await page.getByLabel('Amount received',{exact:true}).inputValue(),'');
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/mzs-integration-billing-'+width+'.png',fullPage:true});}
  await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts?view=relationships');
- await page.getByRole('button',{name:'New rental relationship',exact:true}).waitFor();
- await page.reload();await page.getByRole('button',{name:'New rental relationship',exact:true}).waitFor();
+ await page.getByRole('button',{name:'New company',exact:true}).waitFor();
+ assert.equal(new URL(page.url()).pathname,'/admin/relationships');
+ await page.reload();await page.getByRole('button',{name:'New company',exact:true}).waitFor();
 
  for(const [r,a] of [['client',true],['admin',false]]){role=r;active=a;await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');assert.ok(!(await page.locator('body').innerText()).includes('Fixture long-term rental'));}
  await ctx.clearCookies();await page.goto('http://127.0.0.1:3096/admin/group/estates/contracts');assert.ok(!(await page.locator('body').innerText()).includes('Fixture long-term rental'));

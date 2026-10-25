@@ -1125,5 +1125,25 @@
     "registration12": "Es posible que se haya creado su cuenta, pero no hemos podido verificar la solicitud. Contacte con MZS Group; no se registre de nuevo.",
     "registration13": "Es necesario revisar la configuración del registro. Contacte con MZS Group; no se registre de nuevo.",
     "registration14": "El registro no está disponible temporalmente. Inténtelo de nuevo más tarde."
+  },
+  "RentalAccount": {
+    "title": "Tus relaciones y contratos de alquiler",
+    "intro": "Tus empresas y contratos de alquiler, vinculados a esta cuenta.",
+    "companies": "Empresas",
+    "contracts": "Contratos de alquiler",
+    "period": "Periodo de alquiler",
+    "landlord": "Arrendador",
+    "ongoing": "Duración indefinida",
+    "status": "Calendario de facturación",
+    "active": "Activo",
+    "stopped": "Detenido",
+    "invoices": "Facturas emitidas",
+    "number": "Factura",
+    "due": "Fecha de vencimiento",
+    "total": "Total",
+    "outstanding": "Pendiente",
+    "noInvoices": "Aún no se han emitido facturas.",
+    "error": "No se pudo cargar el resumen de tus relaciones.",
+    "retry": "Volver a intentarlo"
   }
 }
