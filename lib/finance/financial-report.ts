@@ -47,12 +47,13 @@ export function buildFinancialPhase2(args:{
  // Invoice issuer_id is a historical accounting snapshot. Never fall back to a
  // changed contract issuer; otherwise receipts could silently move between entities.
  const chosenPayments=rentPayments.filter(p=>matches(invoiceMap.get(p.invoice_id)?.issuer_id));
- // No foreign key currently connects lending and booking registers to issuing entities.
- // All such amounts appear in Group Consolidated and Unassigned only.
+ // Loan reporting entity is assigned explicitly in each loan dossier; booking data remains unassigned.
  const groupUnassigned=entityId==='all'||entityId==='unassigned';
- const chosenDeals=groupUnassigned?deals:[];
- const chosenInstalments=groupUnassigned?instalments:[];
- const chosenLoanPayments=groupUnassigned?loanPayments:[];
+ const chosenDeals=deals.filter(d=>entityId==='all'||sourceId(d.entity_id)===entityId);
+ const chosenDealIds=new Set(chosenDeals.map(d=>d.id));
+ const chosenInstalments=instalments.filter(i=>chosenDealIds.has(i.deal_id));
+ const chosenTermIds=new Set(chosenInstalments.map(i=>i.id));
+ const chosenLoanPayments=loanPayments.filter(p=>chosenTermIds.has(p.instalment_id));
  const chosenBookings=groupUnassigned?bookings:[];
  const base=buildFinancialCockpit({
   year,asOf,contracts:chosenContracts,rentPayments:chosenPayments,
@@ -94,7 +95,7 @@ export function buildFinancialPhase2(args:{
   outstandingRent:outstanding/100,overdueRent:overdue/100,
   overdueLoanReceivables:dueIncome/100,overdueLoanPayables:dueCost/100,
   unassignedContracts:countByEntity.get('unassigned')||0,
-  loanAttributionPending:loansAvailable?deals.filter(x=>x.status==='active').length:0,
+  loanAttributionPending:loansAvailable?deals.filter(x=>(x.status==='active'||x.status==='agreed')&&!x.entity_id).length:0,
   bookingAttributionPending:bookings.filter(x=>x.status==='confirmed'&&!x.is_test).length
  }};
 }
