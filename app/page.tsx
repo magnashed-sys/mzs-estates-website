@@ -24,8 +24,6 @@ export default async function Home() {
         <div className="mzs-separator" aria-hidden="true" />
 
         <p className="mzs-intro"> {t('mzs_group_is_an_independent_international')} </p>
-
-        <p className="mzs-selective"> {t('new_relationships_are_considered_on_a')} </p>
       </section>
 
       <HomeContactFooter email="info@mzsgroup.eu" />

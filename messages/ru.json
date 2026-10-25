@@ -1,7 +1,6 @@
 {
   "Home": {
     "mzs_group_is_an_independent_international": "MZS Group — независимая международная группа в сфере недвижимости и инвестиций, предоставляющая избранным клиентам и партнёрам доступ к частным возможностям в Европе и ОАЭ.",
-    "new_relationships_are_considered_on_a": "Мы избирательно подходим к установлению новых деловых отношений.",
     "sloganPrivate": "Частная.",
     "sloganIndependent": "Независимая.",
     "sloganInternational": "Международная."
@@ -105,7 +104,7 @@
   "Header": {
     "real_estate": "Недвижимость",
     "private_capital": "Частный капитал",
-    "client_partner_login": "Вход для клиентов и партнёров",
+    "login": "Войти",
     "request_access": "Запросить доступ",
     "mzs_group_home": "MZS Group — Главная",
     "main_navigation": "Основная навигация",

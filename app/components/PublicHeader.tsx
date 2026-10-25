@@ -23,7 +23,7 @@ export default function PublicHeader() {
 const publicNavigation = [
   { href: "/real-estate", label: t('real_estate') },
   { href: "/private-capital", label: t('private_capital') },
-  { href: "/login", label: t('client_partner_login') },
+  { href: "/login", label: t('login') },
 ] as const;
   const [dashboardHref, setDashboardHref] = useState<DashboardHref>(null);
 

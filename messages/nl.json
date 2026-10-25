@@ -1,7 +1,6 @@
 {
   "Home": {
     "mzs_group_is_an_independent_international": "MZS Group is een onafhankelijke internationale vastgoed- en investeringsgroep die geselecteerde cliënten en partners toegang biedt tot private mogelijkheden in Europa en de Verenigde Arabische Emiraten.",
-    "new_relationships_are_considered_on_a": "Nieuwe relaties worden op selectieve basis aangegaan.",
     "sloganPrivate": "Privé.",
     "sloganIndependent": "Onafhankelijk.",
     "sloganInternational": "Internationaal."
@@ -105,7 +104,7 @@
   "Header": {
     "real_estate": "Vastgoed",
     "private_capital": "Privaat kapitaal",
-    "client_partner_login": "Inloggen voor cliënten & partners",
+    "login": "Inloggen",
     "request_access": "Toegang aanvragen",
     "mzs_group_home": "MZS Group — Startpagina",
     "main_navigation": "Hoofdnavigatie",
