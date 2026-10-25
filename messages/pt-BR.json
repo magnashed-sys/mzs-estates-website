@@ -1145,5 +1145,13 @@
     "noInvoices": "Nenhuma fatura foi emitida ainda.",
     "error": "Não foi possível carregar o resumo dos seus relacionamentos.",
     "retry": "Tentar novamente"
+  },
+  "ContactInput": {
+    "chooseCountry": "Selecione o país",
+    "callingCode": "Código do país",
+    "number": "Número de telefone",
+    "chooseCode": "Selecione primeiro o código do país.",
+    "invalidPhone": "Confira o número de telefone e o código do país.",
+    "international": "Internacional"
   }
 }

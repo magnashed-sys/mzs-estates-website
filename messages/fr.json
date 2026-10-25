@@ -1145,5 +1145,13 @@
     "noInvoices": "Aucune facture n’a encore été émise.",
     "error": "Impossible de charger le récapitulatif de vos relations.",
     "retry": "Réessayer"
+  },
+  "ContactInput": {
+    "chooseCountry": "Sélectionner un pays",
+    "callingCode": "Indicatif du pays",
+    "number": "Numéro de téléphone",
+    "chooseCode": "Sélectionnez d’abord un indicatif de pays.",
+    "invalidPhone": "Vérifiez le numéro de téléphone et l’indicatif du pays.",
+    "international": "International"
   }
 }

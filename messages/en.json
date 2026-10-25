@@ -1145,5 +1145,13 @@
     "noInvoices": "No invoices issued yet.",
     "error": "Your relationship overview could not be loaded.",
     "retry": "Try again"
+  },
+  "ContactInput": {
+    "chooseCountry": "Select country",
+    "callingCode": "Country code",
+    "number": "Phone number",
+    "chooseCode": "Select a country code first.",
+    "invalidPhone": "Check the phone number and country code.",
+    "international": "International"
   }
 }

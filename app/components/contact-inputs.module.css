@@ -1,0 +1,8 @@
+.field {display:flex;flex-direction:column;gap:9px;min-width:0;color:inherit;font-size:12px;line-height:1.5;}
+.phone {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:10px;min-width:0;}
+.country.country {appearance:auto;display:block;box-sizing:border-box;min-width:0;width:100%;max-width:100%;min-height:47px;padding:13px 12px;border:1px solid rgba(213,192,154,.35);border-radius:0;background:#11120f;color:#f0ebe2;font:400 16px/1.5 Arial,Helvetica,sans-serif;color-scheme:dark;text-overflow:ellipsis;}
+.phone.phone input {box-sizing:border-box;min-width:0;width:100%;min-height:47px;margin:0!important;padding:13px 12px;border:1px solid rgba(213,192,154,.35);border-radius:0;background:#11120f;color:#f0ebe2;font:400 16px/1.5 Arial,Helvetica,sans-serif;}
+.country:focus-visible,.phone input:focus-visible {outline:2px solid #d5c09a;outline-offset:2px;}
+.country:disabled,.phone input:disabled {opacity:.65;}
+.error {color:#ffb4a8;font-size:12px;}
+@media(max-width:420px) {.phone {grid-template-columns:minmax(0,1fr);}}

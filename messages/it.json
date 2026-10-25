@@ -1145,5 +1145,13 @@
     "noInvoices": "Non sono ancora state emesse fatture.",
     "error": "Impossibile caricare il riepilogo delle tue relazioni.",
     "retry": "Riprova"
+  },
+  "ContactInput": {
+    "chooseCountry": "Seleziona il paese",
+    "callingCode": "Prefisso internazionale",
+    "number": "Numero di telefono",
+    "chooseCode": "Seleziona prima il prefisso internazionale.",
+    "invalidPhone": "Controlla il numero di telefono e il prefisso internazionale.",
+    "international": "Internazionale"
   }
 }

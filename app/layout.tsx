@@ -63,7 +63,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const all = await getMessages();
-  const messages = {RentalAccount: all.RentalAccount, Header: all.Header, Footer: all.Footer, Call: all.Call, Language: all.Language, Login: all.Login, Private: all.Private, CapitalUI: all.CapitalUI, MemberUI: all.MemberUI, AccountUI: all.AccountUI};
+  const messages = {ContactInput: all.ContactInput, RentalAccount: all.RentalAccount, Header: all.Header, Footer: all.Footer, Call: all.Call, Language: all.Language, Login: all.Login, Private: all.Private, CapitalUI: all.CapitalUI, MemberUI: all.MemberUI, AccountUI: all.AccountUI};
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>

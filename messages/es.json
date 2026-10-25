@@ -1145,5 +1145,13 @@
     "noInvoices": "Aún no se han emitido facturas.",
     "error": "No se pudo cargar el resumen de tus relaciones.",
     "retry": "Volver a intentarlo"
+  },
+  "ContactInput": {
+    "chooseCountry": "Selecciona un país",
+    "callingCode": "Prefijo del país",
+    "number": "Número de teléfono",
+    "chooseCode": "Selecciona primero un prefijo de país.",
+    "invalidPhone": "Comprueba el número de teléfono y el prefijo del país.",
+    "international": "Internacional"
   }
 }

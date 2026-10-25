@@ -1,4 +1,5 @@
 "use client";
+import CountrySelect from "../../components/CountrySelect";
 import {useTranslations} from "next-intl";
 
 import { useEffect, useState, type FormEvent } from "react";
@@ -210,8 +211,7 @@ const labelOf = (value: Relationship) => options.find(x => x.value === value)?.l
         <label className={styles.field}>{t("registrationNumber")} <input value={draft.registration_number} maxLength={100} disabled={saving}
             onChange={e => change("registration_number", e.target.value)} />
         </label>
-        <label className={styles.field}>{t("countryOfRegistration")} <input value={draft.country} maxLength={120} disabled={saving}
-            onChange={e => change("country", e.target.value)} />
+        <label className={styles.field}>{t("countryOfRegistration")} <CountrySelect value={draft.country} disabled={saving} onChange={value => change("country", value)} />
         </label>
         <label className={styles.field + " " + styles.fieldFull}> {t("additionalDetailsAboutYourRole")} <textarea value={draft.relationship_notes} maxLength={1000} disabled={saving}
             onChange={e => change("relationship_notes", e.target.value)}

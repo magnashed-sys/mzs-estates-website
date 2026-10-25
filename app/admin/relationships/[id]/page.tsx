@@ -1,4 +1,6 @@
 "use client";
+import CountrySelect from "../../../components/CountrySelect";
+import PhoneInput from "../../../components/PhoneInput";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -262,7 +264,11 @@ export default function RelationshipDossierPage() {
         <section className={styles.panel}>
           <div className={styles.panelHeading}><h2>Personal details.</h2><button type="button" className="admin-button" onClick={() => editing ? setEditing(false) : startEditing()}>{editing ? "Cancel" : "Edit contact details"}</button></div>
           {editing ? <form onSubmit={saveContact} style={{display:"grid",gap:12}}>
-            {([["full_name","Full name"],["phone","Telephone"],["street_address","Street"],["house_number","House number"],["address_addition","Address addition"],["postal_code","Postal code"],["city","City"],["region","Region"],["country","Country"]] as const).map(([key,label]) => <label key={key} style={{display:"grid",gap:6}}>{label}<input className="admin-input" value={contactDraft[key] || ""} maxLength={key === "full_name" || key === "street_address" ? 160 : key === "phone" ? 40 : key === "house_number" || key === "postal_code" ? 24 : key === "address_addition" ? 80 : 120} required={key === "full_name"} onChange={e => setContactDraft(d => ({...d,[key]:e.target.value}))} /></label>)}
+            {([["full_name","Full name"],["phone","Telephone"],["street_address","Street"],["house_number","House number"],["address_addition","Address addition"],["postal_code","Postal code"],["city","City"],["region","Region"],["country","Country"]] as const).map(([key,label]) => key==='phone'
+              ? <PhoneInput key={key} label={label} value={contactDraft.phone || ''} disabled={saving} onChange={value=>setContactDraft(d=>({...d,phone:value}))}/>
+              : <label key={key} style={{display:"grid",gap:6}}>{label}{key==='country'
+                ? <CountrySelect value={contactDraft.country || ''} disabled={saving} onChange={value=>setContactDraft(d=>({...d,country:value}))}/>
+                : <input className="admin-input" value={contactDraft[key] || ""} disabled={saving} maxLength={key === "full_name" || key === "street_address" ? 160 : key === "house_number" || key === "postal_code" ? 24 : key === "address_addition" ? 80 : 120} required={key === "full_name"} onChange={e => setContactDraft(d => ({...d,[key]:e.target.value}))} />}</label>)}
             <button type="submit" className="admin-button" disabled={saving}>{saving ? "Saving..." : "Save contact details"}</button>
           </form> : <div className={styles.fieldGrid}>
             <div><small>Full name</small><p>{filled(person.full_name)}</p></div>

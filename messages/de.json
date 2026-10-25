@@ -1145,5 +1145,13 @@
     "noInvoices": "Es wurden noch keine Rechnungen ausgestellt.",
     "error": "Ihre Beziehungsübersicht konnte nicht geladen werden.",
     "retry": "Erneut versuchen"
+  },
+  "ContactInput": {
+    "chooseCountry": "Land auswählen",
+    "callingCode": "Ländervorwahl",
+    "number": "Telefonnummer",
+    "chooseCode": "Bitte zuerst eine Ländervorwahl auswählen.",
+    "invalidPhone": "Bitte Telefonnummer und Ländervorwahl prüfen.",
+    "international": "International"
   }
 }

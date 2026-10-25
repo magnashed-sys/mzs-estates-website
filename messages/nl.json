@@ -1145,5 +1145,13 @@
     "noInvoices": "Er zijn nog geen facturen uitgegeven.",
     "error": "Je relatieoverzicht kon niet worden geladen.",
     "retry": "Opnieuw proberen"
+  },
+  "ContactInput": {
+    "chooseCountry": "Selecteer land",
+    "callingCode": "Landcode",
+    "number": "Telefoonnummer",
+    "chooseCode": "Selecteer eerst een landcode.",
+    "invalidPhone": "Controleer het telefoonnummer en de landcode.",
+    "international": "Internationaal"
   }
 }

@@ -1,4 +1,6 @@
 'use client';
+import CountrySelect from "../../../../components/CountrySelect";
+import PhoneInput from "../../../../components/PhoneInput";
 import {useState,useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import {saveIssuer} from './actions';
@@ -16,7 +18,7 @@ function IssuerForm({issuer,companies,relationships,close}:{issuer:Issuer|null;c
  const [values,setValues]=useState<Record<string,string>>(()=>({...Object.fromEntries(Object.entries(issuer||{}).filter(([,v])=>typeof v==='string')),...issuer?.details,kind:issuer?.kind||'company'}) as Record<string,string>);
  const [error,setError]=useState('');const [busy,start]=useTransition();const [loadingLogo,setLoadingLogo]=useState(false);const router=useRouter();
  function change(key:string,value:string){setValues(v=>({...v,[key]:value}));}
- function field(key:string,label:string,max=200,required=false,type='text') {return <label key={key} className={s.field}>{label}{key==='payment_instructions'||key==='billing_address'||key==='address'?<textarea name={key} value={values[key]||''} maxLength={max} required={required} onChange={e=>change(key,e.target.value)}/>:<input name={key} value={values[key]||''} maxLength={max} required={required} type={type} readOnly={key==='prefix'&&!!issuer} pattern={key==='prefix'?'[A-Z0-9][A-Z0-9-]{1,19}':undefined} onChange={e=>change(key,e.target.value)}/>}</label>}
+ function field(key:string,label:string,max=200,required=false,type='text') {if(key==='phone')return <PhoneInput key={key} className={s.field} label={label} value={values.phone||''} onChange={value=>change('phone',value)}/>;if(key==='country')return <label key={key} className={s.field}>{label}<CountrySelect value={values.country||''} onChange={value=>change('country',value)}/></label>;return <label key={key} className={s.field}>{label}{key==='payment_instructions'||key==='billing_address'||key==='address'?<textarea name={key} value={values[key]||''} maxLength={max} required={required} onChange={e=>change(key,e.target.value)}/>:<input name={key} value={values[key]||''} maxLength={max} required={required} type={type} readOnly={key==='prefix'&&!!issuer} pattern={key==='prefix'?'[A-Z0-9][A-Z0-9-]{1,19}':undefined} onChange={e=>change(key,e.target.value)}/>}</label>}
  const structured=!!(values.street||values.city||values.house_number||values.postal_code);
  return <form className={s.panel} onSubmit={e=>{e.preventDefault();setError('');start(async()=>{try{const result=await saveIssuer(values,issuer?.id,issuer?.version);if(result.error)setError(result.error);else{close();router.refresh();}}catch{setError('Saving could not be confirmed. Refresh before retrying.');}});}}>
  <fieldset disabled={busy||loadingLogo}><h3>Legal identity</h3><div className={s.grid}>

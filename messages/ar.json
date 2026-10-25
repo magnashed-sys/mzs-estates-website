@@ -1145,5 +1145,13 @@
     "noInvoices": "لم تصدر أي فواتير بعد.",
     "error": "تعذر تحميل ملخص علاقاتك.",
     "retry": "إعادة المحاولة"
+  },
+  "ContactInput": {
+    "chooseCountry": "اختر الدولة",
+    "callingCode": "رمز الدولة",
+    "number": "رقم الهاتف",
+    "chooseCode": "اختر رمز الدولة أولاً.",
+    "invalidPhone": "تحقق من رقم الهاتف ورمز الدولة.",
+    "international": "دولي"
   }
 }
