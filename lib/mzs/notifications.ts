@@ -2,7 +2,7 @@ import {isClientMail, localizedAccountMail, isLocalizedAccountLocale} from "./lo
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted" | "intro_call_requested";
+type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted" | "intro_call_requested" | "owner_stay_requested";
 type EventRow = {
   id: string;
   user_id: string;
@@ -198,6 +198,24 @@ function template(event: EventRow, recipientName: string) {
       " Sign in to review your updated collection.";
     link = site + "/private";
     linkTitle = "EXPLORE MY COLLECTION";
+  } else if (event.event_type === "owner_stay_requested") {
+    subject = "New owner stay request | MZS Group";
+    headline = "A new owner stay request.";
+    intro = "A property partner has requested a complimentary stay. Administrator approval is required before any nights are reserved.";
+    const property = escapeHtml(str(event.payload.property));
+    const requester = escapeHtml(str(event.payload.requester));
+    const checkIn = escapeHtml(str(event.payload.check_in));
+    const checkOut = escapeHtml(str(event.payload.check_out));
+    const guests = escapeHtml(str(event.payload.guest_count));
+    detailsHtml = "<p style='color:#d0c6b8;line-height:1.9'>Partner: " + requester +
+      "<br>Property: " + property + "<br>Check-in: " + checkIn +
+      "<br>Check-out: " + checkOut + "<br>Guests: " + guests +
+      "<br>Rental charge: €0.00</p>";
+    plain = "Owner stay requested by " + str(event.payload.requester) + " for " +
+      str(event.payload.property) + " (" + str(event.payload.check_in) + " to " +
+      str(event.payload.check_out) + ", " + str(event.payload.guest_count) + " guests). Approval required. Rental charge €0.00.";
+    link = site + "/admin/owner-stays";
+    linkTitle = "REVIEW OWNER STAY";
   } else if (event.event_type === "intro_call_requested") {
     subject = "New introductory call request | " + (event.payload?.source === "real-estate" ? "MZS Estates" : "MZS Capital");
     headline = "A new conversation starts here.";
@@ -263,6 +281,26 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       .select("full_name,email,is_active,role").eq("id", event.user_id).single();
     if (profileError || !profile?.email || profile.is_active !== true) {
       throw new Error("Recipient profile unavailable");
+    }
+    if (event.event_type === "owner_stay_requested") {
+      if (process.env.VERCEL_ENV !== "production" ||
+          process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co")
+        throw new Error("Owner-stay notification requires production");
+      if (profile.role !== "admin") throw new Error("Recipient is not an active administrator");
+      const {data:request,error:requestError} = await admin.from("mzs_owner_stay_requests")
+        .select("id,check_in,check_out,guest_count,partner_id")
+        .eq("id",str(event.payload.request_id)).maybeSingle();
+      if(requestError||!request)throw new Error("Owner stay request unavailable");
+      const {data:grant,error:grantError}=await admin.from("mzs_property_partners")
+        .select("profile_id,project_id").eq("id",request.partner_id).single();
+      if(grantError||!grant)throw new Error("Property partner unavailable");
+      const [{data:requester},{data:property}]=await Promise.all([
+        admin.from("profiles").select("full_name").eq("id",grant.profile_id).single(),
+        admin.from("projects").select("title").eq("id",grant.project_id).single()
+      ]);
+      event.payload={...event.payload,requester:requester?.full_name||"Property partner",
+        property:property?.title||"Property",check_in:request.check_in,
+        check_out:request.check_out,guest_count:String(request.guest_count)};
     }
     if (event.event_type === "intro_call_requested") {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Introductory call mail requires production");
@@ -357,4 +395,25 @@ export async function deliverForCapitalGrant(userId: string, grantId: string): P
     if(error || !data?.length) return false;
     return (await deliverOnce(data[0].id)).status === "sent";
   } catch { return false; }
+}
+
+/** Immediately attempt admin notification after a saved owner-stay request.
+ * Database outbox remains authoritative if SMTP is not available.
+ * Preview never sends real messages.
+ */
+export async function deliverOwnerStayAdminNotifications(requestId:string):Promise<void>{
+ if(process.env.VERCEL_ENV!=="production" ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL!=="https://ptrnjzmcehrhbsfxntgw.supabase.co")return;
+ try{
+  const admin=serviceClient();
+  const {data,error}=await admin.from("mzs_mail_outbox").select("id")
+   .eq("event_type","owner_stay_requested").contains("payload",{request_id:requestId})
+   .eq("status","pending").order("created_at").limit(25);
+  if(error)throw new Error("Admin owner-stay notification lookup failed");
+  for(const item of data||[])await deliverOnce(item.id);
+ }catch(error){
+  console.error("[MZS owner stay] admin notification queued for retry",{
+   category:error instanceof Error?error.name:"unknown"
+  });
+ }
 }
