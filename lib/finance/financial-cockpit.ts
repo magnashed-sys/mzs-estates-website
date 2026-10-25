@@ -49,7 +49,12 @@ export function buildFinancialCockpit(args:{
  for(let m=1;m<=12;m++){const month=isoMonth(year,m);byMonth.set(month,{month,rentForecast:Math.round(rentalForecast(contracts,month)*100),rentReceived:0,interestIn:0,interestOut:0,interestReceived:0,interestPaid:0});}
  let actualRentPayments=0,actualLoanPayments=0;
  for(const payment of rentPayments){if(payment.reversed_at)continue;actualRentPayments++;const row=byMonth.get(payment.received_on.slice(0,7));if(row)row.rentReceived+=moneyCents(payment.amount);}
- const activeDeals=new Map(deals.filter(d=>d.status==='active').map(d=>[d.id,d]));
+ // Historical cash receipts are still financial events while a dossier is
+ // marked "agreed". Include its interest schedule when payments have actually
+ // been recorded; leave unsigned/empty agreed deals out of the forecast.
+ const paidTermIds=new Set(loanPayments.filter(p=>!p.is_void).map(p=>p.instalment_id));
+ const paidDealIds=new Set(instalments.filter(i=>i.kind==='interest'&&paidTermIds.has(i.id)).map(i=>i.deal_id));
+ const activeDeals=new Map(deals.filter(d=>d.status==='active'||(d.status==='agreed'&&paidDealIds.has(d.id))).map(d=>[d.id,d]));
  const interestById=new Map<string,{direction:'provided'|'received'}>();
  for(const i of instalments){
   if(i.kind!=='interest')continue;
