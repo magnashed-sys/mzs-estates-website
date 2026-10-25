@@ -26,6 +26,10 @@ const publicNavigation = [
   { href: "/login", label: t('login') },
 ] as const;
   const [dashboardHref, setDashboardHref] = useState<DashboardHref>(null);
+  // Show Login to visitors; replace it with My Dashboard for approved signed-in accounts.
+  const visibleNavigation = dashboardHref
+    ? publicNavigation.filter(({ href }) => href !== "/login")
+    : publicNavigation;
 
   useEffect(() => {
     let mounted = true;
@@ -99,7 +103,7 @@ const publicNavigation = [
 
       <div className={styles.navigationRegion}>
         <nav className={styles.desktopNavigation} aria-label={t('main_navigation')}>
-          {publicNavigation.map(({ href, label }) => (
+          {visibleNavigation.map(({ href, label }) => (
             <a href={localizedPath(href, locale)} className={styles.navLink} key={href}>
               {label} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
             </a>
@@ -116,7 +120,7 @@ const publicNavigation = [
             <span className={styles.menuIcon} aria-hidden="true">☰</span>
           </summary>
           <nav className={styles.mobilePanel} aria-label={t('mobile_main_navigation')}>
-            {publicNavigation.map(({ href, label }) => (
+            {visibleNavigation.map(({ href, label }) => (
               <a href={localizedPath(href, locale)} className={styles.mobileLink} key={href}>
                 {label} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
               </a>
