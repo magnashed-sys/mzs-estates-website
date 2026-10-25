@@ -2,8 +2,8 @@ import {NextRequest} from 'next/server';
 import {requireContractAdmin} from '../../../../lib/security/estate-contracts';
 import {capitalDealsEnabled} from '../../../../lib/security/capital-deals';
 import {readRegister} from '../../../../lib/estates/read-register';
-import {buildFinancialCockpit, type Booking, type LeasePayment, type LoanDeal, type LoanInstalment, type LoanPayment} from '../../../../lib/finance/financial-cockpit';
-import type {ForecastContract} from '../../../../lib/estates/lease-cashflow';
+import {type Booking,type LoanDeal,type LoanInstalment,type LoanPayment} from '../../../../lib/finance/financial-cockpit';
+import {buildFinancialPhase2,type AttributedLease,type AttributedPayment,type LeaseInvoice,type Issuer} from '../../../../lib/finance/financial-report';
 import type {SupabaseClient} from '@supabase/supabase-js';
 
 export const dynamic='force-dynamic';
@@ -34,18 +34,25 @@ export async function GET(request:NextRequest){
   if(!Number.isInteger(year)||year<currentYear-1||year>currentYear+1)
    return Response.json({error:'Invalid reporting year'},{status:400,headers});
   const capitalOn=capitalDealsEnabled();
-  const [contracts,rentPayments,bookings,deals,instalments,loanPayments]=await Promise.all([
+  const entityId=request.nextUrl.searchParams.get('entity')||'all';
+  if(entityId!=='all'&&entityId!=='unassigned'&&!/^[a-f0-9-]{36}$/i.test(entityId))
+   return Response.json({error:'Invalid entity filter'},{status:400,headers});
+  const [contracts,rentPayments,bookings,deals,instalments,loanPayments,issuers,invoices]=await Promise.all([
    readRegister(db,'mzs_lease_contracts'),
    readRegister(db,'mzs_lease_payments'),
    listBookings(db),
    capitalOn?readRegister(db,'mzs_capital_deals'):Promise.resolve([]),
    capitalOn?readRegister(db,'mzs_capital_instalments'):Promise.resolve([]),
-   capitalOn?readRegister(db,'mzs_capital_payments'):Promise.resolve([])
+   capitalOn?readRegister(db,'mzs_capital_payments'):Promise.resolve([]),
+   readRegister(db,'mzs_lease_issuers'),
+   readRegister(db,'mzs_lease_invoices')
   ]);
-  const result=buildFinancialCockpit({
-   year,asOf:today,contracts:contracts as ForecastContract[],rentPayments:rentPayments as LeasePayment[],
+  const result=buildFinancialPhase2({
+   year,asOf:today,entityId,
+   contracts:contracts as AttributedLease[],rentPayments:rentPayments as AttributedPayment[],
    bookings,deals:deals as LoanDeal[],instalments:instalments as LoanInstalment[],
-   loanPayments:loanPayments as LoanPayment[],loansAvailable:capitalOn
+   loanPayments:loanPayments as LoanPayment[],loansAvailable:capitalOn,
+   issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[]
   });
   return Response.json(result,{headers});
  }catch{
