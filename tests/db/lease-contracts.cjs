@@ -153,5 +153,36 @@ await db.exec('reset role');
 assert.equal((await value(`select role from profiles where id='11111111-1111-4111-8111-111111111112'`)).role,'client','relationship link grants no role');
 console.log('PASS acceptance: integration/corrective migrations retain existing data; linked account grants no rights; invalid/duplicate units denied; separate issuer numbering; registration snapshot survives master edits');
 
+
+const issuerMigration='supabase/migrations/20261025092439_issuer_business_profiles.sql';
+await db.exec('create table public.mzs_member_companies(id uuid primary key)');
+const preProfile=await snapshots(preservedTables);
+await db.exec(fs.readFileSync(issuerMigration,'utf8'));
+assert.deepEqual(await snapshots(preservedTables,{mzs_lease_issuers:['kind','source_company_id','details'],mzs_lease_contracts:['issuer_details']}),preProfile,'profile migration preserves all historical values');
+await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)`);
+const business=await value(`insert into mzs_lease_issuers(name,address,iban,prefix,kind,details) values ('Private landlord','Full address','NLTESTACCOUNT','PROFILE','person','{"account_holder":"Original holder","reply_to":"billing@example.invalid","payment_instructions":"Use invoice number"}') returning id,version`);
+const savedProfile=await value(`select details from mzs_lease_issuers where id='${business.id}'`);
+const profileContract=await value(insert.replaceAll('2028','2040').replaceAll('2027','2039'));
+await db.exec(`update mzs_lease_contracts set issuer_id='${business.id}' where id='${profileContract.id}';update mzs_lease_contracts set status='active' where id='${profileContract.id}'`);
+await db.exec(`update mzs_lease_issuers set details='{"account_holder":"Changed master"}' where id='${business.id}'`);
+await generateAt('2040-01-01');
+const profileDraft=await value(`select * from mzs_lease_invoice_drafts where contract_id='${profileContract.id}'`);
+assert.deepEqual(profileDraft.snapshot.issuer_details,savedProfile.details,'active contract freezes full profile');
+await db.exec(`update mzs_lease_invoice_drafts set review_status='checked' where id='${profileDraft.id}'`);
+const profileInvoice=await value(`select mzs_issue_lease_invoice('${profileDraft.id}') as id`);
+assert.deepEqual((await value(`select payload from mzs_lease_invoices where id='${profileInvoice.id}'`)).payload.snapshot.issuer_details,savedProfile.details,'issued invoice retains approved full profile');
+assert.equal((await run(`update mzs_lease_issuers set name='Stale edit' where id='${business.id}' and version=${business.version} returning id`)).rows.length,0,'stale version cannot overwrite an edit');
+await assert.rejects(db.exec(`update mzs_lease_contracts set issuer_details='{}' where id='${profileContract.id}'`),/locked/);
+for(const bad of ['{"unknown":"field"}','{"email":["one","two"]}','{"reply_to":"a@example.invalid,b@example.invalid"}','{"logo":"https://internal"}'])await assert.rejects(run(`update mzs_lease_issuers set details=$1 where id=$2`,[bad,business.id]),/check constraint/);
+for(const uid of ['11111111-1111-4111-8111-111111111112','11111111-1111-4111-8111-111111111113']){
+ await db.exec(`select set_config('request.jwt.claim.sub','${uid}',false)`);
+ assert.equal((await run('select details from mzs_lease_issuers')).rows.length,0);
+ await assert.rejects(db.exec(`insert into mzs_lease_issuers(name,address,iban,prefix,details) values ('Forbidden','Address','NLTEST','NOPE','{}')`),/row-level security/);
+ assert.equal((await run(`update mzs_lease_issuers set details='{}' where id='${business.id}' returning id`)).rows.length,0);
+}
+await db.exec('set role anon');await assert.rejects(db.exec('select details from mzs_lease_issuers'),/permission denied/);
+await db.exec('reset role');
+console.log('PASS issuer profiles: additive migration, private landlord, snapshot immutability, stale update, validation and admin/client/inactive/anon access');
+
 await db.close();console.log('PASS lease draft/activation, overlap, replacement duplicate guard, cutover, catch-up, max terms, end date, leap/month ends, prorating, VAT, placeholders, locked terms, review audit, admin/client/inactive/anon permissions');
 })().catch(e=>{console.error(e);process.exit(1)});
