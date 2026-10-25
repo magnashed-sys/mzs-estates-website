@@ -1,3 +1,4 @@
+import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {localizedPath} from "../../i18n/public-routing";
 import {publicMetadata} from "../../i18n/metadata";
 export const generateMetadata = () => publicMetadata("estates", "/real-estate");
@@ -53,10 +54,10 @@ const activities = [
           <div className={styles.rule} aria-hidden="true" />
           <p className={styles.heroLead}> {t('an_independent_approach_to_selected_property')} </p>
           <nav className={atmosphere.sectionNavigation} aria-label={t('explore_real_estate')}>
-            <a href="#estates-perspective">{t('our_perspective')} <span aria-hidden="true">↗</span></a>
-            <a href="#activities">{t('our_activities')} <span aria-hidden="true">↗</span></a>
-            <a href="#international-reach">{t('international_reach')} <span aria-hidden="true">↗</span></a>
-            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true">↗</span></a>
+            <a href="#estates-perspective">{t('our_perspective')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#activities">{t('our_activities')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#international-reach">{t('international_reach')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
+            <a href="#introductory-call">{t('introductory_call')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
           </nav>
         </div>
         <p className={styles.heroSideNote}>{slogan('sloganPrivate')} {slogan('sloganIndependent')} {slogan('sloganInternational')}</p>

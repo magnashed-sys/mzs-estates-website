@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../../../components/ArrowUpRightIcon";
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "../../../../lib/supabase/client";
@@ -174,7 +175,7 @@ export default function DocumentManager({ projectId, offerings, documents, onRel
               ? offerings.find(o=>o.id === doc.offering_id)?.title || "Selected offering only"
               : "All members authorized for this project"}</p>
             <div className={styles.actions}>
-              <button className="admin-button" type="button" disabled={busy} onClick={()=>void openPrivate(doc)}>Open in new tab ↗</button>
+              <button className="admin-button" type="button" disabled={busy} onClick={()=>void openPrivate(doc)}>Open in new tab <ArrowUpRightIcon /></button>
               <button className="admin-button" type="button" disabled={busy} onClick={()=>void changePublication(doc)}>{doc.is_published ? "Unpublish" : "Publish"}</button>
               <button className="admin-button" type="button" disabled={busy} onClick={()=>void remove(doc)}>Delete</button>
             </div>

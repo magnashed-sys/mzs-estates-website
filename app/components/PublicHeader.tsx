@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "./ArrowUpRightIcon";
 import {useLocale, useTranslations} from 'next-intl';
 
 import { useEffect, useState } from "react";
@@ -100,11 +101,11 @@ const publicNavigation = [
         <nav className={styles.desktopNavigation} aria-label={t('main_navigation')}>
           {publicNavigation.map(({ href, label }) => (
             <a href={localizedPath(href, locale)} className={styles.navLink} key={href}>
-              {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
+              {label} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
             </a>
           ))}
           {dashboardHref && (
-            <a href={dashboardHref} className={styles.dashboardLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true">↗</span>
+            <a href={dashboardHref} className={styles.dashboardLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
             </a>
           )}
         </nav>
@@ -117,11 +118,11 @@ const publicNavigation = [
           <nav className={styles.mobilePanel} aria-label={t('mobile_main_navigation')}>
             {publicNavigation.map(({ href, label }) => (
               <a href={localizedPath(href, locale)} className={styles.mobileLink} key={href}>
-                {label} <span className={styles.navArrow} aria-hidden="true">↗</span>
+                {label} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
               </a>
             ))}
             {dashboardHref && (
-              <a href={dashboardHref} className={styles.mobileLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true">↗</span>
+              <a href={dashboardHref} className={styles.mobileLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
               </a>
             )}
           </nav>

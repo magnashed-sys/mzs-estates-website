@@ -1,3 +1,4 @@
+import ArrowUpRightIcon from "../../../../../components/ArrowUpRightIcon";
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireEstateAdmin } from '../../../../../../lib/security/estate-properties';
@@ -47,7 +48,7 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
       </dl>
       {property.managing_agent_url?.startsWith('https://') && <a className={s.agentCard} href={property.managing_agent_url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${property.managing_agent_name || 'managing agent'} website (opens in a new tab)`}>
         {property.managing_agent_logo === 'kramer-and-partners' && <span className={s.agentLogo}><img src="/partners/kramer-and-partners.svg" alt="Kramer & Partners" width={251} height={90} /></span>}
-        <span>Visit website ↗</span>
+        <span>Visit website <ArrowUpRightIcon /></span>
       </a>}
       {property.notes && <p className={s.note}>{property.notes}</p>}
     </section>

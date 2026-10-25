@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 
 import "./admin.css";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
@@ -608,7 +609,7 @@ export default function AdminPage() {
 
       {tab === "analytics" && <>
         <div className="admin-section-heading"><div><p className="eyebrow">Public website</p><h2>Website analytics.</h2></div><span className="admin-status">Report in Vercel</span></div>
-        <div className="admin-panel"><h3 className="admin-subtitle">Vercel Web Analytics</h3><p className="admin-intro">View visitors, page views and traffic sources in the existing Vercel report. Sign in with your authorised Vercel account.</p><a className="admin-button admin-button-primary admin-space-top" href={trafficReport} target="_blank" rel="noopener noreferrer">Open MZS Analytics ↗</a><p className="admin-help admin-space-top">Visitor figures are displayed in Vercel. They are not synchronised into this dashboard yet.</p></div>
+        <div className="admin-panel"><h3 className="admin-subtitle">Vercel Web Analytics</h3><p className="admin-intro">View visitors, page views and traffic sources in the existing Vercel report. Sign in with your authorised Vercel account.</p><a className="admin-button admin-button-primary admin-space-top" href={trafficReport} target="_blank" rel="noopener noreferrer">Open MZS Analytics <ArrowUpRightIcon /></a><p className="admin-help admin-space-top">Visitor figures are displayed in Vercel. They are not synchronised into this dashboard yet.</p></div>
         <div className="admin-project-grid"><article className="admin-panel"><p className="eyebrow">Public traffic</p><h3 className="admin-subtitle">Understand your audience.</h3><p className="admin-help">Use the report to explore visited pages, countries, devices and referral sources over your selected period.</p></article><article className="admin-panel"><p className="eyebrow">Private relationships</p><h3 className="admin-subtitle">Review actual enquiries.</h3><p className="admin-help">Access requests and account statuses are managed in Relationships. These are separate from website visitor counts.</p><button className="admin-button" onClick={() => openRequests("all")}>View access requests →</button></article></div>
       </>}
     </section>

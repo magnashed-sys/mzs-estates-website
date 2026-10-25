@@ -1,4 +1,5 @@
 "use client";
+import ArrowUpRightIcon from "./ArrowUpRightIcon";
 import {useTranslations} from 'next-intl';
 import LanguageSwitcher from "./LanguageSwitcher";
 import styles from "./HomeContactFooter.module.css";
@@ -18,10 +19,10 @@ export default function HomeContactFooter({ email }: Props) {
       <div className={styles.languages}><LanguageSwitcher inline /></div>
       <div className={styles.links}>
       <a className={styles.contact} href={`mailto:${address}`} aria-label={t("contactEmail", {address})}>
-        <span>{t('contact_mzs')}</span><span aria-hidden="true">↗</span>
+        <span>{t('contact_mzs')}</span><span aria-hidden="true"><ArrowUpRightIcon /></span>
       </a>
       <a className={styles.contact} href="/request-access" aria-label={navigation("request_access")}>
-        <span>{navigation('request_access')}</span><span aria-hidden="true">↗</span>
+        <span>{navigation('request_access')}</span><span aria-hidden="true"><ArrowUpRightIcon /></span>
       </a>
       </div>
     </footer>

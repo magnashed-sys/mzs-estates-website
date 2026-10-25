@@ -1,4 +1,5 @@
 'use client';
+import ArrowUpRightIcon from "../../../../components/ArrowUpRightIcon";
 import {useState,type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
 import {createClient} from '../../../../../lib/supabase/client';
@@ -20,7 +21,7 @@ export default function Documents({dealId,documents}:{dealId:string;documents:Lo
   }catch{if(uploaded)await db.storage.from(BUCKET).remove([path]);setNotice('Upload could not be completed. No document was published.');}
   finally{setBusy(false);}
  }
- return <>{documents.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Document</th><th>Version / status</th><th>Added</th></tr></thead><tbody>{documents.map(d=><tr key={d.id}><td><a href={'/admin/group/capital/deals/documents/'+d.id} target="_blank" rel="noopener noreferrer">{d.title} ↗</a><small>{label(d.category)}</small></td><td>{d.version_label}<small>{label(d.document_status)}</small></td><td>{date(d.created_at)}</td></tr>)}</tbody></table></div>:<p className={s.empty}>No PDFs attached yet. Source references in the deal are not downloadable documents.</p>}
+ return <>{documents.length?<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Document</th><th>Version / status</th><th>Added</th></tr></thead><tbody>{documents.map(d=><tr key={d.id}><td><a href={'/admin/group/capital/deals/documents/'+d.id} target="_blank" rel="noopener noreferrer">{d.title} <ArrowUpRightIcon /></a><small>{label(d.category)}</small></td><td>{d.version_label}<small>{label(d.document_status)}</small></td><td>{date(d.created_at)}</td></tr>)}</tbody></table></div>:<p className={s.empty}>No PDFs attached yet. Source references in the deal are not downloadable documents.</p>}
   <details><summary>Attach an agreement, payment schedule or supporting PDF</summary>
    <form className={s.form} onSubmit={upload}>
     <label>Document title<input name="title" required minLength={2} maxLength={160}/></label>
