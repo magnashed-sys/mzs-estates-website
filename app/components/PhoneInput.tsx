@@ -27,7 +27,7 @@ export default function PhoneInput({value, onChange, label, name, disabled, clas
         value={draft.country} onChange={e => change(draft.national, e.target.value)}>
         <option value="">{t('callingCode')}</option>
         {draft.country.startsWith('+') && <option value={draft.country}>{t('international')} ({draft.country})</option>}
-        {options.map(o => <option key={o.code} value={o.code}>{o.name} (+{callingCode(o.code)})</option>)}
+        {options.map(o => <option key={o.code} value={o.code}>{'\u2066+' + callingCode(o.code) + '\u2069'} · {o.name}</option>)}
       </select>
       <input ref={input} type="tel" dir="ltr" aria-label={t('number')} aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined}
         autoComplete="tel-national" placeholder={t('number')} value={draft.national} disabled={disabled} maxLength={100}
