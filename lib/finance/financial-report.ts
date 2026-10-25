@@ -3,6 +3,7 @@
  * Read-only; no guessing from party names, property owners or free-text fields.
  */
 import {buildFinancialCockpit, type Booking,type LeasePayment,type LoanDeal,type LoanInstalment,type LoanPayment,type CockpitData} from './financial-cockpit';
+import {allocateInterestCredits} from '../capital/interest-allocation';
 import type {ForecastContract} from '../estates/lease-cashflow';
 
 export type AttributedLease = ForecastContract & {id:string;issuer_id:string|null};
@@ -68,15 +69,20 @@ export function buildFinancialPhase2(args:{
   outstanding+=rest;if(invoice.due_date<asOf)overdue+=rest;
  }
  const dealById=new Map(chosenDeals.filter(d=>d.status==='active').map(d=>[d.id,d]));
- const paidByInstalment=new Map<string,number>();
- for(const p of chosenLoanPayments)if(!p.is_void){
-  paidByInstalment.set(p.instalment_id,(paidByInstalment.get(p.instalment_id)||0)+cents(p.amount));
+ const byLoan=new Map<string,ReturnType<typeof allocateInterestCredits>>();
+ for(const [id] of dealById){
+  const loanTerms=chosenInstalments.filter(i=>i.deal_id===id);
+  const loanTermIds=new Set(loanTerms.map(t=>t.id));
+  const loanCash=chosenLoanPayments.filter(p=>loanTermIds.has(p.instalment_id));
+  byLoan.set(id,allocateInterestCredits(loanTerms,loanCash));
  }
  let dueIncome=0,dueCost=0;
  for(const item of chosenInstalments){
   if(item.kind!=='interest'||item.due_date>=asOf)continue;
   const deal=dealById.get(item.deal_id);if(!deal)continue;
-  const due=Math.max(0,cents(item.amount)-(paidByInstalment.get(item.id)||0));
+  const remaining=byLoan.get(item.deal_id)?.byId.get(item.id)?.remaining;
+  if(remaining===undefined)throw new Error('Missing interest allocation');
+  const due=Math.round(remaining*100);
   if(deal.direction==='provided')dueIncome+=due;else dueCost+=due;
  }
  const total=(key:keyof CockpitData['rows'][number])=>base.rows.reduce((s,x)=>s+Number(x[key]),0);
