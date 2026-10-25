@@ -64,6 +64,8 @@ type Presentation = {
 
 export default async function PrivateProjectPage({ params }: Props) {
   const t = await getTranslations("ProjectUI");
+  const privateT = await getTranslations("Private");
+  const mapT = await getTranslations("MarinaMap");
   const locale = await getLocale();
   const villaPhotoChapters = localizedPhotoChapters(t);
   const villaBase = "/properties/villa-la-nucia";
@@ -136,7 +138,7 @@ export default async function PrivateProjectPage({ params }: Props) {
     "marina-botafoch-apartment": {
       label: t("p359"),
       destination: t("p360"),
-      title: "Marina Botafoch Apartment",
+      title: privateT("marinaApartmentTitle"),
       introduction: t("p362"),
       hero: `${marinaBase}/hero-living-kitchen.webp`,
       heroAlt: t("p363"),
@@ -415,6 +417,60 @@ export default async function PrivateProjectPage({ params }: Props) {
               <a href="mailto:info@mzsgroup.eu?subject=MZS%20Private%20Collection%20%E2%80%94%20Property%20Enquiry">{t("p419")}</a>
             </div>
           </section>
+          {slug === "marina-botafoch-apartment" && (
+            <section className={styles.marinaMapSection} aria-labelledby="marina-map-heading">
+              <div className={styles.marinaMapIntroduction}>
+                <p className={styles.kicker}>MARINA BOTAFOCH / IBIZA</p>
+                <h2 id="marina-map-heading">{mapT("heading")}</h2>
+                <p>{mapT("intro")}</p>
+              </div>
+              <div className={styles.marinaMapLayout}>
+                <div className={styles.marinaMapMain}>
+                  <div className={styles.marinaMapFrame}>
+                    <iframe
+                      src="https://maps.google.com/maps?q=Marina%20Botafoch%20Ibiza&z=14&output=embed"
+                      title="Marina Botafoch Ibiza neighbourhood map"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      allowFullScreen
+                    />
+                  </div>
+                  <p className={styles.marinaMapNote}>{mapT("note")}</p>
+                  <a className={styles.marinaMapLink}
+                    href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoch%20Ibiza"
+                    target="_blank" rel="noopener noreferrer">
+                    {mapT("open")} <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+                <div className={styles.marinaNearby}>
+                  <a href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoch%20Ibiza"
+                     target="_blank" rel="noopener noreferrer" className={styles.marinaNearbyItem}>
+                    <span className={styles.marinaNearbyIndex}>01 /</span>
+                    <strong>Marina Botafoch</strong>
+                    <span>{mapT("waterfront")}</span>
+                  </a>
+                  <a href="https://www.google.com/maps/search/?api=1&query=Talamanca%20Beach%20Ibiza"
+                     target="_blank" rel="noopener noreferrer" className={styles.marinaNearbyItem}>
+                    <span className={styles.marinaNearbyIndex}>02 /</span>
+                    <strong>Talamanca Beach</strong>
+                    <span>{mapT("beach")}</span>
+                  </a>
+                  <a href="https://www.google.com/maps/search/?api=1&query=Dalt%20Vila%20Ibiza"
+                     target="_blank" rel="noopener noreferrer" className={styles.marinaNearbyItem}>
+                    <span className={styles.marinaNearbyIndex}>03 /</span>
+                    <strong>Dalt Vila</strong>
+                    <span>{mapT("heritage")}</span>
+                  </a>
+                  <a href="https://www.google.com/maps/search/?api=1&query=Pacha%20Ibiza"
+                     target="_blank" rel="noopener noreferrer" className={styles.marinaNearbyItem}>
+                    <span className={styles.marinaNearbyIndex}>04 /</span>
+                    <strong>Pacha Ibiza</strong>
+                    <span>{mapT("nightlife")}</span>
+                  </a>
+                </div>
+              </div>
+            </section>
+          )}
         </>
       ) : (
         <section className={styles.fallback}>

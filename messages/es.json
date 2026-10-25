@@ -205,6 +205,7 @@
     "failed": "No se puede iniciar sesión en este momento. Inténtalo de nuevo."
   },
   "Private": {
+    "marinaApartmentTitle": "Apartamento de 2–3 dormitorios en Ibiza España",
     "rentals": "Viviendas vacacionales",
     "stays": "Estancias privadas",
     "rental_description": "Residencias privadas disponibles exclusivamente para tu cuenta.",
@@ -1153,5 +1154,15 @@
     "chooseCode": "Selecciona primero un prefijo de país.",
     "invalidPhone": "Comprueba el número de teléfono y el prefijo del país.",
     "international": "Internacional"
+  },
+  "MarinaMap": {
+    "heading": "Una ubicación excepcional en Ibiza",
+    "intro": "Descubre el puerto deportivo, la playa y el casco histórico de Ibiza, muy cerca de Marina Botafoch.",
+    "note": "El mapa muestra la zona, no la dirección exacta del apartamento. Se facilita de forma privada.",
+    "open": "Explorar en Google Maps",
+    "waterfront": "Puerto deportivo y gastronomía",
+    "beach": "Playa y paseo marítimo",
+    "heritage": "Casco histórico",
+    "nightlife": "Ocio nocturno y entretenimiento"
   }
 }

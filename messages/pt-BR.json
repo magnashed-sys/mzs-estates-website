@@ -205,6 +205,7 @@
     "confirmationBody": "Agradecemos seu interesse em {brand}. Nossa equipe entrará em contato por e-mail para agendar um horário conveniente para sua conversa inicial."
   },
   "Private": {
+    "marinaApartmentTitle": "Apartamento com 2 a 3 quartos em Ibiza Espanha",
     "rentals": "Imóveis para temporada",
     "stays": "Estadias privadas",
     "rental_description": "Residências privadas disponíveis exclusivamente para sua conta.",
@@ -1153,5 +1154,15 @@
     "chooseCode": "Selecione primeiro o código do país.",
     "invalidPhone": "Confira o número de telefone e o código do país.",
     "international": "Internacional"
+  },
+  "MarinaMap": {
+    "heading": "Uma localização privilegiada em Ibiza",
+    "intro": "Descubra a marina, a praia e o centro histórico de Ibiza, tudo perto de Marina Botafoch.",
+    "note": "O mapa apresenta a região, não o endereço exato do apartamento, que é informado em privado.",
+    "open": "Explorar no Google Maps",
+    "waterfront": "Marina e restaurantes",
+    "beach": "Praia e calçadão",
+    "heritage": "Centro histórico",
+    "nightlife": "Vida noturna e entretenimento"
   }
 }

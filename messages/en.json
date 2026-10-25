@@ -205,6 +205,7 @@
     "failed": "Unable to sign in at this time. Please try again."
   },
   "Private": {
+    "marinaApartmentTitle": "2–3 Bedroom Apartment in Ibiza Spain",
     "rentals": "Holiday Homes",
     "stays": "Private stays",
     "rental_description": "Private residences available exclusively to your account.",
@@ -1153,5 +1154,15 @@
     "chooseCode": "Select a country code first.",
     "invalidPhone": "Check the phone number and country code.",
     "international": "International"
+  },
+  "MarinaMap": {
+    "heading": "An exceptional Ibiza setting",
+    "intro": "Discover the marina lifestyle, the beach and the historic heart of Ibiza Town — all close to Marina Botafoch.",
+    "note": "Neighbourhood map only. The apartment’s exact address is shared privately.",
+    "open": "Explore on Google Maps",
+    "waterfront": "Waterfront & dining",
+    "beach": "Beach & promenade",
+    "heritage": "Historic Ibiza Town",
+    "nightlife": "Nightlife & entertainment"
   }
 }
