@@ -15,11 +15,12 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
  if(!/^[0-9a-f-]{36}$/i.test(id))notFound();
  const {data:deal,error}=await db.from('mzs_capital_deals').select('*').eq('id',id).single();if(error||!deal)notFound();
  const d=deal as Deal;
- const [schedule,docs,access,relationships]=await Promise.all([
+ const [schedule,docs,access,relationships,entitiesResult]=await Promise.all([
   db.from('mzs_capital_instalments').select('*',{count:'exact'}).eq('deal_id',id).order('due_date').order('created_at').limit(500),
   db.from('mzs_capital_documents').select('id,title,category,version_label,document_status,created_at',{count:'exact'}).eq('deal_id',id).order('created_at',{ascending:false}).limit(500),
   db.from('mzs_capital_client_access').select('*',{count:'exact'}).eq('deal_id',id).order('created_at').limit(500),
-  db.from('profiles').select('id,email,full_name,role,is_active',{count:'exact'}).in('role',['client','partner']).order('email').limit(1000)
+  db.from('profiles').select('id,email,full_name,role,is_active',{count:'exact'}).in('role',['client','partner']).order('email').limit(1000),
+  db.from('mzs_lease_issuers').select('id,name,kind').order('name').limit(1000)
  ]);
  const entries=(schedule.data||[]) as Instalment[];
  const paymentResult=entries.length?await db.from('mzs_capital_payments').select('*',{count:'exact'}).in('instalment_id',entries.map(x=>x.id)).order('created_at',{ascending:false}).limit(1000):{data:[],error:null,count:0};
@@ -36,7 +37,7 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
   <dl className={s.facts}>{[['Original principal',money(d.principal)],['Annual interest',Number(d.annual_rate)+'%'],['Lender',d.lender],['Borrower',d.borrower],['Agreement date',date(d.agreement_date)],['Funding date (source)',date(d.start_date)],['Maturity',date(d.maturity_date)],['Currency','EUR']].map(([a,b])=><div key={a}><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
   {query.mail&&<p className={s.notice} role="status">{query.mail==='sent'?'Notification accepted by the mail server. Inbox delivery is not yet confirmed.':'Access saved. Email queued; delivery has not been confirmed. Preview email delivery is disabled.'}</p>}
   <p className={s.notice}>Original principal is a contractual figure, not a reconciled outstanding balance. A schedule, due date or source deposit entry does not confirm that money was received or paid.</p>
-  <section className={s.section}><h2>Terms & source review</h2><p className={s.notes}>{d.notes||'No additional terms recorded.'}</p><h3>Source references</h3><p className={s.notes}>{d.source_reference||'Not yet recorded.'}</p><details><summary>Edit deal details</summary><DealForm deal={d}/></details></section>
+  <section className={s.section}><h2>Terms & source review</h2><p className={s.notes}>{d.notes||'No additional terms recorded.'}</p><h3>Source references</h3><p className={s.notes}>{d.source_reference||'Not yet recorded.'}</p><details><summary>Edit deal details</summary><DealForm deal={d} entities={entitiesResult.error?[]:(entitiesResult.data||[])}/></details></section>
   <section className={s.section}><h2>Payment schedule</h2><p>{d.direction==='provided'?'Expected receipts from the borrower.':'Expected payments to the lender.'} Amounts and dates are entered from the supplied schedule; no automatic interest calculation is applied.</p>
    {!complete?<p role="alert">The complete schedule/payment history could not be loaded. Payment actions and totals are unavailable.</p>:<>
    <div className={s.facts}><div><dt>Scheduled interest</dt><dd>{money(entries.filter(x=>x.kind==='interest').reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Confirmed cash receipts / payments</dt><dd>{money(payments.filter(x=>!x.is_void).reduce((a,x)=>a+Number(x.amount),0))}</dd></div><div><dt>Past due, not confirmed</dt><dd>{entries.filter(x=>x.due_date<today&&(x.kind==='interest'?(interest.byId.get(x.id)?.remaining??Number(x.amount)):Math.round((Number(x.amount)-paidFor(x.id,payments))*100)/100)>0).length} instalments</dd></div></div>
