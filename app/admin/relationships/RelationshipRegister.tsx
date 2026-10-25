@@ -6,6 +6,7 @@ import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {saveRelationship} from './actions';
 import DeleteRelationship from './DeleteRelationship';
+import CompanyFields from './CompanyFields';
 import {addressFields, formatBillingAddress, normalizedEmail, relationshipRoles, unextendedMembers, type RelationshipRecord, type RelationshipMember} from '../../../lib/relationships/model';
 import s from '../group/estates/contracts/contracts.module.css';
 
@@ -36,7 +37,7 @@ export default function RelationshipRegister({relationships, members = [], initi
   }
   const matchedAccount = !draft.profile_id && draft.email ? members.find(m => normalizedEmail(m.email) === normalizedEmail(draft.email)) : undefined;
   const match = (values: string[]) => values.join(' ').toLowerCase().includes(search.trim().toLowerCase());
-  const visible = relationships.filter(r => (filter === 'all' || r.kind === filter) && match([r.name,r.email,r.reference,r.address]));
+  const visible = relationships.filter(r => (filter === 'all' || r.kind === filter) && match([r.name,r.email,r.reference,r.address,...Object.values(r.company_details || {}).filter((v):v is string=>typeof v==='string')]));
   const existingAccounts = unextendedMembers(relationships, members).filter(m => filter !== 'company' && match([m.full_name || '',m.email]));
   const accountLabel = (id?: string | null) => {const m = members.find(m => m.id === id);return m ? `${m.full_name || m.email} · ${m.is_active === false ? 'Inactive' : 'Existing login'}` : 'No linked login';};
   return <>
@@ -63,9 +64,11 @@ export default function RelationshipRegister({relationships, members = [], initi
         <label className={s.field}><span>Relationship type</span><select value={draft.kind} onChange={e=>change('kind',e.target.value)}><option value="person">Person</option><option value="company">Company</option></select></label>
         <label className={s.field}><span>Email (optional)</span><input type="email" maxLength={254} value={draft.email} onChange={e=>change('email',e.target.value)}/></label>
         <PhoneInput key={editing?.id || draft.profile_id || draft.kind} className={s.field} label="Phone (optional)" value={draft.phone} onChange={value=>change('phone',value)}/>
-        <div className={s.wide}><h3>Billing address (optional)</h3><div className={s.grid}>{Object.entries(addressFields).map(([key,[label,max,autoComplete]])=><label className={s.field} key={key}><span>{label}</span>{key==='country'?<CountrySelect value={draft.billing_address?.country || ''} onChange={value=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,country:value}}))}/>:<input maxLength={max} autoComplete={autoComplete} value={draft.billing_address?.[key as keyof typeof addressFields] || ''} onChange={e=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,[key]:e.target.value}}))}/>}</label>)}</div>
+        {draft.kind==='company'&&<CompanyFields record={draft} onChange={value=>change('company_details',value)} section="identity"/>}
+        <div className={s.wide}><h3>{draft.kind==='company'?'Main address (default for invoices)':'Billing address'} (optional)</h3><div className={s.grid}>{Object.entries(addressFields).map(([key,[label,max,autoComplete]])=><label className={s.field} key={key}><span>{label}</span>{key==='country'?<CountrySelect value={draft.billing_address?.country || ''} onChange={value=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,country:value}}))}/>:<input maxLength={max} autoComplete={autoComplete} value={draft.billing_address?.[key as keyof typeof addressFields] || ''} onChange={e=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,[key]:e.target.value}}))}/>}</label>)}</div>
         {!draft.billing_address&&draft.address&&<p className={s.help}>The existing address is retained until you enter separate address fields.</p>}
         <p className={s.preview} style={{whiteSpace:'pre-line'}}>{draft.billing_address?formatBillingAddress(draft.billing_address)||'No billing address supplied.':draft.address||'No billing address supplied.'}</p></div>
+        {draft.kind==='company'&&<CompanyFields record={{...draft,address:draft.billing_address?formatBillingAddress(draft.billing_address):draft.address}} onChange={value=>change('company_details',value)} section="delivery"/>}
         <label className={s.field}><span>Reference (optional)</span><input maxLength={200} value={draft.reference} onChange={e=>change('reference',e.target.value)}/></label>
         <label className={s.field}><span>{draft.kind === 'company' ? 'Contact account (optional)' : 'Existing client account (optional)'}</span><select value={draft.profile_id || ''} onChange={e=>{
           const m=members.find(m=>m.id===e.target.value);

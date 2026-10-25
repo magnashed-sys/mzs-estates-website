@@ -13,7 +13,7 @@ export async function importIssuerPerson(source:string) {
 const path = '/admin/group/estates/contracts';
 export async function saveContract(input: Record<string, unknown>, id?: string, version?: number) {
   const { db } = await requireContractAdmin();
-  const allowed = ['title','property_id','unit_ids','tenant_profile_id','tenant_relationship_id','tenant_name','tenant_address','tenant_email','issuer_id','issuer_name','issuer_address','issuer_iban','issuer_tax_id','contract_date','lease_start','lease_end','first_period','first_generation_date','max_terms','payment_days','payment_conditions','customer_reference','invoice_subject','invoice_language','planning_color','deposit','prorate','lines','notes'];
+  const allowed = ['title','property_id','unit_ids','tenant_profile_id','tenant_relationship_id','tenant_name','tenant_address','tenant_email','tenant_tax_id','tenant_attention','issuer_id','issuer_name','issuer_address','issuer_iban','issuer_tax_id','contract_date','lease_start','lease_end','first_period','first_generation_date','max_terms','payment_days','payment_conditions','customer_reference','invoice_subject','invoice_language','planning_color','deposit','prorate','lines','notes'];
   const payload = Object.fromEntries(allowed.filter(key => key in input).map(key => [key,input[key]]));
   const q = id ? db.from('mzs_lease_contracts').update(payload).eq('id',id).eq('version',version).eq('status','draft') : db.from('mzs_lease_contracts').insert(payload);
   const { data,error } = await q.select('id').maybeSingle();

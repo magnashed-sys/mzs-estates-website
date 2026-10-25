@@ -241,5 +241,35 @@ assert.equal((await value("select has_function_privilege('anon','public.mzs_memb
 assert.equal((await value("select prosecdef from pg_proc where oid='public.mzs_member_relationship_overview()'::regprocedure")).prosecdef,false);
 console.log('PASS unified relationships: old data retained, one person/account, normalized email deduplication, company contacts reuse accounts, safe tenant account propagation, private drafts, account-bound overview, issued invoice balance, no internal data, inactive/anon/admin rejection');
 
+// Optional company data and tenant invoice copies remain isolated and immutable.
+const companyBefore=await snapshots(['mzs_lease_relationships','mzs_lease_contracts','mzs_lease_invoice_drafts','mzs_lease_invoices']);
+const addressSql=fs.readFileSync('supabase/migrations/20261025111309_relationship_address_cleanup.sql','utf8');
+await db.exec(addressSql.slice(addressSql.indexOf('create function mzs_private.valid_relationship_address'),addressSql.indexOf('alter table public.mzs_lease_relationships add constraint')));
+await db.exec(fs.readFileSync('supabase/migrations/20261025133509_company_billing_details.sql','utf8'));
+assert.deepEqual(await snapshots(['mzs_lease_relationships','mzs_lease_contracts','mzs_lease_invoice_drafts','mzs_lease_invoices'],{mzs_lease_relationships:['company_details'],mzs_lease_contracts:['tenant_tax_id','tenant_attention']}),companyBefore,'additive migration preserves every existing field and invoice snapshot');
+await db.exec("set role authenticated;select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)");
+const details={tax_id:'NL123456789B01',registration_number:'12345678',attention:'Accounts',invoice_email:'invoice@example.invalid',invoice_address:{street:'Invoice street',city:'Madrid'},correspondence_address:{city:'Amsterdam'}};
+await run('update mzs_lease_relationships set company_details=$1 where id=$2',[JSON.stringify(details),linkedCompany.id]);
+assert.deepEqual((await value(`select company_details from mzs_lease_relationships where id='${linkedCompany.id}'`)).company_details,details);
+for(const bad of [null,[],{unknown:'x'},{tax_id:'x'.repeat(61)},{attention:'line\nbreak'},{invoice_email:'one@example.invalid,two@example.invalid'},{correspondence_email:'no-email'},{website:'http://example.invalid'},{invoice_address:{street:42}},{correspondence_address:{unknown:'x'}}])await assert.rejects(run('update mzs_lease_relationships set company_details=$1 where id=$2',[JSON.stringify(bad),linkedCompany.id]),/constraint/);
+await assert.rejects(run('update mzs_lease_contracts set tenant_tax_id=$1 where id=$2',['NLCHANGED',centralContract.id]),/locked/);
+await assert.rejects(run('update mzs_lease_contracts set tenant_attention=$1 where id=$2',['Changed attention',centralContract.id]),/locked/);
+const billingContract=await value(insert.replaceAll('2028','2060').replaceAll('2027','2059'));
+await run('update mzs_lease_contracts set tenant_relationship_id=$1,issuer_id=$2,tenant_tax_id=$3,tenant_attention=$4 where id=$5',[linkedCompany.id,business.id,details.tax_id,details.attention,billingContract.id]);
+await db.exec(`update mzs_lease_contracts set status='active' where id='${billingContract.id}'`);
+await generateAt('2060-04-30');
+const billingSnapshot=(await value(`select snapshot from mzs_lease_invoice_drafts where contract_id='${billingContract.id}' limit 1`)).snapshot;
+assert.equal(billingSnapshot.tenant_tax_id,details.tax_id);assert.equal(billingSnapshot.tenant_attention,details.attention);
+await run('update mzs_lease_relationships set company_details=$1 where id=$2',[JSON.stringify({...details,tax_id:'NLCHANGED'}),linkedCompany.id]);
+assert.deepEqual((await value(`select snapshot from mzs_lease_invoice_drafts where contract_id='${billingContract.id}' limit 1`)).snapshot,billingSnapshot);
+for(const member of ['11111111-1111-4111-8111-111111111112','11111111-1111-4111-8111-111111111113']){
+ await run("select set_config('request.jwt.claim.sub',$1,false)",[member]);
+ assert.equal((await run('select company_details from mzs_lease_relationships')).rows.length,0);
+ assert.equal((await run("update mzs_lease_relationships set company_details='{}' returning id")).rows.length,0);
+}
+await db.exec('set role anon');await assert.rejects(run('select company_details from mzs_lease_relationships'),/permission denied/);
+await db.exec('reset role');assert.equal((await value("select has_function_privilege('anon','mzs_private.valid_company_details(jsonb)','execute') as allowed")).allowed,false);
+console.log('PASS company data: optional fields, invalid values rejected, RLS, preserved rows, locked tenant details and immutable invoice copies');
+
 await db.close();console.log('PASS lease draft/activation, overlap, replacement duplicate guard, cutover, catch-up, max terms, end date, leap/month ends, prorating, VAT, placeholders, locked terms, review audit, admin/client/inactive/anon permissions');
 })().catch(e=>{console.error(e);process.exit(1)});
