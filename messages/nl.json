@@ -205,6 +205,7 @@
     "failed": "Inloggen is momenteel niet mogelijk. Probeer het opnieuw."
   },
   "Private": {
+    "marinaApartmentTitle": "Appartement met 2–3 slaapkamers op Ibiza Spanje",
     "rentals": "Vakantiewoningen",
     "stays": "Privéverblijven",
     "rental_description": "Privéwoningen die uitsluitend voor jouw account beschikbaar zijn.",
@@ -1153,5 +1154,15 @@
     "chooseCode": "Selecteer eerst een landcode.",
     "invalidPhone": "Controleer het telefoonnummer en de landcode.",
     "international": "Internationaal"
+  },
+  "MarinaMap": {
+    "heading": "Een bijzondere locatie op Ibiza",
+    "intro": "Ontdek de jachthaven, het strand en de historische binnenstad van Ibiza, allemaal in de omgeving van Marina Botafoch.",
+    "note": "De kaart toont de omgeving, niet het exacte adres van het appartement. Dat delen we privé.",
+    "open": "Bekijk op Google Maps",
+    "waterfront": "Jachthaven & restaurants",
+    "beach": "Strand & boulevard",
+    "heritage": "Historische binnenstad",
+    "nightlife": "Uitgaan & entertainment"
   }
 }
