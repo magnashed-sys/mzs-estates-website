@@ -3,6 +3,12 @@ import {normalizeIssuer,normalizeInvoicePrefix,issuerSaveError} from '../../../.
 
 import { revalidatePath } from 'next/cache';
 import { requireContractAdmin } from '../../../../../lib/security/estate-contracts';
+import {readIssuerPerson} from '../../../../../lib/estates/read-issuer-person';
+
+export async function importIssuerPerson(source:string) {
+ const {db,user}=await requireContractAdmin();
+ return readIssuerPerson(db,user.id,source);
+}
 
 const path = '/admin/group/estates/contracts';
 export async function saveContract(input: Record<string, unknown>, id?: string, version?: number) {

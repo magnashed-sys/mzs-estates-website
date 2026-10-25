@@ -1,6 +1,6 @@
 export const issuerFields = {
  trading_name: ['Trading name', 180], legal_form: ['Legal form', 100], country: ['Country of establishment', 120],
- street: ['Street', 200], house_number: ['House number', 30], address_extra: ['Address addition', 100], postal_code: ['Postal code', 30], city: ['City', 120],
+ street: ['Street', 200], house_number: ['House number', 30], address_extra: ['Address addition', 100], postal_code: ['Postal code', 30], city: ['City', 120], region: ['Region / province', 120],
  contact_name: ['Contact person', 180], email: ['Contact email', 200], phone: ['Telephone', 60], website: ['Website (https://)', 500],
  account_holder: ['Account holder', 200], bic: ['BIC / SWIFT', 11], payment_instructions: ['Default payment instructions', 1000],
  billing_address: ['Different billing address (optional)', 1000], reply_to: ['Invoice reply-to email (optional)', 200],
@@ -28,7 +28,7 @@ export function normalizeIssuer(input:Record<string,unknown>) {
  const name=text('name',200),iban=text('iban',40).replace(/\s/g,'').toUpperCase();
  const structured=[details.street,details.house_number,details.postal_code,details.city].some(Boolean);
  if(structured&&(!details.street||!details.city||!details.country))throw new Error('Complete street, city and country, or use the existing address.');
- const address=structured?[[details.street,details.house_number,details.address_extra].filter(Boolean).join(' '),[details.postal_code,details.city].filter(Boolean).join(' '),details.country].filter(Boolean).join('\n'):text('address',1000);
+ const address=structured?[[details.street,details.house_number,details.address_extra].filter(Boolean).join(' '),[details.postal_code,details.city].filter(Boolean).join(' '),details.region,details.country].filter(Boolean).join('\n'):text('address',1000);
  if(name.length<2||address.length<2||iban.length<5)throw new Error('Complete the legal name, address and IBAN.');
  return {name,address,iban,tax_id:text('tax_id',60),registration_number:text('registration_number',100),kind,details};
 }
