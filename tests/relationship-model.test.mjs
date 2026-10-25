@@ -17,3 +17,10 @@ test('existing accounts appear once when extended; company contacts do not repla
  const members=[{id:'one'},{id:'two'},{id:'three'}];const records=[{kind:'person',profile_id:'one'},{kind:'company',profile_id:'two'}];
  assert.equal(api.unextendedMembers(records,members).map(x=>x.id).join(','),'two,three');
 });
+
+test('structured addresses format all fields while legacy addresses survive unrelated edits',()=>{
+ const legacy=api.normalizeRelationship({...base,address:'Existing address\nCity'});assert.equal(legacy.address,'Existing address\nCity');assert.equal(legacy.billing_address,undefined);
+ const r=api.normalizeRelationship({...base,address:'ignored',billing_address:{street:' Street ',house_number:'12B',addition:'Unit 3',postal_code:'1234 AB',city:'City',region:'Region',country:'Country'}});assert.equal(r.address,'Street 12B\nUnit 3\n1234 AB City\nRegion\nCountry');assert.equal(r.billing_address.street,'Street');
+ assert.equal(api.normalizeRelationship({...base,address:'Old',billing_address:{}}).address,'');
+ for(const bad of [null,[],{unknown:'x'},{city:1},{street:'line\nbreak'},{postal_code:'x'.repeat(31)}])assert.throws(()=>api.normalizeRelationship({...base,billing_address:bad}));
+});

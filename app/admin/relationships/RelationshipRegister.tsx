@@ -3,14 +3,16 @@ import {useState, useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {saveRelationship} from './actions';
-import {normalizedEmail, relationshipRoles, unextendedMembers, type RelationshipRecord, type RelationshipMember} from '../../../lib/relationships/model';
+import DeleteRelationship from './DeleteRelationship';
+import {addressFields, formatBillingAddress, normalizedEmail, relationshipRoles, unextendedMembers, type RelationshipRecord, type RelationshipMember} from '../../../lib/relationships/model';
 import s from '../group/estates/contracts/contracts.module.css';
 
 type Draft = Omit<RelationshipRecord, 'id' | 'version'>;
 type Props = {relationships: RelationshipRecord[]; members?: RelationshipMember[]; initialKind?: 'person' | 'company'; createInitially?: boolean; initialEdit?: string; initialProfile?: string; initialFilter?: 'all' | 'company'};
 function newDraft(kind: 'person' | 'company', member?: RelationshipMember): Draft {
-  return {kind, name: member?.full_name || member?.email || '', email: member?.email || '', address:'', phone:'', reference:'', roles:member?.role==='partner'?['client','partner']:['client'], profile_id:member?.id || null};
+  return {kind, name: member?.full_name || member?.email || '', email: member?.email || '', address:'', billing_address:{}, phone:'', reference:'', roles:member?.role==='partner'?['client','partner']:['client'], profile_id:member?.id || null};
 }
+function editable(record: RelationshipRecord): Draft {return {...record,billing_address:Object.values(record.billing_address || {}).some(Boolean)?record.billing_address:undefined};}
 const roleLabels: Record<string,string> = {client:'Client', tenant:'Tenant', owner:'Owner', investor:'Investor', partner:'Partner'};
 
 export default function RelationshipRegister({relationships, members = [], initialKind = 'person', createInitially = false, initialEdit, initialProfile, initialFilter = 'all'}: Props) {
@@ -18,7 +20,7 @@ export default function RelationshipRegister({relationships, members = [], initi
   const initialRecord = relationships.find(r => r.id === initialEdit || (r.kind === 'person' && r.profile_id === initialProfile));
   const initialMember = members.find(m => m.id === initialProfile);
   const [editing, setEditing] = useState<RelationshipRecord | null | undefined>(initialRecord || (createInitially || initialMember ? null : undefined));
-  const [draft, setDraft] = useState<Draft>(initialRecord || newDraft(initialKind, initialMember));
+  const [draft, setDraft] = useState<Draft>(initialRecord ? editable(initialRecord) : newDraft(initialKind, initialMember));
   const [filter, setFilter] = useState<'all' | 'person' | 'company'>(initialFilter);
   const [search, setSearch] = useState('');
   const [pending, start] = useTransition();
@@ -28,7 +30,7 @@ export default function RelationshipRegister({relationships, members = [], initi
   const [selected, setSelected] = useState<string | null>(initialRecord?.id || null);
   function change(key: keyof Draft, value: Draft[keyof Draft]) {setDraft(previous => ({...previous, [key]:value}));}
   function open(record: RelationshipRecord | null, kind: 'person' | 'company' = 'person', member?: RelationshipMember) {
-    setEditing(record); setDraft(record || newDraft(kind, member)); setError(''); setExistingId(undefined); setNotice(''); setSelected(record?.id || null);
+    setEditing(record); setDraft(record ? editable(record) : newDraft(kind, member)); setError(''); setExistingId(undefined); setNotice(''); setSelected(record?.id || null);
   }
   const matchedAccount = !draft.profile_id && draft.email ? members.find(m => normalizedEmail(m.email) === normalizedEmail(draft.email)) : undefined;
   const match = (values: string[]) => values.join(' ').toLowerCase().includes(search.trim().toLowerCase());
@@ -59,7 +61,9 @@ export default function RelationshipRegister({relationships, members = [], initi
         <label className={s.field}><span>Relationship type</span><select value={draft.kind} onChange={e=>change('kind',e.target.value)}><option value="person">Person</option><option value="company">Company</option></select></label>
         <label className={s.field}><span>Email (optional)</span><input type="email" maxLength={254} value={draft.email} onChange={e=>change('email',e.target.value)}/></label>
         <label className={s.field}><span>Phone (optional)</span><input type="tel" maxLength={100} value={draft.phone} onChange={e=>change('phone',e.target.value)}/></label>
-        <label className={s.field}><span>Billing address (optional)</span><textarea maxLength={1000} value={draft.address} onChange={e=>change('address',e.target.value)}/></label>
+        <div className={s.wide}><h3>Billing address (optional)</h3><div className={s.grid}>{Object.entries(addressFields).map(([key,[label,max,autoComplete]])=><label className={s.field} key={key}><span>{label}</span><input maxLength={max} autoComplete={autoComplete} value={draft.billing_address?.[key as keyof typeof addressFields] || ''} onChange={e=>setDraft(previous=>({...previous,billing_address:{...previous.billing_address,[key]:e.target.value}}))}/></label>)}</div>
+        {!draft.billing_address&&draft.address&&<p className={s.help}>The existing address is retained until you enter separate address fields.</p>}
+        <p className={s.preview} style={{whiteSpace:'pre-line'}}>{draft.billing_address?formatBillingAddress(draft.billing_address)||'No billing address supplied.':draft.address||'No billing address supplied.'}</p></div>
         <label className={s.field}><span>Reference (optional)</span><input maxLength={200} value={draft.reference} onChange={e=>change('reference',e.target.value)}/></label>
         <label className={s.field}><span>{draft.kind === 'company' ? 'Contact account (optional)' : 'Existing client account (optional)'}</span><select value={draft.profile_id || ''} onChange={e=>{
           const m=members.find(m=>m.id===e.target.value);
@@ -79,9 +83,9 @@ export default function RelationshipRegister({relationships, members = [], initi
       <label className={s.field}><span>Search relationships</span><input type="search" value={search} disabled={pending} onChange={e=>setSearch(e.target.value)}/></label>
       <label className={s.field}><span>Show</span><select value={filter} disabled={pending} onChange={e=>setFilter(e.target.value as typeof filter)}><option value="all">People &amp; companies</option><option value="person">People</option><option value="company">Companies</option></select></label>
     </div>
-    <div className={s.tableWrap}><table className={s.table}><thead><tr><th>Name</th><th>Roles</th><th>Email</th><th>Account / dossier</th></tr></thead><tbody>
-      {visible.map(r=><tr key={r.id} aria-selected={selected===r.id}><td><button disabled={pending} onClick={()=>open(r)}>{r.name}</button><small>{r.kind==='company'?'Company':'Person'}{r.reference?` · ${r.reference}`:''}</small></td><td>{(r.roles || []).map(role=>roleLabels[role] || role).join(', ')}</td><td>{r.email || '—'}</td><td>{accountLabel(r.profile_id)}{r.profile_id&&<small><Link href={`/admin/relationships/${r.profile_id}`}>Open account dossier →</Link></small>}</td></tr>)}
-      {existingAccounts.map(m=><tr key={m.id}><td><button disabled={pending} onClick={()=>open(null,'person',m)}>{m.full_name || m.email}</button><small>Person · existing account</small></td><td>{m.role==='partner'?'Partner':'Client'}</td><td>{m.email}</td><td><Link href={`/admin/relationships/${m.id}`}>Open relationship dossier →</Link><small>{m.is_active===false?'Inactive':'Active'} · Add roles and billing details to this relationship</small></td></tr>)}
+    <div className={s.tableWrap}><table className={s.table}><thead><tr><th>Name</th><th>Roles</th><th>Email</th><th>Account / dossier</th><th>Remove</th></tr></thead><tbody>
+      {visible.map(r=><tr key={r.id} aria-selected={selected===r.id}><td><button disabled={pending} onClick={()=>open(r)}>{r.name}</button><small>{r.kind==='company'?'Company':'Person'}{r.reference?` · ${r.reference}`:''}</small></td><td>{(r.roles || []).map(role=>roleLabels[role] || role).join(', ')}</td><td>{r.email || '—'}</td><td>{accountLabel(r.profile_id)}{r.profile_id&&<small><Link href={`/admin/relationships/${r.profile_id}`}>Open account dossier →</Link></small>}</td><td><DeleteRelationship kind={r.kind==='person'&&r.profile_id?'account':'relationship'} id={r.kind==='person'&&r.profile_id?r.profile_id:r.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Relationship removed.');}}/></td></tr>)}
+      {existingAccounts.map(m=><tr key={m.id}><td><button disabled={pending} onClick={()=>open(null,'person',m)}>{m.full_name || m.email}</button><small>Person · existing account</small></td><td>{m.role==='partner'?'Partner':'Client'}</td><td>{m.email}</td><td><Link href={`/admin/relationships/${m.id}`}>Open relationship dossier →</Link><small>{m.is_active===false?'Inactive':'Active'} · Add roles and billing details to this relationship</small></td><td><DeleteRelationship kind="account" id={m.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Client account removed.');}}/></td></tr>)}
     </tbody></table></div>
     {!visible.length && !existingAccounts.length && <p className={s.empty}>No relationships match this view. Add a client or company to begin.</p>}
   </>;

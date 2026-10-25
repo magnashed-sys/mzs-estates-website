@@ -42,3 +42,22 @@ export async function saveRelationship(input: Record<string, unknown>, id?: stri
   revalidatePath('/admin');
   return {id: data.id as string};
 }
+
+function validDeletionTarget(kind: string, id: string) {
+  return ['account','relationship'].includes(kind) && typeof id==='string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id);
+}
+export async function getRelationshipDeletionPlan(kind: string, id: string) {
+  const {db} = await requireEstateAdmin();
+  if(!validDeletionTarget(kind,id)) return {error:'Invalid deletion target.'};
+  const {data,error}=await db.rpc('mzs_relationship_deletion_plan',{p_kind:kind,p_id:id});
+  if(error) return {error:error.code==='P0002'?'This relationship no longer exists. Refresh the register.':'The deletion check could not be completed. No records were removed.'};
+  return {plan:data as import('../../../lib/relationships/deletion').DeletionPlan};
+}
+export async function deleteRelationship(kind: string, id: string, revision: string, confirmation: string) {
+  const {db} = await requireEstateAdmin();
+  if(!validDeletionTarget(kind,id) || typeof revision!=='string' || !/^[a-f0-9]{32}$/.test(revision) || typeof confirmation!=='string' || !confirmation || confirmation.length>254) return {error:'Run the deletion check and confirm the exact name or email.'};
+  const {error}=await db.rpc('mzs_delete_relationship',{p_kind:kind,p_id:id,p_revision:revision,p_confirmation:confirmation});
+  if(error) return {error:error.code==='23503'?'Linked records prevent deletion. Run the check again to see what must be retained.':error.code==='40001'?'This relationship changed. Close this dialog and run the deletion check again.':error.code==='22023'?'The confirmation does not match.':error.code==='P0002'?'This relationship no longer exists. Refresh the register.':'Deletion could not be confirmed. Refresh the register before trying again.'};
+  revalidatePath('/admin/relationships');revalidatePath('/admin');revalidatePath('/admin/group/estates/contracts');revalidatePath(`/admin/relationships/${id}`);
+  return {success:true};
+}
