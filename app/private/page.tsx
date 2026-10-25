@@ -84,12 +84,11 @@ export default function PrivatePage() {
   const router = useRouter();
   const t = useTranslations("Private");
   const locale = useLocale();
-const categories: { id: Category; title: string; description: string; shortTitle: string }[] = [
+const categories: { id: Category; title: string; description?: string; shortTitle: string }[] = [
   {
     id: "rentals",
     title: t("rentals"),
     shortTitle: t("stays"),
-    description: t("rental_description"),
   },
   {
     id: "investments",
@@ -353,7 +352,7 @@ const categories: { id: Category; title: string; description: string; shortTitle
                     <p className={styles.sectionKicker}>{t("exclusive")}</p>
                     <h2>{selected.title}<span className={styles.headingCount}> / {String(selected.id === "capital" ? (capitalDossierCount ?? "—") : selected.projects.length)}</span></h2>
                   </div>
-                  <p>{selected.description}</p>
+                  {selected.description && <p>{selected.description}</p>}
                 </div>
 
                 {selected.projects.length === 0 ? (
