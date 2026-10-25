@@ -61,6 +61,29 @@ export async function recordPayment(f:FormData) {
  finish(uuid.test(deal)?ROOT+'/'+deal:ROOT,ok);
 }
 
+/** Correct a historic interest receipt atomically.
+ * Never increment an existing payment in place or create a second cash receipt.
+ * The database voids the old immutable row and inserts one replacement.
+ */
+export async function correctInterestReceipt(f:FormData) {
+ const {db}=await requireDealsAdmin();let deal='';let ok=false;
+ try{
+  deal=id(f,'deal_id');
+  const payment=id(f,'payment_id');
+  const replacement=id(f,'replacement_id');
+  const expected=decimal(f,'expected_amount',99999999999999);
+  const corrected=decimal(f,'corrected_amount',99999999999999);
+  const reason=str(f,'correction_reason',450,5);
+  if(expected===corrected)throw new Error('No correction provided');
+  const {data,error}=await db.rpc('mzs_capital_correct_interest_receipt',{
+   p_deal_id:deal,p_payment_id:payment,p_new_payment_id:replacement,
+   p_expected_amount:expected,p_corrected_amount:corrected,p_reason:reason
+  });
+  ok=!error&&data===replacement;
+ }catch{ /* A failed correction leaves the original amount unchanged. */ }
+ finish(uuid.test(deal)?ROOT+'/'+deal:ROOT,ok);
+}
+
 export async function voidPayment(f:FormData) {
  const {db}=await requireDealsAdmin();let deal='';let ok=false;
  try {deal=id(f,'deal_id');const payment=id(f,'payment_id');
