@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/client";
 import "../../admin.css";
 import styles from "./relationship.module.css";
+import DeleteRelationship from "../DeleteRelationship";
 
 type Status = "loading" | "ready" | "denied" | "error";
 type Relationship = {
@@ -297,6 +298,7 @@ export default function RelationshipDossierPage() {
         <p className={styles.note}>Extend this relationship with a tenant, owner, investor or partner role. Companies and rental contracts reuse this same client account.</p>
         <Link className="admin-button" href={`/admin/relationships?profile=${encodeURIComponent(person.id)}`}>Manage relationship details &amp; roles →</Link>{" "}
         <Link className="admin-button" href={`/admin/group/estates/contracts?profile=${encodeURIComponent(person.id)}`}>View rental contracts →</Link>
+        <p><DeleteRelationship kind="account" id={person.id} onDeleted={()=>router.replace("/admin/relationships")}/></p>
       </section>
 
       <section className={styles.panel}>
