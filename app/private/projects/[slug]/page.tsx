@@ -87,15 +87,11 @@ export default async function PrivateProjectPage({ params }: Props) {
 
   const marinaGallery: PropertyPhoto[] = [
     { src: `${marinaBase}/residence-pool.webp`, alt: t("p307"), caption: t("p308") },
-    { src: `${marinaBase}/living-terrace.webp`, alt: t("p309"), caption: t("p310") },
     { src: `${marinaBase}/terrace-pool-view.webp`, alt: t("p311"), caption: t("p312") },
     { src: `${marinaBase}/hero-living-kitchen.webp`, alt: t("p313"), caption: t("p314") },
     { src: `${marinaBase}/building-exterior.webp`, alt: t("p315"), caption: t("p316") },
-    { src: `${marinaBase}/private-terrace.webp`, alt: t("p317"), caption: t("p318") },
     { src: `${marinaBase}/bedroom-one.webp`, alt: t("p319"), caption: t("p320") },
     { src: `${marinaBase}/bedroom-view.webp`, alt: t("p321"), caption: t("p322") },
-    { src: `${marinaBase}/bathroom-two.webp`, alt: t("p323"), caption: t("p324") },
-    { src: `${marinaBase}/bathroom-detail.webp`, alt: t("p325"), caption: t("p326") },
     { src: `${marinaBase}/residence-gym.webp`, alt: t("p327"), caption: t("p328") },
     { src: `${marinaBase}/underground-parking.webp`, alt: t("p329"), caption: t("p330") },
     { src: `${marinaBase}/building-entrance.webp`, alt: t("p331"), caption: t("p332") },
