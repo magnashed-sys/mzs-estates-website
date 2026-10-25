@@ -11,6 +11,7 @@ function madridParts(){
  return {year:Number(find('year')),month:Number(find('month'))};
 }
 const displayEuro=(n:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const displayEuroExact=(n:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 const monthLabel=(key:string)=>new Date(key+'-01T12:00:00Z').toLocaleDateString('en-GB',{month:'short',timeZone:'UTC'});
 const sum=(rows:MonthlyMoney[],key:keyof MonthlyMoney)=>rows.reduce((a,r)=>a+Number(r[key]),0);
 export default function FinancialCockpit({refreshVersion}:{refreshVersion:number}){
@@ -86,9 +87,9 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
    <div className={s.metrics}>
     {cards.map(card=><div key={card.title} className={s.metric}>
      <div className={s.metricHead}><span className={s.kicker}>{card.title}</span><span className={s.dot} data-kind={card.accent}/></div>
-     <strong className={s.metricValue}>{card.available?displayEuro(card.value):'—'}</strong>
+     <strong className={s.metricValue}>{card.available?(card.title==='Interest actually received'?displayEuroExact(card.value):displayEuro(card.value)):'—'}</strong>
      <div className={s.metricDivider}/>
-     <div className={s.metricBottom}><span>Selected month</span><span>Calendar year <strong>{card.available?displayEuro(card.annual):'—'}</strong></span></div>
+     <div className={s.metricBottom}><span>Selected month</span><span>Calendar year <strong>{card.available?(card.title==='Interest actually received'?displayEuroExact(card.annual):displayEuro(card.annual)):'—'}</strong></span></div>
      <p className={s.metricLine}>{card.line}</p>
      {card.available?<Link className={s.cardLink} href={card.path}>View source records ↗</Link>:<p className={s.unavailable}>{loanAvailable?'No validated entity association for loan dossiers yet.':'Capital register is not enabled for this environment.'}</p>}
     </div>)}
