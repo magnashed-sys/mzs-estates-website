@@ -48,3 +48,23 @@
 @media(max-width:900px){.sidePanels{grid-template-columns:1fr}}
 @media(max-width:560px){.cockpit{padding:18px 14px}.metrics{grid-template-columns:1fr}.metric{min-height:210px}.top h2{font-size:36px}.chartRow{grid-template-columns:30px minmax(0,1fr) 73px;gap:6px}.chartAmount{font-size:10px}.metricValue{font-size:34px}.controls{width:100%}.controls label{flex:1}.controls select{width:100%}}
 @media(prefers-reduced-motion:reduce){.barRent,.barCredit,.barExpense{transition:none}}
+
+/* Phase 2 — consolidated entity reporting and export */
+.scopeNote{color:#c6b89f;background:#1c1914;border:1px solid #5a4e3c;padding:13px 17px;margin-bottom:18px;font-size:12px;line-height:1.7}
+.scopeNote strong{color:#efe0c4;font-weight:500}
+.netStrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.netStrip>div{display:flex;flex-direction:column;gap:12px;padding:23px 20px;border:1px solid #514533;background:#1a1915}
+.netStrip span{color:#d5c09a;font-size:10px;line-height:1.5;letter-spacing:.11em;text-transform:uppercase}
+.netStrip strong{font:400 clamp(26px,2.8vw,38px)/1.15 Georgia,serif;color:#f3eadb;font-variant-numeric:tabular-nums}
+.netStrip small{color:#b4aa9b;font-size:12px;line-height:1.65}
+.reportTable{margin-top:18px;padding:clamp(20px,3vw,30px);background:#171714;border:1px solid #40382c}
+.reportTable h3{font:400 clamp(26px,2.8vw,35px)/1.25 Georgia,serif;letter-spacing:-.03em;color:#e9e1d4;margin:10px 0 8px}
+.tableScroll{overflow-x:auto;scrollbar-width:thin;margin:24px 0 20px}
+.tableScroll table{border-collapse:collapse;width:100%;min-width:700px;color:#c8bfaf;font:12px/1.6 Arial,sans-serif;font-variant-numeric:tabular-nums}
+.tableScroll th,.tableScroll td{text-align:right;padding:13px 10px;border-bottom:1px solid #3f372b}
+.tableScroll th:first-child,.tableScroll td:first-child{text-align:left}
+.tableScroll thead th{font:500 10px/1.5 Arial,sans-serif;color:#d5c09a;text-transform:uppercase;letter-spacing:.07em}
+.tableScroll tbody th{font-weight:400;color:#e3d4bd}
+.tableScroll tbody tr:hover{background:rgba(213,192,154,.07)}
+@media(max-width:850px){.netStrip{grid-template-columns:1fr}}
+@media(max-width:560px){.reportTable .panelHeading{flex-wrap:wrap;align-items:flex-start}.reportTable .refresh{width:100%}}
