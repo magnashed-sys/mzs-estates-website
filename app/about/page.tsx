@@ -17,9 +17,9 @@ export async function generateMetadata() {
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
   const activities = [
-    {href: '/consultancy', label: header('consultancy')},
-    {href: '/real-estate', label: header('real_estate')},
-    {href: '/private-capital', label: header('private_capital')},
+    {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
+    {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
+    {href: '/private-capital', label: header('private_capital'), introduction: t('private_capital_intro')},
   ];
   return (
     <main className={styles.page}>
@@ -46,8 +46,11 @@ export default async function AboutPage() {
         <div className={styles.activityGrid}>
           {activities.map((activity, index) => (
             <Link className={styles.activityCard} href={localizedPath(activity.href, locale)} key={activity.href}>
-              <span className={styles.number} aria-hidden="true">0{index + 1}</span>
-              <span className={styles.activityTitle}>{activity.label}</span>
+              <div className={styles.activityHeading}>
+                <h3 className={styles.activityTitle}>{activity.label}</h3>
+                <span className={styles.number} aria-hidden="true">0{index + 1}</span>
+              </div>
+              <p className={styles.activityIntroduction}>{activity.introduction}</p>
               <span className={styles.activityArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
             </Link>
           ))}

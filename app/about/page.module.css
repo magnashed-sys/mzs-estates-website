@@ -33,11 +33,13 @@
 .activities {padding:0 var(--inset) 64px;}
 .activities > h2 {font:400 clamp(24px,2.4vw,34px)/1.25 Georgia,'Times New Roman',serif;text-align:center;margin:0 0 28px;color:#eee8de;}
 .activityGrid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
-.activityCard {position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:30px;min-height:156px;padding:26px 28px;border:1px solid #514a3c;background:linear-gradient(135deg,#1a1b17,#101210);color:#e4cfaa;text-decoration:none;transition:background .2s,border-color .2s;}
+.activityCard {position:relative;display:flex;flex-direction:column;gap:18px;min-height:210px;padding:26px 28px 56px;border:1px solid #514a3c;background:linear-gradient(135deg,#1a1b17,#101210);color:#e4cfaa;text-decoration:none;transition:background .2s,border-color .2s;}
 .activityCard:hover {border-color:#bfa982;background:#22231d;}
 .activityCard:focus-visible {outline:2px solid #d5c09a;outline-offset:5px;}
-.activityTitle {font:400 clamp(24px,2.2vw,32px)/1.25 Georgia,'Times New Roman',serif;padding-inline-end:32px;overflow-wrap:anywhere;}
+.activityTitle {font:400 clamp(24px,2.2vw,32px)/1.25 Georgia,'Times New Roman',serif;margin:0;overflow-wrap:anywhere;}
+.activityHeading {display:flex;align-items:baseline;justify-content:space-between;gap:16px;}
+.activityIntroduction {margin:0;color:#c5beb3;font:400 15px/1.75 Arial,Helvetica,sans-serif;}
 .activityArrow {position:absolute;inset-inline-end:26px;bottom:29px;display:flex;}
 .activityArrow svg {width:20px;height:20px;}
-@media(max-width:700px) {.activities {padding-bottom:42px;}.activityGrid {grid-template-columns:1fr;gap:14px;}.activityCard {min-height:122px;padding:22px;gap:20px;}.activityArrow {inset-inline-end:22px;bottom:25px;}}
+@media(max-width:700px) {.activities {padding-bottom:42px;}.activityGrid {grid-template-columns:1fr;gap:14px;}.activityCard {min-height:190px;padding:22px 22px 52px;gap:14px;}.activityArrow {inset-inline-end:22px;bottom:25px;}}
 @media(prefers-reduced-motion:reduce) {.activityCard {transition:none;}}
