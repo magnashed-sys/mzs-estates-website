@@ -1182,7 +1182,10 @@
     "amsterdam": "Roots near Amsterdam",
     "spain": "Via Spain",
     "dubai": "Based in Dubai today",
-    "caption": "An artistic impression of our journey: Amsterdam, Spain and Dubai."
+    "caption": "An artistic impression of our journey: Amsterdam, Spain and Dubai.",
+    "consultancy_intro": "Advice on legal and tax structures, real estate projects and financing needs.",
+    "real_estate_intro": "Real estate projects and opportunities, combining international experience with local market knowledge.",
+    "private_capital_intro": "Capital solutions and investment opportunities for real estate and businesses."
   },
   "Consultancy": {
     "headline": "The next step, together.",

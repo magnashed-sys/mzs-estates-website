@@ -1182,7 +1182,10 @@
     "amsterdam": "Røtter nær Amsterdam",
     "spain": "Via Spania",
     "dubai": "I dag fra Dubai",
-    "caption": "En kunstnerisk tolkning av reisen vår: Amsterdam, Spania og Dubai."
+    "caption": "En kunstnerisk tolkning av reisen vår: Amsterdam, Spania og Dubai.",
+    "consultancy_intro": "Rådgivning om juridiske og skattemessige strukturer, eiendomsprosjekter og finansieringsbehov.",
+    "real_estate_intro": "Eiendomsprosjekter og muligheter med internasjonal erfaring og lokal markedskunnskap.",
+    "private_capital_intro": "Kapitalløsninger og investeringsmuligheter for eiendom og bedrifter."
   },
   "Consultancy": {
     "headline": "Det neste steget, sammen.",
