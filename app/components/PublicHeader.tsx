@@ -21,9 +21,9 @@ export default function PublicHeader() {
   const t = useTranslations('Header');
   const locale = useLocale();
 const publicNavigation = [
+  { href: "/consultancy", label: t('consultancy') },
   { href: "/real-estate", label: t('real_estate') },
   { href: "/private-capital", label: t('private_capital') },
-  { href: "/consultancy", label: t('consultancy') },
   { href: "/about", label: t('about') },
   { href: "/login", label: t('login') },
 ] as const;
