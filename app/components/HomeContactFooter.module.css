@@ -4,6 +4,8 @@
 .languages {margin-left:auto;min-width:0;max-width:100%;}
 .languages > nav {justify-content:flex-end;flex-wrap:wrap;row-gap:6px;}
 @media(max-width:760px) {
- .footer {gap:12px;padding-top:16px;padding-bottom:8px;}
- .languages {width:100%;}
+ .footer {flex-direction:column;flex-wrap:nowrap;gap:12px;padding-top:16px;padding-bottom:8px;text-align:center;}
+ .locations {flex:none;width:100%;text-align:center;}
+ .languages {width:100%;max-width:360px;margin-inline:auto;}
+ .languages > nav {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));justify-content:center;gap:6px 2px;}
 }
