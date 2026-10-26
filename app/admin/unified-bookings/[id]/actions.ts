@@ -79,3 +79,27 @@ export async function reviewBookingInvoiceDraft(formData:FormData){
  if(error)throw new Error("Invoice review failed. Reload the dossier and try again.");
  redirect("/admin/unified-bookings/"+bookingId+"?invoice=reviewed");
 }
+
+export async function editBookingInvoiceDraft(formData:FormData){
+ const {db}=await requireEstateAdmin();
+ const bookingId=String(formData.get("booking_id")||"");
+ const draftId=String(formData.get("draft_id")||"");
+ const issuer=String(formData.get("issuer_id")||"");
+ const revision=Number(formData.get("revision"));
+ const recipient=String(formData.get("recipient_name")||"").trim();
+ const email=String(formData.get("recipient_email")||"").trim();
+ const vatRate=Number(formData.get("vat_rate"));
+ const taxNote=String(formData.get("tax_note")||"").trim();
+ const reason=String(formData.get("reason")||"").trim();
+ if(!UUID.test(bookingId)||!UUID.test(draftId)||!UUID.test(issuer)||!Number.isInteger(revision)||revision<1||
+ recipient.length<1||recipient.length>250||email.length>254||!Number.isFinite(vatRate)||vatRate<0||vatRate>100||
+ taxNote.length<5||taxNote.length>1000||reason.length<5||reason.length>500)throw new Error("Invalid draft edit information.");
+ const {data:current,error:readError}=await db.from("mzs_booking_invoice_drafts").select("booking_id").eq("id",draftId).single();
+ if(readError||current?.booking_id!==bookingId)throw new Error("Draft does not belong to this reservation.");
+ const {error}=await db.rpc("mzs_admin_edit_booking_invoice_draft",{
+  p_id:draftId,p_revision:revision,p_issuer:issuer,p_recipient:recipient,p_email:email,
+  p_vat_percent:vatRate,p_tax_note:taxNote,p_reason:reason
+ });
+ if(error)throw new Error("Unable to update draft. Reload and check that it is still in Draft status.");
+ redirect("/admin/unified-bookings/"+bookingId+"?invoice=edited");
+}
