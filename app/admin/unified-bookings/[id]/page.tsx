@@ -2,7 +2,7 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import BookingEditor from "../BookingEditor";
-import {recordBookingReceipt} from "./actions";
+import {recordBookingReceipt,reverseBookingReceipt} from "./actions";
 export const dynamic="force-dynamic";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const money=(v:number|string|null)=>v===null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(v));
@@ -21,9 +21,9 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
   db.from("mzs_booking_price_audit").select("id,old_total,new_total,reason,created_at").eq("booking_id",id).order("created_at",{ascending:false}).limit(100),
   db.from("rental_change_notifications").select("id,kind,status,attempts,created_at").eq("booking_id",id).order("created_at",{ascending:false}).limit(100)
  ]);
- const receiptResult=await db.from("mzs_booking_receipts").select("id,amount,received_on,reference,notes,created_at").eq("booking_id",id).order("received_on",{ascending:false}).limit(250);
+ const receiptResult=await db.from("mzs_booking_receipts").select("id,amount,received_on,reference,notes,created_at,reversed_at,reversal_reason").eq("booking_id",id).order("received_on",{ascending:false}).limit(250);
  const receipts=receiptResult.data||[];
- const receiptTotal=receipts.reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
+ const receiptTotal=receipts.filter(r=>!r.reversed_at).reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
  const chargeable=!owner&&b.status==="confirmed"&&Number(b.quoted_total_eur)>0;
  const editable=!b.is_test&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
@@ -51,7 +51,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
     <p>Remaining balance: <strong>{receiptResult.error||b.quoted_total_eur===null?"Unavailable":money(Number(b.quoted_total_eur)-receiptTotal)}</strong></p>
     <p style={{color:"#bcb2a4"}}>These are manually registered booking receipts, not issued invoices or verified bank-feed transactions. The balance is based on the recorded booking total and these receipts only; it is not added to the recurring lease-contract payment ledger.</p>
     {receiptResult.error&&<p role="alert">Booking receipts could not be loaded. Do not rely on this balance.</p>}
-    {receipts.length>0&&<div style={{overflowX:"auto"}}><table style={{width:"100%",textAlign:"left"}}><thead><tr><th>Date</th><th>Amount</th><th>Reference</th><th>Notes</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount)}</td><td>{r.reference}</td><td>{r.notes||"—"}</td></tr>)}</tbody></table></div>}
+    {receipts.length>0&&<div style={{overflowX:"auto"}}><table style={{width:"100%",textAlign:"left"}}><thead><tr><th>Date</th><th>Amount</th><th>Reference</th><th>Notes</th><th>Correction</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount)}</td><td>{r.reference}</td><td>{r.notes||"—"}{r.reversed_at&&<p style={{color:"#e8b29c"}}>Reversed · {new Date(r.reversed_at).toLocaleString("en-GB")}<br/>{r.reversal_reason}</p>}</td><td>{r.reversed_at?"Reversed":<form action={reverseBookingReceipt} style={{display:"grid",gap:6}}><input type="hidden" name="receipt_id" value={r.id}/><input name="reason" required minLength={5} maxLength={500} placeholder="Reason for reversal" aria-label="Reversal reason" style={{padding:7}}/><button type="submit">Reverse receipt</button></form>}</td></tr>)}</tbody></table></div>}
     {chargeable&&!receiptResult.error&&<form action={recordBookingReceipt} style={{marginTop:22,display:"grid",gap:12,maxWidth:420}}>
       <h3>Record a received payment</h3>
       <input type="hidden" name="booking_id" value={id}/>
