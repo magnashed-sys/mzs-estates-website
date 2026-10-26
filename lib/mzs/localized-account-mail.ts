@@ -195,6 +195,39 @@ const copy = {
     "rental": "تأجير خاص"
   }
 },
+  tr: {
+    "member": "müşteri",
+    "dear": "Sayın",
+    "access": "ÖZEL ERİŞİM",
+    "confidential": "Bu kişisel mesaj yalnızca belirtilen alıcıya yöneliktir. Hesap güvenliğiyle ilgili mesajları başkalarına iletmeyin.",
+    "motto": "ÖZEL · BAĞIMSIZ · ULUSLARARASI",
+    "invitation": "YALNIZCA DAVETİYE İLE",
+    "projects": "Erişiminize açılan projeler",
+    "login": "ÖZEL HESABA GİRİŞ YAP",
+    "collection": "ÖZEL KOLEKSİYONUMU AÇ",
+    "capital": "ÖZEL SERMAYE DOSYALARIMI AÇ",
+    "account_activated": [
+      "MZS Group hesabınız etkinleştirildi",
+      "Özel koleksiyonunuza hoş geldiniz.",
+      "MZS Group hesabınız onaylandı ve etkinleştirildi. Artık sizin için seçilmiş fırsatları görüntüleyebilirsiniz."
+    ],
+    "new_project_access": [
+      "Yeni özel proje erişimi | MZS Group",
+      "Koleksiyonunuzda yeni fırsatlar.",
+      "MZS Group hesabınıza özel projeler için ek erişim verildi."
+    ],
+    "capital_access_granted": [
+      "Özel Sermaye erişiminiz | MZS Group",
+      "Özel dosyanız kullanıma açıldı.",
+      "MZS Group hesabınıza bir Özel Sermaye dosyasına erişim verildi. Bilgilerinizi güvenli biçimde görüntülemek için giriş yapın."
+    ],
+    "types": {
+      "investment": "Yatırım",
+      "financing": "Finansman",
+      "sale": "Özel Satış",
+      "rental": "Özel Kiralama"
+    }
+  }
 } as const;
 export function isLocalizedAccountLocale(locale: unknown): locale is keyof typeof copy {
   return typeof locale === 'string' && Object.hasOwn(copy, locale);

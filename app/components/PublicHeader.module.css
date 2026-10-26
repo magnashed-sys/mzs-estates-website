@@ -133,7 +133,7 @@
 
 .languageStatus {max-width:220px;padding:8px 12px;color:#e4cfaa;font:12px/1.5 Arial,sans-serif;}
 
-/* Nine choices remain reachable on short/mobile screens. */
+/* Ten choices remain reachable on short/mobile screens. */
 .languagePanel {max-height:min(70svh,480px);overflow-y:auto;overscroll-behavior:contain;}
 .wordmark {direction:ltr;unicode-bidi:isolate;}
 
