@@ -19,3 +19,13 @@ export async function recordBookingReceipt(formData:FormData){
  if(error)throw new Error("Receipt was not recorded. Check the booking status and unique payment reference.");
  redirect("/admin/unified-bookings/"+id+"?receipt=recorded");
 }
+
+export async function reverseBookingReceipt(formData:FormData){
+ const {db}=await requireEstateAdmin();
+ const receiptId=String(formData.get("receipt_id")||"");
+ const reason=String(formData.get("reason")||"").trim();
+ if(!UUID.test(receiptId)||reason.length<5||reason.length>500)throw new Error("A valid receipt and reversal reason are required.");
+ const {data:bookingId,error}=await db.rpc("mzs_admin_reverse_booking_receipt",{p_receipt_id:receiptId,p_reason:reason});
+ if(error||!bookingId)throw new Error("Unable to reverse receipt. Verify the receipt is active.");
+ redirect("/admin/unified-bookings/"+bookingId+"?receipt=reversed");
+}
