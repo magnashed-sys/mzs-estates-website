@@ -213,7 +213,7 @@
   text-transform: uppercase;
   cursor: pointer;
 }
-.page :global(.request-form button[type="submit"]) { max-width: 300px; }
+.page :global(.request-form button[type="submit"]) { max-width: none; white-space: nowrap; }
 .page :global(.login-form button[type="submit"]:hover:not(:disabled)),
 .page :global(.request-form button[type="submit"]:hover:not(:disabled)) { background: #e3d0ad; }
 .page :global(.login-form button:disabled),
@@ -240,7 +240,7 @@
   .page :global(.request-grid) { grid-template-columns: minmax(0, 1fr); }
   .page :global(.request-container), .page :global(.request-success) { margin-top: 24px; }
   .page :global(.login-container) { margin: auto; }
-  .page :global(.request-form button[type="submit"]) { max-width: none; }
+  .page :global(.request-form button[type="submit"]) { padding-inline: 10px; font-size: clamp(10px, 2.8vw, 14px); letter-spacing: 0; text-transform: none; }
   .page :global(.interest-options) { display: grid; grid-template-columns: minmax(0,1fr); }
 }
 @media (max-height: 650px) {
