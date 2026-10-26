@@ -33,7 +33,7 @@ export default async function UnifiedBookings(){
   <Link href="/admin?tab=bookings" style={{color:"#d5c09a"}}>← Group Administration</Link>
   <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>MZS ESTATES / ADMINISTRATION</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>Unified Bookings</h1>
-  <p style={{color:"#aaa398"}}>Manage reservations, pricing and owner stays together. Changes use the existing protected administrator workflows.</p>
+  <p style={{color:"#aaa398"}}>Select <strong>Edit booking</strong> in the first column of a confirmed or requested guest reservation to change dates, guests, notes or the amount. Owner stays and blocked dates open their specialist administration.</p>
   <nav style={{display:"flex",flexWrap:"wrap",gap:12,margin:"25px 0"}}>
    <Link href="/admin?tab=bookings" style={style}>Guest bookings & calendar →</Link>
    <Link href="/admin/owner-stays" style={style}>Owner stays, pricing & partner access →</Link>
@@ -45,8 +45,8 @@ export default async function UnifiedBookings(){
   </section>
   <div style={{overflowX:"auto"}}>
    <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
-    <thead><tr>{["Property","Type","Check-in","Check-out","Status","Amount","Manage"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
-    <tbody>{rows.map(r=><tr key={r.category+r.id}><td style={{padding:12,borderBottom:"1px solid #3d382f"}}>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td><td>{r.editable?<BookingEditor booking={{id:r.id,checkIn:r.checkIn,checkOut:r.checkOut,total:r.total,guestCount:r.guestCount,notes:r.notes}}/>:<Link style={{color:"#d5c09a"}} href={r.href}>Open →</Link>}</td></tr>)}</tbody>
+    <thead><tr>{["Action","Property","Type","Check-in","Check-out","Status","Amount"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
+    <tbody>{rows.map(r=><tr key={r.category+r.id}><td style={{padding:12,borderBottom:"1px solid #3d382f",verticalAlign:"top"}}>{r.editable?<BookingEditor booking={{id:r.id,checkIn:r.checkIn,checkOut:r.checkOut,total:r.total,guestCount:r.guestCount,notes:r.notes}}/>:<Link style={{color:"#d5c09a"}} href={r.href}>{r.category==="Owner stay"?"Manage owner stay →":"Manage blocked period →"}</Link>}</td><td>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td></tr>)}</tbody>
    </table>
   </div>
   {!rows.length&&<p>No records available in the current reporting scope.</p>}
