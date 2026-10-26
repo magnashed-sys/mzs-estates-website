@@ -68,7 +68,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
     <p><strong>Source file:</strong> {legacy.source_filename} · page 1</p>
     <p><strong>Confirmation date:</strong> {legacy.confirmation_date||"Not stated"}</p>
     <p><strong>Contact address:</strong> {Object.values(legacy.source_address||{}).filter(Boolean).join(" · ")||"Not stated"}</p>
-    <p><strong>Source billed days:</strong> {legacy.source_billed_days} · <strong>Actual nights:</strong> {legacy.source_nights}</p>
+    <p><strong>Source billed days:</strong> {legacy.source_billed_days} · <strong>Original nights:</strong> {legacy.source_nights} · <strong>Current nights:</strong> {Math.round((Date.parse(b.check_out+"T00:00:00Z")-Date.parse(b.check_in+"T00:00:00Z"))/86400000)}</p>
     {legacy.source_billed_days!==legacy.source_nights&&<p style={{color:"#e3a995"}}>The historical confirmation bills a different number of days than the date difference. The originally agreed total was preserved.</p>}
     <details><summary>Original price components and special terms</summary>
       <pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere",fontSize:12}}>{JSON.stringify(legacy.price_breakdown,null,2)}{"\n"}{JSON.stringify(legacy.source_terms,null,2)}</pre>
