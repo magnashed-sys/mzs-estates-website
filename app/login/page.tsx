@@ -13,6 +13,7 @@ import { createClient } from "../../lib/supabase/client";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
+  const navigation = useTranslations("Header");
   const locale = useLocale();
   const background = "/images/client-login-bg.webp";
 
@@ -189,9 +190,15 @@ export default function LoginPage() {
             </p>
           )}
 
-          <button type="submit" disabled={loading}>
-            {loading ? t("signing_in") : t("login") + " →"}
-          </button>
+          <div className={styles.loginActions}>
+            <button type="submit" disabled={loading}>
+              {loading ? t("signing_in") : t("login") + " →"}
+            </button>
+            <a href="/request-access" className={styles.requestAccessButton}
+              onClick={() => rememberLocale(locale)}>
+              {navigation("request_access")} →
+            </a>
+          </div>
         </form>
 
         <p className="login-note">
