@@ -264,3 +264,9 @@
   font-size: clamp(23px, 4.6vw, 32px);
   text-wrap: balance;
 }
+
+/* Existing visitors log in; new visitors can request access without submitting credentials. */
+.loginActions {display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;}
+.page .loginActions :global(button[type="submit"]) {flex:1 1 180px;width:auto;margin:0;}
+.requestAccessButton {display:inline-flex;flex:1 1 180px;align-items:center;justify-content:center;min-height:50px;padding:14px 20px;border:1px solid #d5c09a;border-radius:4px;background:transparent;color:#d5c09a;font:500 14px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;text-align:center;text-decoration:none;}
+.requestAccessButton:hover {background:rgba(213,192,154,.12);color:#f1e1c5;}
