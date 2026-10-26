@@ -1,5 +1,6 @@
 "use server";
 import {redirect} from "next/navigation";
+import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function recordBookingReceipt(formData:FormData){
@@ -49,11 +50,13 @@ export async function createBookingInvoiceDraft(formData:FormData){
  ]);
  const booking=rows?.[0];const user=userRes.data.user;
  if(bookingError||rows?.length!==1||!booking||booking.status!=="confirmed"||Number(booking.quoted_total_eur)<=0||!issuer||issuerError||existing||!user)throw new Error("Confirmed chargeable booking, issuer and unused draft required.");
- const {data:historical,error:historicalError}=await db.from("mzs_booking_legacy_sources")
-  .select("invoice_recipient_name,invoice_issuer_id,invoice_recipient_kind").eq("booking_id",bookingId).maybeSingle();
- if(historicalError)throw new Error("Historic billing source could not be verified.");
- if(historical&&(issuerId!==historical.invoice_issuer_id||recipient!==historical.invoice_recipient_name)){
-  throw new Error("Historic reservation must use the issuing entity and invoice recipient approved in the original confirmation.");
+ const [{data:historical,error:historicalError},{data:correction,error:correctionError}]=await Promise.all([
+  db.from("mzs_booking_legacy_sources").select("invoice_recipient_name,invoice_issuer_id,invoice_recipient_kind").eq("booking_id",bookingId).maybeSingle(),
+  db.from("mzs_booking_legacy_overrides").select("invoice_recipient_name,invoice_recipient_kind").eq("booking_id",bookingId).maybeSingle()
+ ]);
+ if(historicalError||correctionError)throw new Error("Historic billing metadata could not be verified.");
+ if(historical&&(issuerId!==historical.invoice_issuer_id||recipient!==(correction?.invoice_recipient_name||historical.invoice_recipient_name))){
+  throw new Error("Historic reservation must use the current approved invoice recipient and original issuing entity.");
  }
  const owner=await db.from("mzs_owner_stay_requests").select("id").eq("booking_id",bookingId).maybeSingle();
  if(owner.error||owner.data)throw new Error("Complimentary owner stays cannot be invoiced.");
@@ -102,10 +105,85 @@ export async function editBookingInvoiceDraft(formData:FormData){
  taxNote.length<5||taxNote.length>1000||reason.length<5||reason.length>500)throw new Error("Invalid draft edit information.");
  const {data:current,error:readError}=await db.from("mzs_booking_invoice_drafts").select("booking_id").eq("id",draftId).single();
  if(readError||current?.booking_id!==bookingId)throw new Error("Draft does not belong to this reservation.");
+ const [{data:historical,error:historicalError},{data:correction,error:correctionError}]=await Promise.all([
+  db.from("mzs_booking_legacy_sources").select("invoice_issuer_id,invoice_recipient_name").eq("booking_id",bookingId).maybeSingle(),
+  db.from("mzs_booking_legacy_overrides").select("invoice_recipient_name").eq("booking_id",bookingId).maybeSingle()
+ ]);
+ if(historicalError||correctionError)throw new Error("Historic billing recipient cannot be verified.");
+ if(historical&&(issuer!==historical.invoice_issuer_id||recipient!==(correction?.invoice_recipient_name||historical.invoice_recipient_name))){
+  throw new Error("The corrected historic recipient and original issuer must be used for this invoice draft.");
+ }
  const {error}=await db.rpc("mzs_admin_edit_booking_invoice_draft",{
   p_id:draftId,p_revision:revision,p_issuer:issuer,p_recipient:recipient,p_email:email,
   p_vat_percent:vatRate,p_tax_note:taxNote,p_reason:reason
  });
  if(error)throw new Error("Unable to update draft. Reload and check that it is still in Draft status.");
  redirect("/admin/unified-bookings/"+bookingId+"?invoice=edited");
+}
+
+
+export async function updateLegacyBooking(
+ _previous:{ok:boolean;message:string},
+ formData:FormData
+):Promise<{ok:boolean;message:string}>{
+ const {db}=await requireEstateAdmin();
+ const text=(key:string)=>String(formData.get(key)||"").trim();
+ const bookingId=text("booking_id");
+ const expectedRaw=text("expected_booking");
+ const version=Number(text("override_version"));
+ const reason=text("reason");
+ const checkIn=text("check_in");
+ const checkOut=text("check_out");
+ const inTime=text("check_in_time");
+ const outTime=text("check_out_time");
+ const guests=text("guest_count");
+ const total=text("total");
+ const notes=text("admin_notes");
+ const guestName=text("guest_name");
+ const contactName=text("contact_name");
+ const email=text("contact_email");
+ const billingKind=text("invoice_recipient_kind");
+ const companyId=text("invoice_recipient_relationship_id");
+ const personBillName=text("invoice_recipient_name");
+ const failure=(message:string)=>({ok:false,message});
+ if(!UUID.test(bookingId)||!Number.isInteger(version)||version<0||
+  reason.length<5||reason.length>500)return failure("A correction reason of 5–500 characters is required.");
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(checkIn)||!/^\d{4}-\d{2}-\d{2}$/.test(checkOut)||
+    checkOut<=checkIn||!/^(\d{2}:\d{2})?$/.test(inTime)||!/^(\d{2}:\d{2})?$/.test(outTime)||
+    !/^\d+(?:\.\d{1,2})?$/.test(total)||Number(total)>9999999999.99||
+    (guests!==""&&(!/^\d{1,2}$/.test(guests)||Number(guests)<1||Number(guests)>50))){
+  return failure("Check the dates, times, number of guests and reservation amount.");
+ }
+ if(notes.length>2000||guestName.length<2||guestName.length>250||
+    contactName.length<2||contactName.length>250||email.length>254||
+    !["company","person"].includes(billingKind)||
+    (billingKind==="company"&&!UUID.test(companyId))||
+    (billingKind==="person"&&(personBillName.length<2||personBillName.length>250))){
+  return failure("Check the guest, contact and invoice recipient details.");
+ }
+ let expected:unknown;
+ try{expected=JSON.parse(expectedRaw);}catch{return failure("Booking snapshot could not be read. Refresh the dossier.");}
+ if(!expected||typeof expected!=="object"||Array.isArray(expected))return failure("Invalid booking snapshot. Reload.");
+ const {error}=await db.rpc("mzs_admin_correct_legacy_booking",{
+  p_booking_id:bookingId,
+  p_expected_booking:expected,
+  p_expected_override_version:version,
+  p_changes:{
+   check_in:checkIn,check_out:checkOut,check_in_time:inTime,check_out_time:outTime,
+   guest_count:guests,total,admin_notes:notes,
+   guest_name:guestName,contact_name:contactName,contact_email:email,
+   invoice_recipient_kind:billingKind,
+   invoice_recipient_name:billingKind==="person"?personBillName:"",
+   invoice_recipient_relationship_id:billingKind==="company"?companyId:""
+  },
+  p_reason:reason
+ });
+ if(error){
+  const msg=error.message||"Unknown error";
+  const safe=/overlap|changed|reload|invoice|booking|dates|administrator|correction|invalid|company|recipient|confirmed|owner stay/i.test(msg);
+  return failure(safe?msg:"The correction could not be saved. Reload the dossier and try again.");
+ }
+ revalidatePath("/admin/unified-bookings/"+bookingId);
+ revalidatePath("/admin/unified-bookings");
+ return {ok:true,message:"Correction saved. Original confirmation and previous values were preserved in the audit history."};
 }
