@@ -20,8 +20,8 @@ export default async function EstatesHome() {
         <p>View property owners, individual units, recorded tenants and rental amounts.</p><span>Open property register →</span></Link>
       <Link href="/admin?tab=projects"><small>EXISTING ADMINISTRATION</small><h2>Projects & access</h2>
         <p>Continue managing existing property presentations, project content and client permissions.</p><span>Open existing projects →</span></Link>
-      <Link href="/admin?tab=bookings"><small>PROTECTED WORKFLOWS</small><h2>Rental bookings</h2>
-        <p>Existing calendars and reservation workflows remain in their original administration.</p><span>Open bookings →</span></Link>
+      <Link href="/admin/bookings"><small>CENTRAL BOOKINGS HUB</small><h2>Bookings &amp; reservations</h2>
+        <p>Open the central guest and owner-stay register, historic dossiers and recorded booking finances. Requests and the calendar remain one click away.</p><span>Open Bookings →</span></Link>
     </section>
     <p className="mzsFootnote">The ownership register is available to active Group Administrators.</p>
     <Link href="/admin/group">← Group overview</Link>
