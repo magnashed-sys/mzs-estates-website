@@ -134,7 +134,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
         <p>{t('already_part_of_our_network')}</p>
         <div><a href="/login">{t('client_partner_login')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a><a href="/request-access">{t('request_private_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a></div>
       </div>
-      <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>
+      {source !== 'consultancy' && <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>}
     </section>
   );
 }
