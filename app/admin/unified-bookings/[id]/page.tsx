@@ -22,11 +22,13 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
   db.from("rental_change_notifications").select("id,kind,status,attempts,created_at").eq("booking_id",id).order("created_at",{ascending:false}).limit(100)
  ]);
  const receiptResult=await db.from("mzs_booking_receipts").select("id,amount,received_on,reference,notes,created_at,reversed_at,reversal_reason").eq("booking_id",id).order("received_on",{ascending:false}).limit(250);
+ const legacyResult=await db.from("mzs_booking_legacy_sources").select("source_key,original_booking_number,confirmation_date,source_guest_name,booking_contact_name,source_email,source_phone,source_address,source_billed_days,source_nights,source_filename,source_sha256,invoice_recipient_kind,invoice_recipient_name,invoice_recipient_relationship_id,invoice_issuer_id,price_breakdown,source_terms").eq("booking_id",id).maybeSingle();
+ const legacy=legacyResult.data;
  const receipts=receiptResult.data||[];
  const receiptTotal=receipts.filter(r=>!r.reversed_at).reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
  const chargeable=!owner&&b.status==="confirmed"&&Number(b.quoted_total_eur)>0;
  const [invoiceDraft,issuerList]=await Promise.all([db.from("mzs_booking_invoice_drafts").select("id,recipient_name,gross_total,net_total,vat_total,vat_rate,tax_note,created_at,issuer_id,recipient_email,review_status,revision,reviewed_at").eq("booking_id",id).maybeSingle(),db.from("mzs_lease_issuers").select("id,name,tax_id,prefix").order("name")]);
- const editable=!b.is_test&&["requested","confirmed"].includes(b.status)&&!owner;
+ const editable=!b.is_test&&Boolean(b.user_id)&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
   <Link href="/admin/unified-bookings" style={{color:"#d5c09a"}}>← Unified Bookings</Link>
@@ -39,17 +41,35 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
     <section style={card}><small>Recorded total</small><h2 style={{fontWeight:400}}>{money(b.quoted_total_eur)}</h2><p>{owner?"Complimentary owner use":"Registered booking amount"}</p></section>
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:18}}>
-    <section style={card}><h2>Guest & administration</h2><p>Guest: {guest?.full_name||"Not linked"}</p><p>Email: {guest?.email||"Not available"}</p><p>Internal notes: {b.admin_notes||"None"}</p></section>
+    <section style={card}><h2>Guest & administration</h2><p>Guest: {legacy?.source_guest_name||guest?.full_name||"Not available"}</p><p>Email on confirmation: {legacy?.source_email||guest?.email||"Not available"}</p><p>Account: {guest?.email?("Linked: "+guest.email):"No account linked"}</p><p>Internal notes: {b.admin_notes||"None"}</p></section>
     <section style={card}><h2>Manage reservation</h2>
       {editable?<BookingEditor booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}}/>:
-        <><p>This reservation uses a dedicated workflow or is not eligible for modification here.</p><Link href={owner?"/admin/owner-stays":"/admin?tab=bookings"} style={{color:"#d5c09a"}}>Open original management →</Link></>}
+        <><p>{legacy&&!b.user_id?"Imported reservation without a client login. The standard client-booking editor cannot update it; the imported confirmation remains authoritative.":"This reservation uses a dedicated workflow or is not eligible for modification here."}</p><Link href={owner?"/admin/owner-stays":"/admin?tab=bookings"} style={{color:"#d5c09a"}}>Open original management →</Link></>}
       <p style={{color:"#a8a093",fontSize:12}}>Changes use the existing permission-checked booking functions. Amount changes require an audit reason.</p>
     </section>
   </div>
+  {legacy&&<section style={{...card,marginTop:20}} aria-label="Original booking and billing recipient">
+    <h2>Original confirmation & billing recipient</h2>
+    <p><strong>Original reference:</strong> {legacy.original_booking_number} · <strong>Source ID:</strong> {legacy.source_key}</p>
+    <p><strong>Booking contact:</strong> {legacy.booking_contact_name}</p>
+    <p><strong>Invoice recipient:</strong> {legacy.invoice_recipient_name} ({legacy.invoice_recipient_kind==="company"?"Company":"Private person"})</p>
+    <p><strong>Issuing entity:</strong> Mase Estates SL</p>
+    <p><strong>Source file:</strong> {legacy.source_filename} · page 1</p>
+    <p><strong>Confirmation date:</strong> {legacy.confirmation_date||"Not stated"}</p>
+    <p><strong>Contact address:</strong> {Object.values(legacy.source_address||{}).filter(Boolean).join(" · ")||"Not stated"}</p>
+    <p><strong>Source billed days:</strong> {legacy.source_billed_days} · <strong>Actual nights:</strong> {legacy.source_nights}</p>
+    {legacy.source_billed_days!==legacy.source_nights&&<p style={{color:"#e3a995"}}>The historical confirmation bills a different number of days than the date difference. The originally agreed total was preserved.</p>}
+    <details><summary>Original price components and special terms</summary>
+      <pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere",fontSize:12}}>{JSON.stringify(legacy.price_breakdown,null,2)}{"\n"}{JSON.stringify(legacy.source_terms,null,2)}</pre>
+    </details>
+    {legacyResult.error&&<p role="alert">Original confirmation metadata could not be loaded.</p>}
+  </section>}
+  {legacyResult.error&&<p role="alert" style={{color:"#e3a995"}}>Historical billing metadata could not be loaded. Check the source record before issuing invoices.</p>}
   <section style={{...card,marginTop:20}}><h2>Booking payments</h2>
     <p>Recorded booking value: <strong>{money(b.quoted_total_eur)}</strong></p>
     <p>Receipts recorded against this booking: <strong>{receiptResult.error?"Unavailable":money(receiptTotal)}</strong></p>
-    <p>Remaining balance: <strong>{receiptResult.error||b.quoted_total_eur===null?"Unavailable":money(Number(b.quoted_total_eur)-receiptTotal)}</strong></p>
+    <p>{legacy?"Difference vs registered receipts (not a verified outstanding debt):":"Remaining balance:"} <strong>{receiptResult.error||b.quoted_total_eur===null?"Unavailable":money(Number(b.quoted_total_eur)-receiptTotal)}</strong></p>
+    {legacy&&<p style={{color:"#e3a995"}}>Historical payment records have not been reconciled. Do not infer this amount is unpaid or paid until bank records are checked.</p>}
     <p style={{color:"#bcb2a4"}}>These are manually registered booking receipts, not issued invoices or verified bank-feed transactions. The balance is based on the recorded booking total and these receipts only; it is not added to the recurring lease-contract payment ledger.</p>
     {receiptResult.error&&<p role="alert">Booking receipts could not be loaded. Do not rely on this balance.</p>}
     {receipts.length>0&&<div style={{overflowX:"auto"}}><table style={{width:"100%",textAlign:"left"}}><thead><tr><th>Date</th><th>Amount</th><th>Reference</th><th>Notes</th><th>Correction</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount)}</td><td>{r.reference}</td><td>{r.notes||"—"}{r.reversed_at&&<p style={{color:"#e8b29c"}}>Reversed · {new Date(r.reversed_at).toLocaleString("en-GB")}<br/>{r.reversal_reason}</p>}</td><td>{r.reversed_at?"Reversed":<form action={reverseBookingReceipt} style={{display:"grid",gap:6}}><input type="hidden" name="receipt_id" value={r.id}/><input name="reason" required minLength={5} maxLength={500} placeholder="Reason for reversal" aria-label="Reversal reason" style={{padding:7}}/><button type="submit">Reverse receipt</button></form>}</td></tr>)}</tbody></table></div>}
@@ -98,10 +118,10 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
        <small>Issuer selection and totals are snapshotted in the draft. Issuance requires a separate approval workflow.</small>
     </div>:chargeable&&!invoiceDraft.error&&!issuerList.error?<form action={createBookingInvoiceDraft} style={{display:"grid",gap:12,maxWidth:480}}>
       <input type="hidden" name="booking_id" value={id}/>
-      <label>Issuing entity <select name="issuer_id" required defaultValue="" style={{display:"block",padding:10,width:"100%"}}><option value="" disabled>Select issuing entity</option>{(issuerList.data||[]).map(i=><option key={i.id} value={i.id}>{i.name} · {i.prefix||"No prefix"}</option>)}</select></label>
+      <label>Issuing entity <select name="issuer_id" required defaultValue={legacy?.invoice_issuer_id||""} style={{display:"block",padding:10,width:"100%"}}><option value="" disabled>Select issuing entity</option>{(issuerList.data||[]).map(i=><option key={i.id} value={i.id}>{i.name} · {i.prefix||"No prefix"}</option>)}</select></label>
       {(issuerList.data||[]).length===0&&<p role="alert">No issuing entity is configured. Create an issuer in Rental Contracts before drafting an invoice.</p>}
-      <label>Invoice recipient <input name="recipient_name" maxLength={250} required defaultValue={guest?.full_name||""} style={{display:"block",padding:10,width:"100%"}}/></label>
-      <label>Recipient email <input name="recipient_email" type="email" maxLength={254} defaultValue={guest?.email||""} style={{display:"block",padding:10,width:"100%"}}/></label>
+      <label>Invoice recipient <input name="recipient_name" maxLength={250} required defaultValue={legacy?.invoice_recipient_name||guest?.full_name||""} style={{display:"block",padding:10,width:"100%"}}/></label>
+      <label>Recipient email <input name="recipient_email" type="email" maxLength={254} defaultValue={legacy?.source_email||guest?.email||""} style={{display:"block",padding:10,width:"100%"}}/></label>
       <label>VAT rate (%) <input name="vat_rate" type="number" min="0" max="100" step="0.0001" required placeholder="Enter verified rate" style={{display:"block",padding:10,width:"100%"}}/></label>
       <label>VAT / tax assessment notes <textarea name="tax_note" required minLength={5} maxLength={1000} placeholder="Explain the VAT rate or exemption after checking applicable treatment" style={{display:"block",padding:10,width:"100%"}}/></label>
       <p>Total including VAT: <strong>{money(b.quoted_total_eur)}</strong>. The draft calculates net and VAT components from this existing total.</p>
