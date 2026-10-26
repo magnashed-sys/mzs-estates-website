@@ -544,5 +544,47 @@
     "motto": "PRIVAT · INDEPENDENT · INTERNAȚIONAL",
     "cancelFooter": "Eventualele plăți și rambursări sunt gestionate separat. Pentru asistență, contactați MZS Group.",
     "footer": "Starea actuală este disponibilă în contul dumneavoastră personal. Pentru asistență, contactați MZS Group."
+  },
+  "nb": {
+    "title": {
+      "requested": "Bestillingsforespørselen din er mottatt",
+      "confirmed": "Bestillingen din er bekreftet",
+      "modified": "Bestillingen din er endret",
+      "cancelled": "Bestillingen din er kansellert"
+    },
+    "intro": {
+      "requested": "Vi har mottatt forespørselen din. Dette er ennå ikke en bekreftet bestilling. Etter individuell vurdering og godkjenning sender MZS Group en egen bekreftelse.",
+      "confirmed": "MZS Group har godkjent og bekreftet bestillingen din. Vi ser frem til oppholdet ditt.",
+      "modified": "MZS Group har endret den bekreftede bestillingen din. Opplysningene nedenfor erstatter opplysningene i den tidligere bekreftelsen.",
+      "cancelled": "MZS Group har kansellert bestillingen din. Den tidligere bekreftelsen er ikke lenger gyldig. Ikke reis på grunnlag av den bekreftelsen."
+    },
+    "status": {
+      "requested": "FORESPØRSEL — IKKE BEKREFTET",
+      "confirmed": "BEKREFTET",
+      "modified": "BEKREFTET — ENDRET",
+      "cancelled": "KANSELLERT — UGYLDIG"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Eiendom",
+      "checkIn": "Innsjekking",
+      "checkOut": "Utsjekking",
+      "nights": "Antall netter",
+      "guests": "Gjester",
+      "estimate": "Anslått beløp",
+      "confirmed": "Bekreftet beløp",
+      "previous": "Tidligere bekreftet beløp",
+      "reference": "Bestillingsreferanse",
+      "heating": "Ønske om bassengoppvarming",
+      "notes": "Spesielle ønsker"
+    },
+    "yes": "Ja",
+    "no": "Nei",
+    "none": "Ingen",
+    "greeting": "Hei,",
+    "action": "SE BESTILLINGEN MIN",
+    "motto": "PRIVAT · UAVHENGIG · INTERNASJONAL",
+    "cancelFooter": "Eventuelle betalinger og refusjoner håndteres separat. Kontakt MZS Group hvis du trenger hjelp.",
+    "footer": "Du finner gjeldende status på din personlige konto. Kontakt MZS Group hvis du trenger hjelp."
   }
 }

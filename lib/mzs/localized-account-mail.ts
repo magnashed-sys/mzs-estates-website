@@ -385,7 +385,40 @@ const copy = {
     "sale": "Vânzare privată",
     "rental": "Închiriere privată"
   }
-}
+},
+  nb: {
+  "member": "kunde",
+  "dear": "Hei",
+  "access": "PRIVAT TILGANG",
+  "confidential": "Denne personlige meldingen er ment for den angitte mottakeren. Ikke videresend meldinger om kontosikkerhet.",
+  "motto": "PRIVAT · UAVHENGIG · INTERNASJONAL",
+  "invitation": "KUN ETTER INVITASJON",
+  "projects": "Dine tildelte prosjekter",
+  "login": "LOGG INN",
+  "collection": "SE MIN SAMLING",
+  "capital": "ÅPNE PRIVAT KAPITAL",
+  "account_activated": [
+    "MZS Group-kontoen din er aktiv",
+    "Velkommen til din private samling.",
+    "MZS Group-kontoen din er godkjent og aktivert. Du kan nå se mulighetene som er valgt ut for deg."
+  ],
+  "new_project_access": [
+    "Ny tilgang til private prosjekter | MZS Group",
+    "Nye muligheter i samlingen din.",
+    "MZS Group-kontoen din har fått tilgang til flere private prosjekter."
+  ],
+  "capital_access_granted": [
+    "Din tilgang til privat kapital | MZS Group",
+    "Ditt private dossier er tilgjengelig.",
+    "MZS Group-kontoen din har fått tilgang til et dossier for privat kapital. Logg inn for å se oversikten på en sikker måte."
+  ],
+  "types": {
+    "investment": "Investering",
+    "financing": "Finansiering",
+    "sale": "Privat salg",
+    "rental": "Privat utleie"
+  }
+},
 } as const;
 export function isLocalizedAccountLocale(locale: unknown): locale is keyof typeof copy {
   return typeof locale === 'string' && Object.hasOwn(copy, locale);

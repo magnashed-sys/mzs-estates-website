@@ -34,8 +34,8 @@ export default function LanguageSwitcher({account = false, inline = false}: {acc
   if (!route) return null;
   const languageLinks = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}>
     {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
-      hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română'}[locale]}
-      title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română'}[locale]}
+      hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål'}[locale]}
+      title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
       aria-disabled={busy || undefined}
       onClick={async event => {
@@ -60,7 +60,7 @@ export default function LanguageSwitcher({account = false, inline = false}: {acc
           if (isAccountPath(pathname)) location.reload();
           else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
         }
-      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: '🇦🇪', tr: '🇹🇷', lt: '🇱🇹', pl: '🇵🇱', 'zh-CN': '🇨🇳', sv: '🇸🇪', ro: '🇷🇴'}[locale]}</span>
+      }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: '🇦🇪', tr: '🇹🇷', lt: '🇱🇹', pl: '🇵🇱', 'zh-CN': '🇨🇳', sv: '🇸🇪', ro: '🇷🇴', nb: '🇳🇴'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}
