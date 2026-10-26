@@ -14,7 +14,8 @@
     "main_navigation": "Navegação principal",
     "my_dashboard": "Meu painel",
     "menu": "Menu",
-    "mobile_main_navigation": "Navegação principal móvel"
+    "mobile_main_navigation": "Navegação principal móvel",
+    "about": "Sobre nós"
   },
   "Footer": {
     "contact_short": "Contato",
@@ -50,7 +51,9 @@
     "estatesTitle": "Imóveis | MZS Estates",
     "estatesDescription": "Conheça as atividades imobiliárias internacionais independentes da MZS Estates: propriedade, locações privadas, vendas e desenvolvimento.",
     "capitalTitle": "Capital privado | MZS Capital",
-    "capitalDescription": "A MZS Capital explora oportunidades selecionadas de financiamento privado, investimento e parcerias estratégicas em imóveis e empresas."
+    "capitalDescription": "A MZS Capital explora oportunidades selecionadas de financiamento privado, investimento e parcerias estratégicas em imóveis e empresas.",
+    "aboutTitle": "Sobre nós | MZS Group",
+    "aboutDescription": "Nossa trajetória empresarial começou em 1990 no comércio perto de Amsterdã. Passando pela Espanha, chegamos a Dubai, de onde atuamos hoje. Por meio de participações em diversas empresas, combinamos 36 anos de experiência com contatos internacionais e conhecimento dos mercados locais."
   },
   "Estates": {
     "ownership_management": "Propriedade e gestão",
@@ -1168,5 +1171,14 @@
     "beach": "Praia e calçadão",
     "heritage": "Centro histórico",
     "nightlife": "Vida noturna e entretenimento"
+  },
+  "About": {
+    "label": "Sobre nós",
+    "headline": "Contatos internacionais. Conhecimento local.",
+    "body": "Nossa trajetória empresarial começou em 1990 no comércio perto de Amsterdã. Passando pela Espanha, chegamos a Dubai, de onde atuamos hoje. Por meio de participações em diversas empresas, combinamos 36 anos de experiência com contatos internacionais e conhecimento dos mercados locais.",
+    "amsterdam": "Origens perto de Amsterdã",
+    "spain": "Passando pela Espanha",
+    "dubai": "Hoje a partir de Dubai",
+    "caption": "Uma interpretação artística da nossa trajetória: Amsterdã, Espanha e Dubai."
   }
 }

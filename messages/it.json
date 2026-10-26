@@ -14,7 +14,8 @@
     "main_navigation": "Navigazione principale",
     "my_dashboard": "La mia area personale",
     "menu": "Menu",
-    "mobile_main_navigation": "Navigazione principale mobile"
+    "mobile_main_navigation": "Navigazione principale mobile",
+    "about": "Chi siamo"
   },
   "Footer": {
     "contact_short": "Contatti",
@@ -50,7 +51,9 @@
     "estatesTitle": "Immobili | MZS Estates",
     "estatesDescription": "Scopri le attività immobiliari internazionali indipendenti di MZS Estates: proprietà, locazioni private, vendite e sviluppo.",
     "capitalTitle": "Capitale privato | MZS Capital",
-    "capitalDescription": "MZS Capital esplora opportunità selezionate di finanziamento privato, investimento e partnership strategiche nel settore immobiliare e nelle imprese."
+    "capitalDescription": "MZS Capital esplora opportunità selezionate di finanziamento privato, investimento e partnership strategiche nel settore immobiliare e nelle imprese.",
+    "aboutTitle": "Chi siamo | MZS Group",
+    "aboutDescription": "Il nostro percorso imprenditoriale è iniziato nel 1990 nel commercio vicino ad Amsterdam. Passando per la Spagna, ci ha portati a Dubai, da dove operiamo oggi. Attraverso partecipazioni in diverse aziende, uniamo 36 anni di esperienza a contatti internazionali e alla conoscenza dei mercati locali."
   },
   "Estates": {
     "ownership_management": "Proprietà e gestione",
@@ -1168,5 +1171,14 @@
     "beach": "Spiaggia e lungomare",
     "heritage": "Centro storico",
     "nightlife": "Vita notturna e intrattenimento"
+  },
+  "About": {
+    "label": "Chi siamo",
+    "headline": "Contatti internazionali. Conoscenza locale.",
+    "body": "Il nostro percorso imprenditoriale è iniziato nel 1990 nel commercio vicino ad Amsterdam. Passando per la Spagna, ci ha portati a Dubai, da dove operiamo oggi. Attraverso partecipazioni in diverse aziende, uniamo 36 anni di esperienza a contatti internazionali e alla conoscenza dei mercati locali.",
+    "amsterdam": "Le origini vicino ad Amsterdam",
+    "spain": "Passando per la Spagna",
+    "dubai": "Oggi da Dubai",
+    "caption": "Un’interpretazione artistica del nostro percorso: Amsterdam, Spagna e Dubai."
   }
 }
