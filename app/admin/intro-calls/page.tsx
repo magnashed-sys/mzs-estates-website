@@ -43,7 +43,7 @@ export default async function IntroCallsAdmin({ searchParams }: { searchParams: 
       <p>{count || 0} requests · Page {page}</p>
       <div className={styles.list}>{data?.map(item => <article className={styles.card} key={item.id}>
         <div className={styles.top}><strong>{item.status}</strong><span>{new Date(item.created_at).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })}</span></div>
-        <p>{item.source === "real-estate" ? "Real Estate" : "Private Capital"}</p>
+        <p>{item.source === "consultancy" ? "Consultancy" : item.source === "real-estate" ? "Real Estate" : "Private Capital"}</p>
         <h2>{item.full_name}</h2>
         <p><a href={"mailto:" + item.email}>{item.email}</a>{item.phone && <><br />{item.phone}</>}</p>
         {item.message && <p className={styles.explanation}>{item.message}</p>}

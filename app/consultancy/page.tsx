@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import {getTranslations} from 'next-intl/server';
+import IntroCallForm from '../private-capital/IntroCallForm';
 import PublicHeader from '../components/PublicHeader';
 import HomeContactFooter from '../components/HomeContactFooter';
 import ArrowUpRightIcon from '../components/ArrowUpRightIcon';
@@ -39,10 +40,7 @@ export default async function ConsultancyPage() {
           </article>
         ))}
       </section>
-      <div className={styles.contact}>
-        <p>{t('headline')}</p>
-        <a href="mailto:info@mzsgroup.eu?subject=MZS%20Consultancy">{t('cta')}<ArrowUpRightIcon /></a>
-      </div>
+      <IntroCallForm source="consultancy" sectionNumber="04" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
   );
