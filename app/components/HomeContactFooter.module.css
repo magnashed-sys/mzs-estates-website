@@ -1,10 +1,9 @@
-/* Locations and centered flags; footer action links are intentionally omitted. */
-.footer {display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:8px;border-top:1px solid #625745;padding-top:12px;color:#c4bdae;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;letter-spacing:.12em;direction:ltr;}
-.locations {text-align:left;overflow-wrap:break-word;}
-.languages {justify-self:center;min-width:0;max-width:100%;}
+/* Locations left and flags right, vertically aligned on a shared row. */
+.footer {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px 24px;border-top:1px solid #625745;padding-top:12px;color:#c4bdae;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;letter-spacing:.12em;direction:ltr;}
+.locations {flex:1 1 240px;text-align:left;overflow-wrap:break-word;}
+.languages {margin-left:auto;min-width:0;max-width:100%;}
+.languages > nav {justify-content:flex-end;flex-wrap:wrap;row-gap:6px;}
 @media(max-width:760px) {
  .footer {gap:12px;padding-top:16px;padding-bottom:8px;}
- .locations {text-align:center;overflow-wrap:normal;}
  .languages {width:100%;}
- .languages > nav {flex-wrap:wrap;row-gap:6px;}
 }
