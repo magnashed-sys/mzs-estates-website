@@ -26,7 +26,7 @@ export default async function Home() {
         <p className="mzs-intro"> {t('mzs_group_is_an_independent_international')} </p>
       </section>
 
-      <HomeContactFooter email="info@mzsgroup.eu" />
+      <HomeContactFooter />
     </main>
   );
 }

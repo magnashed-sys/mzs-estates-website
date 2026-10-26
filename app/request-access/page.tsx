@@ -109,7 +109,7 @@ export default function RequestAccessPage() {
           <p className="request-success-note">{t("a076")}</p>
           <a href={localizedPath("/", locale)} className="request-return">{t("a053")}</a>
         </section>
-        <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+        <div className={styles.publicFooter}><HomeContactFooter /></div>
       </main>
     );
   }
@@ -177,7 +177,7 @@ export default function RequestAccessPage() {
           </button>
         </form>
       </section>
-      <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+      <div className={styles.publicFooter}><HomeContactFooter /></div>
     </main>
   );
 }
