@@ -444,7 +444,7 @@ export default function AdminPage() {
   </div></main>;
 
   return <main className="admin-page">
-    <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
+    <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><Link href="/admin/workspaces/group" onClick={guardLink} aria-disabled={locked} className="admin-button">New workspaces →</Link><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections" style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 0"}}>
