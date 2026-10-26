@@ -9,6 +9,7 @@ import { createClient } from "../../lib/supabase/client";
 import RentalSummary from "./RentalSummary";
 import FinancialCockpit from "./FinancialCockpit";
 import BookingManagement from "./BookingManagement";
+import GroupActionCenter from "./GroupActionCenter";
 import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
 
@@ -387,7 +388,18 @@ export default function AdminPage() {
     <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
-      <nav className="admin-nav" aria-label="Administration sections">{tabs.map(([key, label]) => <button key={key} disabled={locked} aria-current={tab === key ? "page" : undefined} onClick={() => navigate(key)}>{label}{key === "relationships" && pending.length > 0 && <span className="admin-count">{pending.length}</span>}</button>)}</nav>
+      <nav className="admin-nav" aria-label="Administration sections" style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 0"}}>
+        {([["GROUP",["overview","analytics"]],["MZS ESTATES",["estates","contracts","bookings"]],["MZS CAPITAL",["capital"]],["RELATIONSHIPS",["relationships","companies","projects"]]] as const).map(([group,keys])=>
+         <div key={group} style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
+           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a",paddingRight:5}}>{group}</span>
+           {keys.map(key=>{const item=tabs.find(([k])=>k===key);return item&&<button key={key} disabled={locked} aria-current={tab===key?"page":undefined} onClick={()=>navigate(key)}>{item[1]}{key==="relationships"&&pending.length>0&&<span className="admin-count">{pending.length}</span>}</button>})}
+         </div>)}
+        <div style={{display:"flex",alignItems:"center",gap:7,padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
+          <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>SYSTEM</span>
+          <Link href="/admin/owner-stays" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Property Partners</Link>
+          <Link href="/admin/group/estates/contracts?view=invoices" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Invoices</Link>
+        </div>
+      </nav>
       {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
       {notice && <p className="admin-notice" role="status">{notice}</p>}
       {tab === "capital" && <>
@@ -427,6 +439,7 @@ export default function AdminPage() {
           <button disabled={locked} onClick={() => { navigate("relationships"); setRelationshipView("accounts"); }}><span>Active relationships</span><strong>{activeCount}</strong><small>{relationships.length} total accounts →</small></button>
           <button disabled={locked} onClick={() => navigate("projects")}><span>Active projects</span><strong>{projects.filter(p => p.status === "active").length}</strong><small>View collection →</small></button>
         </div>
+        <GroupActionCenter refreshVersion={refreshVersion}/>
         <div className="admin-section-heading"><div><p className="eyebrow">Your next actions</p><h2>Needs attention.</h2></div></div>
         <div className="admin-panel">
           {!pending.length && !approved.length && !attentionInvites.length && <p className="admin-help">No relationship actions waiting. Check rental requests below.</p>}
