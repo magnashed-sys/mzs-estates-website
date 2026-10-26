@@ -17,7 +17,7 @@
 .number {color:#bfa982;font-size:10px;letter-spacing:.12em;}
 .journey h2 {font:400 clamp(18px,1.7vw,26px)/1.3 Georgia,'Times New Roman',serif;margin:10px 0 0;color:#e4cfaa;}
 .year {position:absolute;top:22px;inset-inline-end:28px;font-size:11px;letter-spacing:.1em;color:#b9b4a9;}
-.body {max-width:930px;color:#c5beb3;font:400 clamp(16px,1.35vw,20px)/1.9 Arial,Helvetica,sans-serif;margin:0 auto;text-wrap:pretty;}
+.body {max-width:none;color:#c5beb3;font:400 clamp(16px,1.2vw,18px)/1.9 Arial,Helvetica,sans-serif;margin:0;text-wrap:balance;}
 .footer {padding:0 var(--inset) 24px;}
 @media(max-width:700px) {
  .intro {padding-top:46px;padding-bottom:26px;}
