@@ -2,7 +2,7 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import BookingEditor from "../BookingEditor";
-import {recordBookingReceipt,reverseBookingReceipt} from "./actions";
+import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft} from "./actions";
 export const dynamic="force-dynamic";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const money=(v:number|string|null)=>v===null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(v));
@@ -25,6 +25,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
  const receipts=receiptResult.data||[];
  const receiptTotal=receipts.filter(r=>!r.reversed_at).reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
  const chargeable=!owner&&b.status==="confirmed"&&Number(b.quoted_total_eur)>0;
+ const [invoiceDraft,issuerList]=await Promise.all([db.from("mzs_booking_invoice_drafts").select("id,recipient_name,gross_total,net_total,vat_total,vat_rate,tax_note,created_at,issuer_id").eq("booking_id",id).maybeSingle(),db.from("mzs_lease_issuers").select("id,name,tax_id,prefix").order("name")]);
  const editable=!b.is_test&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
@@ -63,6 +64,27 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
       <small style={{color:"#bcb2a4"}}>Record only actual cleared receipts. Use a unique reference to prevent accidental duplicate registration.</small>
     </form>}
     <p><Link href="/admin/group/estates/contracts?view=invoices" style={{color:"#d5c09a"}}>Open recurring lease invoices & payments →</Link></p>
+  </section>
+  <section style={{...card,marginTop:20}}><h2>Reservation invoicing</h2>
+    <p style={{color:"#bcb2a4"}}>Invoice drafts only. No invoice number is consumed, no invoice is issued and no email is sent. The VAT rate must be verified by the administrator for the property, issuer and transaction.</p>
+    {(invoiceDraft.error||issuerList.error)&&<p role="alert">Invoice configuration could not be loaded; draft creation is unavailable.</p>}
+    {invoiceDraft.data?<div>
+       <p><strong>Draft registered</strong> · {new Date(invoiceDraft.data.created_at).toLocaleString("en-GB")}</p>
+       <p>Recipient: {invoiceDraft.data.recipient_name}</p>
+       <p>Gross: {money(invoiceDraft.data.gross_total)} · VAT: {money(invoiceDraft.data.vat_total)} · Net: {money(invoiceDraft.data.net_total)}</p>
+       <p>VAT assessment: {invoiceDraft.data.tax_note}</p>
+       <small>Issuer selection and totals are snapshotted in the draft. Issuance requires a separate approval workflow.</small>
+    </div>:chargeable&&!invoiceDraft.error&&!issuerList.error?<form action={createBookingInvoiceDraft} style={{display:"grid",gap:12,maxWidth:480}}>
+      <input type="hidden" name="booking_id" value={id}/>
+      <label>Issuing entity <select name="issuer_id" required defaultValue="" style={{display:"block",padding:10,width:"100%"}}><option value="" disabled>Select issuing entity</option>{(issuerList.data||[]).map(i=><option key={i.id} value={i.id}>{i.name} · {i.prefix||"No prefix"}</option>)}</select></label>
+      {(issuerList.data||[]).length===0&&<p role="alert">No issuing entity is configured. Create an issuer in Rental Contracts before drafting an invoice.</p>}
+      <label>Invoice recipient <input name="recipient_name" maxLength={250} required defaultValue={guest?.full_name||""} style={{display:"block",padding:10,width:"100%"}}/></label>
+      <label>Recipient email <input name="recipient_email" type="email" maxLength={254} defaultValue={guest?.email||""} style={{display:"block",padding:10,width:"100%"}}/></label>
+      <label>VAT rate (%) <input name="vat_rate" type="number" min="0" max="100" step="0.0001" required placeholder="Enter verified rate" style={{display:"block",padding:10,width:"100%"}}/></label>
+      <label>VAT / tax assessment notes <textarea name="tax_note" required minLength={5} maxLength={1000} placeholder="Explain the VAT rate or exemption after checking applicable treatment" style={{display:"block",padding:10,width:"100%"}}/></label>
+      <p>Total including VAT: <strong>{money(b.quoted_total_eur)}</strong>. The draft calculates net and VAT components from this existing total.</p>
+      <button type="submit" disabled={(issuerList.data||[]).length===0} style={{padding:12,background:"#d5c09a",color:"#181410",fontWeight:600}}>Save invoice draft</button>
+    </form>:<p>No invoice draft available for this booking type or status.</p>}
   </section>
   <section style={{...card,marginTop:20}}><h2>Activity & audit history</h2>
     {(changes.error||prices.error||notifications.error)&&<p role="alert" style={{color:"#e3a995"}}>Some audit or notification records could not be loaded. The activity history may be incomplete.</p>}
