@@ -1,5 +1,8 @@
 import Image from 'next/image';
-import {getTranslations} from 'next-intl/server';
+import Link from 'next/link';
+import ArrowUpRightIcon from '../components/ArrowUpRightIcon';
+import {localizedPath} from '../../i18n/public-routing';
+import {getLocale, getTranslations} from 'next-intl/server';
 import PublicHeader from '../components/PublicHeader';
 import HomeContactFooter from '../components/HomeContactFooter';
 import {publicMetadata} from '../../i18n/metadata';
@@ -12,7 +15,12 @@ export async function generateMetadata() {
 }
 
 export default async function AboutPage() {
-  const t = await getTranslations('About');
+  const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
+  const activities = [
+    {href: '/consultancy', label: header('consultancy')},
+    {href: '/real-estate', label: header('real_estate')},
+    {href: '/private-capital', label: header('private_capital')},
+  ];
   return (
     <main className={styles.page}>
       <div className={styles.header}><PublicHeader /></div>
@@ -32,6 +40,18 @@ export default async function AboutPage() {
           <li><span className={styles.number}>03</span><h2>{t('dubai')}</h2></li>
         </ol>
         <p className={styles.body}>{t('body')}</p>
+      </section>
+      <section className={styles.activities} aria-labelledby="about-activities">
+        <h2 id="about-activities">{estates('our_activities_2')}</h2>
+        <div className={styles.activityGrid}>
+          {activities.map((activity, index) => (
+            <Link className={styles.activityCard} href={localizedPath(activity.href, locale)} key={activity.href}>
+              <span className={styles.number} aria-hidden="true">0{index + 1}</span>
+              <span className={styles.activityTitle}>{activity.label}</span>
+              <span className={styles.activityArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
+            </Link>
+          ))}
+        </div>
       </section>
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
