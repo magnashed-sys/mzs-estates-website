@@ -9,7 +9,8 @@ test('Admin core refresh excludes three large optional registers',()=>{
  const end=admin.indexOf('assertComplete(results);',start);
  assert.ok(start>0&&end>start);
  const core=admin.slice(start,end);
- for(const name of ['access_requests','access_invitations','profiles','projects'])
+ assert.ok(admin.slice(0,start).includes('from("access_requests")'),"access requests missing from core loader");
+ for(const name of ['access_invitations','profiles','projects'])
   assert.ok(core.includes(name),name+' missing from core');
  for(const optional of ['mzs_member_companies','mzs_member_contact_details','offerings'])
   assert.ok(!core.includes('from("'+optional+'")'),optional+' unexpectedly eager');
