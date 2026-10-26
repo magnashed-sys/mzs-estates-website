@@ -41,7 +41,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
  const editable=!legacy&&!b.is_test&&Boolean(b.user_id)&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
-  <Link href="/admin/unified-bookings" style={{color:"#d5c09a"}}>← Unified Bookings</Link>
+  <Link href="/admin/bookings" style={{color:"#d5c09a"}}>← Unified Bookings</Link>
   <p style={{color:"#d5c09a",letterSpacing:3,fontSize:11,marginTop:30}}>MZS ESTATES / RESERVATION DOSSIER</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>{property?.title||"Rental property"}</h1>
   <p style={{color:"#b5ac9c"}}>Booking reference: {b.id}</p>
