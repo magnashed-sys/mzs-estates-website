@@ -1,8 +1,8 @@
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../lib/security/estate-properties";
-import {redirect} from "next/navigation";
+import BookingEditor from "./BookingEditor";
 export const dynamic="force-dynamic";
-type Item={id:string;category:"Guest booking"|"Owner stay"|"Unavailable";property:string;checkIn:string;checkOut:string;status:string;amount:string;href:string};
+type Item={id:string;category:"Guest booking"|"Owner stay"|"Unavailable";property:string;checkIn:string;checkOut:string;status:string;amount:string;href:string;editable:boolean;total:number|null;guestCount:number|null;notes:string};
 export default async function UnifiedBookings(){
  const {db}=await requireEstateAdmin();
  const [bookings,requests,properties]=await Promise.all([
@@ -21,11 +21,11 @@ export default async function UnifiedBookings(){
    id:b.id,category:(b.status==="blocked"?"Unavailable":"Guest booking") as Item["category"],
    property:names.get(b.project_id)||"Property",checkIn:b.check_in,checkOut:b.check_out,
    status:b.status,amount:b.quoted_total_eur==null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(b.quoted_total_eur)),
-   href:"/admin?tab=bookings"
+   href:"/admin?tab=bookings",editable:["confirmed","requested"].includes(b.status)&&!b.is_test,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),guestCount:b.guest_count,notes:b.admin_notes||""
   })),
   ...(requests.data||[]).map(r=>({
    id:r.id,category:"Owner stay" as const,property:names.get(grantsById.get(r.partner_id))||"Property",
-   checkIn:r.check_in,checkOut:r.check_out,status:r.status,amount:"€0.00",href:"/admin/owner-stays"
+   checkIn:r.check_in,checkOut:r.check_out,status:r.status,amount:"€0.00",href:"/admin/owner-stays",editable:false,total:0,guestCount:null,notes:""
   }))
  ].sort((a,b)=>b.checkIn.localeCompare(a.checkIn));
  const style={color:"#f0e9de",background:"#12110f",border:"1px solid #504534",padding:"14px"} as const;
@@ -33,7 +33,7 @@ export default async function UnifiedBookings(){
   <Link href="/admin?tab=bookings" style={{color:"#d5c09a"}}>← Group Administration</Link>
   <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>MZS ESTATES / ADMINISTRATION</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>Unified Bookings</h1>
-  <p style={{color:"#aaa398"}}>One read-only view of guest reservations, complimentary owner stays and unavailable periods. Existing protected modules remain the source of truth for changes and approvals.</p>
+  <p style={{color:"#aaa398"}}>Manage reservations, pricing and owner stays together. Changes use the existing protected administrator workflows.</p>
   <nav style={{display:"flex",flexWrap:"wrap",gap:12,margin:"25px 0"}}>
    <Link href="/admin?tab=bookings" style={style}>Guest bookings & calendar →</Link>
    <Link href="/admin/owner-stays" style={style}>Owner stays, pricing & partner access →</Link>
@@ -46,7 +46,7 @@ export default async function UnifiedBookings(){
   <div style={{overflowX:"auto"}}>
    <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
     <thead><tr>{["Property","Type","Check-in","Check-out","Status","Amount","Manage"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
-    <tbody>{rows.map(r=><tr key={r.category+r.id}><td style={{padding:12,borderBottom:"1px solid #3d382f"}}>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td><td><Link style={{color:"#d5c09a"}} href={r.href}>Open →</Link></td></tr>)}</tbody>
+    <tbody>{rows.map(r=><tr key={r.category+r.id}><td style={{padding:12,borderBottom:"1px solid #3d382f"}}>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td><td>{r.editable?<BookingEditor booking={{id:r.id,checkIn:r.checkIn,checkOut:r.checkOut,total:r.total,guestCount:r.guestCount,notes:r.notes}}/>:<Link style={{color:"#d5c09a"}} href={r.href}>Open →</Link>}</td></tr>)}</tbody>
    </table>
   </div>
   {!rows.length&&<p>No records available in the current reporting scope.</p>}
