@@ -21,11 +21,11 @@ function harness(locale,{active=true,authenticated=true,allowed=true,loadError=f
  }});return {exports,messages,reads:()=>reads};
 }
 test('Capital page localizes surrounding copy and empty/error states in all eleven languages',async()=>{
- for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','ar','tr','lt'])for(const loadError of [false,true]){
+ for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','ar','tr','lt','pl','zh-CN','sv','ro'])for(const loadError of [false,true]){
   const h=harness(locale,{loadError});const html=renderToStaticMarkup(await h.exports.default());
   assert.ok(html.includes(h.messages.AccountUI.a101));assert.ok(html.includes(h.messages.AccountUI[loadError?'a105':'a106']));assert.equal(h.reads(),1);
  }
 });
 test('Capital page still denies invalid environments, signed-out and inactive users before loading dossiers',async()=>{
- for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','ar','tr','lt'])for(const [options,message] of [[{allowed:false},'404'],[{authenticated:false},'login'],[{active:false},'404']]){const h=harness(locale,options);await assert.rejects(h.exports.default(),new RegExp(message));assert.equal(h.reads(),0);}
+ for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','ar','tr','lt','pl','zh-CN','sv','ro'])for(const [options,message] of [[{allowed:false},'404'],[{authenticated:false},'login'],[{active:false},'404']]){const h=harness(locale,options);await assert.rejects(h.exports.default(),new RegExp(message));assert.equal(h.reads(),0);}
 });

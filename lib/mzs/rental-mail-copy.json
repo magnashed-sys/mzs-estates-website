@@ -376,5 +376,173 @@
     "motto": "PRIVATUMAS · NEPRIKLAUSOMYBĖ · TARPTAUTIŠKUMAS",
     "cancelFooter": "Mokėjimai ir galimos grąžinamos sumos, jei tokių yra, tvarkomi atskirai. Jei reikia pagalbos, susisiekite su MZS Group.",
     "footer": "Dabartinę rezervacijos būseną galite peržiūrėti savo privačioje paskyroje. Jei reikia pagalbos, susisiekite su MZS Group."
+  },
+  "pl": {
+    "title": {
+      "requested": "Otrzymaliśmy Twoją prośbę o rezerwację",
+      "confirmed": "Twoja rezerwacja została potwierdzona",
+      "modified": "Twoja rezerwacja została zmieniona",
+      "cancelled": "Twoja rezerwacja została anulowana"
+    },
+    "intro": {
+      "requested": "Otrzymaliśmy Twoją prośbę. Nie jest to jeszcze potwierdzona rezerwacja. Po indywidualnym rozpatrzeniu i zatwierdzeniu MZS Group wyśle osobne potwierdzenie.",
+      "confirmed": "MZS Group zatwierdziła i potwierdziła Twoją rezerwację. Czekamy na Twój przyjazd.",
+      "modified": "MZS Group zmieniła Twoją potwierdzoną rezerwację. Poniższe dane zastępują informacje z wcześniejszego potwierdzenia.",
+      "cancelled": "MZS Group anulowała Twoją rezerwację. Wcześniejsze potwierdzenie jest nieważne. Nie podróżuj na podstawie tego potwierdzenia."
+    },
+    "status": {
+      "requested": "PROŚBA — NIEPOTWIERDZONA",
+      "confirmed": "POTWIERDZONA",
+      "modified": "POTWIERDZONA — ZMIENIONA",
+      "cancelled": "ANULOWANA — NIEWAŻNA"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Obiekt",
+      "checkIn": "Przyjazd",
+      "checkOut": "Wyjazd",
+      "nights": "Liczba nocy",
+      "guests": "Goście",
+      "estimate": "Szacunkowa kwota",
+      "confirmed": "Potwierdzona kwota",
+      "previous": "Wcześniej potwierdzona kwota",
+      "reference": "Numer rezerwacji",
+      "heating": "Zamówione podgrzewanie basenu",
+      "notes": "Życzenia specjalne"
+    },
+    "yes": "Tak",
+    "no": "Nie",
+    "none": "Brak",
+    "greeting": "Szanowny Gościu,",
+    "action": "ZOBACZ MOJĄ REZERWACJĘ",
+    "motto": "PRYWATNOŚĆ · NIEZALEŻNOŚĆ · MIĘDZYNARODOWY ZASIĘG",
+    "cancelFooter": "Ewentualne płatności i zwroty są rozpatrywane osobno. Aby uzyskać pomoc, skontaktuj się z MZS Group.",
+    "footer": "Aktualny status znajdziesz na swoim koncie. Aby uzyskać pomoc, skontaktuj się z MZS Group."
+  },
+  "zh-CN": {
+    "title": {
+      "requested": "已收到您的预订申请",
+      "confirmed": "您的预订已确认",
+      "modified": "您的预订已修改",
+      "cancelled": "您的预订已取消"
+    },
+    "intro": {
+      "requested": "我们已收到您的申请。这尚不是已确认的预订。MZS Group 将在单独审核并批准后另行发送确认邮件。",
+      "confirmed": "MZS Group 已批准并确认您的预订。我们期待您的到来。",
+      "modified": "MZS Group 已修改您已确认的预订。以下信息取代此前确认邮件中的信息。",
+      "cancelled": "MZS Group 已取消您的预订。此前的确认已失效，请勿依据该确认安排行程。"
+    },
+    "status": {
+      "requested": "申请 — 尚未确认",
+      "confirmed": "已确认",
+      "modified": "已确认 — 已修改",
+      "cancelled": "已取消 — 已失效"
+    },
+    "labels": {
+      "status": "状态",
+      "property": "住宿物业",
+      "checkIn": "入住",
+      "checkOut": "退房",
+      "nights": "晚数",
+      "guests": "住客",
+      "estimate": "预计金额",
+      "confirmed": "已确认金额",
+      "previous": "此前确认金额",
+      "reference": "预订编号",
+      "heating": "已申请泳池加热",
+      "notes": "特殊要求"
+    },
+    "yes": "是",
+    "no": "否",
+    "none": "无",
+    "greeting": "尊敬的住客，",
+    "action": "查看我的预订",
+    "motto": "私享 · 独立 · 国际",
+    "cancelFooter": "任何付款及退款均将另行处理。如需帮助，请联系 MZS Group。",
+    "footer": "请在您的个人账户中查看当前状态。如需帮助，请联系 MZS Group。"
+  },
+  "sv": {
+    "title": {
+      "requested": "Din bokningsförfrågan har tagits emot",
+      "confirmed": "Din bokning är bekräftad",
+      "modified": "Din bokning har ändrats",
+      "cancelled": "Din bokning har avbokats"
+    },
+    "intro": {
+      "requested": "Vi har tagit emot din förfrågan. Detta är ännu inte en bekräftad bokning. Efter individuell granskning och godkännande skickar MZS Group en separat bekräftelse.",
+      "confirmed": "MZS Group har godkänt och bekräftat din bokning. Vi ser fram emot din vistelse.",
+      "modified": "MZS Group har ändrat din bekräftade bokning. Uppgifterna nedan ersätter uppgifterna i den tidigare bekräftelsen.",
+      "cancelled": "MZS Group har avbokat din bokning. Den tidigare bekräftelsen gäller inte längre. Res inte med den bekräftelsen som underlag."
+    },
+    "status": {
+      "requested": "FÖRFRÅGAN — EJ BEKRÄFTAD",
+      "confirmed": "BEKRÄFTAD",
+      "modified": "BEKRÄFTAD — ÄNDRAD",
+      "cancelled": "AVBOKAD — OGILTIG"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Boende",
+      "checkIn": "Incheckning",
+      "checkOut": "Utcheckning",
+      "nights": "Antal nätter",
+      "guests": "Gäster",
+      "estimate": "Beräknat belopp",
+      "confirmed": "Bekräftat belopp",
+      "previous": "Tidigare bekräftat belopp",
+      "reference": "Bokningsreferens",
+      "heating": "Pooluppvärmning begärd",
+      "notes": "Särskilda önskemål"
+    },
+    "yes": "Ja",
+    "no": "Nej",
+    "none": "Inga",
+    "greeting": "Hej,",
+    "action": "VISA MIN BOKNING",
+    "motto": "PRIVAT · OBEROENDE · INTERNATIONELL",
+    "cancelFooter": "Eventuella betalningar och återbetalningar hanteras separat. Kontakta MZS Group om du behöver hjälp.",
+    "footer": "Du hittar aktuell status på ditt personliga konto. Kontakta MZS Group om du behöver hjälp."
+  },
+  "ro": {
+    "title": {
+      "requested": "Solicitarea de rezervare a fost primită",
+      "confirmed": "Rezervarea dumneavoastră este confirmată",
+      "modified": "Rezervarea dumneavoastră a fost modificată",
+      "cancelled": "Rezervarea dumneavoastră a fost anulată"
+    },
+    "intro": {
+      "requested": "Am primit solicitarea dumneavoastră. Aceasta nu este încă o rezervare confirmată. După analiza individuală și aprobare, MZS Group va trimite o confirmare separată.",
+      "confirmed": "MZS Group a aprobat și confirmat rezervarea dumneavoastră. Vă așteptăm cu drag.",
+      "modified": "MZS Group a modificat rezervarea confirmată. Informațiile de mai jos le înlocuiesc pe cele din confirmarea anterioară.",
+      "cancelled": "MZS Group a anulat rezervarea dumneavoastră. Confirmarea anterioară nu mai este valabilă. Nu călătoriți în baza acelei confirmări."
+    },
+    "status": {
+      "requested": "SOLICITARE — NECONFIRMATĂ",
+      "confirmed": "CONFIRMATĂ",
+      "modified": "CONFIRMATĂ — MODIFICATĂ",
+      "cancelled": "ANULATĂ — NEVALABILĂ"
+    },
+    "labels": {
+      "status": "Stare",
+      "property": "Proprietate",
+      "checkIn": "Sosire",
+      "checkOut": "Plecare",
+      "nights": "Număr de nopți",
+      "guests": "Oaspeți",
+      "estimate": "Sumă estimată",
+      "confirmed": "Sumă confirmată",
+      "previous": "Sumă confirmată anterior",
+      "reference": "Referința rezervării",
+      "heating": "Încălzirea piscinei solicitată",
+      "notes": "Solicitări speciale"
+    },
+    "yes": "Da",
+    "no": "Nu",
+    "none": "Niciuna",
+    "greeting": "Stimate oaspete,",
+    "action": "VEDEȚI REZERVAREA MEA",
+    "motto": "PRIVAT · INDEPENDENT · INTERNAȚIONAL",
+    "cancelFooter": "Eventualele plăți și rambursări sunt gestionate separat. Pentru asistență, contactați MZS Group.",
+    "footer": "Starea actuală este disponibilă în contul dumneavoastră personal. Pentru asistență, contactați MZS Group."
   }
 }
