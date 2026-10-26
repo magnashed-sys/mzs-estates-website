@@ -1,5 +1,5 @@
 /** Explicit allowlist: public marketing pages plus login, never private route aliases. */
-export const memberLocales = ['en', 'nl', 'es', 'de', 'it', 'fr', 'lt', 'ru', 'pt-BR', 'ar', 'tr', 'pl', 'zh-CN', 'sv', 'ro', 'nb'] as const;
+export const memberLocales = ['en', 'nl', 'de', 'fr', 'es', 'it', 'nb', 'sv', 'pl', 'lt', 'ro', 'ru', 'tr', 'zh-CN', 'ar', 'pt-BR'] as const;
 export const locales = memberLocales;
 /** Presentation preference only; never used for authorization. */
 export function memberLocale(value: unknown): typeof memberLocales[number] {
