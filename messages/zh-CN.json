@@ -111,7 +111,7 @@
     "my_dashboard": "我的控制面板",
     "menu": "菜单",
     "mobile_main_navigation": "移动端主导航",
-    "about": "关于我们",
+    "about": "关于 MZS",
     "consultancy": "咨询服务"
   },
   "Footer": {
@@ -189,7 +189,7 @@
     "estatesDescription": "发现独立的国际房地产活动 MZS Estates:财产所有权、私人租赁、销售和发展。",
     "capitalTitle": "私人资本 | MZS Capital",
     "capitalDescription": "MZS Capital 在房地产和企业中探索选定的私人融资、投资和战略伙伴关系机会。",
-    "aboutTitle": "关于我们 | MZS Group",
+    "aboutTitle": "关于 MZS | MZS Group",
     "aboutDescription": "我们的服务涵盖咨询、房地产项目及私人资本。 国际人脉，本地市场洞察。",
     "consultancyTitle": "咨询服务 | MZS Group",
     "consultancyDescription": "清晰的计划始于恰当的问题。MZS Group 将国际经验与本地市场知识相结合，为法律与税务架构、房地产项目及融资事宜提供咨询与支持。"
@@ -1176,7 +1176,7 @@
     "nightlife": "夜生活和娱乐"
   },
   "About": {
-    "label": "关于我们",
+    "label": "关于 MZS",
     "headline": "国际人脉，本地市场洞察。",
     "body": "我们的创业历程始于1990年，在阿姆斯特丹附近从事贸易。经由西班牙，我们来到迪拜，如今以此为基地开展业务。通过参股多家本地公司，我们将36年的经验与国际人脉及本地市场知识相结合。 我们的服务涵盖咨询、房地产项目及私人资本。",
     "amsterdam": "起步于阿姆斯特丹附近",

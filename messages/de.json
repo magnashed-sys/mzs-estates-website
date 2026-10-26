@@ -15,7 +15,7 @@
     "my_dashboard": "Meine Übersicht",
     "menu": "Menü",
     "mobile_main_navigation": "Mobile Hauptnavigation",
-    "about": "Über uns",
+    "about": "Über MZS",
     "consultancy": "Beratung"
   },
   "Footer": {
@@ -53,7 +53,7 @@
     "estatesDescription": "Entdecken Sie die unabhängigen internationalen Immobilienaktivitäten von MZS Estates: Immobilieneigentum, private Vermietung, Verkauf und Entwicklung.",
     "capitalTitle": "Privates Kapital | MZS Capital",
     "capitalDescription": "MZS Capital prüft ausgewählte private Finanzierungs-, Investment- und strategische Partnerschaftsmöglichkeiten im Immobilien- und Unternehmensbereich.",
-    "aboutTitle": "Über uns | MZS Group",
+    "aboutTitle": "Über MZS | MZS Group",
     "aboutDescription": "Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital. Internationale Kontakte. Lokale Marktkenntnis.",
     "consultancyTitle": "Beratung | MZS Group",
     "consultancyDescription": "Ein klarer Plan beginnt mit den richtigen Fragen. MZS Group verbindet internationale Erfahrung mit lokaler Marktkenntnis und begleitet Sie bei rechtlichen und steuerlichen Strukturen, Immobilienprojekten und Finanzierungsfragen."
@@ -1176,7 +1176,7 @@
     "nightlife": "Nachtleben & Unterhaltung"
   },
   "About": {
-    "label": "Über uns",
+    "label": "Über MZS",
     "headline": "Internationale Kontakte. Lokale Marktkenntnis.",
     "body": "Unsere unternehmerische Geschichte begann 1990 im Handel nahe Amsterdam. Über Spanien führte uns unser Weg nach Dubai, von wo aus wir heute tätig sind. Durch Beteiligungen an verschiedenen lokalen Unternehmen verbinden wir 36 Jahre Erfahrung mit internationalen Kontakten und lokaler Marktkenntnis. Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital.",
     "amsterdam": "Ursprung nahe Amsterdam",
