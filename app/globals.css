@@ -743,3 +743,6 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* Natural spacing and line breaking for Simplified Chinese text. */
+html:lang(zh-CN) :is(h1,h2,h3,p,a,button,label,summary) {letter-spacing:normal;word-break:normal;line-break:strict;}

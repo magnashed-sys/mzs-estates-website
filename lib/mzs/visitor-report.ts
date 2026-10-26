@@ -1,7 +1,7 @@
 /** Presentation only. Never store query strings, fragments, form input or tokens. */
 export function visitorPath(input: unknown): string | null {
   if (typeof input !== 'string' || input.length > 250 || /[?#%\\]/.test(input)) return null;
-  const path = input.replace(/^\/(nl|es|ru|de|it|fr|pt-BR|ar)(?=\/|$)/, '') || '/';
+  const path = input.replace(/^\/(nl|es|ru|de|it|fr|pt-BR|ar|tr|lt|pl|zh-CN|sv|ro)(?=\/|$)/, '') || '/';
   if (['/', '/real-estate', '/private-capital', '/private', '/private/profile', '/private/reservations', '/private/capital'].includes(path)) return path;
   return /^\/private\/projects\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(path) ? path : null;
 }

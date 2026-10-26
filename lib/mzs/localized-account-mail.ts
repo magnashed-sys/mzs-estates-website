@@ -253,7 +253,139 @@ const copy = {
       investment: 'Investicija', financing: 'Finansavimas',
       sale: 'Privatus pardavimas', rental: 'Privati nuoma'
     }
+  },
+"pl": {
+  "member": "kliencie",
+  "dear": "Dzień dobry",
+  "access": "DOSTĘP PRYWATNY",
+  "confidential": "Ta prywatna wiadomość jest przeznaczona dla wskazanego odbiorcy. Nie przekazuj dalej wiadomości dotyczących bezpieczeństwa konta.",
+  "motto": "PRYWATNOŚĆ · NIEZALEŻNOŚĆ · MIĘDZYNARODOWY ZASIĘG",
+  "invitation": "WYŁĄCZNIE NA ZAPROSZENIE",
+  "projects": "Przydzielone Ci projekty",
+  "login": "ZALOGUJ SIĘ",
+  "collection": "ZOBACZ MOJĄ KOLEKCJĘ",
+  "capital": "OTWÓRZ KAPITAŁ PRYWATNY",
+  "account_activated": [
+    "Twoje konto MZS Group jest już aktywne",
+    "Witaj w swojej prywatnej kolekcji.",
+    "Twoje konto MZS Group zostało zatwierdzone i aktywowane. Możesz teraz przeglądać wybrane dla Ciebie możliwości."
+  ],
+  "new_project_access": [
+    "Nowy dostęp do projektów prywatnych | MZS Group",
+    "Nowe możliwości w Twojej kolekcji.",
+    "Twoje konto MZS Group otrzymało dodatkowy dostęp do projektów prywatnych."
+  ],
+  "capital_access_granted": [
+    "Twój dostęp do kapitału prywatnego | MZS Group",
+    "Twoja prywatna dokumentacja jest dostępna.",
+    "Twoje konto MZS Group otrzymało dostęp do dokumentacji kapitału prywatnego. Zaloguj się, aby bezpiecznie zapoznać się z informacjami."
+  ],
+  "types": {
+    "investment": "Inwestycja",
+    "financing": "Finansowanie",
+    "sale": "Sprzedaż prywatna",
+    "rental": "Wynajem prywatny"
   }
+},
+"zh-CN": {
+  "member": "客户",
+  "dear": "您好",
+  "access": "专属访问",
+  "confidential": "此私密邮件仅供指定收件人阅读。请勿转发涉及账户安全的邮件。",
+  "motto": "私享 · 独立 · 国际",
+  "invitation": "仅限受邀人士",
+  "projects": "您获授权的项目",
+  "login": "登录专属账户",
+  "collection": "查看我的精选项目",
+  "capital": "查看私人资本",
+  "account_activated": [
+    "您的 MZS Group 账户已激活",
+    "欢迎查看您的专属精选项目。",
+    "您的 MZS Group 账户已获批并激活。您现在可以查看为您精选的机遇。"
+  ],
+  "new_project_access": [
+    "新增专属项目访问权限 | MZS Group",
+    "您的精选项目中新增了机遇。",
+    "您的 MZS Group 账户已获得更多专属项目的访问权限。"
+  ],
+  "capital_access_granted": [
+    "您的私人资本访问权限 | MZS Group",
+    "您的专属档案已可查看。",
+    "您的 MZS Group 账户已获得私人资本档案的访问权限。请登录以安全查看。"
+  ],
+  "types": {
+    "investment": "投资",
+    "financing": "融资",
+    "sale": "专属销售",
+    "rental": "专属租赁"
+  }
+},
+"sv": {
+  "member": "kund",
+  "dear": "Hej",
+  "access": "PRIVAT TILLGÅNG",
+  "confidential": "Detta privata meddelande är avsett för den angivna mottagaren. Vidarebefordra inte meddelanden om kontosäkerhet.",
+  "motto": "PRIVAT · OBEROENDE · INTERNATIONELL",
+  "invitation": "ENDAST PÅ INBJUDAN",
+  "projects": "Dina tilldelade projekt",
+  "login": "LOGGA IN",
+  "collection": "VISA MIN SAMLING",
+  "capital": "ÖPPNA PRIVAT KAPITAL",
+  "account_activated": [
+    "Ditt MZS Group-konto är nu aktivt",
+    "Välkommen till din privata samling.",
+    "Ditt MZS Group-konto har godkänts och aktiverats. Du kan nu se de möjligheter som har valts ut för dig."
+  ],
+  "new_project_access": [
+    "Ny tillgång till privata projekt | MZS Group",
+    "Nya möjligheter i din samling.",
+    "Ditt MZS Group-konto har fått ytterligare tillgång till privata projekt."
+  ],
+  "capital_access_granted": [
+    "Din tillgång till privat kapital | MZS Group",
+    "Ditt privata ärende är tillgängligt.",
+    "Ditt MZS Group-konto har fått tillgång till ett ärende inom privat kapital. Logga in för att se din översikt på ett säkert sätt."
+  ],
+  "types": {
+    "investment": "Investering",
+    "financing": "Finansiering",
+    "sale": "Privat försäljning",
+    "rental": "Privat uthyrning"
+  }
+},
+"ro": {
+  "member": "client",
+  "dear": "Bună ziua",
+  "access": "ACCES PRIVAT",
+  "confidential": "Acest mesaj privat este destinat persoanei indicate. Nu redirecționați mesajele privind securitatea contului.",
+  "motto": "PRIVAT · INDEPENDENT · INTERNAȚIONAL",
+  "invitation": "EXCLUSIV PE BAZĂ DE INVITAȚIE",
+  "projects": "Proiectele alocate dumneavoastră",
+  "login": "AUTENTIFICARE",
+  "collection": "VEDEȚI COLECȚIA MEA",
+  "capital": "DESCHIDEȚI CAPITALUL PRIVAT",
+  "account_activated": [
+    "Contul dumneavoastră MZS Group este acum activ",
+    "Bun venit în colecția dumneavoastră privată.",
+    "Contul dumneavoastră MZS Group a fost aprobat și activat. Acum puteți consulta oportunitățile selectate pentru dumneavoastră."
+  ],
+  "new_project_access": [
+    "Acces nou la proiecte private | MZS Group",
+    "Oportunități noi în colecția dumneavoastră.",
+    "Contului dumneavoastră MZS Group i-a fost acordat acces suplimentar la proiecte private."
+  ],
+  "capital_access_granted": [
+    "Accesul la capital privat | MZS Group",
+    "Dosarul dumneavoastră privat este disponibil.",
+    "Contului dumneavoastră MZS Group i-a fost acordat acces la un dosar de capital privat. Autentificați-vă pentru a consulta în siguranță informațiile."
+  ],
+  "types": {
+    "investment": "Investiție",
+    "financing": "Finanțare",
+    "sale": "Vânzare privată",
+    "rental": "Închiriere privată"
+  }
+}
 } as const;
 export function isLocalizedAccountLocale(locale: unknown): locale is keyof typeof copy {
   return typeof locale === 'string' && Object.hasOwn(copy, locale);
@@ -282,6 +414,6 @@ export function localizedAccountMail(event: {event_type: string; payload: Record
     // Never include financial data, project names or other payload fields for capital mail.
     link = site + '/private/capital'; action = c.capital;
   }
-  const html = `<!DOCTYPE html><html lang="${locale}" dir="${locale === 'ar' ? 'rtl' : 'ltr'}"><body style="margin:0;background:#0b0b0a;color:#f4f0e7;font-family:Arial,Helvetica,sans-serif"><div style="max-width:590px;margin:40px auto;padding:40px 30px;background:#11100e;border:1px solid #3d3529;overflow-wrap:anywhere"><div style="text-align:center;color:#d5c09a;font-family:Georgia,serif;font-size:35px;letter-spacing:5px">MZS</div><div style="text-align:center;letter-spacing:5px;font-size:10px;color:#d0c6b8;margin:10px 0 35px">GROUP</div><p style="text-align:center;letter-spacing:${locale === 'ar' ? 0 : 3}px;color:#d5c09a;font-size:11px">${c.access}</p><h1 style="font-family:Georgia,serif;font-weight:normal;text-align:center;font-size:33px">${headline}</h1><p style="line-height:1.9;color:#d0c6b8">${c.dear} <bdi>${escape(name)}</bdi>,</p><p style="line-height:1.9;color:#d0c6b8">${intro}</p>${details.map(d=>`<p style="color:#d5c09a;line-height:1.9"><bdi>${escape(d)}</bdi></p>`).join('')}<p style="margin:40px 0;text-align:center"><a href="${escape(link)}" style="display:inline-block;background:#d5c09a;color:#0b0b0a;padding:18px 24px;text-decoration:none;letter-spacing:${locale === 'ar' ? 0 : 1}px;font-size:12px;font-weight:bold">${action} ${locale === 'ar' ? '←' : '→'}</a></p><p style="font-size:11px;color:#aaa398;line-height:1.9;text-align:center">${c.confidential}</p><hr style="border:0;border-top:1px solid #514839;margin:30px 0"/><p style="text-align:center;font-size:10px;color:#d5c09a;letter-spacing:${locale === 'ar' ? 0 : 2}px">${c.motto}</p><p style="text-align:center;font-size:11px;color:#aaa398">MZS GROUP · ${c.invitation}</p></div></body></html>`;
+  const html = `<!DOCTYPE html><html lang="${locale}" dir="${locale === 'ar' ? 'rtl' : 'ltr'}"><body style="margin:0;background:#0b0b0a;color:#f4f0e7;font-family:Arial,Helvetica,sans-serif"><div style="max-width:590px;margin:40px auto;padding:40px 30px;background:#11100e;border:1px solid #3d3529;overflow-wrap:anywhere"><div style="text-align:center;color:#d5c09a;font-family:Georgia,serif;font-size:35px;letter-spacing:5px">MZS</div><div style="text-align:center;letter-spacing:5px;font-size:10px;color:#d0c6b8;margin:10px 0 35px">GROUP</div><p style="text-align:center;letter-spacing:${(locale === 'ar' || locale === 'zh-CN') ? 0 : 3}px;color:#d5c09a;font-size:11px">${c.access}</p><h1 style="font-family:Georgia,serif;font-weight:normal;text-align:center;font-size:33px">${headline}</h1><p style="line-height:1.9;color:#d0c6b8">${c.dear} <bdi>${escape(name)}</bdi>,</p><p style="line-height:1.9;color:#d0c6b8">${intro}</p>${details.map(d=>`<p style="color:#d5c09a;line-height:1.9"><bdi>${escape(d)}</bdi></p>`).join('')}<p style="margin:40px 0;text-align:center"><a href="${escape(link)}" style="display:inline-block;background:#d5c09a;color:#0b0b0a;padding:18px 24px;text-decoration:none;letter-spacing:${(locale === 'ar' || locale === 'zh-CN') ? 0 : 1}px;font-size:12px;font-weight:bold">${action} ${locale === 'ar' ? '←' : '→'}</a></p><p style="font-size:11px;color:#aaa398;line-height:1.9;text-align:center">${c.confidential}</p><hr style="border:0;border-top:1px solid #514839;margin:30px 0"/><p style="text-align:center;font-size:10px;color:#d5c09a;letter-spacing:${(locale === 'ar' || locale === 'zh-CN') ? 0 : 2}px">${c.motto}</p><p style="text-align:center;font-size:11px;color:#aaa398">MZS GROUP · ${c.invitation}</p></div></body></html>`;
   return {subject, html, text: `${c.dear} ${name},\n\n${intro}\n\n${details.join('\n')}\n\n${action}: ${link}\n\n${c.confidential}\n\nMZS Group`};
 }

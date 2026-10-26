@@ -3,7 +3,7 @@ import {getCountries, getCountryCallingCode, parsePhoneNumberFromString, type Co
 // ISO 3166-1 territories without a separate telephone plan are still valid addresses.
 export const phoneCountries = getCountries();
 export const countryCodes = [...new Set<string>([...phoneCountries, 'AQ', 'BV', 'GS', 'HM', 'PN', 'TF', 'UM'])].filter(c => !['AC', 'TA'].includes(c)).sort();
-const locales = ['en', 'nl', 'es', 'de', 'it', 'fr', 'ru', 'pt-BR', 'ar'];
+const locales = ['en', 'nl', 'es', 'de', 'it', 'fr', 'ru', 'pt-BR', 'ar', 'tr', 'lt', 'pl', 'zh-CN', 'sv', 'ro'];
 const names = new Map<string, Intl.DisplayNames>();
 function displayNames(locale: string) {
   if (!names.has(locale)) names.set(locale, new Intl.DisplayNames([locale], {type: 'region'}));
