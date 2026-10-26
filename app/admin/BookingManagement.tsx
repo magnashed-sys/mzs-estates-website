@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, } from "react";
+import Link from "next/link";
 import RentalSchedule from "./RentalSchedule";
 import RentalNotificationStatus from "./RentalNotificationStatus";
 import { liveArrivals, matchesSearch, todayInMadrid } from "./admin-model";
@@ -421,7 +422,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         <p className="admin-help">Updated {updated} · Madrid time. Test bookings are excluded. {bookings.filter(b => b.is_test).length} test records are available under Bookings → Test.</p>
         <div className="admin-panel"><h3 className="admin-subtitle">Next arrivals.</h3>
           {!arrivals.length && <p className="admin-help">No confirmed arrivals in the next 3 months.</p>}
-          {arrivals.map(booking => <button key={booking.id} className="admin-action-row" onClick={() => onNavigate?.("bookings")}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} →</span></button>)}
+          {arrivals.map(booking => <Link key={booking.id} className="admin-action-row" href={"/admin/bookings/"+booking.id} style={{textDecoration:"none",color:"inherit"}} onClick={event=>{if(locked)event.preventDefault()}}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} · Open dossier →</span></Link>)}
         </div>
       </>}
     </section>;

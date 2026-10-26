@@ -9,7 +9,8 @@ export default function BookingRegister({rows}:{rows:BookingRow[]}){
  const [time,setTime]=useState("all");
  const [year,setYear]=useState("all");
  const [property,setProperty]=useState("all");
- const today=new Date().toISOString().slice(0,10);
+ // Calendar days are interpreted at the property/admin timezone, not UTC.
+ const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Madrid",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
  const properties=useMemo(()=>Array.from(new Set(rows.map(r=>r.property))).sort(),[rows]);
  const statuses=useMemo(()=>Array.from(new Set(rows.map(r=>r.status))).sort(),[rows]);
  const years=useMemo(()=>Array.from(new Set(rows.map(r=>r.checkIn.slice(0,4)).filter(y=>/^\d{4}$/.test(y)))).sort((a,b)=>b.localeCompare(a)),[rows]);
@@ -40,7 +41,7 @@ export default function BookingRegister({rows}:{rows:BookingRow[]}){
    <table style={{width:"100%",borderCollapse:"collapse",minWidth:1060}}>
     <thead><tr>{["Reservation","Guest","Invoice recipient","Reference","Property","Type","Check-in","Check-out","Status","Amount"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
     <tbody>{filtered.map(r=><tr key={r.category+r.id}>
-     <td style={{padding:12,borderBottom:"1px solid #3d382f"}}><Link style={{color:"#d5c09a",fontWeight:600}} href={r.category==="Owner stay"?r.href:"/admin/unified-bookings/"+r.id}>{r.category==="Owner stay"?"Manage owner stay →":"Open dossier →"}</Link></td>
+     <td style={{padding:12,borderBottom:"1px solid #3d382f"}}><Link style={{color:"#d5c09a",fontWeight:600}} href={r.category==="Owner stay"?r.href:"/admin/bookings/"+r.id}>{r.category==="Owner stay"?"Manage owner stay →":"Open dossier →"}</Link></td>
      <td>{r.guestName}</td><td>{r.invoiceRecipient||"—"}</td><td style={{whiteSpace:"nowrap",fontSize:12}}>{r.sourceRef||"—"}</td><td>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td>
     </tr>)}</tbody>
    </table>
