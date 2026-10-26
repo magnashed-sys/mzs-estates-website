@@ -2,7 +2,7 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import BookingEditor from "../BookingEditor";
-import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft,reviewBookingInvoiceDraft} from "./actions";
+import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft,reviewBookingInvoiceDraft,editBookingInvoiceDraft} from "./actions";
 export const dynamic="force-dynamic";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const money=(v:number|string|null)=>v===null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(v));
@@ -25,7 +25,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
  const receipts=receiptResult.data||[];
  const receiptTotal=receipts.filter(r=>!r.reversed_at).reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
  const chargeable=!owner&&b.status==="confirmed"&&Number(b.quoted_total_eur)>0;
- const [invoiceDraft,issuerList]=await Promise.all([db.from("mzs_booking_invoice_drafts").select("id,recipient_name,gross_total,net_total,vat_total,vat_rate,tax_note,created_at,issuer_id,review_status,revision,reviewed_at").eq("booking_id",id).maybeSingle(),db.from("mzs_lease_issuers").select("id,name,tax_id,prefix").order("name")]);
+ const [invoiceDraft,issuerList]=await Promise.all([db.from("mzs_booking_invoice_drafts").select("id,recipient_name,gross_total,net_total,vat_total,vat_rate,tax_note,created_at,issuer_id,recipient_email,review_status,revision,reviewed_at").eq("booking_id",id).maybeSingle(),db.from("mzs_lease_issuers").select("id,name,tax_id,prefix").order("name")]);
  const editable=!b.is_test&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
@@ -74,6 +74,19 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
        <p>Gross: {money(invoiceDraft.data.gross_total)} · VAT: {money(invoiceDraft.data.vat_total)} · Net: {money(invoiceDraft.data.net_total)}</p>
        <p>VAT assessment: {invoiceDraft.data.tax_note}</p>
        <p>Status: <strong>{invoiceDraft.data.review_status}</strong>{invoiceDraft.data.reviewed_at&&" · reviewed "+new Date(invoiceDraft.data.reviewed_at).toLocaleString("en-GB")}</p>
+       {invoiceDraft.data.review_status==="draft"&&<details style={{border:"1px solid #514839",padding:14,margin:"18px 0"}}>
+         <summary style={{cursor:"pointer",color:"#d5c09a"}}>Edit draft details</summary>
+         <form action={editBookingInvoiceDraft} style={{display:"grid",gap:12,marginTop:16,maxWidth:480}}>
+           <input type="hidden" name="booking_id" value={id}/><input type="hidden" name="draft_id" value={invoiceDraft.data.id}/><input type="hidden" name="revision" value={invoiceDraft.data.revision}/>
+           <label>Issuing entity<select name="issuer_id" defaultValue={invoiceDraft.data.issuer_id} required style={{display:"block",padding:10,width:"100%"}}>{(issuerList.data||[]).map(i=><option key={i.id} value={i.id}>{i.name}</option>)}</select></label>
+           <label>Recipient<input name="recipient_name" defaultValue={invoiceDraft.data.recipient_name} required maxLength={250} style={{display:"block",padding:10,width:"100%"}}/></label>
+           <label>Email<input type="email" name="recipient_email" defaultValue={invoiceDraft.data.recipient_email||""} maxLength={254} style={{display:"block",padding:10,width:"100%"}}/></label>
+           <label>VAT rate (%)<input type="number" name="vat_rate" defaultValue={Number(invoiceDraft.data.vat_rate)*100} min={0} max={100} step="0.0001" required style={{display:"block",padding:10,width:"100%"}}/></label>
+           <label>VAT explanation<textarea name="tax_note" defaultValue={invoiceDraft.data.tax_note} minLength={5} maxLength={1000} required style={{display:"block",padding:10,width:"100%"}}/></label>
+           <label>Reason for editing<textarea name="reason" minLength={5} maxLength={500} required style={{display:"block",padding:10,width:"100%"}}/></label>
+           <button type="submit" style={{padding:12,background:"#d5c09a",color:"#181410"}}>Save draft changes</button>
+         </form>
+       </details>}
        <form action={reviewBookingInvoiceDraft} style={{display:"grid",gap:12,maxWidth:480,marginTop:16}}>
         <input type="hidden" name="booking_id" value={id}/>
         <input type="hidden" name="draft_id" value={invoiceDraft.data.id}/>
