@@ -32,7 +32,7 @@ export default async function UnifiedBookings(){
    id:b.id,category:(b.status==="blocked"?"Unavailable":"Guest booking") as Item["category"],
    property:names.get(b.project_id)||"Property",checkIn:b.check_in,checkOut:b.check_out,
    status:b.status,amount:b.quoted_total_eur==null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(b.quoted_total_eur)),
-   href:"/admin?tab=bookings",editable:["confirmed","requested"].includes(b.status)&&!b.is_test,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),guestCount:b.guest_count,notes:b.admin_notes||"",guestName:historicByBooking.get(b.id)?.source_guest_name||guestNamesById.get(b.user_id)||"No account / name",invoiceRecipient:historicByBooking.get(b.id)?.invoice_recipient_name||"",sourceRef:historicByBooking.get(b.id)?(`${historicByBooking.get(b.id)?.original_booking_number} · ${historicByBooking.get(b.id)?.source_key}`):""
+   href:"/admin?tab=bookings",editable:["confirmed","requested"].includes(b.status)&&!b.is_test,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),guestCount:b.guest_count,notes:b.admin_notes||"",guestName:historicByBooking.get(b.id)?.source_guest_name||(b.user_id?guestNamesById.get(b.user_id):null)||"No account / name",invoiceRecipient:historicByBooking.get(b.id)?.invoice_recipient_name||"",sourceRef:historicByBooking.get(b.id)?(`${historicByBooking.get(b.id)?.original_booking_number} · ${historicByBooking.get(b.id)?.source_key}`):""
   })),
   ...(requests.data||[]).map(r=>({
    id:r.id,category:"Owner stay" as const,property:names.get(grantsById.get(r.partner_id))||"Property",
