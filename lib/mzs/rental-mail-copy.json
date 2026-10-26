@@ -334,5 +334,47 @@
     "motto": "ÖZEL · BAĞIMSIZ · ULUSLARARASI",
     "cancelFooter": "Varsa ödemeler ve para iadeleri ayrıca ele alınır. Yardım için MZS Group ile iletişime geçin.",
     "footer": "Güncel durumu özel hesabınızdan görüntüleyebilirsiniz. Yardım için MZS Group ile iletişime geçin."
+  },
+  "lt": {
+    "title": {
+      "requested": "Jūsų rezervacijos užklausa gauta",
+      "confirmed": "Jūsų rezervacija patvirtinta",
+      "modified": "Jūsų rezervacija pakeista",
+      "cancelled": "Jūsų rezervacija atšaukta"
+    },
+    "intro": {
+      "requested": "Gavome Jūsų rezervacijos užklausą. Tai dar nėra patvirtinta rezervacija. MZS Group atskirai peržiūrės užklausą ir, ją patvirtinusi, atsiųs papildomą patvirtinimą.",
+      "confirmed": "MZS Group peržiūrėjo ir patvirtino Jūsų rezervaciją. Džiaugiamės galėdami Jus priimti.",
+      "modified": "MZS Group pakeitė Jūsų patvirtintą rezervaciją. Toliau pateikta informacija pakeičia ankstesnio patvirtinimo duomenis.",
+      "cancelled": "MZS Group atšaukė Jūsų rezervaciją. Ankstesnis patvirtinimas nebegalioja. Prašome neplanuoti kelionės remiantis ankstesniu patvirtinimu."
+    },
+    "status": {
+      "requested": "UŽKLAUSA – DAR NEPATVIRTINTA",
+      "confirmed": "PATVIRTINTA",
+      "modified": "PATVIRTINTA – PAKEISTA",
+      "cancelled": "ATŠAUKTA – NEBEGALIOJA"
+    },
+    "labels": {
+      "status": "Būsena",
+      "property": "Apgyvendinimo objektas",
+      "checkIn": "Atvykimo data",
+      "checkOut": "Išvykimo data",
+      "nights": "Nakvynių skaičius",
+      "guests": "Svečių skaičius",
+      "estimate": "Preliminari suma",
+      "confirmed": "Patvirtinta suma",
+      "previous": "Anksčiau patvirtinta suma",
+      "reference": "Rezervacijos numeris",
+      "heating": "Pageidaujamas baseino šildymas",
+      "notes": "Papildomi pageidavimai"
+    },
+    "yes": "Taip",
+    "no": "Ne",
+    "none": "Nėra",
+    "greeting": "Sveiki,",
+    "action": "PERŽIŪRĖTI MANO REZERVACIJĄ",
+    "motto": "PRIVATU · NEPRIKLAUSOMA · TARPTAUTIŠKA",
+    "cancelFooter": "Jei buvo atlikti mokėjimai, jų grąžinimo klausimai sprendžiami atskirai. Prireikus pagalbos, susisiekite su MZS Group.",
+    "footer": "Aktualią rezervacijos būseną galite peržiūrėti savo privačioje paskyroje. Prireikus pagalbos, susisiekite su MZS Group."
   }
 }
