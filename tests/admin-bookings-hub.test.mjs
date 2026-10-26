@@ -25,7 +25,8 @@ test("main Admin places Bookings in its own primary group, separated from estate
 test("new canonical Bookings routes reuse existing Estate-admin protected implementation",()=>{
  const index=source("app/admin/bookings/page.tsx");
  const detail=source("app/admin/bookings/[id]/page.tsx");
- assert.match(index,/\.\.\/unified-bookings\/page/);
+ assert.match(index,/requireEstateAdmin\(\)/);
+ assert.match(index,/mzs_admin_bookings_search/);
  assert.match(detail,/\.\.\/\.\.\/unified-bookings\/\[id\]\/page/);
  assert.match(source("app/admin/unified-bookings/page.tsx"),/requireEstateAdmin\(\)/);
  assert.match(source("app/admin/unified-bookings/[id]/page.tsx"),/requireEstateAdmin\(\)/);
