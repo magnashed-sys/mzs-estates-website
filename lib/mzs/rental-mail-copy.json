@@ -292,5 +292,47 @@
     "motto": "خاص · مستقل · دولي",
     "cancelFooter": "ستُعالَج أي ترتيبات للدفع أو استرداد الأموال بشكل منفصل. يُرجى التواصل مع MZS Group للحصول على المساعدة.",
     "footer": "يمكنكم الاطلاع على الحالة الحالية في حسابكم الخاص. يُرجى التواصل مع MZS Group للحصول على المساعدة."
+  },
+  "tr": {
+    "title": {
+      "requested": "Rezervasyon talebiniz alındı",
+      "confirmed": "Rezervasyonunuz onaylandı",
+      "modified": "Rezervasyonunuz değiştirildi",
+      "cancelled": "Rezervasyonunuz iptal edildi"
+    },
+    "intro": {
+      "requested": "Rezervasyon talebinizi aldık. Bu henüz onaylanmış bir rezervasyon değildir. Talebiniz ayrı ayrı incelenip onaylandıktan sonra MZS Group size ayrıca bir onay gönderecektir.",
+      "confirmed": "MZS Group rezervasyonunuzu inceleyip onayladı. Sizi ağırlamaktan memnuniyet duyacağız.",
+      "modified": "MZS Group onaylı rezervasyonunuzu değiştirdi. Aşağıdaki bilgiler, önceki onayınızdaki bilgilerin yerine geçer.",
+      "cancelled": "MZS Group rezervasyonunuzu iptal etti. Önceki onay artık geçerli değildir. Lütfen bu eski onaya dayanarak seyahat etmeyin."
+    },
+    "status": {
+      "requested": "TALEP — HENÜZ ONAYLANMADI",
+      "confirmed": "ONAYLANDI",
+      "modified": "ONAYLANDI — DEĞİŞTİRİLDİ",
+      "cancelled": "İPTAL EDİLDİ — GEÇERSİZ"
+    },
+    "labels": {
+      "status": "Durum",
+      "property": "Konaklama yeri",
+      "checkIn": "Giriş tarihi",
+      "checkOut": "Çıkış tarihi",
+      "nights": "Gece sayısı",
+      "guests": "Misafir sayısı",
+      "estimate": "Tahmini tutar",
+      "confirmed": "Onaylanan tutar",
+      "previous": "Önceki onaylı tutar",
+      "reference": "Rezervasyon referansı",
+      "heating": "Havuz ısıtması istendi",
+      "notes": "Özel istekler"
+    },
+    "yes": "Evet",
+    "no": "Hayır",
+    "none": "Yok",
+    "greeting": "Sayın misafirimiz,",
+    "action": "REZERVASYONUMU GÖRÜNTÜLE",
+    "motto": "ÖZEL · BAĞIMSIZ · ULUSLARARASI",
+    "cancelFooter": "Varsa ödemeler ve para iadeleri ayrıca ele alınır. Yardım için MZS Group ile iletişime geçin.",
+    "footer": "Güncel durumu özel hesabınızdan görüntüleyebilirsiniz. Yardım için MZS Group ile iletişime geçin."
   }
 }
