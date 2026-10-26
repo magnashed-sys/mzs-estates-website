@@ -111,7 +111,8 @@
     "my_dashboard": "Min oversikt",
     "menu": "Meny",
     "mobile_main_navigation": "Hovednavigasjon på mobil",
-    "about": "Om oss"
+    "about": "Om oss",
+    "consultancy": "Rådgivning"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -189,7 +190,9 @@
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforsker muligheter for privat finansiering, investering og strategisk partnerskap på tvers av fast eiendom og næringsliv.",
     "aboutTitle": "Om oss | MZS Group",
-    "aboutDescription": "Tjenestene våre omfatter rådgivning, eiendomsprosjekter og privat kapital. Internasjonale kontakter. Lokal markedskunnskap."
+    "aboutDescription": "Tjenestene våre omfatter rådgivning, eiendomsprosjekter og privat kapital. Internasjonale kontakter. Lokal markedskunnskap.",
+    "consultancyTitle": "Rådgivning | MZS Group",
+    "consultancyDescription": "En tydelig plan begynner med de riktige spørsmålene. MZS Group kombinerer internasjonal erfaring med lokal markedskunnskap og veileder deg om juridiske og skattemessige strukturer, eiendomsprosjekter og finansiering."
   },
   "Login": {
     "private_access": "Privat tilgang",
@@ -1180,5 +1183,17 @@
     "spain": "Via Spania",
     "dubai": "I dag fra Dubai",
     "caption": "En kunstnerisk tolkning av reisen vår: Amsterdam, Spania og Dubai."
+  },
+  "Consultancy": {
+    "headline": "Det neste steget, sammen.",
+    "lead": "En tydelig plan begynner med de riktige spørsmålene. MZS Group kombinerer internasjonal erfaring med lokal markedskunnskap og veileder deg om juridiske og skattemessige strukturer, eiendomsprosjekter og finansiering.",
+    "legalTitle": "Juridiske og skattemessige strukturer",
+    "legalBody": "Vi bistår med struktureringen av virksomhet, eierandeler og investeringer. Fra eierskap til internasjonale forhold tydeliggjør vi målene dine og hjelper med å samordne beslutninger med de involverte spesialistene.",
+    "estateTitle": "Eiendomsprosjekter",
+    "estateBody": "Fra første idé til gjennomføring hjelper vi deg med å gi eiendomsprosjektet retning. Vi støtter vurdering av muligheter, prosjektstrukturering og samordning mellom partene, med hensyn til det lokale markedet og dine langsiktige mål.",
+    "financeTitle": "Finansieringsrådgivning",
+    "financeBody": "Vi hjelper deg med å gjøre finansieringsbehovet til et tydelig, godt begrunnet forslag. For eiendom, bedrifter og andre formål utforsker vi egnede finansieringsformer og støtter forberedelser og samtaler med potensielle finansieringspartnere.",
+    "cta": "La oss diskutere planene dine",
+    "label": "Rådgivning"
   }
 }

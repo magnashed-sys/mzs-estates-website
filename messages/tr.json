@@ -111,7 +111,8 @@
     "my_dashboard": "Panelim",
     "menu": "Menü",
     "mobile_main_navigation": "Mobil ana menü",
-    "about": "Hakkımızda"
+    "about": "Hakkımızda",
+    "consultancy": "Danışmanlık"
   },
   "Footer": {
     "contact_short": "İletişim",
@@ -189,7 +190,9 @@
     "capitalTitle": "Özel Sermaye | MZS Capital",
     "capitalDescription": "MZS Capital, gayrimenkul ve işletmelerdeki seçilmiş özel finansman, yatırım ve stratejik ortaklık fırsatlarını değerlendirir.",
     "aboutTitle": "Hakkımızda | MZS Group",
-    "aboutDescription": "Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır. Uluslararası bağlantılar. Yerel pazar bilgisi."
+    "aboutDescription": "Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır. Uluslararası bağlantılar. Yerel pazar bilgisi.",
+    "consultancyTitle": "Danışmanlık | MZS Group",
+    "consultancyDescription": "Net bir plan doğru sorularla başlar. MZS Group, uluslararası deneyimi yerel pazar bilgisiyle birleştirerek hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında size rehberlik eder."
   },
   "Login": {
     "private_access": "Özel Erişim",
@@ -1180,5 +1183,17 @@
     "spain": "İspanya üzerinden",
     "dubai": "Bugün Dubai’den",
     "caption": "Yolculuğumuzun sanatsal bir yorumu: Amsterdam, İspanya ve Dubai."
+  },
+  "Consultancy": {
+    "headline": "Bir sonraki adım, birlikte.",
+    "lead": "Net bir plan doğru sorularla başlar. MZS Group, uluslararası deneyimi yerel pazar bilgisiyle birleştirerek hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında size rehberlik eder.",
+    "legalTitle": "Hukuki ve vergisel yapılar",
+    "legalBody": "Faaliyetlerinizin, ortaklıklarınızın ve yatırımlarınızın hukuki ve vergisel yapısına destek oluruz. Mülkiyetten uluslararası konulara kadar hedeflerinizi netleştirir, kararların ilgili uzmanlarla koordinasyonuna yardımcı oluruz.",
+    "estateTitle": "Gayrimenkul projeleri",
+    "estateBody": "İlk fikirden uygulamaya kadar projenize yön vermenize yardımcı oluruz. Yerel pazarı ve uzun vadeli hedeflerinizi dikkate alarak fırsatların değerlendirilmesini, proje yapılanmasını ve taraflar arasındaki koordinasyonu destekleriz.",
+    "financeTitle": "Finansman danışmanlığı",
+    "financeBody": "Finansman ihtiyacınızı açık ve temellendirilmiş bir teklife dönüştürmenize yardımcı oluruz. Gayrimenkul, işletmeler ve diğer amaçlar için uygun finansman biçimlerini araştırır, hazırlık sürecini ve potansiyel finansörlerle görüşmeleri destekleriz.",
+    "cta": "Planlarınızı konuşalım",
+    "label": "Danışmanlık"
   }
 }

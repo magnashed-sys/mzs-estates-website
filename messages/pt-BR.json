@@ -15,7 +15,8 @@
     "my_dashboard": "Meu painel",
     "menu": "Menu",
     "mobile_main_navigation": "Navegação principal móvel",
-    "about": "Sobre nós"
+    "about": "Sobre nós",
+    "consultancy": "Consultoria"
   },
   "Footer": {
     "contact_short": "Contato",
@@ -53,7 +54,9 @@
     "capitalTitle": "Capital privado | MZS Capital",
     "capitalDescription": "A MZS Capital explora oportunidades selecionadas de financiamento privado, investimento e parcerias estratégicas em imóveis e empresas.",
     "aboutTitle": "Sobre nós | MZS Group",
-    "aboutDescription": "Nossos serviços abrangem assessoria, projetos imobiliários e capital privado. Contatos internacionais. Conhecimento local."
+    "aboutDescription": "Nossos serviços abrangem assessoria, projetos imobiliários e capital privado. Contatos internacionais. Conhecimento local.",
+    "consultancyTitle": "Consultoria | MZS Group",
+    "consultancyDescription": "Um plano claro começa com as perguntas certas. A MZS Group combina experiência internacional e conhecimento local para orientar você em estruturas jurídicas e fiscais, projetos imobiliários e financiamento."
   },
   "Estates": {
     "ownership_management": "Propriedade e gestão",
@@ -1180,5 +1183,17 @@
     "spain": "Passando pela Espanha",
     "dubai": "Hoje a partir de Dubai",
     "caption": "Uma interpretação artística da nossa trajetória: Amsterdã, Espanha e Dubai."
+  },
+  "Consultancy": {
+    "headline": "O próximo passo, juntos.",
+    "lead": "Um plano claro começa com as perguntas certas. A MZS Group combina experiência internacional e conhecimento local para orientar você em estruturas jurídicas e fiscais, projetos imobiliários e financiamento.",
+    "legalTitle": "Estruturas jurídicas e fiscais",
+    "legalBody": "Apoiamos a estruturação jurídica e fiscal de suas atividades, participações e investimentos. Da propriedade às questões internacionais, esclarecemos seus objetivos e ajudamos a coordenar decisões com os especialistas envolvidos.",
+    "estateTitle": "Projetos imobiliários",
+    "estateBody": "Da ideia inicial à execução, ajudamos a dar direção ao seu projeto. Apoiamos a avaliação de oportunidades, a estruturação e a coordenação das partes, considerando o mercado local e seus objetivos de longo prazo.",
+    "financeTitle": "Assessoria em financiamento",
+    "financeBody": "Ajudamos a transformar suas necessidades de financiamento em uma proposta clara e fundamentada. Para imóveis, empresas e outras finalidades, exploramos formas adequadas de financiamento e apoiamos a preparação e as conversas com potenciais financiadores.",
+    "cta": "Vamos conversar sobre seus planos",
+    "label": "Consultoria"
   }
 }

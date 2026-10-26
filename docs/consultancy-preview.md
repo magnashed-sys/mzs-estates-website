@@ -1,0 +1,9 @@
+# Consultancy page draft
+
+Preview proposal for MZS Group's third activity. Three areas: legal and tax structures, real estate project advice, and financing for real estate, businesses and other purposes. Draft translations prepared in all sixteen existing locales. Final service scope remains subject to owner review; no qualifications or financing outcomes are promised.
+
+The contact CTA opens the existing business email address info@mzsgroup.eu in the visitor's mail app. It does not send automatically. Existing public and private forms are unchanged.
+
+Generated illustrative image: public/images/consultancy-gateway.png. Built-in imagegen mode. Final prompt:
+
+Use case: ads-marketing. Asset type: panoramic hero photograph for the premium MZS Group Consultancy website, dark charcoal and muted champagne visual identity. Primary request: an inviting open doorway or gate we can walk through together, a metaphor for thoughtful guidance and new possibilities. Photorealistic architectural editorial photography, landscape 16:9. View from a quiet shaded natural-stone entrance through a generous pair of open dark bronze gates onto a sunlit limestone path and a refined Mediterranean courtyard with olive trees, distant soft blue sea and a calm horizon. Both gate leaves visibly open, the clear unobstructed path wide enough for two people to walk side by side. No people are needed. Authentic travertine texture, understated contemporary Mediterranean architecture, warm late-afternoon light, deep natural shadows and restrained champagne highlights. Strong balanced composition, open gate centered slightly right so the left third has dark textured wall and quiet shadow suitable for a website title. Keep the open passage and destination clearly visible; welcoming and grounded, not mysterious. Premium photographic realism, no fantasy, no excessive glow, no ornate palace, no business clichés, no text, logos or watermarks.
