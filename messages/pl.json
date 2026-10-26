@@ -110,7 +110,8 @@
     "main_navigation": "Nawigacja główna",
     "my_dashboard": "Mój panel",
     "menu": "Menu",
-    "mobile_main_navigation": "Główna nawigacja mobilna"
+    "mobile_main_navigation": "Główna nawigacja mobilna",
+    "about": "O nas"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -186,7 +187,9 @@
     "estatesTitle": "Nieruchomości | MZS Estates",
     "estatesDescription": "Odkryj niezależną działalność międzynarodową nieruchomości MZS Estates: własność własności, prywatne wynajem, sprzedaż i rozwój.",
     "capitalTitle": "Kapitał prywatny | MZS Capital",
-    "capitalDescription": "MZS Capital bada możliwości finansowania prywatnego, inwestycyjnego i strategicznego partnerstwa między nieruchomościami i przedsiębiorstwami."
+    "capitalDescription": "MZS Capital bada możliwości finansowania prywatnego, inwestycyjnego i strategicznego partnerstwa między nieruchomościami i przedsiębiorstwami.",
+    "aboutTitle": "O nas | MZS Group",
+    "aboutDescription": "Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny. Międzynarodowe kontakty. Znajomość lokalnych rynków."
   },
   "Login": {
     "private_access": "Dostęp prywatny",
@@ -1168,5 +1171,14 @@
     "beach": "Plaża i promenada",
     "heritage": "Historyczne miasto Ibiza",
     "nightlife": "Nocne życie i rozrywka"
+  },
+  "About": {
+    "label": "O nas",
+    "headline": "Międzynarodowe kontakty. Znajomość lokalnych rynków.",
+    "body": "Nasza historia przedsiębiorczości rozpoczęła się w 1990 roku od handlu w pobliżu Amsterdamu. Przez Hiszpanię dotarliśmy do Dubaju, skąd dziś działamy. Dzięki udziałom w różnych lokalnych firmach łączymy 36 lat doświadczenia z międzynarodowymi kontaktami i znajomością lokalnych rynków. Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny.",
+    "amsterdam": "Początki w pobliżu Amsterdamu",
+    "spain": "Przez Hiszpanię",
+    "dubai": "Dziś z Dubaju",
+    "caption": "Artystyczna wizja naszej drogi: Amsterdam, Hiszpania i Dubaj."
   }
 }

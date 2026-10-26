@@ -14,7 +14,8 @@
     "main_navigation": "Hauptnavigation",
     "my_dashboard": "Meine Übersicht",
     "menu": "Menü",
-    "mobile_main_navigation": "Mobile Hauptnavigation"
+    "mobile_main_navigation": "Mobile Hauptnavigation",
+    "about": "Über uns"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -50,7 +51,9 @@
     "estatesTitle": "Immobilien | MZS Estates",
     "estatesDescription": "Entdecken Sie die unabhängigen internationalen Immobilienaktivitäten von MZS Estates: Immobilieneigentum, private Vermietung, Verkauf und Entwicklung.",
     "capitalTitle": "Privates Kapital | MZS Capital",
-    "capitalDescription": "MZS Capital prüft ausgewählte private Finanzierungs-, Investment- und strategische Partnerschaftsmöglichkeiten im Immobilien- und Unternehmensbereich."
+    "capitalDescription": "MZS Capital prüft ausgewählte private Finanzierungs-, Investment- und strategische Partnerschaftsmöglichkeiten im Immobilien- und Unternehmensbereich.",
+    "aboutTitle": "Über uns | MZS Group",
+    "aboutDescription": "Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital. Internationale Kontakte. Lokale Marktkenntnis."
   },
   "Estates": {
     "ownership_management": "Eigentum und Verwaltung",
@@ -1168,5 +1171,14 @@
     "beach": "Strand & Promenade",
     "heritage": "Historische Altstadt",
     "nightlife": "Nachtleben & Unterhaltung"
+  },
+  "About": {
+    "label": "Über uns",
+    "headline": "Internationale Kontakte. Lokale Marktkenntnis.",
+    "body": "Unsere unternehmerische Geschichte begann 1990 im Handel nahe Amsterdam. Über Spanien führte uns unser Weg nach Dubai, von wo aus wir heute tätig sind. Durch Beteiligungen an verschiedenen lokalen Unternehmen verbinden wir 36 Jahre Erfahrung mit internationalen Kontakten und lokaler Marktkenntnis. Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital.",
+    "amsterdam": "Ursprung nahe Amsterdam",
+    "spain": "Über Spanien",
+    "dubai": "Heute von Dubai aus",
+    "caption": "Eine künstlerische Darstellung unseres Weges: Amsterdam, Spanien und Dubai."
   }
 }

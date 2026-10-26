@@ -110,7 +110,8 @@
     "main_navigation": "主导航",
     "my_dashboard": "我的控制面板",
     "menu": "菜单",
-    "mobile_main_navigation": "移动端主导航"
+    "mobile_main_navigation": "移动端主导航",
+    "about": "关于我们"
   },
   "Footer": {
     "contact_short": "联系",
@@ -186,7 +187,9 @@
     "estatesTitle": "房地产 | MZS Estates",
     "estatesDescription": "发现独立的国际房地产活动 MZS Estates:财产所有权、私人租赁、销售和发展。",
     "capitalTitle": "私人资本 | MZS Capital",
-    "capitalDescription": "MZS Capital 在房地产和企业中探索选定的私人融资、投资和战略伙伴关系机会。"
+    "capitalDescription": "MZS Capital 在房地产和企业中探索选定的私人融资、投资和战略伙伴关系机会。",
+    "aboutTitle": "关于我们 | MZS Group",
+    "aboutDescription": "我们的服务涵盖咨询、房地产项目及私人资本。 国际人脉，本地市场洞察。"
   },
   "Login": {
     "private_access": "私人使用",
@@ -1168,5 +1171,14 @@
     "beach": "海滩和舞台剧",
     "heritage": "历史上的伊比扎镇",
     "nightlife": "夜生活和娱乐"
+  },
+  "About": {
+    "label": "关于我们",
+    "headline": "国际人脉，本地市场洞察。",
+    "body": "我们的创业历程始于1990年，在阿姆斯特丹附近从事贸易。经由西班牙，我们来到迪拜，如今以此为基地开展业务。通过参股多家本地公司，我们将36年的经验与国际人脉及本地市场知识相结合。 我们的服务涵盖咨询、房地产项目及私人资本。",
+    "amsterdam": "起步于阿姆斯特丹附近",
+    "spain": "经由西班牙",
+    "dubai": "如今立足迪拜",
+    "caption": "我们的发展历程艺术示意图：阿姆斯特丹、西班牙和迪拜。"
   }
 }

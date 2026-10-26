@@ -7,7 +7,7 @@ export function memberLocale(value: unknown): typeof memberLocales[number] {
     ? value as typeof memberLocales[number] : 'en';
 }
 export type Locale = typeof locales[number];
-export const publicPaths = ['/', '/real-estate', '/private-capital'] as const;
+export const publicPaths = ['/', '/real-estate', '/private-capital', '/about'] as const;
 export const localizedPaths = [...publicPaths, '/login'] as const;
 export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && locales.includes(value as Locale);

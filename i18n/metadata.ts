@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {getLocale, getTranslations} from 'next-intl/server';
 import {languageAlternates, localizedPath} from './public-routing';
-export async function publicMetadata(page: 'home' | 'estates' | 'capital', path: string): Promise<Metadata> {
+export async function publicMetadata(page: 'home' | 'estates' | 'capital' | 'about', path: string): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations('Metadata');
   const title = t(`${page}Title`), description = t(`${page}Description`);

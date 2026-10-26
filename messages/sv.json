@@ -110,7 +110,8 @@
     "main_navigation": "Huvudnavigation",
     "my_dashboard": "Min översikt",
     "menu": "Meny",
-    "mobile_main_navigation": "Huvudnavigation för mobil"
+    "mobile_main_navigation": "Huvudnavigation för mobil",
+    "about": "Om oss"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -186,7 +187,9 @@
     "estatesTitle": "Fastigheter | MZS Estates",
     "estatesDescription": "Upptäck den oberoende internationella fastighetsverksamheten i MZS Estates: fastighetsägande, privata uthyrningar, försäljning och utveckling.",
     "capitalTitle": "Privat kapital | MZS Capital",
-    "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag."
+    "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag.",
+    "aboutTitle": "Om oss | MZS Group",
+    "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom."
   },
   "Login": {
     "private_access": "Privat åtkomst",
@@ -1168,5 +1171,14 @@
     "beach": "Strand och strandpromenad",
     "heritage": "Historiska staden Ibiza",
     "nightlife": "Nattliv och underhållning"
+  },
+  "About": {
+    "label": "Om oss",
+    "headline": "Internationella kontakter. Lokal marknadskännedom.",
+    "body": "Vår företagarresa började 1990 med handel nära Amsterdam. Via Spanien ledde vägen oss till Dubai, där vi verkar i dag. Genom ägarandelar i olika lokala företag kombinerar vi 36 års erfarenhet med internationella kontakter och lokal marknadskännedom. Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital.",
+    "amsterdam": "Rötter nära Amsterdam",
+    "spain": "Via Spanien",
+    "dubai": "I dag från Dubai",
+    "caption": "En konstnärlig tolkning av vår resa: Amsterdam, Spanien och Dubai."
   }
 }

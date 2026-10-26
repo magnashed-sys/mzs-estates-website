@@ -110,7 +110,8 @@
     "main_navigation": "Hoofdnavigatie",
     "my_dashboard": "Mijn dashboard",
     "menu": "Menu",
-    "mobile_main_navigation": "Mobiele hoofdnavigatie"
+    "mobile_main_navigation": "Mobiele hoofdnavigatie",
+    "about": "Over ons"
   },
   "Footer": {
     "contact_short": "Contact",
@@ -186,7 +187,9 @@
     "estatesTitle": "Vastgoed | MZS Estates",
     "estatesDescription": "Ontdek de onafhankelijke internationale vastgoedactiviteiten van MZS Estates: vastgoedbezit, private verhuur, verkoop en ontwikkeling.",
     "capitalTitle": "Privaat kapitaal | MZS Capital",
-    "capitalDescription": "MZS Capital verkent geselecteerde mogelijkheden voor private financiering, investeringen en strategische samenwerkingen in vastgoed en ondernemingen."
+    "capitalDescription": "MZS Capital verkent geselecteerde mogelijkheden voor private financiering, investeringen en strategische samenwerkingen in vastgoed en ondernemingen.",
+    "aboutTitle": "Over ons | MZS Group",
+    "aboutDescription": "Onze diensten richten zich op advisering, vastgoedprojecten en private capital. Internationale contacten. Lokale marktkennis."
   },
   "Login": {
     "private_access": "Private toegang",
@@ -1168,5 +1171,14 @@
     "beach": "Strand & boulevard",
     "heritage": "Historische binnenstad",
     "nightlife": "Uitgaan & entertainment"
+  },
+  "About": {
+    "label": "Over ons",
+    "headline": "Internationale contacten. Lokale marktkennis.",
+    "body": "Onze ondernemersgeschiedenis begon in 1990 met handel nabij Amsterdam. Via Spanje bracht onze reis ons naar Dubai, van waaruit we vandaag actief zijn. Met deelnemingen in diverse lokale bedrijven verbinden we 36 jaar ervaring met internationale contacten en lokale marktkennis. Vanuit deze basis richten onze diensten zich op advisering, vastgoedprojecten en private capital.",
+    "amsterdam": "Oorsprong nabij Amsterdam",
+    "spain": "Via Spanje",
+    "dubai": "Vandaag vanuit Dubai",
+    "caption": "Een artistieke impressie van onze route: Amsterdam, Spanje en Dubai."
   }
 }
