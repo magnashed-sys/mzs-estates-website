@@ -24,7 +24,6 @@ export default async function AboutPage() {
         <div className={styles.panorama}>
           <Image src="/images/about-journey.png" alt={t('caption')} fill priority sizes="100vw" className={styles.image} />
         </div>
-        <figcaption>{t('caption')}</figcaption>
       </figure>
       <section className={styles.story} aria-label={t('label')}>
         <ol className={styles.journey}>
