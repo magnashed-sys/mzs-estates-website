@@ -19,15 +19,36 @@ export async function grantPartner(form:FormData){
  if(error)throw Error('Partner grant could not be saved');
  revalidatePath(path);
 }
-export async function decideOwnerStay(form:FormData){
+export type OwnerStayDecisionResult={status:'idle'|'success'|'error';message:string};
+/**
+ * A calendar conflict is a normal business validation outcome, not a fatal
+ * Next.js Server Action error. Never overwrite an existing booked period.
+ */
+export async function decideOwnerStay(
+ _previous:OwnerStayDecisionResult,form:FormData
+):Promise<OwnerStayDecisionResult>{
  const {db}=await requireEstateAdmin();
  const id=String(form.get('request_id')||'');
  const choice=String(form.get('decision')||'');
- if(!UUID.test(id)||!['approve','decline'].includes(choice))throw Error('Invalid decision');
+ if(!UUID.test(id)||!['approve','decline'].includes(choice))
+   return {status:'error',message:'Invalid request or decision. Refresh the page.'};
  const {error}=await db.rpc('mzs_admin_decide_owner_stay',{p_request_id:id,p_approve:choice==='approve'});
- if(error)throw Error(error.message||'Approval failed');
+ if(error){
+   const message=error.message||'';
+   if(message.includes('Dates are no longer available'))
+     return {status:'error',message:'This stay overlaps an existing confirmed reservation or blocked period. No owner stay was approved. Review the availability and existing booking dates first.'};
+   if(message.includes('Past dates unavailable'))
+     return {status:'error',message:'This request starts in the past and can no longer be approved.'};
+   if(message.includes('Request unavailable or reviewed'))
+     return {status:'error',message:'This request was already reviewed or has changed. Refresh the page before trying again.'};
+   if(message.includes('Partner owner-stay grant inactive'))
+     return {status:'error',message:'The property partner permission is no longer active. No booking was created.'};
+   return {status:'error',message:'The request could not be processed. Refresh the page and check its status before retrying.'};
+ }
  revalidatePath(path);
  revalidatePath('/admin');
+ revalidatePath('/admin/bookings');
+ return {status:'success',message:choice==='approve'?'Owner stay approved. The confirmed booking is now recorded.':'Owner stay request declined.'};
 }
 export async function adjustBookingPrice(form:FormData){
  const {db}=await requireEstateAdmin();
