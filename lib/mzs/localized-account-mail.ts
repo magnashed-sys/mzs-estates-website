@@ -227,6 +227,32 @@ const copy = {
       "sale": "Özel Satış",
       "rental": "Özel Kiralama"
     }
+  },
+  lt: {
+    member: 'kliente', dear: 'Gerb.', access: 'PRIVATI PRIEIGA',
+    confidential: 'Šis asmeninis pranešimas skirtas tik nurodytam gavėjui. Nepersiųskite su paskyros saugumu susijusių pranešimų.',
+    motto: 'PRIVATU · NEPRIKLAUSOMA · TARPTAUTINĖ VEIKLA', invitation: 'TIK SU KVIETIMU',
+    projects: 'Jums priskirti projektai', login: 'PRISIJUNGTI PRIVAČIAI',
+    collection: 'PERŽIŪRĖTI MANO KOLEKCIJĄ', capital: 'ATVERTI PRIVATE CAPITAL',
+    account_activated: [
+      'Jūsų MZS Group paskyra aktyvuota',
+      'Sveiki atvykę į savo privačią kolekciją.',
+      'Jūsų MZS Group paskyra patvirtinta ir aktyvuota. Dabar galite peržiūrėti specialiai jums atrinktas galimybes.'
+    ],
+    new_project_access: [
+      'Suteikta prieiga prie naujų privačių projektų | MZS Group',
+      'Naujos galimybės jūsų kolekcijoje.',
+      'Jūsų MZS Group paskyrai suteikta papildoma prieiga prie privačių projektų.'
+    ],
+    capital_access_granted: [
+      'Jūsų prieiga prie Private Capital | MZS Group',
+      'Jūsų privatus dokumentų rinkinys pasiekiamas.',
+      'Jūsų MZS Group paskyrai suteikta prieiga prie Private Capital dokumentų rinkinio. Saugiai prisijunkite ir peržiūrėkite savo informaciją.'
+    ],
+    types: {
+      investment: 'Investicija', financing: 'Finansavimas',
+      sale: 'Privatus pardavimas', rental: 'Privati nuoma'
+    }
   }
 } as const;
 export function isLocalizedAccountLocale(locale: unknown): locale is keyof typeof copy {
