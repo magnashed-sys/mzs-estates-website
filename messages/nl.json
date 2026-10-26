@@ -111,7 +111,7 @@
     "my_dashboard": "Mijn dashboard",
     "menu": "Menu",
     "mobile_main_navigation": "Mobiele hoofdnavigatie",
-    "about": "Over ons",
+    "about": "Over MZS",
     "consultancy": "Consultancy"
   },
   "Footer": {
@@ -189,7 +189,7 @@
     "estatesDescription": "Ontdek de onafhankelijke internationale vastgoedactiviteiten van MZS Estates: vastgoedbezit, private verhuur, verkoop en ontwikkeling.",
     "capitalTitle": "Privaat kapitaal | MZS Capital",
     "capitalDescription": "MZS Capital verkent geselecteerde mogelijkheden voor private financiering, investeringen en strategische samenwerkingen in vastgoed en ondernemingen.",
-    "aboutTitle": "Over ons | MZS Group",
+    "aboutTitle": "Over MZS | MZS Group",
     "aboutDescription": "Onze diensten richten zich op advisering, vastgoedprojecten en private capital. Internationale contacten. Lokale marktkennis.",
     "consultancyTitle": "Consultancy | MZS Group",
     "consultancyDescription": "Een helder plan begint met de juiste vragen. MZS Group verbindt internationale ervaring met lokale marktkennis en begeleidt u bij juridische en fiscale structuren, vastgoedprojecten en financieringsvraagstukken."
@@ -1176,7 +1176,7 @@
     "nightlife": "Uitgaan & entertainment"
   },
   "About": {
-    "label": "Over ons",
+    "label": "Over MZS",
     "headline": "Internationale contacten. Lokale marktkennis.",
     "body": "Onze ondernemersgeschiedenis begon in 1990 met handel nabij Amsterdam. Via Spanje bracht onze reis ons naar Dubai, van waaruit we vandaag actief zijn. Met deelnemingen in diverse lokale bedrijven verbinden we 36 jaar ervaring met internationale contacten en lokale marktkennis. Vanuit deze basis richten onze diensten zich op advisering, vastgoedprojecten en private capital.",
     "amsterdam": "Oorsprong nabij Amsterdam",

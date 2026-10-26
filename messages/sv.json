@@ -111,7 +111,7 @@
     "my_dashboard": "Min översikt",
     "menu": "Meny",
     "mobile_main_navigation": "Huvudnavigation för mobil",
-    "about": "Om oss",
+    "about": "Om MZS",
     "consultancy": "Rådgivning"
   },
   "Footer": {
@@ -189,7 +189,7 @@
     "estatesDescription": "Upptäck den oberoende internationella fastighetsverksamheten i MZS Estates: fastighetsägande, privata uthyrningar, försäljning och utveckling.",
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag.",
-    "aboutTitle": "Om oss | MZS Group",
+    "aboutTitle": "Om MZS | MZS Group",
     "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom.",
     "consultancyTitle": "Rådgivning | MZS Group",
     "consultancyDescription": "En tydlig plan börjar med rätt frågor. MZS Group förenar internationell erfarenhet med lokal marknadskännedom och vägleder dig inom juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering."
@@ -1176,7 +1176,7 @@
     "nightlife": "Nattliv och underhållning"
   },
   "About": {
-    "label": "Om oss",
+    "label": "Om MZS",
     "headline": "Internationella kontakter. Lokal marknadskännedom.",
     "body": "Vår företagarresa började 1990 med handel nära Amsterdam. Via Spanien ledde vägen oss till Dubai, där vi verkar i dag. Genom ägarandelar i olika lokala företag kombinerar vi 36 års erfarenhet med internationella kontakter och lokal marknadskännedom. Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital.",
     "amsterdam": "Rötter nära Amsterdam",

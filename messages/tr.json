@@ -111,7 +111,7 @@
     "my_dashboard": "Panelim",
     "menu": "Menü",
     "mobile_main_navigation": "Mobil ana menü",
-    "about": "Hakkımızda",
+    "about": "MZS Hakkında",
     "consultancy": "Danışmanlık"
   },
   "Footer": {
@@ -189,7 +189,7 @@
     "estatesDescription": "MZS Estates'in bağımsız uluslararası gayrimenkul faaliyetlerini keşfedin: mülkiyet, özel kiralama, satış ve geliştirme.",
     "capitalTitle": "Özel Sermaye | MZS Capital",
     "capitalDescription": "MZS Capital, gayrimenkul ve işletmelerdeki seçilmiş özel finansman, yatırım ve stratejik ortaklık fırsatlarını değerlendirir.",
-    "aboutTitle": "Hakkımızda | MZS Group",
+    "aboutTitle": "MZS Hakkında | MZS Group",
     "aboutDescription": "Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır. Uluslararası bağlantılar. Yerel pazar bilgisi.",
     "consultancyTitle": "Danışmanlık | MZS Group",
     "consultancyDescription": "Net bir plan doğru sorularla başlar. MZS Group, uluslararası deneyimi yerel pazar bilgisiyle birleştirerek hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında size rehberlik eder."
@@ -1176,7 +1176,7 @@
     "nightlife": "Gece hayatı ve eğlence"
   },
   "About": {
-    "label": "Hakkımızda",
+    "label": "MZS Hakkında",
     "headline": "Uluslararası bağlantılar. Yerel pazar bilgisi.",
     "body": "Girişimcilik yolculuğumuz 1990 yılında Amsterdam yakınlarında ticaretle başladı. İspanya üzerinden bugün faaliyetlerimizi yürüttüğümüz Dubai’ye uzandı. Çeşitli yerel şirketlerdeki ortaklıklarımız aracılığıyla 36 yıllık deneyimimizi uluslararası bağlantılar ve yerel pazar bilgisiyle birleştiriyoruz. Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır.",
     "amsterdam": "Amsterdam yakınlarında başlangıç",
