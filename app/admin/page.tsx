@@ -6,11 +6,14 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
-import RentalSummary from "./RentalSummary";
-import FinancialCockpit from "./FinancialCockpit";
-import BookingManagement from "./BookingManagement";
-import GroupActionCenter from "./GroupActionCenter";
-import RequestProjectApproval, { type PlannedInvitation } from "./RequestProjectApproval";
+import dynamic from "next/dynamic";
+import type { PlannedInvitation } from "./RequestProjectApproval";
+// Defer specialist modules until the corresponding administration panel is rendered.
+const RentalSummary = dynamic(() => import("./RentalSummary"), {loading:()=> <p role="status" className="admin-help">Loading rental contracts…</p>});
+const FinancialCockpit = dynamic(() => import("./FinancialCockpit"), {loading:()=> <p role="status" className="admin-help">Loading financial cockpit…</p>});
+const BookingManagement = dynamic(() => import("./BookingManagement"), {loading:()=> <p role="status" className="admin-help">Loading rental operations…</p>});
+const GroupActionCenter = dynamic(() => import("./GroupActionCenter"), {loading:()=> <p role="status" className="admin-help">Loading action center…</p>});
+const RequestProjectApproval = dynamic(() => import("./RequestProjectApproval"), {loading:()=> <p role="status" className="admin-help">Loading approval form…</p>});
 import { assertComplete, matchesRequestFilter, matchesSearch, requestStage, type RequestFilter } from "./admin-model";
 
 type AccessRequest = { id: string; full_name: string; email: string; company: string | null; country: string | null; interests: string[]; message: string | null; status: string; created_at: string; auth_user_id: string | null; email_verified_at: string | null };
@@ -36,6 +39,10 @@ export default function AdminPage() {
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [memberCompanies, setMemberCompanies] = useState<CompanyAssociation[]>([]);
   const [memberContacts, setMemberContacts] = useState<ContactSnapshot[]>([]);
+  const [directoryState,setDirectoryState] = useState<"idle"|"loading"|"ready"|"error">("idle");
+  const [directoryVersion,setDirectoryVersion] = useState(-1);
+  const [offeringsState,setOfferingsState] = useState<"idle"|"loading"|"ready"|"error">("idle");
+  const [offeringsVersion,setOfferingsVersion] = useState(-1);
   const [projects, setProjects] = useState<Project[]>([]);
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [error, setError] = useState("");
@@ -109,19 +116,15 @@ export default function AdminPage() {
         supabase.from("access_invitations").select("id,request_id,email,requested_role,status,invited_at", { count: "exact" }).order("invited_at", { ascending: false }),
         supabase.from("profiles").select("id,full_name,email,role,is_active,created_at", { count: "exact" }).in("role", ["client", "partner"]).order("created_at", { ascending: false }),
         supabase.from("projects").select("id,title,location,status", { count: "exact" }).order("title"),
-        supabase.from("offerings").select("id,project_id,title,offering_type,status", { count: "exact" }).order("title"),
-        supabase.from("mzs_member_companies").select("id,user_id,legal_name,trading_name,registration_number,country,relationship_type", { count: "exact" }).order("legal_name"),
-        supabase.from("mzs_member_contact_details").select("user_id,phone,city,country", { count: "exact" }),
       ]);
       if (!current()) return;
       assertComplete(results);
       setRequests((results[0].data ?? []) as AccessRequest[]);
       setInvitations((results[1].data ?? []) as PlannedInvitation[]);
       setRelationships((results[2].data ?? []) as Relationship[]);
-      setMemberCompanies((results[5].data ?? []) as CompanyAssociation[]);
-      setMemberContacts((results[6].data ?? []) as ContactSnapshot[]);
       setProjects((results[3].data ?? []) as Project[]);
-      setOfferings((results[4].data ?? []) as Offering[]);
+      // Company affiliations, contact details and offering descriptions are
+      // fetched on demand when their specialist tab is actually opened.
       setUpdated(new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
       setState("ready");
       setRefreshVersion(value => value + 1);
@@ -141,6 +144,62 @@ export default function AdminPage() {
     void reload();
     return () => { mounted.current = false; generation.current += 1; };
   }, [reload]);
+
+  // Defer relationship detail queries until Accounts or Companies is opened.
+  // Verification and RLS remain in Supabase; a failed optional query is not
+  // displayed as an empty register or allowed to replace previously loaded data.
+  useEffect(()=>{
+    if(state!=="ready" || !(
+      tab==="companies" || (tab==="relationships" && relationshipView==="accounts")
+    ) || directoryVersion===refreshVersion) return;
+    let active=true;
+    setDirectoryState("loading");
+    void (async()=>{
+      try{
+        const db=createClient();
+        const [companies,contacts]=await Promise.all([
+          db.from("mzs_member_companies")
+            .select("id,user_id,legal_name,trading_name,registration_number,country,relationship_type",{count:"exact"})
+            .order("legal_name"),
+          db.from("mzs_member_contact_details")
+            .select("user_id,phone,city,country",{count:"exact"})
+        ]);
+        assertComplete([companies,contacts]);
+        if(!active)return;
+        setMemberCompanies((companies.data??[]) as CompanyAssociation[]);
+        setMemberContacts((contacts.data??[]) as ContactSnapshot[]);
+        setDirectoryState("ready");
+      } catch {
+        if(active)setDirectoryState("error");
+      } finally {
+        if(active)setDirectoryVersion(refreshVersion);
+      }
+    })();
+    return ()=>{active=false};
+  },[state,tab,relationshipView,refreshVersion,directoryVersion]);
+
+  useEffect(()=>{
+    if(state!=="ready" || tab!=="projects" || offeringsVersion===refreshVersion)return;
+    let active=true;
+    setOfferingsState("loading");
+    void (async()=>{
+      try{
+        const db=createClient();
+        const result=await db.from("offerings")
+          .select("id,project_id,title,offering_type,status",{count:"exact"})
+          .order("title");
+        assertComplete([result]);
+        if(!active)return;
+        setOfferings((result.data??[]) as Offering[]);
+        setOfferingsState("ready");
+      } catch {
+        if(active)setOfferingsState("error");
+      } finally {
+        if(active)setOfferingsVersion(refreshVersion);
+      }
+    })();
+    return ()=>{active=false};
+  },[state,tab,refreshVersion,offeringsVersion]);
 
   useEffect(() => {
     if (!busy) return;
@@ -594,6 +653,9 @@ export default function AdminPage() {
           })}</div>
           {visibleRequests.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more requests</button>}
         </> : <>
+          {directoryState==="loading"&&<p role="status" className="admin-help">Loading relationship company and contact details…</p>}
+          {directoryState==="error"&&<p role="alert" className="admin-notice">Relationship details could not be loaded. Refresh the dashboard to retry.</p>}
+          {directoryState==="ready"&&<>
           <div className="admin-toolbar"><label className="admin-field">Account type<select disabled={locked} value={accountRole} onChange={event => { setAccountRole(event.target.value); setLimit(pageSize); }}><option value="all">All types</option><option value="client">Client</option><option value="partner">Partner</option></select></label><label className="admin-field">Status<select disabled={locked} value={accountStatus} onChange={event => { setAccountStatus(event.target.value); setLimit(pageSize); }}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
           <p className="admin-help">{visibleAccounts.length} matching accounts</p>
           {!visibleAccounts.length && <p className="admin-empty">No accounts match these filters.</p>}
@@ -618,12 +680,16 @@ export default function AdminPage() {
             </article>;
           })}</div>
           {visibleAccounts.length > limit && <button className="admin-button admin-space-top" disabled={locked} onClick={() => setLimit(value => value + pageSize)}>Show more accounts</button>}
+          </>}
         </>}
       </>}
 
       {tab === "companies" && <>
+        {directoryState==="loading"&&<p role="status" className="admin-help">Loading company directory…</p>}
+        {directoryState==="error"&&<p role="alert" className="admin-notice">Company directory could not be loaded. Refresh to retry.</p>}
         <div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" onClick={guardLink} href="/admin/relationships?new=company">New company</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships?kind=company">Open company relationships →</Link></div>
         <p><Link className="admin-button" onClick={guardLink} href="/admin/group/estates/contracts?view=issuers">Manage landlord &amp; issuing entities →</Link></p>
+        {directoryState==="ready"&&<>
         <div className="admin-section-heading"><div><p className="eyebrow">Relationship affiliations</p><h2>Company directory.</h2></div><span>{memberCompanies.length} declared records</span></div>
         <p className="admin-help">Each entry is a relationship self-declared by a client or partner, not a verified legal entity. Company declarations never assign project rights.</p>
         <label className="admin-field admin-search">Search companies and members<input type="search" value={search} disabled={locked} onChange={event => setSearch(event.target.value)} placeholder="Company, member, registration number or country" /></label>
@@ -646,12 +712,15 @@ export default function AdminPage() {
             </article>;
           })}
         </div>
+        </>}
       </>}
 
       {tab === "projects" && <>
+        {offeringsState==="loading"&&<p role="status" className="admin-help">Loading available project offerings…</p>}
+        {offeringsState==="error"&&<p role="alert" className="admin-notice">Project offerings could not be loaded. Refresh the dashboard to retry.</p>}
         <div className="admin-section-heading"><div><p className="eyebrow">Private collection</p><h2>Projects & access.</h2></div><div className="admin-actions"><Link className="admin-button" href="/admin/capital-requests">Capital Requests →</Link><Link className="admin-button" href="/admin/project-access">Manage permissions →</Link></div></div>
         <label className="admin-field admin-search">Search projects<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Property or location" /></label>
-        <div className="admin-project-grid">{visibleProjects.map(project => <article className="admin-panel" key={project.id}><span className="admin-status">{project.status}</span><h3 className="admin-subtitle admin-space-top">{project.title}</h3><p className="admin-help">{project.location || "Private collection"}</p><div className="admin-interests">{offerings.filter(item => item.project_id === project.id).map(item => <span key={item.id}>{labels[item.offering_type] ?? item.offering_type}{item.title ? ` — ${item.title}` : ""} · {item.status}</span>)}</div><div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" href={"/admin/projects/" + encodeURIComponent(project.id)}>Open Project Cockpit →</Link>{project.status === "active" && <Link className="admin-button" href={`/admin/project-access?project=${encodeURIComponent(project.id)}`}>Manage access →</Link>}</div></article>)}</div>
+        <div className="admin-project-grid">{visibleProjects.map(project => <article className="admin-panel" key={project.id}><span className="admin-status">{project.status}</span><h3 className="admin-subtitle admin-space-top">{project.title}</h3><p className="admin-help">{project.location || "Private collection"}</p><div className="admin-interests">{offeringsState==="ready"&&offerings.filter(item => item.project_id === project.id).map(item => <span key={item.id}>{labels[item.offering_type] ?? item.offering_type}{item.title ? ` — ${item.title}` : ""} · {item.status}</span>)}</div><div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" href={"/admin/projects/" + encodeURIComponent(project.id)}>Open Project Cockpit →</Link>{project.status === "active" && <Link className="admin-button" href={`/admin/project-access?project=${encodeURIComponent(project.id)}`}>Manage access →</Link>}</div></article>)}</div>
         {!visibleProjects.length && <p className="admin-empty">No projects match this search.</p>}
       </>}
 
