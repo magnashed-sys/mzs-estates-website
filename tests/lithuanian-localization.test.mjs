@@ -76,3 +76,21 @@ test('Lithuanian booking messages include financial and date formatting without 
  assert.match(account,/lt: \{/);
  assert.match(account,/Jūsų MZS Group paskyra aktyvuota/);
 });
+
+test('Prepared Lithuanian Auth templates retain exact verification/recovery links and English fallback',()=>{
+ for(const [base,lt,combined] of [
+ ['mzs-confirm-signup-email-template','mzs-confirm-signup-email-template-lt','mzs-confirm-signup-email-template-all-languages-plus-lt'],
+ ['mzs-staging-reset-password-email-template','mzs-staging-reset-password-email-template-lt','mzs-staging-reset-password-email-template-all-languages-plus-lt']
+ ]){
+  const original=read('docs/'+base+'.html');
+  const languageTemplate=read('docs/'+lt+'.html');
+  const compound=read('docs/'+combined+'.html');
+  const urls=s=>[...s.matchAll(/href="([^"]+)"/g)].map(m=>m[1]);
+  assert.deepEqual(urls(languageTemplate),urls(original));
+  assert.match(languageTemplate,/<html lang="lt">/);
+  assert.match(compound,/else if eq \.Data\.preferred_language "lt"/);
+  assert.ok(compound.includes(languageTemplate));
+  const fallback=compound.split('{{ else }}\n')[1];
+  assert.equal(fallback,original+'{{ end }}\n');
+ }
+});
