@@ -200,7 +200,7 @@ export default function LoginPage() {
       </section>
 
       <div className={styles.publicFooter}>
-        <HomeContactFooter email="info@mzsgroup.eu" />
+        <HomeContactFooter />
       </div>
     </main>
   );

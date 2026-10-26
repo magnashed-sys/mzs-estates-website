@@ -37,7 +37,7 @@ export default async function RegistrationPendingPage() {
         }}>
           {t("a095")}</a>
       </section>
-      <div className={styles.publicFooter}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+      <div className={styles.publicFooter}><HomeContactFooter /></div>
     </main>
   );
 }

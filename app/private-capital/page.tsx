@@ -154,7 +154,7 @@ const focus = [
         <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
         <Link href={localizedPath("/real-estate", locale)}>{t('explore_real_estate')}</Link>
       </div>
-      <div className={styles.footerWrap}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+      <div className={styles.footerWrap}><HomeContactFooter /></div>
     </main>
   );
 }

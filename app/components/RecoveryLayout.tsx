@@ -47,7 +47,7 @@ export default function RecoveryLayout({
       </section>
 
       <div className={styles.publicFooter}>
-        <HomeContactFooter email="info@mzsgroup.eu" />
+        <HomeContactFooter />
       </div>
     </main>
   );

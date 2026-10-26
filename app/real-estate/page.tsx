@@ -110,7 +110,7 @@ const activities = [
         <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
         <Link href={localizedPath("/private-capital", locale)}>{t('explore_private_capital')}</Link>
       </div>
-      <div className={styles.footerWrap}><HomeContactFooter email="info@mzsgroup.eu" /></div>
+      <div className={styles.footerWrap}><HomeContactFooter /></div>
     </main>
   );
 }
