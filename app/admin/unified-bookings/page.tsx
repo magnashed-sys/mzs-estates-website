@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BookingRegister from "./BookingRegister";
 import {requireEstateAdmin} from "../../../lib/security/estate-properties";
 
 export const dynamic="force-dynamic";
@@ -43,12 +44,7 @@ export default async function UnifiedBookings(){
   <section style={{display:"flex",gap:12,flexWrap:"wrap",margin:"25px 0"}}>
    {["Guest booking","Owner stay","Unavailable"].map(category=><div key={category} style={{...style,minWidth:160}}><small style={{color:"#d5c09a"}}>{category}</small><p style={{fontSize:26,margin:"8px 0"}}>{rows.filter(x=>x.category===category).length}</p></div>)}
   </section>
-  <div style={{overflowX:"auto"}}>
-   <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
-    <thead><tr>{["Reservation","Property","Type","Check-in","Check-out","Status","Amount"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
-    <tbody>{rows.map(r=><tr key={r.category+r.id}><td style={{padding:12,borderBottom:"1px solid #3d382f",verticalAlign:"top"}}><Link style={{color:"#d5c09a",fontWeight:600}} href={r.category==="Owner stay"?r.href:"/admin/unified-bookings/"+r.id}>{r.category==="Owner stay"?"Manage owner stay →":"Open dossier →"}</Link></td><td>{r.property}</td><td>{r.category}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{r.status}</td><td>{r.amount}</td></tr>)}</tbody>
-   </table>
-  </div>
+  <BookingRegister rows={rows.map(({id,category,property,checkIn,checkOut,status,amount,href})=>({id,category,property,checkIn,checkOut,status,amount,href}))}/>
   {!rows.length&&<p>No records available in the current reporting scope.</p>}
  </main>;
 }
