@@ -40,7 +40,7 @@ export default async function ConsultancyPage() {
           </article>
         ))}
       </section>
-      <IntroCallForm source="consultancy" sectionNumber="04" preview={process.env.VERCEL_ENV === "preview"} />
+      <IntroCallForm introduction={t('lead')} source="consultancy" sectionNumber="04" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
   );

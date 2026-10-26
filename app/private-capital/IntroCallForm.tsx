@@ -7,9 +7,8 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./intro-call.module.css";
 
 /** Public contact request; no account is created. */
-export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital" }: { preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" | "consultancy" }) {
+export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital", introduction }: { introduction?: string; preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" | "consultancy" }) {
   const t = useTranslations('Call');
-  const consultancy = useTranslations('Consultancy');
   const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -72,7 +71,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
           <p className={styles.eyebrow}>{t('a_first_conversation')} {sectionNumber}</p>
           <h2 id="intro-call-heading">{t('lets_start_with')}<br /><em>{t('a_conversation')}</em></h2>
           <p className={styles.lead}>
-            {source === "consultancy" ? consultancy('lead') : source === "real-estate" ? t('looking_to_rent_acquire_or_discuss') : t('have_a_financing_need_an_investment')} {t('lets_get_acquainted_and_explore_whether')} </p>
+            {introduction ?? (source === "real-estate" ? t('looking_to_rent_acquire_or_discuss') : t('have_a_financing_need_an_investment'))} {t('lets_get_acquainted_and_explore_whether')} </p>
           <div className={styles.callDetails}>
             <span className={styles.clock} aria-hidden="true">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
