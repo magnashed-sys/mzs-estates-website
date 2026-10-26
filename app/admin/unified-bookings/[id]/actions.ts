@@ -65,3 +65,17 @@ export async function createBookingInvoiceDraft(formData:FormData){
  if(error)throw new Error("Invoice draft could not be saved. Check issuer configuration or whether a draft already exists.");
  redirect("/admin/unified-bookings/"+bookingId+"?invoice=draft");
 }
+
+export async function reviewBookingInvoiceDraft(formData:FormData){
+ const {db}=await requireEstateAdmin();
+ const bookingId=String(formData.get("booking_id")||"");
+ const draftId=String(formData.get("draft_id")||"");
+ const revision=Number(formData.get("revision"));
+ const status=String(formData.get("review_status")||"");
+ const note=String(formData.get("tax_note")||"").trim();
+ if(!UUID.test(bookingId)||!UUID.test(draftId)||!Number.isInteger(revision)||revision<1||
+ !["draft","reviewed"].includes(status)||note.length<5||note.length>1000)throw new Error("Invalid invoice review.");
+ const {error}=await db.rpc("mzs_admin_review_booking_invoice_draft",{p_draft_id:draftId,p_revision:revision,p_status:status,p_note:note});
+ if(error)throw new Error("Invoice review failed. Reload the dossier and try again.");
+ redirect("/admin/unified-bookings/"+bookingId+"?invoice=reviewed");
+}
