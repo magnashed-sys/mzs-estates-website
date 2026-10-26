@@ -64,7 +64,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
     </details>
     {legacyResult.error&&<p role="alert">Original confirmation metadata could not be loaded.</p>}
   </section>}
-  {legacyResult.error&&<p role="alert" style={{color:"#e3a995"}}Historical billing metadata could not be loaded. Check the source record before issuing invoices.</p>}
+  {legacyResult.error&&<p role="alert" style={{color:"#e3a995"}}>Historical billing metadata could not be loaded. Check the source record before issuing invoices.</p>}
   <section style={{...card,marginTop:20}}><h2>Booking payments</h2>
     <p>Recorded booking value: <strong>{money(b.quoted_total_eur)}</strong></p>
     <p>Receipts recorded against this booking: <strong>{receiptResult.error?"Unavailable":money(receiptTotal)}</strong></p>
