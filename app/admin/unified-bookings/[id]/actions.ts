@@ -18,7 +18,7 @@ export async function recordBookingReceipt(formData:FormData){
   p_booking_id:id,p_amount:Number(amount),p_received_on:date,p_reference:reference,p_notes:notes||null
  });
  if(error)throw new Error("Receipt was not recorded. Check the booking status and unique payment reference.");
- redirect("/admin/unified-bookings/"+id+"?receipt=recorded");
+ redirect("/admin/bookings/"+id+"?receipt=recorded");
 }
 
 export async function reverseBookingReceipt(formData:FormData){
@@ -28,7 +28,7 @@ export async function reverseBookingReceipt(formData:FormData){
  if(!UUID.test(receiptId)||reason.length<5||reason.length>500)throw new Error("A valid receipt and reversal reason are required.");
  const {data:bookingId,error}=await db.rpc("mzs_admin_reverse_booking_receipt",{p_receipt_id:receiptId,p_reason:reason});
  if(error||!bookingId)throw new Error("Unable to reverse receipt. Verify the receipt is active.");
- redirect("/admin/unified-bookings/"+bookingId+"?receipt=reversed");
+ redirect("/admin/bookings/"+bookingId+"?receipt=reversed");
 }
 
 export async function createBookingInvoiceDraft(formData:FormData){
@@ -72,7 +72,7 @@ export async function createBookingInvoiceDraft(formData:FormData){
   created_by:user.id
  });
  if(error)throw new Error("Invoice draft could not be saved. Check issuer configuration or whether a draft already exists.");
- redirect("/admin/unified-bookings/"+bookingId+"?invoice=draft");
+ redirect("/admin/bookings/"+bookingId+"?invoice=draft");
 }
 
 export async function reviewBookingInvoiceDraft(formData:FormData){
@@ -86,7 +86,7 @@ export async function reviewBookingInvoiceDraft(formData:FormData){
  !["draft","reviewed"].includes(status)||note.length<5||note.length>1000)throw new Error("Invalid invoice review.");
  const {error}=await db.rpc("mzs_admin_review_booking_invoice_draft",{p_draft_id:draftId,p_revision:revision,p_status:status,p_note:note});
  if(error)throw new Error("Invoice review failed. Reload the dossier and try again.");
- redirect("/admin/unified-bookings/"+bookingId+"?invoice=reviewed");
+ redirect("/admin/bookings/"+bookingId+"?invoice=reviewed");
 }
 
 export async function editBookingInvoiceDraft(formData:FormData){
@@ -118,7 +118,7 @@ export async function editBookingInvoiceDraft(formData:FormData){
   p_vat_percent:vatRate,p_tax_note:taxNote,p_reason:reason
  });
  if(error)throw new Error("Unable to update draft. Reload and check that it is still in Draft status.");
- redirect("/admin/unified-bookings/"+bookingId+"?invoice=edited");
+ redirect("/admin/bookings/"+bookingId+"?invoice=edited");
 }
 
 
@@ -183,7 +183,7 @@ export async function updateLegacyBooking(
   const safe=/overlap|changed|reload|invoice|booking|dates|administrator|correction|invalid|company|recipient|confirmed|owner stay/i.test(msg);
   return failure(safe?msg:"The correction could not be saved. Reload the dossier and try again.");
  }
- revalidatePath("/admin/unified-bookings/"+bookingId);
- revalidatePath("/admin/unified-bookings");
+ revalidatePath("/admin/bookings/"+bookingId);
+ revalidatePath("/admin/bookings");
  return {ok:true,message:"Correction saved. Original confirmation and previous values were preserved in the audit history."};
 }
