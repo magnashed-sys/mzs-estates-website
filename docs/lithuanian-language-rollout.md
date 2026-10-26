@@ -32,3 +32,11 @@ Provide **Lietuvių** as the eleventh MZS Group platform language, matching the 
 ## Technical notes
 - This branch is not a schema migration; it extends the existing next-intl catalogue, route allowlist and client preference handling.
 - The app mail layers use `lib/mzs/localized-account-mail.ts` and `lib/mzs/rental-mail-copy.json`. Neutral Auth recovery/signup templates are prepared separately in `docs/mzs-*-lt.html`.
+
+## Completion record — 26 October 2026
+- The complete 1,132-key Lithuanian catalogue is present. ICU variables match English; Lithuanian integer/fractional plurals and account/booking mail safeguards are tested.
+- The full local suite passes 194 tests. Next.js build and TypeScript validation passed, and GitHub Platform checks passed for the catalogue completion commit.
+- The branch has a READY Vercel Preview, scoped to the MZS Staging public URL/key. App SMTP is disabled and rental mail uses capture mode for this preview.
+- Browser checks confirmed Lithuanian home rendering, the flag, Dutch-to-Lithuanian language switching and preference persistence into the neutral `/request-access` route. Eight public/account routes also passed HTTP rendering checks with Lithuanian content. The final browser review caught and corrected the remaining Spain/UAE footer labels.
+- Full authenticated client acceptance is still open: the preview readiness endpoint reports a missing required server configuration and cannot validate the privileged staging connection. No client-account or booking records were created or modified during verification. Do not treat public-page checks as an end-to-end client test.
+- Mobile visual acceptance, native-speaker review and installation/delivery testing of the separate Supabase Auth templates remain release checks. No Production merge or release is included.
