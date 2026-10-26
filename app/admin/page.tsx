@@ -389,17 +389,21 @@ export default function AdminPage() {
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections" style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 0"}}>
-        {([["GROUP",["overview"]],["MZS ESTATES",["estates","contracts"]],["MZS CAPITAL",["capital"]],["RELATIONSHIPS",["relationships","companies","projects"]]] as const).map(([group,keys])=>
-         <div key={group} style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
-           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a",paddingRight:5}}>{group}</span>
-           {keys.map(key=>{const item=tabs.find(([k])=>k===key);return item&&<button key={key} disabled={locked} aria-current={tab===key?"page":undefined} onClick={()=>navigate(key)}>{item[1]}{key==="relationships"&&pending.length>0&&<span className="admin-count">{pending.length}</span>}</button>})}
-         </div>)}
+        <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
+          <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a",paddingRight:5}}>GROUP</span>
+          <button disabled={locked} aria-current={tab==="overview"?"page":undefined} onClick={()=>navigate("overview")}>Overview</button>
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #796546",borderRadius:4,background:"rgba(213,192,154,.065)"}}>
           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>BOOKINGS</span>
           <Link href="/admin/bookings" onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary" style={{minHeight:40,display:"inline-flex",alignItems:"center"}}>All Bookings →</Link>
           <button disabled={locked} aria-current={tab==="bookings"?"page":undefined} onClick={()=>openBookings("bookings")}>Requests &amp; Calendar</button>
           <Link href="/admin/owner-stays" onClick={guardLink} aria-disabled={locked} style={{color:"#eeeae2",padding:"10px"}}>Owner stays</Link>
         </div>
+        {([["MZS ESTATES",["estates","contracts"]],["MZS CAPITAL",["capital"]],["RELATIONSHIPS",["relationships","companies","projects"]]] as const).map(([group,keys])=>
+         <div key={group} style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
+           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a",paddingRight:5}}>{group}</span>
+           {keys.map(key=>{const item=tabs.find(([k])=>k===key);return item&&<button key={key} disabled={locked} aria-current={tab===key?"page":undefined} onClick={()=>navigate(key)}>{item[1]}{key==="relationships"&&pending.length>0&&<span className="admin-count">{pending.length}</span>}</button>})}
+         </div>)}
         <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>SYSTEM</span>
           <button disabled={locked} aria-current={tab==="analytics"?"page":undefined} onClick={()=>navigate("analytics")}>Analytics</button>
