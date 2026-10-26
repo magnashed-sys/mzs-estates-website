@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {requireEstateAdmin} from '../../../lib/security/estate-properties';
-import {grantPartner,decideOwnerStay,adjustBookingPrice} from './actions';
+import {grantPartner,adjustBookingPrice} from './actions';
+import OwnerStayDecision from './OwnerStayDecision';
 export const dynamic='force-dynamic';
 const money=(n:number|string|null)=>n===null?'Not priced':new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(Number(n));
 export default async function PropertyPartnerManagement(){
@@ -19,10 +20,30 @@ export default async function PropertyPartnerManagement(){
  const names=new Map((people.data||[]).map(x=>[x.id,x.full_name||x.email]));
  const places=new Map((projects.data||[]).map(x=>[x.id,x.title]));
  const grantIndex=new Map((grants.data||[]).map(x=>[x.id,x]));
+ // Exact calendar-overlap checks for each distinct pending owner-stay interval.
+ // Reuse one query for duplicate submissions; never load private booking data
+ // outside the existing administrator guard.
+ const pending=(requests.data||[]).filter(r=>r.status==='requested');
+ const intervals=new Map<string,{projectId:string;checkIn:string;checkOut:string}>();
+ for(const request of pending){
+  const grant=grantIndex.get(request.partner_id);
+  if(!grant)continue;
+  const key=[grant.project_id,request.check_in,request.check_out].join('|');
+  intervals.set(key,{projectId:grant.project_id,checkIn:request.check_in,checkOut:request.check_out});
+ }
+ const entries=[...intervals];
+ const checked=await Promise.all(entries.map(([,span])=>db.from('rental_bookings')
+  .select('id,check_in,check_out,status')
+  .eq('project_id',span.projectId).eq('is_test',false)
+  .in('status',['confirmed','blocked'])
+  .lt('check_in',span.checkOut).gt('check_out',span.checkIn)
+  .order('check_in',{ascending:true}).limit(2)));
+ const conflictByInterval=new Map(entries.map(([key],i)=>[key,checked[i]]));
+ const conflictError=checked.some(result=>Boolean(result.error));
  const field={padding:'9px',background:'#24221f',color:'#fff',border:'1px solid #655c4c'} as const;
  const section={padding:24,border:'1px solid #5b503e',background:'#151411',marginTop:24} as const;
  return <main style={{padding:'40px clamp(20px,5vw,75px)',background:'#0f0f0e',color:'#f2eee8',minHeight:'100vh'}}>
- <Link href='/admin?tab=bookings' style={{color:'#d5c09a'}}>← Booking administration</Link>
+ <Link href='/admin/bookings' style={{color:'#d5c09a'}}>← Bookings</Link>
  <h1 style={{fontFamily:'Georgia,serif',fontWeight:400}}>Property Partners & Owner Stays</h1>
  <p style={{color:'#b9aa94'}}>Property-specific rights, admin approval and auditable booking prices.</p>
  {failures.length>0&&<p role='alert' style={{padding:16,border:'1px solid #a9845a'}}>Some sections could not load ({failures.join(', ')}). No changes have been made; please refresh or check administrator permissions.</p>}
@@ -35,12 +56,18 @@ export default async function PropertyPartnerManagement(){
  {(grants.data||[]).map(g=><p key={g.id}>{names.get(g.profile_id)||'Account'} · {places.get(g.project_id)||'Property'} · {g.is_active?'Active':'Inactive'}</p>)}
  </section>
  <section style={section}><h2>Owner-stay requests</h2>
- {(requests.data||[]).length===0?<p>No requests yet.</p>:(requests.data||[]).map(r=>{const g=grantIndex.get(r.partner_id);return <article key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #4b4234'}}>
+ <p style={{color:'#b9aa94'}}>Every approval is checked against confirmed stays and unavailable periods. An overlapping request cannot create a second reservation.</p>
+ {conflictError&&<p role='alert' style={{padding:14,border:'1px solid #a9845a',color:'#e3a995'}}>Availability checks could not be completed. Approvals are temporarily disabled; refresh the page and verify the calendar before proceeding.</p>}
+ {(requests.data||[]).length===0?<p>No requests yet.</p>:(requests.data||[]).map(r=>{const g=grantIndex.get(r.partner_id);const check=g?conflictByInterval.get([g.project_id,r.check_in,r.check_out].join('|')):null;const conflict=check?.data?.[0];const blocked=Boolean(r.status==='requested'&&(!g||!check||check.error||conflictError||conflict));return <article key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #4b4234'}}>
  <strong>{names.get(g?.profile_id||'')||'Partner'} · {places.get(g?.project_id||'')||'Property'}</strong>
  <p>{r.check_in} – {r.check_out} · {r.guest_count} guests · {r.status.toUpperCase()} · €0 owner stay</p><p>{r.notes}</p>
- {r.status==='requested'&&<form action={decideOwnerStay} style={{display:'flex',gap:12}}><input type='hidden' name='request_id' value={r.id}/>
- <button name='decision' value='approve' style={field}>Approve · create confirmed stay</button>
- <button name='decision' value='decline' style={field}>Decline</button></form>}
+ {r.status==='requested'&&conflict&&<p role="alert" style={{padding:12,color:'#f0c0a5',border:'1px solid #8a624c',lineHeight:1.7}}>
+   <strong>Approval blocked: dates already occupied.</strong> An existing {conflict.status} reservation or unavailable period runs from {conflict.check_in} to {conflict.check_out}. This request cannot be accepted without resolving that conflict.
+   {' '}<Link href={'/admin/bookings/'+conflict.id} style={{color:'#d5c09a'}}>Open existing booking →</Link>
+ </p>}
+ {r.status==='requested'&&!conflict&&blocked&&<p role="alert" style={{color:'#e3a995'}}>Approval is disabled because the property or calendar could not be verified. You can still decline the request.</p>}
+ {r.status==='requested'&&<OwnerStayDecision id={r.id} blocked={blocked}/>}
+
  </article>})}
  </section>
  <section style={section}><h2>Booking price editor</h2><p style={{color:'#b9aa94'}}>Updates are audit-logged; no payment is generated or edited. Existing issued invoices require separate accounting adjustments.</p>
