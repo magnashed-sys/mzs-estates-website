@@ -389,16 +389,21 @@ export default function AdminPage() {
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections" style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 0"}}>
-        {([["GROUP",["overview","analytics"]],["MZS ESTATES",["estates","contracts","bookings"]],["MZS CAPITAL",["capital"]],["RELATIONSHIPS",["relationships","companies","projects"]]] as const).map(([group,keys])=>
+        {([["GROUP",["overview"]],["MZS ESTATES",["estates","contracts"]],["MZS CAPITAL",["capital"]],["RELATIONSHIPS",["relationships","companies","projects"]]] as const).map(([group,keys])=>
          <div key={group} style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
            <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a",paddingRight:5}}>{group}</span>
            {keys.map(key=>{const item=tabs.find(([k])=>k===key);return item&&<button key={key} disabled={locked} aria-current={tab===key?"page":undefined} onClick={()=>navigate(key)}>{item[1]}{key==="relationships"&&pending.length>0&&<span className="admin-count">{pending.length}</span>}</button>})}
          </div>)}
-        <div style={{display:"flex",alignItems:"center",gap:7,padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
+        <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #796546",borderRadius:4,background:"rgba(213,192,154,.065)"}}>
+          <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>BOOKINGS</span>
+          <Link href="/admin/bookings" onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary" style={{minHeight:40,display:"inline-flex",alignItems:"center"}}>All Bookings →</Link>
+          <button disabled={locked} aria-current={tab==="bookings"?"page":undefined} onClick={()=>openBookings("bookings")}>Requests &amp; Calendar</button>
+          <Link href="/admin/owner-stays" onClick={guardLink} aria-disabled={locked} style={{color:"#eeeae2",padding:"10px"}}>Owner stays</Link>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>SYSTEM</span>
-          <Link href="/admin/unified-bookings" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Unified Bookings</Link>
-          <Link href="/admin/owner-stays" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Property Partners</Link>
-          <Link href="/admin/group/estates/contracts?view=invoices" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Invoices</Link>
+          <button disabled={locked} aria-current={tab==="analytics"?"page":undefined} onClick={()=>navigate("analytics")}>Analytics</button>
+          <Link href="/admin/group/estates/contracts?view=invoices" onClick={guardLink} aria-disabled={locked} style={{color:"#eeeae2",padding:"10px"}}>Invoices</Link>
         </div>
       </nav>
       {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
@@ -434,6 +439,31 @@ export default function AdminPage() {
 
       {tab === "overview" && <>
         <FinancialCockpit refreshVersion={refreshVersion}/>
+        <section aria-label="Daily operations" className="admin-panel" style={{margin:"24px 0",borderColor:"#62543f"}}>
+          <p className="eyebrow">Daily operations / One workspace</p>
+          <h2 className="admin-subtitle">Manage reservations and incoming work.</h2>
+          <p className="admin-intro">The central Bookings register holds confirmed stays and their dossiers. Requests, calendars and owner stays remain connected specialist workflows.</p>
+          <div className="admin-project-grid" style={{marginTop:18}}>
+            <article className="admin-panel" style={{margin:0}}>
+              <p className="eyebrow">01 / BOOKING REGISTER</p>
+              <h3 className="admin-subtitle">All bookings.</h3>
+              <p className="admin-help">Find reservations by property, guest, year and status. Open historic dossiers and review registered receipts.</p>
+              <Link href="/admin/bookings" onClick={guardLink} aria-disabled={locked} className="admin-button admin-button-primary admin-space-top">Open Bookings →</Link>
+            </article>
+            <article className="admin-panel" style={{margin:0}}>
+              <p className="eyebrow">02 / INCOMING REQUESTS</p>
+              <h3 className="admin-subtitle">Approvals &amp; calendar.</h3>
+              <p className="admin-help">Review pending rental requests, cancellation requests and live property availability.</p>
+              <button className="admin-button admin-space-top" disabled={locked} onClick={()=>openBookings("bookings")}>Review requests →</button>
+            </article>
+            <article className="admin-panel" style={{margin:0}}>
+              <p className="eyebrow">03 / OWNER &amp; PARTNER STAYS</p>
+              <h3 className="admin-subtitle">Owner stays.</h3>
+              <p className="admin-help">Manage complimentary stays and owner-specific availability without confusing them with rental income.</p>
+              <Link href="/admin/owner-stays" onClick={guardLink} aria-disabled={locked} className="admin-button admin-space-top">Manage owner stays →</Link>
+            </article>
+          </div>
+        </section>
         <div className="admin-metrics">
           <button disabled={locked} onClick={() => openRequests("pending")}><span>Access requests</span><strong>{pending.length}</strong><small>Awaiting review →</small></button>
           <button disabled={locked} onClick={() => openRequests("approved")}><span>Approved requests</span><strong>{approved.length}</strong><small>Awaiting invitation →</small></button>
@@ -621,7 +651,13 @@ export default function AdminPage() {
         {!visibleProjects.length && <p className="admin-empty">No projects match this search.</p>}
       </>}
 
-      {tab === "bookings" && <><div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Reservations & calendar.</h2></div></div><BookingManagement key={`bookings-${refreshVersion}`} initialSection={bookingEntry} onBusyChange={setBookingBusy} /></>}
+      {tab === "bookings" && <>
+        <div className="admin-section-heading"><div><p className="eyebrow">BOOKINGS / WORKFLOWS</p><h2>Requests &amp; Calendar.</h2>
+          <p className="admin-intro">Review pending requests and availability here. The central Bookings register is the main place to view and edit all recorded reservations.</p></div>
+          <Link href="/admin/bookings" aria-disabled={locked} onClick={guardLink} className="admin-button admin-button-primary">All Bookings →</Link>
+        </div>
+        <BookingManagement key={`bookings-${refreshVersion}`} initialSection={bookingEntry} onBusyChange={setBookingBusy} />
+      </>}
 
       {tab === "analytics" && <>
         <div className="admin-section-heading"><div><p className="eyebrow">Public website</p><h2>Website analytics.</h2></div><span className="admin-status">Report in Vercel</span></div>
