@@ -6,7 +6,7 @@ import {createTranslator} from 'next-intl';
 import ts from 'typescript';
 import vm from 'node:vm';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const locales=['de','it','fr','pt-BR','ar','tr'];
+const locales=['de','it','fr','pt-BR','ar','tr','lt'];
 const en=JSON.parse(read('messages/en.json'));
 const routing={};vm.runInNewContext(ts.transpileModule(read('i18n/public-routing.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:routing});
 function args(nodes,out=new Set()) {for(const n of nodes){if([1,2,3,4,5,6].includes(n.type))out.add(n.value);if(n.options)for(const o of Object.values(n.options))args(o.value,out);if(n.children)args(n.children,out);}return [...out].sort();}
@@ -33,7 +33,7 @@ for(const locale of locales){
 }
 test('Arabic direction is presentation-only and Brazilian Portuguese stays distinct',()=>{
  assert.equal(routing.localeDirection('ar'),'rtl');
- for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','tr'])assert.equal(routing.localeDirection(locale),'ltr');
+ for(const locale of ['en','nl','es','ru','de','it','fr','pt-BR','tr','lt'])assert.equal(routing.localeDirection(locale),'ltr');
  for(const unsupported of ['pt','pt-PT','ar/admin','__proto__',null,{role:'admin'}]){assert.equal(routing.isLocale(unsupported),false);assert.equal(routing.memberLocale(unsupported),'en');}
  assert.match(read('app/layout.tsx'),/dir=\{localeDirection\(locale\)\}/);
  assert.match(read('app/rtl.css'),/input\[type="email"\].*direction:ltr/);
