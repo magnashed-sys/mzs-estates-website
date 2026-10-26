@@ -396,6 +396,7 @@ export default function AdminPage() {
          </div>)}
         <div style={{display:"flex",alignItems:"center",gap:7,padding:"8px 10px",border:"1px solid #514839",borderRadius:4}}>
           <span style={{fontSize:10,letterSpacing:1.5,color:"#d5c09a"}}>SYSTEM</span>
+          <Link href="/admin/unified-bookings" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Unified Bookings</Link>
           <Link href="/admin/owner-stays" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Property Partners</Link>
           <Link href="/admin/group/estates/contracts?view=invoices" onClick={guardLink} style={{color:"#eeeae2",padding:"10px"}}>Invoices</Link>
         </div>
