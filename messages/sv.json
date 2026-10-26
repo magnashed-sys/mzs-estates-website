@@ -111,7 +111,8 @@
     "my_dashboard": "Min översikt",
     "menu": "Meny",
     "mobile_main_navigation": "Huvudnavigation för mobil",
-    "about": "Om oss"
+    "about": "Om oss",
+    "consultancy": "Rådgivning"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -189,7 +190,9 @@
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag.",
     "aboutTitle": "Om oss | MZS Group",
-    "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom."
+    "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom.",
+    "consultancyTitle": "Rådgivning | MZS Group",
+    "consultancyDescription": "En tydlig plan börjar med rätt frågor. MZS Group förenar internationell erfarenhet med lokal marknadskännedom och vägleder dig inom juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering."
   },
   "Login": {
     "private_access": "Privat åtkomst",
@@ -1180,5 +1183,17 @@
     "spain": "Via Spanien",
     "dubai": "I dag från Dubai",
     "caption": "En konstnärlig tolkning av vår resa: Amsterdam, Spanien och Dubai."
+  },
+  "Consultancy": {
+    "headline": "Nästa steg, tillsammans.",
+    "lead": "En tydlig plan börjar med rätt frågor. MZS Group förenar internationell erfarenhet med lokal marknadskännedom och vägleder dig inom juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering.",
+    "legalTitle": "Juridiska och skattemässiga strukturer",
+    "legalBody": "Vi hjälper till att strukturera verksamhet, ägarandelar och investeringar. Från ägarförhållanden till internationella frågor tydliggör vi dina mål och hjälper till att samordna beslut med berörda specialister.",
+    "estateTitle": "Fastighetsprojekt",
+    "estateBody": "Från första idé till genomförande hjälper vi dig att ge fastighetsprojektet riktning. Vi stödjer bedömning av möjligheter, projektstrukturering och samordning mellan parterna, med hänsyn till den lokala marknaden och dina långsiktiga mål.",
+    "financeTitle": "Finansieringsrådgivning",
+    "financeBody": "Vi hjälper dig att omvandla finansieringsbehovet till ett tydligt, välgrundat förslag. För fastigheter, företag och andra ändamål undersöker vi lämpliga finansieringsformer och stödjer förberedelser och samtal med möjliga finansiärer.",
+    "cta": "Diskutera dina planer",
+    "label": "Rådgivning"
   }
 }

@@ -7,7 +7,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./intro-call.module.css";
 
 /** Public contact request; no account is created. */
-export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital" }: { preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" }) {
+export default function IntroCallForm({ preview = false, sectionNumber = "04", source = "private-capital", introduction }: { introduction?: string; preview?: boolean; sectionNumber?: string; source?: "private-capital" | "real-estate" | "consultancy" }) {
   const t = useTranslations('Call');
   const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -71,7 +71,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
           <p className={styles.eyebrow}>{t('a_first_conversation')} {sectionNumber}</p>
           <h2 id="intro-call-heading">{t('lets_start_with')}<br /><em>{t('a_conversation')}</em></h2>
           <p className={styles.lead}>
-            {source === "real-estate" ? t('looking_to_rent_acquire_or_discuss') : t('have_a_financing_need_an_investment')} {t('lets_get_acquainted_and_explore_whether')} </p>
+            {introduction ?? (source === "real-estate" ? t('looking_to_rent_acquire_or_discuss') : t('have_a_financing_need_an_investment'))} {t('lets_get_acquainted_and_explore_whether')} </p>
           <div className={styles.callDetails}>
             <span className={styles.clock} aria-hidden="true">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
@@ -93,7 +93,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
               <span className={styles.confirmationMark} aria-hidden="true">✓</span>
               <p className={styles.eyebrow}>{t('request_received')}</p>
               <h3 id="intro-call-confirmation">{t('thank_you_for')}<br />{t('reaching_out')}</h3>
-              <p>{t("confirmationBody", {brand: source === "real-estate" ? "MZS Estates" : "MZS Capital"})}</p>
+              <p>{t("confirmationBody", {brand: source === "consultancy" ? "MZS Group" : source === "real-estate" ? "MZS Estates" : "MZS Capital"})}</p>
               <p className={styles.confirmationNote}>{t('your_request_has_been_received_a')}</p>
               <p className={styles.contactNote}>{t('reference')} {reference}</p>
               <button className={styles.resetButton} type="button" onClick={() => { returnToForm.current = true; setSubmitted(false); }}>{t('back_to_the_form')} <span aria-hidden="true"><ArrowUpRightIcon /></span></button>
@@ -134,7 +134,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
         <p>{t('already_part_of_our_network')}</p>
         <div><a href="/login">{t('client_partner_login')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a><a href="/request-access">{t('request_private_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a></div>
       </div>
-      <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>
+      {source !== 'consultancy' && <p className={styles.disclaimer}>{t('information_on_this_page_is_introductory')}</p>}
     </section>
   );
 }

@@ -15,7 +15,8 @@
     "my_dashboard": "Meine Übersicht",
     "menu": "Menü",
     "mobile_main_navigation": "Mobile Hauptnavigation",
-    "about": "Über uns"
+    "about": "Über uns",
+    "consultancy": "Beratung"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -53,7 +54,9 @@
     "capitalTitle": "Privates Kapital | MZS Capital",
     "capitalDescription": "MZS Capital prüft ausgewählte private Finanzierungs-, Investment- und strategische Partnerschaftsmöglichkeiten im Immobilien- und Unternehmensbereich.",
     "aboutTitle": "Über uns | MZS Group",
-    "aboutDescription": "Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital. Internationale Kontakte. Lokale Marktkenntnis."
+    "aboutDescription": "Unsere Dienstleistungen konzentrieren sich auf Beratung, Immobilienprojekte und Private Capital. Internationale Kontakte. Lokale Marktkenntnis.",
+    "consultancyTitle": "Beratung | MZS Group",
+    "consultancyDescription": "Ein klarer Plan beginnt mit den richtigen Fragen. MZS Group verbindet internationale Erfahrung mit lokaler Marktkenntnis und begleitet Sie bei rechtlichen und steuerlichen Strukturen, Immobilienprojekten und Finanzierungsfragen."
   },
   "Estates": {
     "ownership_management": "Eigentum und Verwaltung",
@@ -1180,5 +1183,17 @@
     "spain": "Über Spanien",
     "dubai": "Heute von Dubai aus",
     "caption": "Eine künstlerische Darstellung unseres Weges: Amsterdam, Spanien und Dubai."
+  },
+  "Consultancy": {
+    "headline": "Gemeinsam den nächsten Schritt.",
+    "lead": "Ein klarer Plan beginnt mit den richtigen Fragen. MZS Group verbindet internationale Erfahrung mit lokaler Marktkenntnis und begleitet Sie bei rechtlichen und steuerlichen Strukturen, Immobilienprojekten und Finanzierungsfragen.",
+    "legalTitle": "Rechtliche & steuerliche Strukturen",
+    "legalBody": "Wir unterstützen die rechtliche und steuerliche Strukturierung Ihrer Aktivitäten, Beteiligungen und Investitionen. Von Eigentumsverhältnissen bis zu internationalen Zusammenhängen klären wir Ihre Ziele und helfen bei der Abstimmung mit den beteiligten Fachleuten.",
+    "estateTitle": "Immobilienprojekte",
+    "estateBody": "Von der ersten Idee bis zur Umsetzung geben wir Ihrem Immobilienprojekt Orientierung. Wir unterstützen die Bewertung von Möglichkeiten, die Projektstrukturierung und die Abstimmung zwischen Beteiligten – mit Blick auf den lokalen Markt und Ihre langfristigen Ziele.",
+    "financeTitle": "Finanzierungsberatung",
+    "financeBody": "Wir helfen, Ihren Finanzierungsbedarf in einen klaren, fundierten Vorschlag zu übersetzen. Für Immobilien, Unternehmen und andere Zwecke prüfen wir passende Finanzierungsformen und begleiten die Vorbereitung und Gespräche mit möglichen Kapitalgebern.",
+    "cta": "Besprechen Sie Ihr Vorhaben",
+    "label": "Beratung"
   }
 }

@@ -111,7 +111,8 @@
     "my_dashboard": "Mano apžvalga",
     "menu": "Meniu",
     "mobile_main_navigation": "Pagrindinė mobilioji navigacija",
-    "about": "Apie mus"
+    "about": "Apie mus",
+    "consultancy": "Konsultacijos"
   },
   "Footer": {
     "contact_short": "Kontaktai",
@@ -189,7 +190,9 @@
     "capitalTitle": "Privatus kapitalas | MZS Capital",
     "capitalDescription": "MZS Capital nagrinėja atrinktas privataus finansavimo, investavimo ir strateginės partnerystės galimybes nekilnojamojo turto ir verslo srityse.",
     "aboutTitle": "Apie mus | MZS Group",
-    "aboutDescription": "Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą. Tarptautiniai ryšiai. Vietos rinkų išmanymas."
+    "aboutDescription": "Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą. Tarptautiniai ryšiai. Vietos rinkų išmanymas.",
+    "consultancyTitle": "Konsultacijos | MZS Group",
+    "consultancyDescription": "Aiškus planas prasideda nuo tinkamų klausimų. MZS Group derina tarptautinę patirtį su vietos rinkų išmanymu ir konsultuoja teisinių bei mokestinių struktūrų, nekilnojamojo turto projektų ir finansavimo klausimais."
   },
   "Login": {
     "private_access": "Privati prieiga",
@@ -1180,5 +1183,17 @@
     "spain": "Per Ispaniją",
     "dubai": "Šiandien iš Dubajaus",
     "caption": "Meninė mūsų kelio interpretacija: Amsterdamas, Ispanija ir Dubajus."
+  },
+  "Consultancy": {
+    "headline": "Kitas žingsnis – kartu.",
+    "lead": "Aiškus planas prasideda nuo tinkamų klausimų. MZS Group derina tarptautinę patirtį su vietos rinkų išmanymu ir konsultuoja teisinių bei mokestinių struktūrų, nekilnojamojo turto projektų ir finansavimo klausimais.",
+    "legalTitle": "Teisinės ir mokestinės struktūros",
+    "legalBody": "Padedame formuoti veiklos, akcijų paketų ir investicijų teisinę bei mokestinę struktūrą. Nuo nuosavybės iki tarptautinių aspektų – išgryniname tikslus ir padedame derinti sprendimus su dalyvaujančiais specialistais.",
+    "estateTitle": "Nekilnojamojo turto projektai",
+    "estateBody": "Nuo pirmosios idėjos iki įgyvendinimo padedame nustatyti projekto kryptį. Prisidedame prie galimybių vertinimo, projekto struktūros ir šalių koordinavimo, atsižvelgdami į vietos rinką ir ilgalaikius tikslus.",
+    "financeTitle": "Finansavimo konsultacijos",
+    "financeBody": "Padedame finansavimo poreikį paversti aiškiu, pagrįstu pasiūlymu. Nekilnojamajam turtui, verslui ir kitiems tikslams nagrinėjame tinkamas finansavimo formas bei padedame pasirengti pokalbiams su galimais finansuotojais.",
+    "cta": "Aptarkime jūsų planus",
+    "label": "Konsultacijos"
   }
 }

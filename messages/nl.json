@@ -111,7 +111,8 @@
     "my_dashboard": "Mijn dashboard",
     "menu": "Menu",
     "mobile_main_navigation": "Mobiele hoofdnavigatie",
-    "about": "Over ons"
+    "about": "Over ons",
+    "consultancy": "Consultancy"
   },
   "Footer": {
     "contact_short": "Contact",
@@ -189,7 +190,9 @@
     "capitalTitle": "Privaat kapitaal | MZS Capital",
     "capitalDescription": "MZS Capital verkent geselecteerde mogelijkheden voor private financiering, investeringen en strategische samenwerkingen in vastgoed en ondernemingen.",
     "aboutTitle": "Over ons | MZS Group",
-    "aboutDescription": "Onze diensten richten zich op advisering, vastgoedprojecten en private capital. Internationale contacten. Lokale marktkennis."
+    "aboutDescription": "Onze diensten richten zich op advisering, vastgoedprojecten en private capital. Internationale contacten. Lokale marktkennis.",
+    "consultancyTitle": "Consultancy | MZS Group",
+    "consultancyDescription": "Een helder plan begint met de juiste vragen. MZS Group verbindt internationale ervaring met lokale marktkennis en begeleidt u bij juridische en fiscale structuren, vastgoedprojecten en financieringsvraagstukken."
   },
   "Login": {
     "private_access": "Private toegang",
@@ -1180,5 +1183,17 @@
     "spain": "Via Spanje",
     "dubai": "Vandaag vanuit Dubai",
     "caption": "Een artistieke impressie van onze route: Amsterdam, Spanje en Dubai."
+  },
+  "Consultancy": {
+    "headline": "Samen de volgende stap.",
+    "lead": "Een helder plan begint met de juiste vragen. MZS Group verbindt internationale ervaring met lokale marktkennis en begeleidt u bij juridische en fiscale structuren, vastgoedprojecten en financieringsvraagstukken.",
+    "legalTitle": "Juridische & fiscale structuren",
+    "legalBody": "We denken mee over de juridische en fiscale inrichting van uw activiteiten, deelnemingen en investeringen. Van eigendomsstructuur tot internationale samenhang: we brengen uw uitgangspunten in kaart en helpen keuzes af te stemmen met de betrokken specialisten.",
+    "estateTitle": "Vastgoedprojecten",
+    "estateBody": "Van eerste idee tot uitvoering helpen we richting te geven aan uw vastgoedproject. We ondersteunen bij het beoordelen van mogelijkheden, projectstructuur en de afstemming tussen betrokken partijen, met oog voor de lokale markt en uw langetermijndoelen.",
+    "financeTitle": "Financieringsadvies",
+    "financeBody": "We helpen uw financieringsbehoefte te vertalen naar een helder en onderbouwd voorstel. Voor vastgoed, ondernemingen en andere doeleinden verkennen we passende financieringsvormen en begeleiden we de voorbereiding en gesprekken met potentiële financiers.",
+    "cta": "Bespreek uw vraagstuk",
+    "label": "Consultancy"
   }
 }

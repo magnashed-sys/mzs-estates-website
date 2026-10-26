@@ -111,7 +111,8 @@
     "my_dashboard": "我的控制面板",
     "menu": "菜单",
     "mobile_main_navigation": "移动端主导航",
-    "about": "关于我们"
+    "about": "关于我们",
+    "consultancy": "咨询服务"
   },
   "Footer": {
     "contact_short": "联系",
@@ -189,7 +190,9 @@
     "capitalTitle": "私人资本 | MZS Capital",
     "capitalDescription": "MZS Capital 在房地产和企业中探索选定的私人融资、投资和战略伙伴关系机会。",
     "aboutTitle": "关于我们 | MZS Group",
-    "aboutDescription": "我们的服务涵盖咨询、房地产项目及私人资本。 国际人脉，本地市场洞察。"
+    "aboutDescription": "我们的服务涵盖咨询、房地产项目及私人资本。 国际人脉，本地市场洞察。",
+    "consultancyTitle": "咨询服务 | MZS Group",
+    "consultancyDescription": "清晰的计划始于恰当的问题。MZS Group 将国际经验与本地市场知识相结合，为法律与税务架构、房地产项目及融资事宜提供咨询与支持。"
   },
   "Login": {
     "private_access": "私人使用",
@@ -1180,5 +1183,17 @@
     "spain": "经由西班牙",
     "dubai": "如今立足迪拜",
     "caption": "我们的发展历程艺术示意图：阿姆斯特丹、西班牙和迪拜。"
+  },
+  "Consultancy": {
+    "headline": "携手迈出下一步。",
+    "lead": "清晰的计划始于恰当的问题。MZS Group 将国际经验与本地市场知识相结合，为法律与税务架构、房地产项目及融资事宜提供咨询与支持。",
+    "legalTitle": "法律与税务架构",
+    "legalBody": "我们协助梳理业务、股权参与及投资的法律与税务架构。从所有权安排到跨境因素，我们帮助明确目标，并与相关专业人士协调决策。",
+    "estateTitle": "房地产项目",
+    "estateBody": "从初步构想到实施，我们协助明确项目方向。我们支持机会评估、项目架构设计及各方协调，同时兼顾本地市场与您的长期目标。",
+    "financeTitle": "融资咨询",
+    "financeBody": "我们协助将融资需求转化为清晰、有依据的方案。针对房地产、企业及其他用途，我们探索适合的融资方式，支持前期准备及与潜在资金方的沟通。",
+    "cta": "与我们讨论您的计划",
+    "label": "咨询服务"
   }
 }

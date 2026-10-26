@@ -15,7 +15,8 @@
     "my_dashboard": "Mon tableau de bord",
     "menu": "Menu",
     "mobile_main_navigation": "Navigation principale mobile",
-    "about": "À propos"
+    "about": "À propos",
+    "consultancy": "Conseil"
   },
   "Footer": {
     "contact_short": "Contact",
@@ -53,7 +54,9 @@
     "capitalTitle": "Capital privé | MZS Capital",
     "capitalDescription": "MZS Capital explore des opportunités sélectionnées de financement privé, d’investissement et de partenariats stratégiques dans l’immobilier et les entreprises.",
     "aboutTitle": "À propos | MZS Group",
-    "aboutDescription": "Nos services portent sur le conseil, les projets immobiliers et le capital privé. Des contacts internationaux. Une connaissance locale."
+    "aboutDescription": "Nos services portent sur le conseil, les projets immobiliers et le capital privé. Des contacts internationaux. Une connaissance locale.",
+    "consultancyTitle": "Conseil | MZS Group",
+    "consultancyDescription": "Un projet clair commence par les bonnes questions. MZS Group associe expérience internationale et connaissance locale pour vous accompagner dans les structures juridiques et fiscales, les projets immobiliers et le financement."
   },
   "Estates": {
     "ownership_management": "Propriété et gestion",
@@ -1180,5 +1183,17 @@
     "spain": "En passant par l’Espagne",
     "dubai": "Aujourd’hui depuis Dubaï",
     "caption": "Une évocation artistique de notre parcours : Amsterdam, l’Espagne et Dubaï."
+  },
+  "Consultancy": {
+    "headline": "Avançons ensemble.",
+    "lead": "Un projet clair commence par les bonnes questions. MZS Group associe expérience internationale et connaissance locale pour vous accompagner dans les structures juridiques et fiscales, les projets immobiliers et le financement.",
+    "legalTitle": "Structures juridiques & fiscales",
+    "legalBody": "Nous vous accompagnons dans la structuration juridique et fiscale de vos activités, participations et investissements. Des modalités de détention aux enjeux internationaux, nous clarifions vos objectifs et facilitons la coordination avec les spécialistes concernés.",
+    "estateTitle": "Projets immobiliers",
+    "estateBody": "De l’idée initiale à la réalisation, nous vous aidons à orienter votre projet immobilier. Nous accompagnons l’évaluation des possibilités, la structuration et la coordination des parties, en tenant compte du marché local et de vos objectifs à long terme.",
+    "financeTitle": "Conseil en financement",
+    "financeBody": "Nous vous aidons à traduire vos besoins en un dossier clair et étayé. Pour l’immobilier, les entreprises et d’autres besoins, nous explorons les financements adaptés et accompagnons la préparation et les échanges avec les financeurs potentiels.",
+    "cta": "Parlons de votre projet",
+    "label": "Conseil"
   }
 }

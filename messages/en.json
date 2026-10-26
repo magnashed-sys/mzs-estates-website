@@ -111,7 +111,8 @@
     "my_dashboard": "My Dashboard",
     "menu": "Menu",
     "mobile_main_navigation": "Mobile main navigation",
-    "about": "About us"
+    "about": "About us",
+    "consultancy": "Consultancy"
   },
   "Footer": {
     "contact_short": "Contact",
@@ -189,7 +190,9 @@
     "capitalTitle": "Private Capital | MZS Capital",
     "capitalDescription": "MZS Capital explores select private financing, investment and strategic partnership opportunities across real estate and businesses.",
     "aboutTitle": "About us | MZS Group",
-    "aboutDescription": "Our services focus on advisory, real estate projects and private capital. International connections. Local market knowledge."
+    "aboutDescription": "Our services focus on advisory, real estate projects and private capital. International connections. Local market knowledge.",
+    "consultancyTitle": "Consultancy | MZS Group",
+    "consultancyDescription": "A clear plan starts with the right questions. MZS Group combines international experience with local market knowledge to guide you through legal and tax structures, real estate projects and financing matters."
   },
   "Login": {
     "private_access": "Private Access",
@@ -1180,5 +1183,17 @@
     "spain": "Via Spain",
     "dubai": "Based in Dubai today",
     "caption": "An artistic impression of our journey: Amsterdam, Spain and Dubai."
+  },
+  "Consultancy": {
+    "headline": "The next step, together.",
+    "lead": "A clear plan starts with the right questions. MZS Group combines international experience with local market knowledge to guide you through legal and tax structures, real estate projects and financing matters.",
+    "legalTitle": "Legal & tax structures",
+    "legalBody": "We help shape the legal and tax structure of your activities, participations and investments. From ownership arrangements to international considerations, we clarify your objectives and help coordinate decisions with the specialists involved.",
+    "estateTitle": "Real estate projects",
+    "estateBody": "From initial idea to implementation, we help give direction to your property project. We support opportunity assessment, project structuring and coordination between parties, with attention to the local market and your long-term goals.",
+    "financeTitle": "Financing advisory",
+    "financeBody": "We help translate your financing needs into a clear, substantiated proposal. For real estate, businesses and other purposes, we explore suitable financing structures and support preparation and discussions with potential funders.",
+    "cta": "Discuss your plans",
+    "label": "Consultancy"
   }
 }

@@ -5,13 +5,13 @@ export function introCallsEnvironmentAllowed() {
     (env === "preview" && url === "https://senonkpxdtlhyhrubicg.supabase.co");
 }
 
-export type IntroCallInput = { requestKey: string; name: string; email: string; phone: string; message: string; source: "private-capital" | "real-estate" };
+export type IntroCallInput = { requestKey: string; name: string; email: string; phone: string; message: string; source: "private-capital" | "real-estate" | "consultancy" };
 export function parseIntroCall(value: unknown): IntroCallInput | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const input = value as Record<string, unknown>;
   if (typeof input.requestKey !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.requestKey)) return null;
   const source = input.source ?? "private-capital";
-  if (source !== "private-capital" && source !== "real-estate") return null;
+  if (source !== "private-capital" && source !== "real-estate" && source !== "consultancy") return null;
   const clean = (v: unknown, limit: number, optional = false) => {
     if (optional && (v === undefined || v === "")) return "";
     if (typeof v !== "string" || v.length > limit || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(v)) return null;

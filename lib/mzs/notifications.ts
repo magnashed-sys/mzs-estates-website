@@ -217,7 +217,7 @@ function template(event: EventRow, recipientName: string) {
     link = site + "/admin/owner-stays";
     linkTitle = "REVIEW OWNER STAY";
   } else if (event.event_type === "intro_call_requested") {
-    subject = "New introductory call request | " + (event.payload?.source === "real-estate" ? "MZS Estates" : "MZS Capital");
+    subject = "New introductory call request | " + (event.payload?.source === "consultancy" ? "MZS Consultancy" : event.payload?.source === "real-estate" ? "MZS Estates" : "MZS Capital");
     headline = "A new conversation starts here.";
     intro = "A visitor has requested an introductory call without creating an account. Please review their contact details and arrange a convenient time.";
     plain = intro + " Reference: " + str(event.payload.request_id);

@@ -111,7 +111,8 @@
     "my_dashboard": "Mój panel",
     "menu": "Menu",
     "mobile_main_navigation": "Główna nawigacja mobilna",
-    "about": "O nas"
+    "about": "O nas",
+    "consultancy": "Doradztwo"
   },
   "Footer": {
     "contact_short": "Kontakt",
@@ -189,7 +190,9 @@
     "capitalTitle": "Kapitał prywatny | MZS Capital",
     "capitalDescription": "MZS Capital bada możliwości finansowania prywatnego, inwestycyjnego i strategicznego partnerstwa między nieruchomościami i przedsiębiorstwami.",
     "aboutTitle": "O nas | MZS Group",
-    "aboutDescription": "Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny. Międzynarodowe kontakty. Znajomość lokalnych rynków."
+    "aboutDescription": "Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny. Międzynarodowe kontakty. Znajomość lokalnych rynków.",
+    "consultancyTitle": "Doradztwo | MZS Group",
+    "consultancyDescription": "Jasny plan zaczyna się od właściwych pytań. MZS Group łączy międzynarodowe doświadczenie ze znajomością lokalnych rynków, wspierając w strukturach prawnych i podatkowych, projektach nieruchomościowych oraz finansowaniu."
   },
   "Login": {
     "private_access": "Dostęp prywatny",
@@ -1180,5 +1183,17 @@
     "spain": "Przez Hiszpanię",
     "dubai": "Dziś z Dubaju",
     "caption": "Artystyczna wizja naszej drogi: Amsterdam, Hiszpania i Dubaj."
+  },
+  "Consultancy": {
+    "headline": "Kolejny krok, razem.",
+    "lead": "Jasny plan zaczyna się od właściwych pytań. MZS Group łączy międzynarodowe doświadczenie ze znajomością lokalnych rynków, wspierając w strukturach prawnych i podatkowych, projektach nieruchomościowych oraz finansowaniu.",
+    "legalTitle": "Struktury prawne i podatkowe",
+    "legalBody": "Pomagamy kształtować strukturę prawną i podatkową działalności, udziałów i inwestycji. Od własności po kwestie międzynarodowe – określamy cele i wspieramy uzgadnianie decyzji z zaangażowanymi specjalistami.",
+    "estateTitle": "Projekty nieruchomościowe",
+    "estateBody": "Od pomysłu do realizacji pomagamy nadać kierunek projektowi nieruchomościowemu. Wspieramy ocenę możliwości, strukturę projektu i koordynację stron, uwzględniając lokalny rynek i długoterminowe cele.",
+    "financeTitle": "Doradztwo w finansowaniu",
+    "financeBody": "Pomagamy przekształcić potrzeby finansowe w jasną, uzasadnioną propozycję. Dla nieruchomości, firm i innych celów analizujemy odpowiednie formy finansowania oraz wspieramy przygotowania i rozmowy z potencjalnymi finansującymi.",
+    "cta": "Porozmawiajmy o planach",
+    "label": "Doradztwo"
   }
 }

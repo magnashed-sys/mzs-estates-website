@@ -111,7 +111,8 @@
     "my_dashboard": "Panoul meu",
     "menu": "Meniu",
     "mobile_main_navigation": "Navigare principală pe mobil",
-    "about": "Despre noi"
+    "about": "Despre noi",
+    "consultancy": "Consultanță"
   },
   "Footer": {
     "contact_short": "Contact",
@@ -189,7 +190,9 @@
     "capitalTitle": "Capital privat | MZS Capital",
     "capitalDescription": "MZS Capital explorează posibilităţile de finanţare privată, de investiţii şi de parteneriat strategic între imobiliare şi întreprinderi.",
     "aboutTitle": "Despre noi | MZS Group",
-    "aboutDescription": "Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat. Contacte internaționale. Cunoașterea piețelor locale."
+    "aboutDescription": "Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat. Contacte internaționale. Cunoașterea piețelor locale.",
+    "consultancyTitle": "Consultanță | MZS Group",
+    "consultancyDescription": "Un plan clar începe cu întrebările potrivite. MZS Group combină experiența internațională cu cunoașterea piețelor locale și vă îndrumă în structuri juridice și fiscale, proiecte imobiliare și finanțare."
   },
   "Login": {
     "private_access": "Acces privat",
@@ -1180,5 +1183,17 @@
     "spain": "Prin Spania",
     "dubai": "Astăzi din Dubai",
     "caption": "O interpretare artistică a parcursului nostru: Amsterdam, Spania și Dubai."
+  },
+  "Consultancy": {
+    "headline": "Următorul pas, împreună.",
+    "lead": "Un plan clar începe cu întrebările potrivite. MZS Group combină experiența internațională cu cunoașterea piețelor locale și vă îndrumă în structuri juridice și fiscale, proiecte imobiliare și finanțare.",
+    "legalTitle": "Structuri juridice și fiscale",
+    "legalBody": "Vă sprijinim în structurarea juridică și fiscală a activităților, participațiilor și investițiilor. De la proprietate la aspecte internaționale, clarificăm obiectivele și ajutăm la coordonarea deciziilor cu specialiștii implicați.",
+    "estateTitle": "Proiecte imobiliare",
+    "estateBody": "De la ideea inițială la implementare, vă ajutăm să definiți direcția proiectului. Sprijinim evaluarea oportunităților, structurarea și coordonarea părților, ținând cont de piața locală și obiectivele pe termen lung.",
+    "financeTitle": "Consultanță în finanțare",
+    "financeBody": "Vă ajutăm să transformați nevoile de finanțare într-o propunere clară și fundamentată. Pentru imobiliare, companii și alte scopuri, explorăm forme adecvate de finanțare și sprijinim pregătirea și discuțiile cu potențiali finanțatori.",
+    "cta": "Să discutăm planurile dumneavoastră",
+    "label": "Consultanță"
   }
 }
