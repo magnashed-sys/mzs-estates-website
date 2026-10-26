@@ -17,6 +17,7 @@ const spainLabels: Record<string, string> = {
   ru: "ИСПАНИЯ",
   "pt-BR": "ESPANHA",
   ar: "إسبانيا",
+  lt: "ISPANIJA",
 };
 
 const uaeLabels: Record<string, string> = {
@@ -29,6 +30,7 @@ const uaeLabels: Record<string, string> = {
   ru: "ОАЭ",
   "pt-BR": "EAU",
   ar: "الإمارات العربية المتحدة",
+  lt: "JAE",
 };
 
 export default function HomeContactFooter({ email }: Props) {
