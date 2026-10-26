@@ -231,9 +231,9 @@ const copy = {
   lt: {
     member: 'kliente', dear: 'Gerb.', access: 'PRIVATI PRIEIGA',
     confidential: 'Šis asmeninis pranešimas skirtas tik nurodytam gavėjui. Nepersiųskite su paskyros saugumu susijusių pranešimų.',
-    motto: 'PRIVATU · NEPRIKLAUSOMA · TARPTAUTINĖ VEIKLA', invitation: 'TIK SU KVIETIMU',
+    motto: 'PRIVATUMAS · NEPRIKLAUSOMYBĖ · TARPTAUTIŠKUMAS', invitation: 'TIK SU KVIETIMU',
     projects: 'Jums priskirti projektai', login: 'PRISIJUNGTI PRIVAČIAI',
-    collection: 'PERŽIŪRĖTI MANO KOLEKCIJĄ', capital: 'ATVERTI PRIVATE CAPITAL',
+    collection: 'PERŽIŪRĖTI MANO KOLEKCIJĄ', capital: 'PERŽIŪRĖTI PRIVATŲ KAPITALĄ',
     account_activated: [
       'Jūsų MZS Group paskyra aktyvuota',
       'Sveiki atvykę į savo privačią kolekciją.',
@@ -245,9 +245,9 @@ const copy = {
       'Jūsų MZS Group paskyrai suteikta papildoma prieiga prie privačių projektų.'
     ],
     capital_access_granted: [
-      'Jūsų prieiga prie Private Capital | MZS Group',
+      'Jūsų prieiga prie privataus kapitalo | MZS Group',
       'Jūsų privatus dokumentų rinkinys pasiekiamas.',
-      'Jūsų MZS Group paskyrai suteikta prieiga prie Private Capital dokumentų rinkinio. Saugiai prisijunkite ir peržiūrėkite savo informaciją.'
+      'Jūsų MZS Group paskyrai suteikta prieiga prie privataus kapitalo dokumentų rinkinio. Saugiai prisijunkite ir peržiūrėkite savo informaciją.'
     ],
     types: {
       investment: 'Investicija', financing: 'Finansavimas',

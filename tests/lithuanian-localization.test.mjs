@@ -65,6 +65,33 @@ test('Critical Lithuanian actions, security and booking labels have actual trans
   assert.ok(t('ProjectUI.minimumStay',{count:n}).length>5);
  assert.deepEqual(errors,[]);
 });
+
+test('Lithuanian overnight quantities use native one, few, other and fractional forms',()=>{
+ const t=createTranslator({locale:'lt',messages:lt});
+ for(const [count,ending] of [[0,'naktų'],[1,'naktis'],[2,'naktys'],[9,'naktys'],[11,'naktų'],[21,'naktis'],[22,'naktys'],[100,'naktų'],[1.5,'nakties']]) {
+  const value=t('ProjectUI.minimumStay',{count});
+  assert.ok(value.endsWith(ending+'.'),value);
+ }
+ assert.match(t('ProjectUI.nightlyCalculation',{count:2,price:'300,50 €'}),/2 naktys × 300,50 €/);
+ assert.match(t('AccountUI.registration8'),/jau yra/);
+ assert.match(t('AccountUI.a083'),/8/);
+ assert.match(t('ProjectUI.requestReceived'),/dar nepatvirtinta/);
+});
+
+test('Lithuanian account notifications preserve private routes, escaped names and Capital confidentiality',()=>{
+ const exports={};
+ vm.runInNewContext(ts.transpileModule(read('lib/mzs/localized-account-mail.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports});
+ assert.equal(exports.isLocalizedAccountLocale('lt'),true);
+ const site='https://staging.example.invalid';
+ for(const [type,path] of [['account_activated','/lt/login'],['new_project_access','/private'],['capital_access_granted','/private/capital']]) {
+  const m=exports.localizedAccountMail({event_type:type,payload:{project:'<script>untrusted</script>',projects:['<script>untrusted</script>'],added_types:['rental'],amount:987654321,borrower:'CONFIDENTIAL-BORROWER'}},'<img onerror=x>','lt',site);
+  assert.match(m.html,/<html lang="lt" dir="ltr">/);
+  assert.ok(m.html.includes(`href="${site}${path}"`));
+  assert.doesNotMatch(m.html,/<script>|<img/);
+  assert.doesNotMatch(m.html,/987654321|CONFIDENTIAL-BORROWER/);
+  if(type==='capital_access_granted')assert.doesNotMatch(m.html,/untrusted/);
+ }
+});
 test('Lithuanian booking messages include financial and date formatting without changing records',()=>{
  const copy=JSON.parse(read('lib/mzs/rental-mail-copy.json'));
  assert.deepEqual(Object.keys(copy.lt).sort(),Object.keys(copy.tr).sort());
