@@ -49,6 +49,12 @@ export async function createBookingInvoiceDraft(formData:FormData){
  ]);
  const booking=rows?.[0];const user=userRes.data.user;
  if(bookingError||rows?.length!==1||!booking||booking.status!=="confirmed"||Number(booking.quoted_total_eur)<=0||!issuer||issuerError||existing||!user)throw new Error("Confirmed chargeable booking, issuer and unused draft required.");
+ const {data:historical,error:historicalError}=await db.from("mzs_booking_legacy_sources")
+  .select("invoice_recipient_name,invoice_issuer_id,invoice_recipient_kind").eq("booking_id",bookingId).maybeSingle();
+ if(historicalError)throw new Error("Historic billing source could not be verified.");
+ if(historical&&(issuerId!==historical.invoice_issuer_id||recipient!==historical.invoice_recipient_name)){
+  throw new Error("Historic reservation must use the issuing entity and invoice recipient approved in the original confirmation.");
+ }
  const owner=await db.from("mzs_owner_stay_requests").select("id").eq("booking_id",bookingId).maybeSingle();
  if(owner.error||owner.data)throw new Error("Complimentary owner stays cannot be invoiced.");
  const gross=Math.round(Number(booking.quoted_total_eur)*100);
