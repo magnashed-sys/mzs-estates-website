@@ -39,11 +39,11 @@ test("Each cockpit has distinct specialist sources; no eager all-department read
   assert.match(s,/role="alert"/);
  }
 });
-test("Workspaces link to existing guarded modules and preserve legacy admin access",()=>{
+test("Workspaces link to existing guarded modules and preserve access to account requests",()=>{
  const layout=read(base+"layout.tsx");
  const nav=read(base+"WorkspaceNavigation.tsx");
  const legacy=read("app/admin/page.tsx");
- assert.match(layout,/href="\/admin"/);
+ assert.match(layout,/href="\/admin\?tab=relationships"/);
  assert.match(legacy,/href="\/admin\/workspaces\/group"/);
  for(const route of ["/admin/workspaces/group","/admin/bookings","/admin/workspaces/estates","/admin/workspaces/capital","/admin/workspaces/relationships"])
   assert.ok(nav.includes(route),route);
