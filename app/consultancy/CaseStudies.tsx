@@ -3,6 +3,12 @@ import {getLocale} from 'next-intl/server';
 import styles from './CaseStudies.module.css';
 
 const captions: Record<string, readonly string[]> = {
+"nb":["Utvikling", "Transformasjon", "Kjøp", "Eiendom med flere leietakere", "Småbåthavn", "Eiendom med flere enheter", "Nederland", "Spania"],
+"sv":["Utveckling", "Omvandling", "Förvärv", "Fastighet med flera hyresgäster", "Småbåtshamn", "Fastighet med flera enheter", "Nederländerna", "Spanien"],
+"pl":["Realizacja", "Przekształcenie", "Zakup", "Nieruchomość z wieloma najemcami", "Marina", "Nieruchomość wielolokalowa", "Holandia", "Hiszpania"],
+"ro":["Dezvoltare", "Transformare", "Achiziție", "Imobil cu mai mulți chiriași", "Port de agrement", "Imobil cu mai multe unități", "Țările de Jos", "Spania"],
+"zh":["开发", "改造", "收购", "多租户物业", "游艇码头", "多单元物业", "荷兰", "西班牙"],
+
  nl: ['Ontwikkeling', 'Transformatie', 'Aankoop', 'Multi-tenant vastgoed', 'Jachthaven', 'Multi-unit vastgoed', 'Nederland', 'Spanje'],
  en: ['Development', 'Transformation', 'Acquisition', 'Multi-tenant property', 'Marina', 'Multi-unit property', 'The Netherlands', 'Spain'],
  es: ['Desarrollo', 'Transformación', 'Adquisición', 'Inmueble multiinquilino', 'Puerto deportivo', 'Inmueble de varias unidades', 'Países Bajos', 'España'],
@@ -15,9 +21,21 @@ const captions: Record<string, readonly string[]> = {
  tr: ['Geliştirme', 'Dönüşüm', 'Satın alma', 'Çok kiracılı gayrimenkul', 'Marina', 'Çok birimli gayrimenkul', 'Hollanda', 'İspanya'],
  lt: ['Plėtra', 'Pertvarkymas', 'Įsigijimas', 'Kelių nuomininkų turtas', 'Jachtų prieplauka', 'Kelių vienetų turtas', 'Nyderlandai', 'Ispanija'],
 };
-const units: Record<string,string> = {nl:'units',en:'units',es:'unidades',de:'Einheiten',fr:'unités',it:'unità',pt:'unidades',ru:'объектов',ar:'وحدة',tr:'birim',lt:'vienetų'};
+const units: Record<string,string> = {
+"nb":"enheter",
+"sv":"enheter",
+"pl":"lokali",
+"ro":"unități",
+"zh":"个单元",
+nl:'units',en:'units',es:'unidades',de:'Einheiten',fr:'unités',it:'unità',pt:'unidades',ru:'объектов',ar:'وحدة',tr:'birim',lt:'vienetų'};
 
 const financing: Record<string,string> = {
+"nb":"Finansiering · Oppføring av næringsbygg",
+"sv":"Finansiering · Uppförande av företagscenter",
+"pl":"Finansowanie · Budowa centrum biznesowego",
+"ro":"Finanțare · Construcția unui centru de afaceri",
+"zh":"融资 · 商业综合楼建设",
+
  nl:'Financiering · Realisatie bedrijfsverzamelgebouw',
  en:'Financing · Business centre construction',
  es:'Financiación · Construcción de centro empresarial',
@@ -31,6 +49,12 @@ const financing: Record<string,string> = {
  lt:'Finansavimas · Verslo centro statyba',
 };
 const introductions: Record<string,string> = {
+"nb":"Dette er et utvalg av prosjektene våre. I en personlig samtale presenterer vi gjerne flere prosjekter som passer dine interesser og planer.",
+"sv":"Detta är ett urval av våra projekt. Vid ett personligt samtal berättar vi gärna om fler projekt som passar dina intressen och planer.",
+"pl":"To wybrane przykłady naszych projektów. Podczas osobistej rozmowy chętnie przedstawimy kolejne projekty odpowiadające Państwa zainteresowaniom i planom.",
+"ro":"Aceasta este o selecție a proiectelor noastre. În cadrul unei discuții personale, vă prezentăm cu plăcere alte proiecte relevante pentru interesele și planurile dumneavoastră.",
+"zh":"这里展示了我们的部分项目。我们很乐意在私人会谈中介绍更多符合您兴趣和计划的项目。",
+
   "nl": "Dit is een selectie van onze projecten. Tijdens een persoonlijk gesprek lichten we graag meer projecten toe die aansluiten bij uw interesses en plannen.",
   "en": "These are a selection of our projects. We would be pleased to discuss further projects relevant to your interests and plans in a personal conversation.",
   "es": "Esta es una selección de nuestros proyectos. En una conversación personal, estaremos encantados de presentar otros proyectos relacionados con sus intereses y planes.",
@@ -44,7 +68,13 @@ const introductions: Record<string,string> = {
   "lt": "Tai tik dalis mūsų projektų. Asmeninio pokalbio metu mielai pristatysime daugiau projektų, atitinkančių jūsų interesus ir planus."
 };
 
-const management: Record<string,string> = {"nl":"Vastgoedbeheer en exploitatie","en":"Property management and operations","es":"Gestión y explotación inmobiliaria","de":"Immobilienverwaltung und Bewirtschaftung","fr":"Gestion et exploitation immobilières","it":"Gestione e valorizzazione immobiliare","pt":"Gestão e exploração imobiliária","ru":"Управление и эксплуатация недвижимости","ar":"إدارة وتشغيل العقارات","tr":"Gayrimenkul yönetimi ve işletmesi","lt":"Nekilnojamojo turto valdymas ir eksploatavimas"};
+const management: Record<string,string> = {
+"nb":"Eiendomsforvaltning og drift",
+"sv":"Fastighetsförvaltning och drift",
+"pl":"Zarządzanie i eksploatacja nieruchomości",
+"ro":"Administrare și exploatare imobiliară",
+"zh":"物业管理与运营",
+"nl":"Vastgoedbeheer en exploitatie","en":"Property management and operations","es":"Gestión y explotación inmobiliaria","de":"Immobilienverwaltung und Bewirtschaftung","fr":"Gestion et exploitation immobilières","it":"Gestione e valorizzazione immobiliare","pt":"Gestão e exploração imobiliária","ru":"Управление и эксплуатация недвижимости","ar":"إدارة وتشغيل العقارات","tr":"Gayrimenkul yönetimi ve işletmesi","lt":"Nekilnojamojo turto valdymas ir eksploatavimas"};
 
 export default async function CaseStudies({sectionNumber = '04'}: {sectionNumber?: string}) {
  const locale = (await getLocale()).split('-')[0];
@@ -67,3 +97,4 @@ export default async function CaseStudies({sectionNumber = '04'}: {sectionNumber
   </figure>)}</div>
  </section>;
 }
+
