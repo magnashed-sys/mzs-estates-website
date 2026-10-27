@@ -389,7 +389,10 @@ export default function AdminPage() {
     setTab(next); setSearch(""); setLimit(pageSize); setNotice("");
   }
   function openRequests(next: RequestFilter) { navigate("relationships"); setRelationshipView("requests"); setFilter(next); }
-  function openBookings(section: "bookings" | "cancellations") { navigate("bookings"); setBookingEntry(section); }
+  function openBookings(section: "bookings" | "cancellations") {
+    if (locked || actionLock.current) return;
+    router.push("/admin/bookings/operations" + (section === "cancellations" ? "?view=cancellations" : ""));
+  }
 
   async function runAction(key: string, action: () => Promise<string>) {
     if (actionLock.current || locked) return;
