@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group è un gruppo immobiliare e di investimento internazionale indipendente che offre a clienti e partner selezionati accesso a opportunità private in Europa e negli Emirati Arabi Uniti.",
+    "mzs_group_is_an_independent_international": "Consulenza indipendente, progetti immobiliari e capitale privato in Europa e negli Emirati Arabi Uniti. Esperienza internazionale e conoscenza locale.",
     "sloganPrivate": "Riservato.",
     "sloganIndependent": "Indipendente.",
     "sloganInternational": "Internazionale."
@@ -47,16 +47,16 @@
     "failed": "Al momento non è possibile accedere. Riprova."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Immobili e investimenti privati",
-    "homeDescription": "MZS Group è un gruppo immobiliare e di investimento internazionale indipendente che mette in contatto clienti e partner selezionati con opportunità private in Europa e negli Emirati Arabi Uniti.",
-    "estatesTitle": "Immobili | MZS Estates",
+    "homeTitle": "Consulenza, immobili e capitale privato | MZS Group",
+    "homeDescription": "Consulenza indipendente, progetti immobiliari e capitale privato in Europa e negli Emirati Arabi Uniti. Esperienza internazionale e conoscenza locale.",
+    "estatesTitle": "Proprietà, locazione e sviluppo immobiliare | MZS Estates",
     "estatesDescription": "Scopri le attività immobiliari internazionali indipendenti di MZS Estates: proprietà, locazioni private, vendite e sviluppo.",
     "capitalTitle": "Capitale privato | MZS Capital",
     "capitalDescription": "MZS Capital esplora opportunità selezionate di finanziamento privato, investimento e partnership strategiche nel settore immobiliare e nelle imprese.",
     "aboutTitle": "Informazioni su MZS | MZS Group",
     "aboutDescription": "I nostri servizi si concentrano sulla consulenza, sui progetti immobiliari e sul capitale privato. Contatti internazionali. Conoscenza locale.",
-    "consultancyTitle": "Consulenza | MZS Group",
-    "consultancyDescription": "Un piano chiaro inizia dalle domande giuste. MZS Group unisce esperienza internazionale e conoscenza locale per accompagnarvi nelle strutture legali e fiscali, nei progetti immobiliari e nel finanziamento."
+    "consultancyTitle": "Consulenza immobiliare e finanziamenti | MZS Group",
+    "consultancyDescription": "Consulenza su strutture legali e fiscali, progetti immobiliari e finanziamenti. Esperienza internazionale e conoscenza dei mercati locali."
   },
   "Estates": {
     "ownership_management": "Proprietà e gestione",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "Informazioni su MZS",
     "headline": "Contatti internazionali. Conoscenza locale.",
-    "body": "Il nostro percorso imprenditoriale è iniziato nel 1990 nel commercio vicino ad Amsterdam. Passando per la Spagna, ci ha portati a Dubai, da dove operiamo oggi. Attraverso partecipazioni in diverse aziende locali, uniamo 36 anni di esperienza a contatti internazionali e alla conoscenza dei mercati locali. I nostri servizi si concentrano sulla consulenza, sui progetti immobiliari e sul capitale privato.",
+    "body": "Il nostro percorso imprenditoriale è iniziato nel 1990 nel commercio vicino ad Amsterdam. Passando per la Spagna, ci ha portati a Dubai, da dove operiamo oggi. Attraverso partecipazioni in diverse aziende locali, uniamo l’esperienza maturata dal 1990 a contatti internazionali e alla conoscenza dei mercati locali. I nostri servizi si concentrano sulla consulenza, sui progetti immobiliari e sul capitale privato.",
     "amsterdam": "Le origini vicino ad Amsterdam",
     "spain": "Passando per la Spagna",
     "dubai": "Oggi da Dubai",

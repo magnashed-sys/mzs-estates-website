@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group är en oberoende internationell fastighets- och investeringsgrupp som ger utvalda kunder och partner tillgång till privata möjligheter i Europa och Förenade Arabemiraten.",
+    "mzs_group_is_an_independent_international": "Oberoende rådgivning, fastighetsprojekt och privat kapital i Europa och Förenade Arabemiraten. Internationell erfarenhet och lokal marknadskännedom.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Oberoende.",
     "sloganInternational": "Internationell."
@@ -183,16 +183,16 @@
     "save_failed": "Det gick inte att spara ditt språk. Försök igen."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Privata fastigheter och investeringar",
-    "homeDescription": "MZS Group är en oberoende internationell fastighets- och investeringsgrupp som förbinder utvalda kunder och partner med privata möjligheter i Europa och Förenade Arabemiraten.",
-    "estatesTitle": "Fastigheter | MZS Estates",
+    "homeTitle": "Rådgivning, fastigheter och privat kapital | MZS Group",
+    "homeDescription": "Oberoende rådgivning, fastighetsprojekt och privat kapital i Europa och Förenade Arabemiraten. Internationell erfarenhet och lokal marknadskännedom.",
+    "estatesTitle": "Fastighetsägande, uthyrning och utveckling | MZS Estates",
     "estatesDescription": "Upptäck den oberoende internationella fastighetsverksamheten i MZS Estates: fastighetsägande, privata uthyrningar, försäljning och utveckling.",
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag.",
     "aboutTitle": "Om MZS | MZS Group",
     "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom.",
-    "consultancyTitle": "Rådgivning | MZS Group",
-    "consultancyDescription": "En tydlig plan börjar med rätt frågor. MZS Group förenar internationell erfarenhet med lokal marknadskännedom och vägleder dig inom juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering."
+    "consultancyTitle": "Fastighets- och finansieringsrådgivning | MZS Group",
+    "consultancyDescription": "Rådgivning om juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering. Internationell erfarenhet och lokal marknadskännedom."
   },
   "Login": {
     "private_access": "Privat åtkomst",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "Om MZS",
     "headline": "Internationella kontakter. Lokal marknadskännedom.",
-    "body": "Vår företagarresa började 1990 med handel nära Amsterdam. Via Spanien ledde vägen oss till Dubai, där vi verkar i dag. Genom ägarandelar i olika lokala företag kombinerar vi 36 års erfarenhet med internationella kontakter och lokal marknadskännedom. Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital.",
+    "body": "Vår företagarresa började 1990 med handel nära Amsterdam. Via Spanien ledde vägen oss till Dubai, där vi verkar i dag. Genom ägarandelar i olika lokala företag kombinerar vi erfarenhet sedan 1990 med internationella kontakter och lokal marknadskännedom. Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital.",
     "amsterdam": "Rötter nära Amsterdam",
     "spain": "Via Spanien",
     "dubai": "I dag från Dubai",

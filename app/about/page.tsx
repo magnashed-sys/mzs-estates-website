@@ -11,11 +11,7 @@ import HomeContactFooter from '../components/HomeContactFooter';
 import {publicMetadata} from '../../i18n/metadata';
 import styles from './page.module.css';
 
-export async function generateMetadata() {
-  const metadata = await publicMetadata('about', '/about');
-  return {...metadata, openGraph: {...metadata.openGraph, images: ['/images/about-journey.png']},
-    twitter: {...metadata.twitter, images: ['/images/about-journey.png']}};
-}
+export const generateMetadata = () => publicMetadata('about', '/about');
 
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);

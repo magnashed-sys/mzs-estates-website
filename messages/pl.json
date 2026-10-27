@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group to niezależna międzynarodowa grupa działająca w sektorze nieruchomości i inwestycji, oferująca wybranym klientom i partnerom dostęp do prywatnych możliwości w Europie i Zjednoczonych Emiratach Arabskich.",
+    "mzs_group_is_an_independent_international": "Niezależne doradztwo, projekty nieruchomości i kapitał prywatny w Europie oraz Zjednoczonych Emiratach Arabskich. Międzynarodowe doświadczenie i lokalna wiedza.",
     "sloganPrivate": "Prywatność.",
     "sloganIndependent": "Niezależność.",
     "sloganInternational": "Międzynarodowy zasięg."
@@ -183,16 +183,16 @@
     "save_failed": "Nie udało się zapisać języka. Spróbuj ponownie."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Prywatne nieruchomości i inwestycje",
-    "homeDescription": "MZS Group jest niezależną międzynarodową grupą nieruchomości i inwestycji, łączącą wybranych klientów i partnerów z możliwościami prywatnymi w Europie i w ZEA.",
-    "estatesTitle": "Nieruchomości | MZS Estates",
+    "homeTitle": "Doradztwo, nieruchomości i kapitał prywatny | MZS Group",
+    "homeDescription": "Niezależne doradztwo, projekty nieruchomości i kapitał prywatny w Europie oraz Zjednoczonych Emiratach Arabskich. Międzynarodowe doświadczenie i lokalna wiedza.",
+    "estatesTitle": "Nieruchomości: własność, wynajem i rozwój | MZS Estates",
     "estatesDescription": "Odkryj niezależną działalność międzynarodową nieruchomości MZS Estates: własność własności, prywatne wynajem, sprzedaż i rozwój.",
     "capitalTitle": "Kapitał prywatny | MZS Capital",
     "capitalDescription": "MZS Capital bada możliwości finansowania prywatnego, inwestycyjnego i strategicznego partnerstwa między nieruchomościami i przedsiębiorstwami.",
     "aboutTitle": "O MZS | MZS Group",
     "aboutDescription": "Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny. Międzynarodowe kontakty. Znajomość lokalnych rynków.",
-    "consultancyTitle": "Doradztwo | MZS Group",
-    "consultancyDescription": "Jasny plan zaczyna się od właściwych pytań. MZS Group łączy międzynarodowe doświadczenie ze znajomością lokalnych rynków, wspierając w strukturach prawnych i podatkowych, projektach nieruchomościowych oraz finansowaniu."
+    "consultancyTitle": "Doradztwo nieruchomościowe i finansowanie | MZS Group",
+    "consultancyDescription": "Doradztwo w zakresie struktur prawnych i podatkowych, projektów nieruchomości i finansowania. Międzynarodowe doświadczenie i znajomość lokalnych rynków."
   },
   "Login": {
     "private_access": "Dostęp prywatny",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "O MZS",
     "headline": "Międzynarodowe kontakty. Znajomość lokalnych rynków.",
-    "body": "Nasza historia przedsiębiorczości rozpoczęła się w 1990 roku od handlu w pobliżu Amsterdamu. Przez Hiszpanię dotarliśmy do Dubaju, skąd dziś działamy. Dzięki udziałom w różnych lokalnych firmach łączymy 36 lat doświadczenia z międzynarodowymi kontaktami i znajomością lokalnych rynków. Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny.",
+    "body": "Nasza historia przedsiębiorczości rozpoczęła się w 1990 roku od handlu w pobliżu Amsterdamu. Przez Hiszpanię dotarliśmy do Dubaju, skąd dziś działamy. Dzięki udziałom w różnych lokalnych firmach łączymy doświadczenie zdobywane od 1990 roku z międzynarodowymi kontaktami i znajomością lokalnych rynków. Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny.",
     "amsterdam": "Początki w pobliżu Amsterdamu",
     "spain": "Przez Hiszpanię",
     "dubai": "Dziś z Dubaju",

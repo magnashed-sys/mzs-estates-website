@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group, Avrupa ve Birleşik Arap Emirlikleri'ndeki özel fırsatlara seçkin müşterilerinin ve iş ortaklarının erişimini sağlayan, bağımsız ve uluslararası bir gayrimenkul ve yatırım grubudur.",
+    "mzs_group_is_an_independent_international": "Avrupa ve Birleşik Arap Emirlikleri'nde bağımsız danışmanlık, gayrimenkul projeleri ve özel sermaye. Uluslararası deneyim ve yerel pazar bilgisi.",
     "sloganPrivate": "Özel.",
     "sloganIndependent": "Bağımsız.",
     "sloganInternational": "Uluslararası."
@@ -183,16 +183,16 @@
     "save_failed": "Dil tercihiniz kaydedilemedi. Lütfen tekrar deneyin."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Özel Gayrimenkul ve Yatırımlar",
-    "homeDescription": "MZS Group, Avrupa ve BAE'deki özel fırsatları seçilmiş müşteriler ve iş ortaklarıyla buluşturan bağımsız, uluslararası bir gayrimenkul ve yatırım grubudur.",
-    "estatesTitle": "Gayrimenkul | MZS Estates",
+    "homeTitle": "Danışmanlık, gayrimenkul ve özel sermaye | MZS Group",
+    "homeDescription": "Avrupa ve Birleşik Arap Emirlikleri'nde bağımsız danışmanlık, gayrimenkul projeleri ve özel sermaye. Uluslararası deneyim ve yerel pazar bilgisi.",
+    "estatesTitle": "Gayrimenkul sahipliği, kiralama ve geliştirme | MZS Estates",
     "estatesDescription": "MZS Estates'in bağımsız uluslararası gayrimenkul faaliyetlerini keşfedin: mülkiyet, özel kiralama, satış ve geliştirme.",
     "capitalTitle": "Özel Sermaye | MZS Capital",
     "capitalDescription": "MZS Capital, gayrimenkul ve işletmelerdeki seçilmiş özel finansman, yatırım ve stratejik ortaklık fırsatlarını değerlendirir.",
     "aboutTitle": "MZS Hakkında | MZS Group",
     "aboutDescription": "Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır. Uluslararası bağlantılar. Yerel pazar bilgisi.",
-    "consultancyTitle": "Danışmanlık | MZS Group",
-    "consultancyDescription": "Net bir plan doğru sorularla başlar. MZS Group, uluslararası deneyimi yerel pazar bilgisiyle birleştirerek hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında size rehberlik eder."
+    "consultancyTitle": "Gayrimenkul ve finansman danışmanlığı | MZS Group",
+    "consultancyDescription": "Hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında danışmanlık. Uluslararası deneyim ve yerel pazar bilgisi."
   },
   "Login": {
     "private_access": "Özel Erişim",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "MZS Hakkında",
     "headline": "Uluslararası bağlantılar. Yerel pazar bilgisi.",
-    "body": "Girişimcilik yolculuğumuz 1990 yılında Amsterdam yakınlarında ticaretle başladı. İspanya üzerinden bugün faaliyetlerimizi yürüttüğümüz Dubai’ye uzandı. Çeşitli yerel şirketlerdeki ortaklıklarımız aracılığıyla 36 yıllık deneyimimizi uluslararası bağlantılar ve yerel pazar bilgisiyle birleştiriyoruz. Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır.",
+    "body": "Girişimcilik yolculuğumuz 1990 yılında Amsterdam yakınlarında ticaretle başladı. İspanya üzerinden bugün faaliyetlerimizi yürüttüğümüz Dubai’ye uzandı. Çeşitli yerel şirketlerdeki ortaklıklarımız aracılığıyla 1990 yılından bu yana edindiğimiz deneyimi uluslararası bağlantılar ve yerel pazar bilgisiyle birleştiriyoruz. Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır.",
     "amsterdam": "Amsterdam yakınlarında başlangıç",
     "spain": "İspanya üzerinden",
     "dubai": "Bugün Dubai’den",

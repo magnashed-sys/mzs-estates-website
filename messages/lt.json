@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group – nepriklausoma tarptautinė nekilnojamojo turto ir investicijų grupė, suteikianti atrinktiems klientams bei partneriams prieigą prie privačių galimybių Europoje ir JAE.",
+    "mzs_group_is_an_independent_international": "Nepriklausomos konsultacijos, NT projektai ir privatus kapitalas Europoje bei Jungtiniuose Arabų Emyratuose. Tarptautinė patirtis ir vietos rinkų išmanymas.",
     "sloganPrivate": "Privatumas.",
     "sloganIndependent": "Nepriklausomybė.",
     "sloganInternational": "Tarptautiškumas."
@@ -183,16 +183,16 @@
     "save_failed": "Nepavyko išsaugoti jūsų kalbos. Bandykite dar kartą."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Privatus nekilnojamasis turtas ir investicijos",
-    "homeDescription": "MZS Group – nepriklausoma tarptautinė nekilnojamojo turto ir investicijų grupė, sujungianti atrinktus klientus bei partnerius su privačiomis galimybėmis Europoje ir JAE.",
-    "estatesTitle": "Nekilnojamasis turtas | MZS Estates",
+    "homeTitle": "Konsultacijos, NT ir privatus kapitalas | MZS Group",
+    "homeDescription": "Nepriklausomos konsultacijos, NT projektai ir privatus kapitalas Europoje bei Jungtiniuose Arabų Emyratuose. Tarptautinė patirtis ir vietos rinkų išmanymas.",
+    "estatesTitle": "NT nuosavybė, nuoma ir plėtra | MZS Estates",
     "estatesDescription": "Susipažinkite su nepriklausoma tarptautine MZS Estates nekilnojamojo turto veikla: nuosavybe, privačia nuoma, pardavimu ir plėtra.",
     "capitalTitle": "Privatus kapitalas | MZS Capital",
     "capitalDescription": "MZS Capital nagrinėja atrinktas privataus finansavimo, investavimo ir strateginės partnerystės galimybes nekilnojamojo turto ir verslo srityse.",
     "aboutTitle": "Apie MZS | MZS Group",
     "aboutDescription": "Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą. Tarptautiniai ryšiai. Vietos rinkų išmanymas.",
-    "consultancyTitle": "Konsultacijos | MZS Group",
-    "consultancyDescription": "Aiškus planas prasideda nuo tinkamų klausimų. MZS Group derina tarptautinę patirtį su vietos rinkų išmanymu ir konsultuoja teisinių bei mokestinių struktūrų, nekilnojamojo turto projektų ir finansavimo klausimais."
+    "consultancyTitle": "NT ir finansavimo konsultacijos | MZS Group",
+    "consultancyDescription": "Konsultacijos teisinių ir mokestinių struktūrų, NT projektų bei finansavimo klausimais. Tarptautinė patirtis ir vietos rinkų išmanymas."
   },
   "Login": {
     "private_access": "Privati prieiga",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "Apie MZS",
     "headline": "Tarptautiniai ryšiai. Vietos rinkų išmanymas.",
-    "body": "Mūsų verslo istorija prasidėjo 1990 metais nuo prekybos netoli Amsterdamo. Per Ispaniją mūsų kelias atvedė į Dubajų, iš kur šiandien vykdome veiklą. Turėdami įvairių vietos įmonių akcijų, deriname 36 metų patirtį su tarptautiniais ryšiais ir vietos rinkų išmanymu. Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą.",
+    "body": "Mūsų verslo istorija prasidėjo 1990 metais nuo prekybos netoli Amsterdamo. Per Ispaniją mūsų kelias atvedė į Dubajų, iš kur šiandien vykdome veiklą. Turėdami įvairių vietos įmonių akcijų, deriname nuo 1990 metų sukauptą patirtį su tarptautiniais ryšiais ir vietos rinkų išmanymu. Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą.",
     "amsterdam": "Pradžia netoli Amsterdamo",
     "spain": "Per Ispaniją",
     "dubai": "Šiandien iš Dubajaus",
