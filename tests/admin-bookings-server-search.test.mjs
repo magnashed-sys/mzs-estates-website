@@ -7,12 +7,13 @@ const read=path=>readFileSync(new URL("../"+path,import.meta.url),"utf8");
 test("the central Bookings screen retrieves filtered, counted pages from the server",()=>{
  const source=read("app/admin/bookings/page.tsx");
  assert.match(source,/await requireEstateAdmin\(\)/);
- assert.match(source,/db\.rpc\("mzs_admin_bookings_search"/);
+ assert.match(source,/db\.rpc\("mzs_admin_bookings_search_v2"/);
  assert.match(source,/p_query:query/);
  assert.match(source,/p_year:year/);
  assert.match(source,/p_property:property/);
  assert.match(source,/p_offset:offset/);
  assert.match(source,/p_limit:pageSize/);
+ assert.match(source,/p_archive:archive/);
  assert.match(source,/method="GET"/);
  assert.match(source,/Apply filters/);
  assert.match(source,/of.*matching records/);
