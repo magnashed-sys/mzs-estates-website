@@ -9,6 +9,7 @@ import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import ProjectResources from "./ProjectResources";
 import PropertyWalkthrough from "./PropertyWalkthrough";
+import {nuciaVideoNotes} from "./nuciaVideoNotes";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
@@ -67,7 +68,7 @@ export default async function PrivateProjectPage({ params }: Props) {
   const privateT = await getTranslations("Private");
   const mapT = await getTranslations("MarinaMap");
   const locale = await getLocale();
-  const villaPhotoChapters = localizedPhotoChapters(t);
+  const villaPhotoChapters = localizedPhotoChapters(t, locale);
   const villaBase = "/properties/villa-la-nucia";
   const marinaBase = "/properties/marina-botafoch-apartment";
 
@@ -332,6 +333,31 @@ export default async function PrivateProjectPage({ params }: Props) {
             </section>
           )}
 
+          {slug === "villa-la-nucia" && (
+            <section id="villa-video" className={styles.marinaVideoSection} aria-labelledby="villa-video-heading">
+              <div className={styles.marinaVideoIntro}>
+                <p className={styles.kicker}>MZS GROUP / 4K</p>
+                <h2 id="villa-video-heading">Villa La Nucia</h2>
+              </div>
+              <div className={styles.marinaVideoPlayer}>
+                <iframe
+                  src="https://www.youtube-nocookie.com/embed/RzBYyb1pxGk?rel=0"
+                  title="Villa La Nucia — 4K"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <a className={styles.marinaVideoLink}
+                 href="https://youtu.be/RzBYyb1pxGk"
+                 target="_blank" rel="noopener noreferrer">
+                YouTube <span aria-hidden="true">↗</span>
+              </a>
+              <p className={styles.bodyCopy}>{nuciaVideoNotes[locale] || nuciaVideoNotes.en}</p>
+            </section>
+          )}
+
           {slug === "villa-la-nucia" && <PropertyWalkthrough />}
 
           <section id="experience" className={styles.storySection}>
@@ -530,3 +556,4 @@ export default async function PrivateProjectPage({ params }: Props) {
     </main>
   );
 }
+

@@ -5,16 +5,29 @@ import {useTranslations, useLocale} from "next-intl";
 
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import sourceChapters from "./villaLaNuciaPhotos.json";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyWalkthrough.module.css";
 
 export default function PropertyWalkthrough() {
   const t = useTranslations("ProjectUI");
-  const rtl = useLocale() === "ar";
+  const locale = useLocale();
+  const rtl = locale === "ar";
 
-  const chapters = localizedPhotoChapters(t);
+  const chapters = localizedPhotoChapters(t, locale);
   const [position, setPosition] = useState({ chapter: 0, photo: 0 });
+  // Stable chapter links allow the forthcoming verified site plan to open a section.
+  useEffect(() => {
+    function selectFromHash() {
+      const id = window.location.hash.slice(1);
+      const index = sourceChapters.findIndex(item => `tour-${item.id}` === id);
+      if (index >= 0) setPosition({chapter: index, photo: 0});
+    }
+    selectFromHash();
+    window.addEventListener("hashchange", selectFromHash);
+    return () => window.removeEventListener("hashchange", selectFromHash);
+  }, []);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const chapter = chapters[position.chapter];
   const photo = chapter.photos[position.photo];
@@ -34,7 +47,7 @@ export default function PropertyWalkthrough() {
       <div className={styles.layout}>
         <nav className={styles.chapters} aria-label={t("p147")}>
           {chapters.map((item, index) => (
-            <button key={item.title} type="button" aria-current={position.chapter === index ? "step" : undefined}
+            <button id={`tour-${item.id}`} key={item.id} type="button" aria-current={position.chapter === index ? "step" : undefined}
               onClick={() => setPosition({ chapter: index, photo: 0 })}>
               <span>{String(index + 1).padStart(2, "0")}</span>{item.title}<span aria-hidden="true"><ArrowUpRightIcon /></span>
             </button>
@@ -66,3 +79,4 @@ export default function PropertyWalkthrough() {
     </section>
   );
 }
+
