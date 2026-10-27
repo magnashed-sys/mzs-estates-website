@@ -44,6 +44,8 @@ const introductions: Record<string,string> = {
   "lt": "Tai tik dalis mūsų projektų. Asmeninio pokalbio metu mielai pristatysime daugiau projektų, atitinkančių jūsų interesus ir planus."
 };
 
+const management: Record<string,string> = {"nl":"Vastgoedbeheer en exploitatie","en":"Property management and operations","es":"Gestión y explotación inmobiliaria","de":"Immobilienverwaltung und Bewirtschaftung","fr":"Gestion et exploitation immobilières","it":"Gestione e valorizzazione immobiliare","pt":"Gestão e exploração imobiliária","ru":"Управление и эксплуатация недвижимости","ar":"إدارة وتشغيل العقارات","tr":"Gayrimenkul yönetimi ve işletmesi","lt":"Nekilnojamojo turto valdymas ir eksploatavimas"};
+
 export default async function CaseStudies() {
  const locale = (await getLocale()).split('-')[0];
  const c = captions[locale] ?? captions.en;
@@ -53,6 +55,7 @@ export default async function CaseStudies() {
   {image:'ijmuiden-transformatie', title:c[1]+' · '+c[3], location:'IJmuiden, '+c[6], width:1400, height:933},
   {image:'ter-apel-jachthaven', title:c[2]+' · '+c[4], location:'Ter Apel, '+c[6], width:1400, height:789},
   {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
+  {image:'alicante-beheer-exploitatie', title:management[locale] ?? management.en, location:'Alicante, '+c[7], width:1372, height:836},
   {image:'ibiza-20-units', title:c[0]+' · 20 '+unit, location:'Ibiza, '+c[7], width:1400, height:788},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
