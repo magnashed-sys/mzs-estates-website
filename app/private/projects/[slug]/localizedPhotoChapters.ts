@@ -1,3 +1,4 @@
+import {nuciaExtraCopy} from "./nuciaExtraCopy";
 import chapters from "./villaLaNuciaPhotos.json";
 
 // Only fixed presentation copy is translated; the source asset metadata stays authoritative.
@@ -75,10 +76,12 @@ const copyKeys: Record<string, string> = {
   "Relax by the pool, gather on the terrace and enjoy the barbecue area.": "p525"
 };
 
-export function localizedPhotoChapters(t: (key: string) => string) {
-  const copy = (text: string) => copyKeys[text] ? t(copyKeys[text]) : text;
+export function localizedPhotoChapters(t: (key: string) => string, locale = "en") {
+  const extra = nuciaExtraCopy(locale);
+  const copy = (text: string) => copyKeys[text] ? t(copyKeys[text]) : extra[text] || text;
   return chapters.map(chapter => ({
     ...chapter, title: copy(chapter.title), description: copy(chapter.description),
     photos: chapter.photos.map(photo => ({...photo, alt: copy(photo.alt), caption: copy(photo.caption)})),
   }));
 }
+

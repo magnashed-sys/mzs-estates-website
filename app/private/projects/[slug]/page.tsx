@@ -67,7 +67,7 @@ export default async function PrivateProjectPage({ params }: Props) {
   const privateT = await getTranslations("Private");
   const mapT = await getTranslations("MarinaMap");
   const locale = await getLocale();
-  const villaPhotoChapters = localizedPhotoChapters(t);
+  const villaPhotoChapters = localizedPhotoChapters(t, locale);
   const villaBase = "/properties/villa-la-nucia";
   const marinaBase = "/properties/marina-botafoch-apartment";
 
@@ -530,3 +530,4 @@ export default async function PrivateProjectPage({ params }: Props) {
     </main>
   );
 }
+
