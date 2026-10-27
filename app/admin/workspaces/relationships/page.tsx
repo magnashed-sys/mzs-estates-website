@@ -27,7 +27,7 @@ export default async function RelationshipsWorkspace(){
   </section>
   <section className={styles.grid} aria-label="Relationship workflows">
    <Link className={styles.card} href="/admin/relationships"><small>01 / RELATIONSHIP 360°</small><strong>People & companies</strong><p>Central records, correspondence details, company roles and linked relationships.</p><span>Open CRM →</span></Link>
-   <Link className={styles.card} href="/admin?tab=relationships"><small>02 / ONBOARDING</small><strong>Access requests</strong><p>Review new accounts, approve registrations and administer invitations.</p><span>Review applications →</span></Link>
+   <Link className={styles.card} href="/admin/accounts"><small>02 / ONBOARDING</small><strong>Access requests</strong><p>Review new accounts, approve registrations and administer invitations.</p><span>Review applications →</span></Link>
    <Link className={styles.card} href="/admin/project-access"><small>03 / ACCESS CONTROL</small><strong>Project permissions</strong><p>Grant or revoke individual access without changing public accounts.</p><span>Manage permissions →</span></Link>
    <Link className={styles.card} href="/admin/relationships?new=person"><small>04 / NEW CONTACT</small><strong>Create relationship</strong><p>Add a person to the CRM without giving them platform login rights.</p><span>Add person →</span></Link>
    <Link className={styles.card} href="/admin/relationships?new=company"><small>05 / ORGANISATIONS</small><strong>Create company</strong><p>Register legal and correspondence details separately from account access.</p><span>Add company →</span></Link>

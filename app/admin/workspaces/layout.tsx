@@ -13,7 +13,7 @@ export default async function WorkspaceLayout({children}:{children:React.ReactNo
    <header className={styles.header}>
     <Link href="/admin/workspaces/group" className={styles.brand}>MZS GROUP</Link>
     <span className={styles.headerTag}>Private Administration</span>
-    <div className={styles.headerLinks}><Link href="/admin?tab=relationships">Account requests</Link><Link href="/">Public website</Link></div>
+    <div className={styles.headerLinks}><Link href="/admin/accounts">Account requests</Link><Link href="/">Public website</Link></div>
    </header>
    <WorkspaceNavigation/>
    {children}

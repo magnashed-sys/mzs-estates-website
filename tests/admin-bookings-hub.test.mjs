@@ -4,22 +4,14 @@ import {readFileSync} from "node:fs";
 
 const source = path => readFileSync(new URL("../"+path, import.meta.url),"utf8");
 
-test("main Admin places Bookings in its own primary group, separated from estates and system",()=>{
- const admin=source("app/admin/page.tsx");
- const start=admin.indexOf('aria-label="Administration sections"');
- const end=admin.indexOf("</nav>",start);
- assert.ok(start>0&&end>start);
- const nav=admin.slice(start,end);
- for(const [title,expected] of [["GROUP","GROUP"],["BOOKINGS","BOOKINGS"],["MZS ESTATES","MZS ESTATES"],["MZS CAPITAL","MZS CAPITAL"],["RELATIONSHIPS","RELATIONSHIPS"],["SYSTEM","SYSTEM"]]){
-   assert.ok(nav.includes(title),expected);
- }
- assert.ok(nav.indexOf("BOOKINGS")<nav.indexOf("MZS ESTATES"));
- assert.match(nav,/href="\/admin\/bookings"/);
- assert.match(nav,/Requests &amp; Calendar/);
- assert.match(nav,/href="\/admin\/owner-stays"/);
- assert.doesNotMatch(nav,/href="\/admin\/unified-bookings"/);
- assert.match(admin,/tab === "bookings" &&/);
- assert.match(admin,/BookingManagement key=\{`bookings-/);
+test("canonical navigation keeps Bookings beside Group and routes legacy operations",()=>{
+ const nav=source("app/admin/workspaces/WorkspaceNavigation.tsx");
+ assert.ok(nav.indexOf('label:"Bookings"')<nav.indexOf('label:"MZS Estates"'));
+ assert.match(nav,/href:"\/admin\/bookings"/);
+ const operations=source("app/admin/bookings/operations/page.tsx");
+ assert.match(operations,/await requireEstateAdmin\(\)/);
+ assert.match(operations,/<BookingManagement/);
+ assert.match(source("app/admin/page.tsx"),/redirect\(adminEntryRoute/);
 });
 
 test("new canonical Bookings routes reuse existing Estate-admin protected implementation",()=>{

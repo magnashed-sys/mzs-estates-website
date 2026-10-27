@@ -24,7 +24,7 @@ export default async function CapitalWorkspace(){
    <Link className={styles.card} href="/admin/group/capital/deals"><small>01 / FINANCING</small><strong>Loans & agreements</strong><p>Individual lender and borrower dossiers, repayment schedules, interest and confirmations.</p><span>Open lending dossiers →</span></Link>
    <Link className={styles.card} href="/admin/capital-requests"><small>02 / ENQUIRIES</small><strong>Capital requests</strong><p>Review confidential financing and investment enquiries.</p><span>Open requests →</span></Link>
    <Link className={styles.card} href="/admin/intro-calls"><small>03 / CONVERSATIONS</small><strong>Introduction calls</strong><p>Manage confidential introductory-call requests and their next steps.</p><span>Open calls →</span></Link>
-   <Link className={styles.card} href="/admin?tab=capital"><small>04 / EXISTING ADMINISTRATION</small><strong>Capital operations</strong><p>Access all current Capital-specific administrative controls while the transition continues.</p><span>Open current Capital admin →</span></Link>
+   <Link className={styles.card} href="/admin/group/capital"><small>04 / EXISTING ADMINISTRATION</small><strong>Capital operations</strong><p>Access all current Capital-specific administrative controls while the transition continues.</p><span>Open current Capital admin →</span></Link>
   </section>
   <p className={styles.note}>Loan and enquiry counts are record counts, not committed funds or payments. Existing financial scopes, lender access and contract checks remain enforced by their original protected routes.</p>
  </>;
