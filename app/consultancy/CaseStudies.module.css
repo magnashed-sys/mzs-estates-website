@@ -15,3 +15,6 @@
 
 .introduction{max-width:740px;margin:-8px 0 30px;color:#c5beb3;font-size:15px;line-height:1.85}
 @media(max-width:700px){.introduction{font-size:14px;margin-bottom:24px}}
+
+.unfiltered img{filter:none}
+.unfiltered::after{display:none}

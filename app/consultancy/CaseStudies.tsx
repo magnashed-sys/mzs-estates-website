@@ -62,7 +62,7 @@ export default async function CaseStudies() {
   <div className={styles.heading}><span aria-hidden="true">04</span><h2 id="case-studies-title">Case Studies</h2></div>
   <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
-   <div className={styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
+   <div className={project.image === 'amsterdam-85-units' ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
    <figcaption><h3>{project.title}</h3><p>{project.location}</p></figcaption>
   </figure>)}</div>
  </section>;
