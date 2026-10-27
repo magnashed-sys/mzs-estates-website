@@ -33,12 +33,13 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
  const category=categories.includes(param(params,"category"))?param(params,"category"):"all";
  const status=statuses.includes(param(params,"status"))?param(params,"status"):"all";
  const period=periods.some(x=>x[0]===param(params,"period"))?param(params,"period"):"all";
+ const archive=["active","archived","all"].includes(param(params,"archive"))?param(params,"archive"):"active";
  const pageSize=[25,50,100].includes(Number(param(params,"size")))?Number(param(params,"size")):25;
  const page=Math.min(Math.max(Number.parseInt(param(params,"page"),10)||1,1),1000);
  const offset=(page-1)*pageSize;
- const {data,error}=await db.rpc("mzs_admin_bookings_search",{
+ const {data,error}=await db.rpc("mzs_admin_bookings_search_v2",{
    p_query:query,p_year:year,p_property:property,p_category:category,
-   p_status:status,p_period:period,p_offset:offset,p_limit:pageSize
+   p_status:status,p_period:period,p_archive:archive,p_offset:offset,p_limit:pageSize
  });
  const payload=error?null:data as Result|null;
  const rows=Array.isArray(payload?.items)?payload.items:[];
@@ -46,6 +47,7 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
  const maxPage=Math.max(1,Math.ceil(total/pageSize));
  const href=(next:number)=>{
   const p=new URLSearchParams();
+  if(archive!=="active")p.set("archive",archive);
   if(query)p.set("q",query);if(year)p.set("year",String(year));
   if(property)p.set("property",property);
   if(category!=="all")p.set("category",category);
@@ -91,6 +93,9 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
      </label>
      <label style={{display:"grid",gap:6}}>Period
       <select style={control} name="period" defaultValue={period}>{periods.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
+     </label>
+     <label style={{display:"grid",gap:6}}>Archive
+      <select style={control} name="archive" defaultValue={archive}><option value="active">Not archived</option><option value="archived">Archived</option><option value="all">Including archive</option></select>
      </label>
      <label style={{display:"grid",gap:6}}>Per page
       <select style={control} name="size" defaultValue={pageSize}>{[25,50,100].map(x=><option key={x} value={x}>{x}</option>)}</select>

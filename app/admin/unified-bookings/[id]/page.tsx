@@ -2,6 +2,7 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import TestBookingCleanup from "./TestBookingCleanup";
+import BookingCleanup from "./BookingCleanup";
 import BookingEditor from "../BookingEditor";
 import LegacyBookingEditor from "./LegacyBookingEditor";
 import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft,reviewBookingInvoiceDraft,editBookingInvoiceDraft} from "./actions";
@@ -15,6 +16,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
  const {data:rows,error}=await db.rpc("admin_list_rental_bookings").eq("id",id).limit(2);
  if(error||!rows||rows.length!==1)notFound();
  const b=rows[0];
+ const cleanup=await db.rpc("mzs_admin_booking_cleanup_plan",{p_booking_id:id});
  const [{data:property},{data:guest},{data:owner},changes,prices,notifications]=await Promise.all([
   db.from("projects").select("title").eq("id",b.project_id).maybeSingle(),
   b.user_id?db.from("profiles").select("full_name,email").eq("id",b.user_id).maybeSingle():Promise.resolve({data:null}),
@@ -54,6 +56,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:18}}>
     <section style={card}><h2>Guest & administration</h2><p>Guest: {effectiveGuestName||guest?.full_name||"Not available"}</p><p>Contact email: {effectiveContactEmail||guest?.email||"Not available"}</p><p>Account: {guest?.email?("Linked: "+guest.email):"No account linked"}</p><p>Internal notes: {b.admin_notes||"None"}</p></section>
     <section style={card}><h2>Manage reservation</h2>
+      {!cleanup.error&&cleanup.data?<BookingCleanup key={cleanup.data.fingerprint} bookingId={id} plan={cleanup.data}/>:<p role="alert">Cleanup options could not be loaded. Refresh to verify.</p>}
       {b.is_test&&["requested","test_approved","declined","cancelled"].includes(b.status)&&<TestBookingCleanup bookingId={b.id}/>}
       {legacy&&!correctionResult.error&&!invoiceCompaniesResult.error&&b.status==="confirmed"&&!b.is_test&&!owner?<LegacyBookingEditor key={id+"-"+(currentCorrection?.version||0)} booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,checkInTime:(b.preferred_check_in||"").slice(0,5),checkOutTime:(b.preferred_check_out||"").slice(0,5),guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}} source={{guestName:effectiveGuestName||"",contactName:currentCorrection?.contact_name||legacy.booking_contact_name,contactEmail:effectiveContactEmail||"",billingKind:(currentCorrection?.invoice_recipient_kind||legacy.invoice_recipient_kind) as "person"|"company",invoiceRecipient:effectiveInvoiceRecipient||"",companyId:currentCorrection?.invoice_recipient_relationship_id||legacy.invoice_recipient_relationship_id,version:currentCorrection?.version||0}} companies={invoiceCompaniesResult.data||[]}/>:editable?<BookingEditor booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}}/>:
         <><p>{legacy&&!b.user_id?"Imported reservation without a client login. The standard client-booking editor cannot update it; the imported confirmation remains authoritative.":"This reservation uses a dedicated workflow or is not eligible for modification here."}</p><Link href={owner?"/admin/owner-stays":"/admin/bookings/operations"} style={{color:"#d5c09a"}}>Open booking operations →</Link></>}
