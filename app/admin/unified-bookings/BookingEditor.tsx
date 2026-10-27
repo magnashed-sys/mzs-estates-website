@@ -14,7 +14,7 @@ export default function BookingEditor({booking}:{booking:Booking}){
   if(busy)return;
   const guests=Number(dates.guests);
   if(!dates.checkIn||dates.checkOut<=dates.checkIn||!Number.isInteger(guests)||guests<1||dates.notes.length>2000){setError("Check dates, guests and notes.");return;}
-  if(!window.confirm("Save these booking dates and guest details? Price may be recalculated at the original nightly rate."))return;
+  if(!window.confirm("Save these booking dates and guest details? Price may be recalculated at the original nightly rate. Confirmed-booking changes can queue an email to the linked client."))return;
   setBusy(true);setError("");
   try{
    const response=await fetch("/api/rental/admin-booking",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -42,7 +42,7 @@ export default function BookingEditor({booking}:{booking:Booking}){
     </div>
     <hr style={{borderColor:"#514839",margin:"20px 0"}}/>
     <strong>Booking total</strong>
-    <p style={{fontSize:12,color:"#bbb1a3"}}>Adjust the complete EUR amount separately after editing dates. A reason is required and a price audit is retained.</p>
+    <p style={{fontSize:12,color:"#bbb1a3"}}>Adjust the complete EUR amount separately after editing dates. A reason is required and a price audit is retained. For a confirmed client booking, a price change can queue a client email.</p>
     <form action={adjustBookingPrice} style={{display:"grid",gap:9}}>
      <input type="hidden" name="booking_id" value={booking.id}/>
      <input type="hidden" name="expected" value={booking.total===null?"":String(booking.total)}/>
