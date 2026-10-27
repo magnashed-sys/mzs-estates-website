@@ -43,3 +43,9 @@
 .activityArrow svg {width:20px;height:20px;}
 @media(max-width:700px) {.activities {padding-bottom:42px;}.activityGrid {grid-template-columns:1fr;gap:14px;}.activityCard {min-height:190px;padding:22px 22px 52px;gap:14px;}.activityArrow {inset-inline-end:22px;bottom:25px;}}
 @media(prefers-reduced-motion:reduce) {.activityCard {transition:none;}}
+
+.storyContent {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(24px,4vw,64px);}
+.historyPhoto {margin:0;min-width:0;}
+.historyPhoto img {display:block;width:100%;height:auto;border-radius:4px;}
+.storyContent .body {text-align:start;text-wrap:pretty;margin:0;}
+@media(max-width:850px){.storyContent {grid-template-columns:minmax(0,1fr);gap:24px;}}

@@ -41,7 +41,12 @@ export default async function AboutPage() {
           <li><span className={styles.number}>02</span><h2>{t('spain')}</h2></li>
           <li><span className={styles.number}>03</span><h2>{t('dubai')}</h2></li>
         </ol>
-        <p className={styles.body}>{t('body')}</p>
+        <div className={styles.storyContent}>
+          <figure className={styles.historyPhoto}>
+            <Image src="/images/about-bazaar.webp" alt="De Bazaar, Beverwijk" width={1250} height={544} sizes="(max-width: 850px) 100vw, 48vw" />
+          </figure>
+          <p className={styles.body}>{t('body')}</p>
+        </div>
       </section>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
