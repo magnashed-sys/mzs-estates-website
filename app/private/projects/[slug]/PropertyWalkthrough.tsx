@@ -24,9 +24,15 @@ export default function PropertyWalkthrough() {
       const index = sourceChapters.findIndex(item => `tour-${item.id}` === id);
       if (index >= 0) setPosition({chapter: index, photo: 0});
     }
+    function selectFromMap(event: Event) {
+      const id = (event as CustomEvent<unknown>).detail;
+      const index = sourceChapters.findIndex(item => item.id === id);
+      if (index >= 0) setPosition({chapter: index, photo: 0});
+    }
     selectFromHash();
+    window.addEventListener("mzs-photo-chapter", selectFromMap);
     window.addEventListener("hashchange", selectFromHash);
-    return () => window.removeEventListener("hashchange", selectFromHash);
+    return () => { window.removeEventListener("hashchange", selectFromHash); window.removeEventListener("mzs-photo-chapter", selectFromMap); };
   }, []);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const chapter = chapters[position.chapter];

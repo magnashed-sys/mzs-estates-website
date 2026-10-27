@@ -9,6 +9,7 @@ import ConfiguredRentalCalendar from "./ConfiguredRentalCalendar";
 import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import ProjectResources from "./ProjectResources";
 import PropertyWalkthrough from "./PropertyWalkthrough";
+import VillaSitePlan from "./VillaSitePlan";
 import {nuciaVideoNotes} from "./nuciaVideoNotes";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
@@ -297,6 +298,8 @@ export default async function PrivateProjectPage({ params }: Props) {
               </div>
             ))}
           </section>
+
+          {slug === "villa-la-nucia" && <VillaSitePlan />}
 
           <section id="gallery" className={styles.gallerySection}>
             <div className={styles.sectionHeader}>
