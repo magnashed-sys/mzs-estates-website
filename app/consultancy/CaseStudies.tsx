@@ -17,6 +17,19 @@ const captions: Record<string, readonly string[]> = {
 };
 const units: Record<string,string> = {nl:'units',en:'units',es:'unidades',de:'Einheiten',fr:'unités',it:'unità',pt:'unidades',ru:'объектов',ar:'وحدة',tr:'birim',lt:'vienetų'};
 
+const financing: Record<string,string> = {
+ nl:'Financiering · Realisatie bedrijfsverzamelgebouw',
+ en:'Financing · Business centre construction',
+ es:'Financiación · Construcción de centro empresarial',
+ de:'Finanzierung · Errichtung eines Gewerbezentrums',
+ fr:'Financement · Construction d’un centre d’activités',
+ it:'Finanziamento · Realizzazione di un centro aziendale',
+ pt:'Financiamento · Construção de um centro empresarial',
+ ru:'Финансирование · Строительство бизнес-центра',
+ ar:'تمويل · إنشاء مجمع أعمال',
+ tr:'Finansman · İş merkezi inşaatı',
+ lt:'Finansavimas · Verslo centro statyba',
+};
 export default async function CaseStudies() {
  const locale = (await getLocale()).split('-')[0];
  const c = captions[locale] ?? captions.en;
@@ -25,7 +38,7 @@ export default async function CaseStudies() {
   {image:'amsterdam-85-units', title:c[0]+' · 85 '+unit, location:'Amsterdam, '+c[6], width:888, height:1080},
   {image:'ijmuiden-transformatie', title:c[1]+' · '+c[3], location:'IJmuiden, '+c[6], width:1400, height:933},
   {image:'ter-apel-jachthaven', title:c[2]+' · '+c[4], location:'Ter Apel, '+c[6], width:1400, height:789},
-  {image:'ibiza-transformatie', title:c[1]+' · '+c[5], location:'Ibiza, '+c[7], width:1400, height:792},
+  {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
   {image:'ibiza-20-units', title:c[0]+' · 20 '+unit, location:'Ibiza, '+c[7], width:1400, height:788},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
