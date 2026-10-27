@@ -68,7 +68,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>{children}<AnalyticsConsent /></NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>{children}<AnalyticsConsent preview={process.env.VERCEL_ENV === "preview"} /></NextIntlClientProvider>
         <PublicWebAnalytics />
         <VisitorActivity />
       </body>

@@ -6,13 +6,13 @@ import {analyticsPage, readConsent, saveConsent} from '../../lib/analytics/publi
 import {googleEnabled, restoreGoogleConsent, sendPage, setGoogleConsent, stopGoogle} from '../../lib/analytics/google';
 import {analyticsCopy} from '../../lib/analytics/copy';
 import styles from './AnalyticsConsent.module.css';
-export default function AnalyticsConsent() {
+export default function AnalyticsConsent({preview = false}: {preview?: boolean}) {
   const pathname = usePathname(); const locale = useLocale();
   const [enabled,setEnabled] = useState(false); const [open,setOpen] = useState(false);
   const copy = analyticsCopy[locale] || analyticsCopy.en;
   const publicPage = !!analyticsPage(pathname || '');
   useEffect(() => {
-    const enabled = googleEnabled() && publicPage; setEnabled(enabled);
+    const enabled = (googleEnabled() || preview) && publicPage; setEnabled(enabled);
     if (!enabled) { stopGoogle(); return; }
     setOpen(readConsent() === null); restoreGoogleConsent(); sendPage();
     function storage() { setOpen(readConsent() === null); restoreGoogleConsent(); }
@@ -26,7 +26,7 @@ export default function AnalyticsConsent() {
     }
     window.addEventListener('storage',storage); document.addEventListener('click',leave,true);
     return () => {stopGoogle(); window.removeEventListener('storage',storage); document.removeEventListener('click',leave,true);};
-  },[pathname,publicPage]);
+  },[pathname,publicPage,preview]);
   function choose(choice: 'granted' | 'denied') {
     saveConsent(choice); setGoogleConsent(choice === 'granted'); setOpen(false);
     if (choice === 'denied' && document.getElementById('mzs-google-tag')) window.location.reload();
