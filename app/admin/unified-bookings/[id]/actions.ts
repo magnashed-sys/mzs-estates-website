@@ -1,4 +1,5 @@
 "use server";
+import {isMaseIssuer} from "../../../../lib/estates/booking-invoice";
 import {redirect} from "next/navigation";
 import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
@@ -60,6 +61,7 @@ export async function createBookingInvoiceDraft(formData:FormData){
  }
  const owner=await db.from("mzs_owner_stay_requests").select("id").eq("booking_id",bookingId).maybeSingle();
  if(owner.error||owner.data)throw new Error("Complimentary owner stays cannot be invoiced.");
+ if(isMaseIssuer(issuer)&&Number(vatRateText)!==0)throw new Error("The approved Mase Estates SL booking model charges no VAT.");
  const gross=Math.round(Number(booking.quoted_total_eur)*100);
  const rate=Number(vatRateText)/100;
  const net=Math.round(gross/(1+rate));
@@ -113,6 +115,9 @@ export async function editBookingInvoiceDraft(formData:FormData){
  if(historical&&(issuer!==historical.invoice_issuer_id||recipient!==(correction?.invoice_recipient_name||historical.invoice_recipient_name))){
   throw new Error("The corrected historic recipient and original issuer must be used for this invoice draft.");
  }
+ const {data:selectedIssuer,error:selectedIssuerError}=await db.from("mzs_lease_issuers").select("name,tax_id").eq("id",issuer).single();
+ if(selectedIssuerError||!selectedIssuer)throw new Error("Issuing entity unavailable.");
+ if(isMaseIssuer(selectedIssuer)&&vatRate!==0)throw new Error("The approved Mase Estates SL booking model charges no VAT.");
  const {error}=await db.rpc("mzs_admin_edit_booking_invoice_draft",{
   p_id:draftId,p_revision:revision,p_issuer:issuer,p_recipient:recipient,p_email:email,
   p_vat_percent:vatRate,p_tax_note:taxNote,p_reason:reason
