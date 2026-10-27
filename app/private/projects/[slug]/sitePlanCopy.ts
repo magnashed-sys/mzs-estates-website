@@ -11,7 +11,7 @@ export const sitePlanCopy: Record<string, readonly string[]> = {
   "nl": [
     "Ontdek het terrein",
     "Schematisch overzicht · niet op schaal",
-    "Gastenverblijf voor",
+    "Gastenverblijf voorkant",
     "Gastenverblijf achter",
     "Hoofdverblijf",
     "3 parkeerplaatsen",
