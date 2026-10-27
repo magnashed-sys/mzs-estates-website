@@ -142,9 +142,10 @@ function Detail({ label, children }: {
     return <div><p style={{ color: muted, fontSize: 13, margin: "0 0 8px" }}>{label}</p>
     <p style={{ margin: 0, lineHeight: 1.6, overflowWrap: "anywhere" }}>{children}</p></div>;
 }
-export default function BookingManagement({ mode = "full", initialSection = "bookings", onNavigate, onBusyChange }: {
+export default function BookingManagement({ mode = "full", initialSection = "bookings", initialScope = "live", onNavigate, onBusyChange }: {
     mode?: "full" | "summary";
-    initialSection?: "bookings" | "cancellations";
+    initialSection?: "bookings" | "cancellations" | "calendar";
+    initialScope?: "live" | "test" | "all";
     onNavigate?: (section: "bookings" | "cancellations") => void;
     onBusyChange?: (busy: boolean) => void;
 } = {}) {
@@ -158,7 +159,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     const [cancellationFilter, setCancellationFilter] = useState<CancellationFilter>("pending");
     const [search, setSearch] = useState("");
     const [propertyFilter, setPropertyFilter] = useState("all");
-    const [scope, setScope] = useState<"live" | "test" | "all">("live");
+    const [scope, setScope] = useState<"live" | "test" | "all">(initialScope);
     const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
     const [editDraft, setEditDraft] = useState({check_in:"", check_out:"", guest_count:"2", admin_notes:""});
     const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);

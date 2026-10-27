@@ -59,13 +59,14 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
  const loadedTo=Math.min(offset+rows.length,total);
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"36px clamp(18px,4vw,60px)"}}>
   <div style={{maxWidth:1500,margin:"0 auto"}}>
-   <Link href="/admin" style={linkStyle}>← Group Administration</Link>
+   <Link href="/admin/workspaces/group" style={linkStyle}>← Group Administration</Link>
    <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>MZS GROUP / ADMINISTRATION</p>
    <h1 style={{fontFamily:"Georgia,serif",fontWeight:400,fontSize:"clamp(36px,5vw,58px)",margin:"8px 0"}}>Bookings.</h1>
    <p style={{color:"#b5ac9c",maxWidth:850,lineHeight:1.8}}>Central reservations and owner stays. Search and filter your full booking history in the database, then open an audited dossier. Original booking details and corrected billing recipients remain available.</p>
    <nav aria-label="Booking workflows" style={{display:"flex",gap:10,flexWrap:"wrap",margin:"24px 0"}}>
     <Link href="/admin/bookings" style={{...control,...linkStyle,borderColor:"#d5c09a"}}>All Bookings</Link>
-    <Link href="/admin?tab=bookings" style={{...control,...linkStyle}}>Requests &amp; Calendar</Link>
+    <Link href="/admin/bookings/operations" style={{...control,...linkStyle}}>Requests &amp; Calendar</Link>
+    <Link href="/admin/bookings/operations?scope=test" style={{...control,...linkStyle}}>Test cleanup</Link>
     <Link href="/admin/owner-stays" style={{...control,...linkStyle}}>Owner stays</Link>
     <Link href="/admin/group/estates/contracts?view=invoices" style={{...control,...linkStyle}}>Contracts &amp; Invoices</Link>
     <Link href="/admin/group/estates/properties" style={{...control,...linkStyle}}>Properties</Link>
