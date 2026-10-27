@@ -1,6 +1,7 @@
 import {NextIntlClientProvider} from "next-intl";
 import {getLocale, getMessages} from "next-intl/server";
 import type { Metadata } from "next";
+import AnalyticsConsent from "./components/AnalyticsConsent";
 import VisitorActivity from "./components/VisitorActivity";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
 import "./globals.css";
@@ -67,10 +68,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>{children}<AnalyticsConsent /></NextIntlClientProvider>
         <PublicWebAnalytics />
         <VisitorActivity />
       </body>
     </html>
   );
 }
+

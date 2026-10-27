@@ -6,6 +6,7 @@ import styles from "./HomeContactFooter.module.css";
 /** Keep Amsterdam as a city; show Spain and UAE in each available language. */
 const spainLabels: Record<string, string> = {
   en: "SPAIN",
+  tr: "İSPANYA",
   nl: "SPANJE",
   es: "ESPAÑA",
   de: "SPANIEN",
@@ -20,6 +21,7 @@ const spainLabels: Record<string, string> = {
 
 const uaeLabels: Record<string, string> = {
   en: "UAE",
+  tr: "BAE",
   nl: "VAE",
   es: "EAU",
   de: "VAE",
@@ -41,3 +43,4 @@ export default function HomeContactFooter() {
     </footer>
   );
 }
+

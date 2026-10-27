@@ -1,4 +1,5 @@
 "use client";
+import {trackLead} from "../../lib/analytics/google";
 import CountrySelect from "../components/CountrySelect";
 import RussianAccessNotice from "../components/RussianAccessNotice";
 import {useTranslations, useLocale} from "next-intl";
@@ -88,6 +89,7 @@ export default function RequestAccessPage() {
         setError(t(registrationErrorKey(result.error)));
         return;
       }
+      trackLead("account_request");
       setSubmitted(true);
       setPassword("");
       setPasswordConfirmation("");
@@ -181,3 +183,4 @@ export default function RequestAccessPage() {
     </main>
   );
 }
+
