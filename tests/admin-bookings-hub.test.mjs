@@ -47,7 +47,8 @@ test("financial booking actions preserve guarded RPCs and use canonical dossier 
  assert.match(actions,/\/admin\/bookings\//);
  const legacyDossier=source("app/admin/unified-bookings/[id]/page.tsx");
  assert.match(legacyDossier,/Original confirmation & billing recipient/);
- assert.match(legacyDossier,/href="\/admin\/bookings"/);
+ assert.match(legacyDossier,/href=\{returnHref\}/);
+ assert.match(legacyDossier,/bookingReturnHref\(\(await searchParams\)\.returnTo\)/);
  const arrivals=source("app/admin/BookingManagement.tsx");
  assert.match(arrivals,/href=\{"\/admin\/bookings\/"\+booking\.id\}/);
 });
