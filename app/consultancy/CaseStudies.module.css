@@ -14,3 +14,6 @@
 .card p{font-size:12px;line-height:1.7;color:#c5beb3;margin:6px 0 0}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card:first-child{grid-row:auto}.card:first-child .visual{aspect-ratio:16/10;flex:none}}
 @media(max-width:700px){.section{padding-top:12px;padding-bottom:48px}.heading{padding-top:26px;gap:16px;margin-bottom:24px}.grid{grid-template-columns:minmax(0,1fr);gap:30px}.visual,.card:first-child .visual{aspect-ratio:auto;background:transparent}.visual img{width:100%;height:auto;object-fit:contain}.card figcaption{padding-top:13px}.card h3{font-size:21px}}
+
+.introduction{max-width:740px;margin:-8px 0 30px;color:#c5beb3;font-size:15px;line-height:1.85}
+@media(max-width:700px){.introduction{font-size:14px;margin-bottom:24px}}

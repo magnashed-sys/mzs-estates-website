@@ -30,6 +30,20 @@ const financing: Record<string,string> = {
  tr:'Finansman · İş merkezi inşaatı',
  lt:'Finansavimas · Verslo centro statyba',
 };
+const introductions: Record<string,string> = {
+  "nl": "Dit is een selectie van onze projecten. Tijdens een persoonlijk gesprek lichten we graag meer projecten toe die aansluiten bij uw interesses en plannen.",
+  "en": "These are a selection of our projects. We would be pleased to discuss further projects relevant to your interests and plans in a personal conversation.",
+  "es": "Esta es una selección de nuestros proyectos. En una conversación personal, estaremos encantados de presentar otros proyectos relacionados con sus intereses y planes.",
+  "de": "Dies ist eine Auswahl unserer Projekte. In einem persönlichen Gespräch stellen wir Ihnen gerne weitere Projekte vor, die zu Ihren Interessen und Plänen passen.",
+  "fr": "Voici une sélection de nos projets. Lors d’un échange personnel, nous serons heureux de vous présenter d’autres projets en lien avec vos intérêts et vos objectifs.",
+  "it": "Questa è una selezione dei nostri progetti. Durante un colloquio personale, saremo lieti di presentarvi altri progetti in linea con i vostri interessi e programmi.",
+  "pt": "Esta é uma seleção dos nossos projetos. Em uma conversa pessoal, teremos prazer em apresentar outros projetos alinhados aos seus interesses e planos.",
+  "ru": "Здесь представлена лишь часть наших проектов. В личной беседе мы будем рады рассказать о других проектах, соответствующих вашим интересам и планам.",
+  "ar": "هذه مجموعة مختارة من مشاريعنا. يسعدنا خلال لقاء شخصي مناقشة مشاريع أخرى تتناسب مع اهتماماتكم وخططكم.",
+  "tr": "Bunlar projelerimizden seçilmiş örneklerdir. Kişisel bir görüşmede ilgi alanlarınıza ve planlarınıza uygun diğer projeleri paylaşmaktan memnuniyet duyarız.",
+  "lt": "Tai tik dalis mūsų projektų. Asmeninio pokalbio metu mielai pristatysime daugiau projektų, atitinkančių jūsų interesus ir planus."
+};
+
 export default async function CaseStudies() {
  const locale = (await getLocale()).split('-')[0];
  const c = captions[locale] ?? captions.en;
@@ -43,6 +57,7 @@ export default async function CaseStudies() {
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
   <div className={styles.heading}><span aria-hidden="true">04</span><h2 id="case-studies-title">Case Studies</h2></div>
+  <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
    <div className={styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
    <figcaption><h3>{project.title}</h3><p>{project.location}</p></figcaption>
