@@ -1,6 +1,6 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "MZS Group este un grup internațional independent de investiții și imobiliare, care oferă clienților și partenerilor selectați acces la oportunități private în Europa și Emiratele Arabe Unite.",
+    "mzs_group_is_an_independent_international": "Consultanță independentă, proiecte imobiliare și capital privat în Europa și Emiratele Arabe Unite. Experiență internațională și cunoaștere locală.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Independent.",
     "sloganInternational": "Internațional."
@@ -183,16 +183,16 @@
     "save_failed": "Limba nu a putut fi salvată. Încercați din nou."
   },
   "Metadata": {
-    "homeTitle": "MZS Group | Proprietăți și investiții private",
-    "homeDescription": "MZS Group este un grup internațional independent de imobiliare și investiții, care conectează clienții selectați și partenerii cu oportunități private în Europa și în EAU.",
-    "estatesTitle": "Imobiliare | MZS Estates",
+    "homeTitle": "Consultanță, imobiliare și capital privat | MZS Group",
+    "homeDescription": "Consultanță independentă, proiecte imobiliare și capital privat în Europa și Emiratele Arabe Unite. Experiență internațională și cunoaștere locală.",
+    "estatesTitle": "Proprietăți, închirieri și dezvoltare | MZS Estates",
     "estatesDescription": "Descoperiţi activităţile imobiliare internaţionale independente ale MZS Estates: proprietate proprietati, inchirieri private, vanzari si dezvoltare.",
     "capitalTitle": "Capital privat | MZS Capital",
     "capitalDescription": "MZS Capital explorează posibilităţile de finanţare privată, de investiţii şi de parteneriat strategic între imobiliare şi întreprinderi.",
     "aboutTitle": "Despre MZS | MZS Group",
     "aboutDescription": "Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat. Contacte internaționale. Cunoașterea piețelor locale.",
-    "consultancyTitle": "Consultanță | MZS Group",
-    "consultancyDescription": "Un plan clar începe cu întrebările potrivite. MZS Group combină experiența internațională cu cunoașterea piețelor locale și vă îndrumă în structuri juridice și fiscale, proiecte imobiliare și finanțare."
+    "consultancyTitle": "Consultanță imobiliară și finanțare | MZS Group",
+    "consultancyDescription": "Consultanță privind structuri juridice și fiscale, proiecte imobiliare și finanțare. Experiență internațională și cunoașterea piețelor locale."
   },
   "Login": {
     "private_access": "Acces privat",
@@ -1178,7 +1178,7 @@
   "About": {
     "label": "Despre MZS",
     "headline": "Contacte internaționale. Cunoașterea piețelor locale.",
-    "body": "Povestea noastră antreprenorială a început în 1990 în comerț, lângă Amsterdam. Prin Spania, drumul ne-a adus în Dubai, de unde activăm astăzi. Prin participații în diverse companii locale, îmbinăm 36 de ani de experiență cu contacte internaționale și cunoașterea piețelor locale. Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat.",
+    "body": "Povestea noastră antreprenorială a început în 1990 în comerț, lângă Amsterdam. Prin Spania, drumul ne-a adus în Dubai, de unde activăm astăzi. Prin participații în diverse companii locale, îmbinăm experiența acumulată din 1990 cu contacte internaționale și cunoașterea piețelor locale. Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat.",
     "amsterdam": "Origini lângă Amsterdam",
     "spain": "Prin Spania",
     "dubai": "Astăzi din Dubai",

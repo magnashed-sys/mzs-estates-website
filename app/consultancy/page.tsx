@@ -8,11 +8,7 @@ import ArrowUpRightIcon from '../components/ArrowUpRightIcon';
 import {publicMetadata} from '../../i18n/metadata';
 import styles from './page.module.css';
 
-export async function generateMetadata() {
-  const metadata = await publicMetadata('consultancy', '/consultancy');
-  return {...metadata, openGraph: {...metadata.openGraph, images: ['/images/consultancy-gateway.png']},
-    twitter: {...metadata.twitter, images: ['/images/consultancy-gateway.png']}};
-}
+export const generateMetadata = () => publicMetadata('consultancy', '/consultancy');
 
 export default async function ConsultancyPage() {
   const t = await getTranslations('Consultancy');
@@ -42,7 +38,7 @@ export default async function ConsultancyPage() {
         ))}
       </section>
       <CaseStudies />
-      <IntroCallForm introduction={t('lead')} source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
+      <IntroCallForm source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
   );
