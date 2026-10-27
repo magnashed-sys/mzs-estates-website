@@ -1,3 +1,4 @@
+import CaseStudies from '../consultancy/CaseStudies';
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {localizedPath} from "../../i18n/public-routing";
 import {publicMetadata} from "../../i18n/metadata";
@@ -103,7 +104,8 @@ const activities = [
         </div>
       </section>
 
-      <IntroCallForm preview={preview} source="real-estate" sectionNumber="04" />
+      <CaseStudies />
+      <IntroCallForm preview={preview} source="real-estate" sectionNumber="05" />
       {<p className={atmosphere.imageNote}>{t('illustrative_atmosphere_imagery')}</p>}
 
       <div className={styles.bottomNavigation}>
