@@ -10,6 +10,7 @@ import PropertyGallery, { type PropertyPhoto } from "./PropertyGallery";
 import ProjectResources from "./ProjectResources";
 import PropertyWalkthrough from "./PropertyWalkthrough";
 import VillaSitePlan from "./VillaSitePlan";
+import VillaNeighbourhood from "./VillaNeighbourhood";
 import {nuciaVideoNotes} from "./nuciaVideoNotes";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
@@ -108,10 +109,10 @@ export default async function PrivateProjectPage({ params }: Props) {
       hero: `${villaBase}/2026-10/6883.webp`,
       heroAlt: t("p337"),
       facts: [
-        { number: "04", label: t("p338") },
-        { number: "03", label: t("p339") },
-        { number: "08", label: t("p340") },
-        { number: "01", label: t("p341") },
+        { number: "4", label: t("p338") },
+        { number: "3", label: t("p339") },
+        { number: "8", label: t("p340") },
+        { number: "1", label: t("p341") },
       ],
       gallery: villaGallery,
       storyKicker: t("p342"),
@@ -466,6 +467,8 @@ export default async function PrivateProjectPage({ params }: Props) {
               <a href="mailto:info@mzsgroup.eu?subject=MZS%20Private%20Collection%20%E2%80%94%20Property%20Enquiry">{t("p419")}</a>
             </div>
           </section>
+          {slug === "villa-la-nucia" && <VillaNeighbourhood locale={locale} />}
+
           {slug === "marina-botafoch-apartment" && (
             <section className={styles.marinaMapSection} aria-labelledby="marina-map-heading">
               <div className={styles.marinaMapIntroduction}>
