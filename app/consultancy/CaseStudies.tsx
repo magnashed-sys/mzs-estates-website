@@ -52,8 +52,8 @@ export default async function CaseStudies() {
  const unit = units[locale] ?? units.en;
  const projects = [
   {image:'amsterdam-85-units', title:c[0]+' · 85 '+unit, location:'Amsterdam, '+c[6], width:1400, height:876},
-  {image:'ijmuiden-transformatie', title:c[1]+' · '+c[3], location:'IJmuiden, '+c[6], width:1400, height:933},
-  {image:'ibiza-20-units', title:c[0]+' · 20 '+unit, location:'Ibiza, '+c[7], width:1400, height:788},
+  {image:'ijmuiden-transformatie', title:c[1]+' · '+c[3], location:'IJmuiden, '+c[6], width:1400, height:876},
+  {image:'ibiza-20-units', title:c[0]+' · 20 '+unit, location:'Ibiza, '+c[7], width:1400, height:876},
   {image:'ter-apel-jachthaven', title:c[2]+' · '+c[4], location:'Ter Apel, '+c[6], width:1400, height:789},
   {image:'alicante-beheer-exploitatie', title:management[locale] ?? management.en, location:'Alicante, '+c[7], width:1372, height:836},
   {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
@@ -62,7 +62,7 @@ export default async function CaseStudies() {
   <div className={styles.heading}><span aria-hidden="true">04</span><h2 id="case-studies-title">Case Studies</h2></div>
   <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
-   <div className={project.image === 'amsterdam-85-units' ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
+   <div className={['amsterdam-85-units', 'ijmuiden-transformatie', 'ibiza-20-units'].includes(project.image) ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
    <figcaption><h3>{project.title}</h3><p>{project.location}</p></figcaption>
   </figure>)}</div>
  </section>;
