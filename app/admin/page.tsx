@@ -140,6 +140,9 @@ export default function AdminPage() {
       window.location.hostname.endsWith("-mzs3.vercel.app")
     );
     const initial = new URLSearchParams(window.location.search).get("tab");
+    const destinations:Record<string,string>={overview:"/admin/workspaces/group",estates:"/admin/workspaces/estates",capital:"/admin/workspaces/capital",contracts:"/admin/group/estates/contracts",bookings:"/admin/bookings/operations"};
+    const destination=initial?destinations[initial]:"/admin/workspaces/group";
+    if(destination){window.location.replace(destination);return ()=>{mounted.current=false;generation.current+=1;};}
     if (tabs.some(([key]) => key === initial)) setTab(initial as Tab);
     void reload();
     return () => { mounted.current = false; generation.current += 1; };
@@ -386,10 +389,15 @@ export default function AdminPage() {
 
   function navigate(next: Tab) {
     if (locked || actionLock.current) return;
+    const destinations:Partial<Record<Tab,string>>={overview:"/admin/workspaces/group",estates:"/admin/workspaces/estates",capital:"/admin/workspaces/capital",contracts:"/admin/group/estates/contracts",bookings:"/admin/bookings/operations"};
+    if(destinations[next]){router.push(destinations[next]!);return;}
     setTab(next); setSearch(""); setLimit(pageSize); setNotice("");
   }
   function openRequests(next: RequestFilter) { navigate("relationships"); setRelationshipView("requests"); setFilter(next); }
-  function openBookings(section: "bookings" | "cancellations") { navigate("bookings"); setBookingEntry(section); }
+  function openBookings(section: "bookings" | "cancellations") {
+    if (locked || actionLock.current) return;
+    router.push("/admin/bookings/operations" + (section === "cancellations" ? "?view=cancellations" : ""));
+  }
 
   async function runAction(key: string, action: () => Promise<string>) {
     if (actionLock.current || locked) return;
@@ -444,7 +452,7 @@ export default function AdminPage() {
   </div></main>;
 
   return <main className="admin-page">
-    <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><Link href="/admin/workspaces/group" onClick={guardLink} aria-disabled={locked} className="admin-button">New workspaces →</Link><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
+    <header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><div className="admin-header-actions"><span>Private administration</span><Link href="/admin/workspaces/group" onClick={guardLink} aria-disabled={locked} className="admin-button">Administration →</Link><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? "Signing out…" : "Sign out"}</button></div></header>
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>Private management.</h1><p className="admin-intro">Your relationships, properties, rental contracts, reservations and private capital in one place.</p></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <nav className="admin-nav" aria-label="Administration sections" style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 0"}}>

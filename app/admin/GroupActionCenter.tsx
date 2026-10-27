@@ -25,7 +25,7 @@ export default function GroupActionCenter({refreshVersion}:{refreshVersion:numbe
    if(owner.error)issues.push("Owner stays");
    else (owner.data||[]).forEach(x=>all.push({id:"owner-"+x.id,title:"Owner stay approval",detail:x.check_in+" – "+x.check_out,href:"/admin/owner-stays",category:"ESTATES",date:x.created_at}));
    if(bookings.error)issues.push("Booking requests");
-   else (bookings.data||[]).forEach(x=>all.push({id:"booking-"+x.id,title:"Rental booking request",detail:x.check_in+" – "+x.check_out,href:"/admin?tab=bookings",category:"BOOKINGS",date:x.created_at}));
+   else (bookings.data||[]).forEach(x=>all.push({id:"booking-"+x.id,title:"Rental booking request",detail:x.check_in+" – "+x.check_out,href:"/admin/bookings/operations",category:"BOOKINGS",date:x.created_at}));
    if(capital.error)issues.push("Capital enquiries");
    else (capital.data||[]).filter(x=>x.status==="pending"||x.status==="new").forEach(x=>all.push({id:"capital-"+x.id,title:"Capital enquiry",detail:"Review submitted request",href:"/admin/capital-requests",category:"CAPITAL",date:x.created_at}));
    if(outbox.error)issues.push("Email queue");
