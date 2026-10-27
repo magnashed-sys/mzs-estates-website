@@ -1,8 +1,9 @@
 "use client";
 import {useRef,useState} from "react";
 import {useRouter} from "next/navigation";
+import {bookingReturnHref} from "../../../../lib/admin/booking-return";
 import {createClient} from "../../../../lib/supabase/client";
-export default function TestBookingCleanup({bookingId}:{bookingId:string}){
+export default function TestBookingCleanup({bookingId,returnHref}:{bookingId:string;returnHref?:string}){
  const router=useRouter(),lock=useRef(false);
  const [busy,setBusy]=useState(false),[error,setError]=useState("");
  async function remove(){
@@ -11,7 +12,7 @@ export default function TestBookingCleanup({bookingId}:{bookingId:string}){
   try{
    const {data,error:failure}=await createClient().rpc("delete_test_rental_booking",{p_booking_id:bookingId});
    if(failure||data!==true)throw new Error("Deletion could not be confirmed. The record may have changed or have linked history. Refresh and review it before trying again.");
-   router.replace("/admin/bookings/operations?scope=test");router.refresh();
+   router.replace(returnHref?bookingReturnHref(returnHref):"/admin/bookings/operations?scope=test");router.refresh();
   }catch(cause){setError(cause instanceof Error?cause.message:"Deletion could not be confirmed.");lock.current=false;setBusy(false);}
  }
  return <section aria-label="Test booking cleanup">
