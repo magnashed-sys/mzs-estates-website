@@ -44,6 +44,9 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
  });
  const payload=error?null:data as Result|null;
  const rows=Array.isArray(payload?.items)?payload.items:[];
+ const ownerRequestIds=rows.filter(r=>r.category==="Owner stay").map(r=>r.id);
+ const ownerLinks=ownerRequestIds.length?await db.from("mzs_owner_stay_requests").select("id,booking_id").in("id",ownerRequestIds):{data:[],error:null};
+ const ownerBookings=new Map((ownerLinks.data||[]).map(r=>[r.id,r.booking_id]));
  const total=typeof payload?.total==="number"?payload.total:0;
  const maxPage=Math.max(1,Math.ceil(total/pageSize));
  const href=(next:number)=>{
@@ -60,6 +63,10 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
  };
  if(!error&&page>maxPage)redirect(href(maxPage));
  const returnTo=href(page);
+ const dossierHref=(r:Row)=>{
+  const bookingId=r.category==="Owner stay"?ownerBookings.get(r.id):r.id;
+  return bookingId?"/admin/bookings/"+bookingId+"?"+new URLSearchParams({returnTo}).toString():"/admin/owner-stays#request-"+r.id;
+ };
  const loadedFrom=total===0?0:offset+1;
  const loadedTo=Math.min(offset+rows.length,total);
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"36px clamp(18px,4vw,60px)"}}>
@@ -122,7 +129,7 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
      <table style={{width:"100%",minWidth:1120,borderCollapse:"collapse",textAlign:"left"}}>
       <thead style={{background:"#1e1b16"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Original reference","Property","Type","Check-in","Check-out","Status","Agreed amount"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #514839",fontWeight:500,color:"#d5c09a"}}>{h}</th>)}</tr></thead>
       <tbody>{rows.map(r=><tr key={r.category+r.id} style={{borderBottom:"1px solid #373229"}}>
-       <td style={{padding:12}}><Link href={r.category==="Owner stay"?r.href:"/admin/bookings/"+r.id+"?"+new URLSearchParams({returnTo}).toString()} style={linkStyle}>{r.category==="Owner stay"?"Manage stay →":"Open dossier →"}</Link></td>
+       <td style={{padding:12}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?"Manage request →":"Open dossier →"}</Link></td>
        <td style={{padding:12}}>{r.guestName}</td>
        <td style={{padding:12}}>{r.invoiceRecipient||"—"}</td>
        <td style={{padding:12,whiteSpace:"nowrap",fontSize:12}}>{r.sourceRef||"—"}</td>

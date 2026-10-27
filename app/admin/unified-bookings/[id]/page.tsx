@@ -4,6 +4,7 @@ import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import TestBookingCleanup from "./TestBookingCleanup";
 import BookingCleanup from "./BookingCleanup";
+import BookingCancellation from "./BookingCancellation";
 import BookingEditor from "../BookingEditor";
 import LegacyBookingEditor from "./LegacyBookingEditor";
 import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft,reviewBookingInvoiceDraft,editBookingInvoiceDraft} from "./actions";
@@ -18,8 +19,11 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
  const {data:rows,error}=await db.rpc("admin_list_rental_bookings").eq("id",id).limit(2);
  if(error||!rows||rows.length!==1)notFound();
  const b=rows[0];
- const cleanup=await db.rpc("mzs_admin_booking_cleanup_plan",{p_booking_id:id});
- const [{data:property},{data:guest},{data:owner},changes,prices,notifications]=await Promise.all([
+ const [cleanup,cancellation]=await Promise.all([
+  db.rpc("mzs_admin_booking_cleanup_plan",{p_booking_id:id}),
+  db.rpc("mzs_admin_booking_cancellation_plan",{p_booking_id:id})
+ ]);
+ const [{data:property},{data:guest},ownerResult,changes,prices,notifications]=await Promise.all([
   db.from("projects").select("title").eq("id",b.project_id).maybeSingle(),
   b.user_id?db.from("profiles").select("full_name,email").eq("id",b.user_id).maybeSingle():Promise.resolve({data:null}),
   db.from("mzs_owner_stay_requests").select("id,status").eq("booking_id",id).maybeSingle(),
@@ -27,6 +31,7 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
   db.from("mzs_booking_price_audit").select("id,old_total,new_total,reason,created_at").eq("booking_id",id).order("created_at",{ascending:false}).limit(100),
   db.from("rental_change_notifications").select("id,kind,status,attempts,created_at").eq("booking_id",id).order("created_at",{ascending:false}).limit(100)
  ]);
+ const owner=ownerResult.data;
  const receiptResult=await db.from("mzs_booking_receipts").select("id,amount,received_on,reference,notes,created_at,reversed_at,reversal_reason").eq("booking_id",id).order("received_on",{ascending:false}).limit(250);
  const legacyResult=await db.from("mzs_booking_legacy_sources").select("source_key,original_booking_number,confirmation_date,source_guest_name,booking_contact_name,source_email,source_phone,source_address,source_billed_days,source_nights,source_filename,source_sha256,invoice_recipient_kind,invoice_recipient_name,invoice_recipient_relationship_id,invoice_issuer_id,price_breakdown,source_terms").eq("booking_id",id).maybeSingle();
  const legacy=legacyResult.data;
@@ -43,7 +48,10 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
  const receiptTotal=receipts.filter(r=>!r.reversed_at).reduce((sum,r)=>sum+Math.round(Number(r.amount)*100),0)/100;
  const chargeable=!owner&&b.status==="confirmed"&&Number(b.quoted_total_eur)>0;
  const [invoiceDraft,issuerList]=await Promise.all([db.from("mzs_booking_invoice_drafts").select("id,recipient_name,gross_total,net_total,vat_total,vat_rate,tax_note,created_at,issuer_id,recipient_email,review_status,revision,reviewed_at").eq("booking_id",id).maybeSingle(),db.from("mzs_lease_issuers").select("id,name,tax_id,prefix").order("name")]);
- const editable=!legacy&&!b.is_test&&Boolean(b.user_id)&&["requested","confirmed"].includes(b.status)&&!owner;
+ const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Madrid",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ const actionDataReady=!legacyResult.error&&!ownerResult.error&&!cancellation.error&&Boolean(cancellation.data);
+ const historicalEditable=actionDataReady&&legacy&&!correctionResult.error&&!invoiceCompaniesResult.error&&!invoiceDraft.error&&!invoiceDraft.data&&b.status==="confirmed"&&!b.is_test&&!owner;
+ const editable=actionDataReady&&b.check_in>=today&&!legacy&&!b.is_test&&Boolean(b.user_id)&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
   <Link href={returnHref} style={{color:"#d5c09a"}}>← Back to bookings</Link>
@@ -57,11 +65,17 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:18}}>
     <section style={card}><h2>Guest & administration</h2><p>Guest: {effectiveGuestName||guest?.full_name||"Not available"}</p><p>Contact email: {effectiveContactEmail||guest?.email||"Not available"}</p><p>Account: {guest?.email?("Linked: "+guest.email):"No account linked"}</p><p>Internal notes: {b.admin_notes||"None"}</p></section>
-    <section style={card}><h2>Manage reservation</h2>
-      {!cleanup.error&&cleanup.data?<BookingCleanup key={cleanup.data.fingerprint} bookingId={id} plan={cleanup.data} returnHref={returnHref}/>:<p role="alert">Cleanup options could not be loaded. Refresh to verify.</p>}
+    <section style={card} aria-label="Reservation actions"><h2>Manage reservation</h2>
+      {!actionDataReady&&<p role="alert">Reservation type or actions could not be verified. Refresh before making changes.</p>}
+      <h3>Change reservation details</h3>
+
       {b.is_test&&["requested","test_approved","declined","cancelled"].includes(b.status)&&<TestBookingCleanup bookingId={b.id} returnHref={returnHref}/>}
-      {legacy&&!correctionResult.error&&!invoiceCompaniesResult.error&&b.status==="confirmed"&&!b.is_test&&!owner?<LegacyBookingEditor key={id+"-"+(currentCorrection?.version||0)} booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,checkInTime:(b.preferred_check_in||"").slice(0,5),checkOutTime:(b.preferred_check_out||"").slice(0,5),guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}} source={{guestName:effectiveGuestName||"",contactName:currentCorrection?.contact_name||legacy.booking_contact_name,contactEmail:effectiveContactEmail||"",billingKind:(currentCorrection?.invoice_recipient_kind||legacy.invoice_recipient_kind) as "person"|"company",invoiceRecipient:effectiveInvoiceRecipient||"",companyId:currentCorrection?.invoice_recipient_relationship_id||legacy.invoice_recipient_relationship_id,version:currentCorrection?.version||0}} companies={invoiceCompaniesResult.data||[]}/>:editable?<BookingEditor booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}}/>:
-        <><p>{legacy&&!b.user_id?"Imported reservation without a client login. The standard client-booking editor cannot update it; the imported confirmation remains authoritative.":"This reservation uses a dedicated workflow or is not eligible for modification here."}</p><Link href={owner?"/admin/owner-stays":"/admin/bookings/operations"} style={{color:"#d5c09a"}}>Open booking operations →</Link></>}
+      {historicalEditable?<LegacyBookingEditor key={id+"-"+(currentCorrection?.version||0)} booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,checkInTime:(b.preferred_check_in||"").slice(0,5),checkOutTime:(b.preferred_check_out||"").slice(0,5),guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}} source={{guestName:effectiveGuestName||"",contactName:currentCorrection?.contact_name||legacy.booking_contact_name,contactEmail:effectiveContactEmail||"",billingKind:(currentCorrection?.invoice_recipient_kind||legacy.invoice_recipient_kind) as "person"|"company",invoiceRecipient:effectiveInvoiceRecipient||"",companyId:currentCorrection?.invoice_recipient_relationship_id||legacy.invoice_recipient_relationship_id,version:currentCorrection?.version||0}} companies={invoiceCompaniesResult.data||[]}/>:editable?<BookingEditor booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}}/>:
+        <><p>{legacy?"Historical editing requires a confirmed reservation and no invoice draft. Original records remain available below.":owner?"Owner stays use their own approval workflow. Cancellation is available below when eligible.":b.status==="blocked"?"This period blocks availability. You can release it below without deleting its history.":"Date editing is available for upcoming live requested or confirmed client bookings."}</p><Link href={owner?"/admin/owner-stays#request-"+owner.id:"/admin/bookings/operations"} style={{color:"#d5c09a"}}>Open booking operations →</Link></>}
+      {!cancellation.error&&cancellation.data&&<BookingCancellation key={cancellation.data.fingerprint} bookingId={id} plan={cancellation.data}/>}
+      <details style={{marginTop:20}}><summary style={{cursor:"pointer",padding:"12px 0"}}>Archive, restore or remove an erroneous record</summary>
+      {!cleanup.error&&cleanup.data?<BookingCleanup key={cleanup.data.fingerprint} bookingId={id} plan={cleanup.data} returnHref={returnHref}/>:<p role="alert">Cleanup options could not be loaded. Refresh to verify.</p>}
+      </details>
       <p style={{color:"#a8a093",fontSize:12}}>Changes use the existing permission-checked booking functions. Amount changes require an audit reason.</p>
     </section>
   </div>

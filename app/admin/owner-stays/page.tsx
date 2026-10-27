@@ -58,9 +58,10 @@ export default async function PropertyPartnerManagement(){
  <section style={section}><h2>Owner-stay requests</h2>
  <p style={{color:'#b9aa94'}}>Every approval is checked against confirmed stays and unavailable periods. An overlapping request cannot create a second reservation.</p>
  {conflictError&&<p role='alert' style={{padding:14,border:'1px solid #a9845a',color:'#e3a995'}}>Availability checks could not be completed. Approvals are temporarily disabled; refresh the page and verify the calendar before proceeding.</p>}
- {(requests.data||[]).length===0?<p>No requests yet.</p>:(requests.data||[]).map(r=>{const g=grantIndex.get(r.partner_id);const check=g?conflictByInterval.get([g.project_id,r.check_in,r.check_out].join('|')):null;const conflict=check?.data?.[0];const blocked=Boolean(r.status==='requested'&&(!g||!check||check.error||conflictError||conflict));return <article key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #4b4234'}}>
+ {(requests.data||[]).length===0?<p>No requests yet.</p>:(requests.data||[]).map(r=>{const g=grantIndex.get(r.partner_id);const check=g?conflictByInterval.get([g.project_id,r.check_in,r.check_out].join('|')):null;const conflict=check?.data?.[0];const blocked=Boolean(r.status==='requested'&&(!g||!check||check.error||conflictError||conflict));return <article id={'request-'+r.id} key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #4b4234'}}>
  <strong>{names.get(g?.profile_id||'')||'Partner'} · {places.get(g?.project_id||'')||'Property'}</strong>
  <p>{r.check_in} – {r.check_out} · {r.guest_count} guests · {r.status.toUpperCase()} · €0 owner stay</p><p>{r.notes}</p>
+ {r.booking_id&&<Link href={'/admin/bookings/'+r.booking_id} style={{color:'#d5c09a'}}>Open reservation dossier →</Link>}
  {r.status==='requested'&&conflict&&<p role="alert" style={{padding:12,color:'#f0c0a5',border:'1px solid #8a624c',lineHeight:1.7}}>
    <strong>Approval blocked: dates already occupied.</strong> An existing {conflict.status} reservation or unavailable period runs from {conflict.check_in} to {conflict.check_out}. This request cannot be accepted without resolving that conflict.
    {' '}<Link href={'/admin/bookings/'+conflict.id} style={{color:'#d5c09a'}}>Open existing booking →</Link>

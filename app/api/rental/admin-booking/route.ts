@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const fields: Record<string, string[]> = {
+  mzs_admin_cancel_booking_dossier: ["p_booking_id", "p_reason", "p_fingerprint"],
   admin_modify_live_rental_booking: ["p_booking_id", "p_check_in", "p_check_out", "p_guest_count",
     "p_expected_check_in", "p_expected_check_out", "p_expected_guest_count", "p_admin_notes"],
   admin_cancel_live_rental_booking: ["p_booking_id", "p_reason"],
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest) {
   // The unchanged RPC retains validation, availability, price and audit behaviour.
   const { data, error } = await auth.db.rpc(body.functionName, args);
   if (error) return rentalJson(409, { error: error.message });
+  if (body.functionName === "mzs_admin_cancel_booking_dossier" && data?.emailQueued !== true)
+    return rentalJson(200, { result: data, delivery: "not_required" });
   let delivery: string = "queued";
   try { delivery = await deliverRentalChange(bookingId); } catch { /* Committed outbox survives failures. */ }
   return rentalJson(200, { result: data, delivery });
