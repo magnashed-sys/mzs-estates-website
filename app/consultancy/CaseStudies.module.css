@@ -1,4 +1,4 @@
-.section{padding:24px var(--inset) 80px;scroll-margin-top:32px}
+.section{padding:24px var(--inset, var(--mzs-public-inset, 20px)) 80px;scroll-margin-top:32px}
 .heading{display:flex;align-items:baseline;gap:24px;border-top:1px solid #464235;padding-top:32px;margin-bottom:30px}
 .heading>span{color:#bfa982;font-size:11px;letter-spacing:.1em}
 .heading h2{font:400 clamp(32px,3.2vw,46px)/1.2 Georgia,'Times New Roman',serif;color:#e4cfaa;margin:0}

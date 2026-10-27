@@ -46,7 +46,7 @@ const introductions: Record<string,string> = {
 
 const management: Record<string,string> = {"nl":"Vastgoedbeheer en exploitatie","en":"Property management and operations","es":"Gestión y explotación inmobiliaria","de":"Immobilienverwaltung und Bewirtschaftung","fr":"Gestion et exploitation immobilières","it":"Gestione e valorizzazione immobiliare","pt":"Gestão e exploração imobiliária","ru":"Управление и эксплуатация недвижимости","ar":"إدارة وتشغيل العقارات","tr":"Gayrimenkul yönetimi ve işletmesi","lt":"Nekilnojamojo turto valdymas ir eksploatavimas"};
 
-export default async function CaseStudies() {
+export default async function CaseStudies({sectionNumber = '04'}: {sectionNumber?: string}) {
  const locale = (await getLocale()).split('-')[0];
  const c = captions[locale] ?? captions.en;
  const unit = units[locale] ?? units.en;
@@ -59,7 +59,7 @@ export default async function CaseStudies() {
   {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
-  <div className={styles.heading}><span aria-hidden="true">04</span><h2 id="case-studies-title">Case Studies</h2></div>
+  <div className={styles.heading}><span aria-hidden="true">{sectionNumber}</span><h2 id="case-studies-title">Case Studies</h2></div>
   <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
    <div className={['amsterdam-85-units', 'ijmuiden-transformatie', 'ibiza-20-units'].includes(project.image) ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>

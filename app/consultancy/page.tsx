@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import CaseStudies from './CaseStudies';
+import Image from 'next/image';
 import {getTranslations} from 'next-intl/server';
 import IntroCallForm from '../private-capital/IntroCallForm';
 import PublicHeader from '../components/PublicHeader';
@@ -41,8 +41,8 @@ export default async function ConsultancyPage() {
           </article>
         ))}
       </section>
-      {process.env.VERCEL_ENV === "preview" && <CaseStudies />}
-      <IntroCallForm introduction={t('lead')} source="consultancy" sectionNumber={process.env.VERCEL_ENV === "preview" ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} />
+      <CaseStudies />
+      <IntroCallForm introduction={t('lead')} source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
   );

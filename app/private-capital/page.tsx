@@ -1,3 +1,4 @@
+import CaseStudies from '../consultancy/CaseStudies';
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {localizedPath} from "../../i18n/public-routing";
 import {publicMetadata} from "../../i18n/metadata";
@@ -139,7 +140,8 @@ const focus = [
         </div>
       </section>}
 
-      {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "05" : "04"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
+      <CaseStudies sectionNumber={atmosphereEnabled ? "05" : "04"} />
+      {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "06" : "05"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
         <p className={styles.eyebrow}>{t('selected_private_access')}</p>
         <h2 id="capital-invitation">{t('a_confidential_conversation')}<br />{t('starts_here')}</h2>
         <p> {t('authorized_clients_and_partners_can_view')} </p>

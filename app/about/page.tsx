@@ -1,3 +1,5 @@
+import IntroCallForm from '../private-capital/IntroCallForm';
+import CaseStudies from '../consultancy/CaseStudies';
 import Image from 'next/image';
 import Link from 'next/link';
 import ArrowUpRightIcon from '../components/ArrowUpRightIcon';
@@ -56,6 +58,8 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
+      <CaseStudies />
+      <IntroCallForm introduction="" source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
   );
