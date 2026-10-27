@@ -32,7 +32,7 @@ export default function InvestorConcept(){
    </div>
    <figure className={s.heroVisual}>
     <Image src="/images/capital/mediterranean-light.webp" alt="Sfeerbeeld van mediterrane architectuur in warm zonlicht" width={1536} height={1024} priority sizes="(max-width: 800px) 100vw, 45vw"/>
-    <figcaption><span>PRIVATE. INDEPENDENT. INTERNATIONAL.</span><small>Sfeerbeeld · geen aangeboden onderpand</small></figcaption>
+    <figcaption><span>PRIVATE. INDEPENDENT. INTERNATIONAL.</span></figcaption>
    </figure>
   </section>
   <section id="uitgangspunten" className={s.terms} aria-label="Uitgangspunten van de samenwerking">
