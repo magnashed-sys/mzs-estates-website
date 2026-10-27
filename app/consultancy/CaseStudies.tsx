@@ -51,12 +51,12 @@ export default async function CaseStudies() {
  const c = captions[locale] ?? captions.en;
  const unit = units[locale] ?? units.en;
  const projects = [
-  {image:'amsterdam-85-units', title:c[0]+' · 85 '+unit, location:'Amsterdam, '+c[6], width:888, height:1080},
+  {image:'amsterdam-85-units', title:c[0]+' · 85 '+unit, location:'Amsterdam, '+c[6], width:1400, height:1050},
   {image:'ijmuiden-transformatie', title:c[1]+' · '+c[3], location:'IJmuiden, '+c[6], width:1400, height:933},
-  {image:'ter-apel-jachthaven', title:c[2]+' · '+c[4], location:'Ter Apel, '+c[6], width:1400, height:789},
-  {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
-  {image:'alicante-beheer-exploitatie', title:management[locale] ?? management.en, location:'Alicante, '+c[7], width:1372, height:836},
   {image:'ibiza-20-units', title:c[0]+' · 20 '+unit, location:'Ibiza, '+c[7], width:1400, height:788},
+  {image:'ter-apel-jachthaven', title:c[2]+' · '+c[4], location:'Ter Apel, '+c[6], width:1400, height:789},
+  {image:'alicante-beheer-exploitatie', title:management[locale] ?? management.en, location:'Alicante, '+c[7], width:1372, height:836},
+  {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
   <div className={styles.heading}><span aria-hidden="true">04</span><h2 id="case-studies-title">Case Studies</h2></div>
