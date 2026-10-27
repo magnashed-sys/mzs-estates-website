@@ -36,8 +36,10 @@ export async function bookingInvoicePdf(i:BookingInvoiceDocument){
  let left=block(i.issuer.name.toUpperCase(),46,792,270,17);
  left=block(i.issuer.address,46,left-9,270,9);
  left=block("CIF: "+i.issuer.tax_id,46,left-3,270,9,muted);
- text("FACTUUR / INVOICE / FACTURA",325,792,11);
- text("CONCEPT / DRAFT / BORRADOR",325,774,8,gold);
+ text("BOEKINGSBEVESTIGING",325,792,10);
+ text("BOOKING CONFIRMATION",325,779,10);
+ text("CONFIRMACIÓN DE RESERVA",325,766,10);
+ text("CONCEPT / DRAFT / BORRADOR",325,749,8,gold);
  let y=Math.min(left-12,704);rule(y);y-=22;
  text("FACTUUR AAN / BILL TO / FACTURAR A",46,y,8,muted);
  let recipientEnd=block(i.recipient,46,y-21,260,12);
@@ -73,6 +75,6 @@ export async function bookingInvoicePdf(i:BookingInvoiceDocument){
   y=block(term.text,46,y,503,8)-6;
  }
  doc.getPages().forEach((p,n)=>p.drawText("CONCEPT / DRAFT / BORRADOR   |   "+(n+1)+" / "+doc.getPageCount(),{x:46,y:28,size:7,font,color:muted}));
- doc.setTitle("Concept invoice - "+i.reference);doc.setProducer("MZS Group");
+ doc.setTitle("Booking confirmation - "+i.reference);doc.setProducer("MZS Group");
  return Buffer.from(await doc.save());
 }
