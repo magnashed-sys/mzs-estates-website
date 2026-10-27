@@ -1,3 +1,4 @@
+import {getWorkCopy} from './work-copy';
 import IntroCallForm from '../private-capital/IntroCallForm';
 import CaseStudies from '../consultancy/CaseStudies';
 import Image from 'next/image';
@@ -18,6 +19,7 @@ export async function generateMetadata() {
 
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
+  const work = getWorkCopy(locale);
   const activities = [
     {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
     {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
@@ -63,27 +65,25 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
-      {locale === "nl" && (
-        <section className={styles.workGrid} aria-label="Werken met en voor MZS">
-          <article className={styles.workCard} aria-labelledby="work-with-title">
-            <p className={styles.eyebrow}>PARTNERS &amp; SAMENWERKING</p>
-            <h2 id="work-with-title">Werken <em>met</em> MZS</h2>
-            <p className={styles.workLead}>Sterke relaties beginnen met een kennismaking.</p>
-            <p>We breiden ons netwerk voortdurend uit met partners die onze persoonlijke aanpak en internationale ambities delen. Van makelaars, notarissen en architecten tot andere specialisten: samen brengen we lokale kennis en aanvullende expertise bij elkaar.</p>
-            <p>Ziet u mogelijkheden om met MZS samen te werken? Vraag een partneraccount aan en vertel ons kort over uw expertise en de samenwerking die u voor ogen heeft.</p>
-            <Link className={styles.workAction} href={localizedPath('/request-access', locale)}>Partneraccount aanvragen <ArrowUpRightIcon /></Link>
-          </article>
-          <article className={styles.workCard} aria-labelledby="work-for-title">
-            <p className={styles.eyebrow}>CARRIÈRE &amp; INTERNATIONALE GROEI</p>
-            <h2 id="work-for-title">Werken <em>voor</em> MZS</h2>
-            <p className={styles.workLead}>Bouw mee aan onze internationale groei.</p>
-            <p>Ons groeiende klantenbestand en internationale bedrijfsmodel bieden ruimte voor nieuwe collega's. Daarom zoeken we accountmanagers die onze klanten kunnen begeleiden in de volgende talen:</p>
-            <ul className={styles.workLanguages} aria-label="Gezochte talen"><li>Spaans</li><li>Italiaans</li><li>Russisch</li></ul>
-            <p>Bent u sterk in het opbouwen van relaties en voelt u zich thuis in een internationale omgeving? We bespreken graag hoe uw ervaring en ambities bij MZS kunnen aansluiten. Vermeld bij uw aanvraag uw taalvaardigheid en relevante ervaring.</p>
-            <a className={styles.workAction} href="#introductory-call">Interesse? Maak kennis met ons <ArrowUpRightIcon /></a>
-          </article>
-        </section>
-      )}
+      <section className={styles.workGrid} aria-label={work.sectionLabel}>
+        <article className={styles.workCard} aria-labelledby="work-with-title">
+          <p className={styles.eyebrow}>{work.partnerEyebrow}</p>
+          <h2 id="work-with-title">{work.partnerTitle}</h2>
+          <p className={styles.workLead}>{work.partnerLead}</p>
+          <p>{work.partnerBody}</p>
+          <p>{work.partnerInvitation}</p>
+          <Link className={styles.workAction} href={localizedPath('/request-access', locale)}>{work.partnerAction} <ArrowUpRightIcon /></Link>
+        </article>
+        <article className={styles.workCard} aria-labelledby="work-for-title">
+          <p className={styles.eyebrow}>{work.careerEyebrow}</p>
+          <h2 id="work-for-title">{work.careerTitle}</h2>
+          <p className={styles.workLead}>{work.careerLead}</p>
+          <p>{work.careerBody}</p>
+          <ul className={styles.workLanguages}>{work.languages.map(language => <li key={language}>{language}</li>)}</ul>
+          <p>{work.careerInvitation}</p>
+          <a className={styles.workAction} href="#introductory-call">{work.careerAction} <ArrowUpRightIcon /></a>
+        </article>
+      </section>
       <CaseStudies />
       <IntroCallForm introduction="" source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
