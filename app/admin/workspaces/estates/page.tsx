@@ -33,7 +33,7 @@ export default async function EstatesWorkspace(){
    <Link className={styles.card} href="/admin/group/estates/contracts"><small>03 / RENTAL ADMINISTRATION</small><strong>Contracts & invoices</strong><p>Tenants, agreements, invoicing entities and billing control.</p><span>Open contracts →</span></Link>
    <Link className={styles.card} href="/admin/bookings"><small>04 / RESERVATIONS</small><strong>Bookings</strong><p>Current and historical bookings, private stays, year filters and payments.</p><span>Open Bookings →</span></Link>
    <Link className={styles.card} href="/admin/owner-stays"><small>05 / OWNER & PARTNER</small><strong>Owner stays</strong><p>Complimentary stays, availability checks and booking approval.</p><span>Manage owner stays →</span></Link>
-   <Link className={styles.card} href="/admin?tab=projects"><small>06 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
+   <Link className={styles.card} href="/admin/projects"><small>06 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
   </section>
   <p className={styles.note}>Counts represent registered records, not monthly revenue or paid invoices. The financial cockpit provides separate reporting of contracted, forecast and actually received amounts.</p>
  </>;

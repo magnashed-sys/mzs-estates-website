@@ -1,9 +1,10 @@
 "use client";
 import {useRef,useState} from "react";
 import {useRouter} from "next/navigation";
+import {bookingReturnHref} from "../../../../lib/admin/booking-return";
 import {createClient} from "../../../../lib/supabase/client";
 type Plan={archived:boolean;canArchive:boolean;canDelete:boolean;blockers:string[];fingerprint:string};
-export default function BookingCleanup({bookingId,plan}:{bookingId:string;plan:Plan}){
+export default function BookingCleanup({bookingId,plan,returnHref}:{bookingId:string;plan:Plan;returnHref?:string}){
  const router=useRouter(),lock=useRef(false);
  const [reason,setReason]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");
  async function apply(action:"archive"|"restore"|"delete"){
@@ -14,7 +15,7 @@ export default function BookingCleanup({bookingId,plan}:{bookingId:string;plan:P
   try{
    const {data,error:failure}=await createClient().rpc("mzs_admin_booking_cleanup",{p_booking_id:bookingId,p_action:action,p_reason:reason.trim(),p_fingerprint:plan.fingerprint});
    if(failure||data!==action)throw new Error(failure?.message||"Result could not be confirmed. Refresh before trying again.");
-   if(action==="delete")router.replace("/admin/bookings");else router.refresh();
+   if(action==="delete")router.replace(bookingReturnHref(returnHref));else router.refresh();
   }catch(cause){setError(cause instanceof Error?cause.message:"Cleanup failed.");}
   finally{lock.current=false;setBusy(false);}
  }

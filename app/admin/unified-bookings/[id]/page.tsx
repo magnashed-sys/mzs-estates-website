@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {bookingReturnHref} from "../../../../lib/admin/booking-return";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import TestBookingCleanup from "./TestBookingCleanup";
@@ -9,8 +10,9 @@ import {recordBookingReceipt,reverseBookingReceipt,createBookingInvoiceDraft,rev
 export const dynamic="force-dynamic";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const money=(v:number|string|null)=>v===null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(v));
-export default async function BookingDossier({params}:{params:Promise<{id:string}>}){
+export default async function BookingDossier({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<Record<string,string|string[]|undefined>>}){
  const {id}=await params;
+ const returnHref=bookingReturnHref((await searchParams).returnTo);
  if(!UUID.test(id))notFound();
  const {db}=await requireEstateAdmin();
  const {data:rows,error}=await db.rpc("admin_list_rental_bookings").eq("id",id).limit(2);
@@ -44,7 +46,7 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
  const editable=!legacy&&!b.is_test&&Boolean(b.user_id)&&["requested","confirmed"].includes(b.status)&&!owner;
  const card={padding:24,border:"1px solid #514839",background:"#151411",borderRadius:6} as const;
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"42px clamp(20px,5vw,70px)"}}>
-  <Link href="/admin/bookings" style={{color:"#d5c09a"}}>← Unified Bookings</Link>
+  <Link href={returnHref} style={{color:"#d5c09a"}}>← Back to bookings</Link>
   <p style={{color:"#d5c09a",letterSpacing:3,fontSize:11,marginTop:30}}>MZS ESTATES / RESERVATION DOSSIER</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>{property?.title||"Rental property"}</h1>
   <p style={{color:"#b5ac9c"}}>Booking reference: {b.id}</p>
@@ -56,8 +58,8 @@ export default async function BookingDossier({params}:{params:Promise<{id:string
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:18}}>
     <section style={card}><h2>Guest & administration</h2><p>Guest: {effectiveGuestName||guest?.full_name||"Not available"}</p><p>Contact email: {effectiveContactEmail||guest?.email||"Not available"}</p><p>Account: {guest?.email?("Linked: "+guest.email):"No account linked"}</p><p>Internal notes: {b.admin_notes||"None"}</p></section>
     <section style={card}><h2>Manage reservation</h2>
-      {!cleanup.error&&cleanup.data?<BookingCleanup key={cleanup.data.fingerprint} bookingId={id} plan={cleanup.data}/>:<p role="alert">Cleanup options could not be loaded. Refresh to verify.</p>}
-      {b.is_test&&["requested","test_approved","declined","cancelled"].includes(b.status)&&<TestBookingCleanup bookingId={b.id}/>}
+      {!cleanup.error&&cleanup.data?<BookingCleanup key={cleanup.data.fingerprint} bookingId={id} plan={cleanup.data} returnHref={returnHref}/>:<p role="alert">Cleanup options could not be loaded. Refresh to verify.</p>}
+      {b.is_test&&["requested","test_approved","declined","cancelled"].includes(b.status)&&<TestBookingCleanup bookingId={b.id} returnHref={returnHref}/>}
       {legacy&&!correctionResult.error&&!invoiceCompaniesResult.error&&b.status==="confirmed"&&!b.is_test&&!owner?<LegacyBookingEditor key={id+"-"+(currentCorrection?.version||0)} booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,checkInTime:(b.preferred_check_in||"").slice(0,5),checkOutTime:(b.preferred_check_out||"").slice(0,5),guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}} source={{guestName:effectiveGuestName||"",contactName:currentCorrection?.contact_name||legacy.booking_contact_name,contactEmail:effectiveContactEmail||"",billingKind:(currentCorrection?.invoice_recipient_kind||legacy.invoice_recipient_kind) as "person"|"company",invoiceRecipient:effectiveInvoiceRecipient||"",companyId:currentCorrection?.invoice_recipient_relationship_id||legacy.invoice_recipient_relationship_id,version:currentCorrection?.version||0}} companies={invoiceCompaniesResult.data||[]}/>:editable?<BookingEditor booking={{id:b.id,checkIn:b.check_in,checkOut:b.check_out,guestCount:b.guest_count,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),notes:b.admin_notes||""}}/>:
         <><p>{legacy&&!b.user_id?"Imported reservation without a client login. The standard client-booking editor cannot update it; the imported confirmation remains authoritative.":"This reservation uses a dedicated workflow or is not eligible for modification here."}</p><Link href={owner?"/admin/owner-stays":"/admin/bookings/operations"} style={{color:"#d5c09a"}}>Open booking operations →</Link></>}
       <p style={{color:"#a8a093",fontSize:12}}>Changes use the existing permission-checked booking functions. Amount changes require an audit reason.</p>

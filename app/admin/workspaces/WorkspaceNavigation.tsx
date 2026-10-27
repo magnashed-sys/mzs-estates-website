@@ -8,10 +8,10 @@ const items=[
  {href:"/admin/workspaces/estates",label:"MZS Estates"},
  {href:"/admin/workspaces/capital",label:"MZS Capital"},
  {href:"/admin/workspaces/relationships",label:"Relationships"},
- {href:"/admin?tab=analytics",label:"System"}
+ {href:"/admin/system",label:"System"}
 ];
-export default function WorkspaceNavigation(){
+export default function WorkspaceNavigation({disabled=false}:{disabled?:boolean}){
  const path=usePathname();
  return <nav className={styles.nav} aria-label="Administration workspaces">{items.map(item=>
-  <Link key={item.href} href={item.href} aria-current={path===item.href||path.startsWith(item.href+"/")?"page":undefined}>{item.label}</Link>)}</nav>;
+  <Link key={item.href} href={item.href} onClick={event=>{if(disabled)event.preventDefault()}} aria-disabled={disabled} aria-current={path===item.href||path.startsWith(item.href+"/")||(item.label==="Relationships"&&["/admin/accounts","/admin/member-companies","/admin/relationships"].some(prefix=>path===prefix||path.startsWith(prefix+"/")))||(item.label==="MZS Estates"&&path.startsWith("/admin/projects"))?"page":undefined}>{item.label}</Link>)}</nav>;
 }

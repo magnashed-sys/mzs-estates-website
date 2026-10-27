@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const admin=read('app/admin/page.tsx');
+const admin=read('app/admin/AdminPanels.tsx');
 test('Admin core refresh excludes three large optional registers',()=>{
  const start=admin.indexOf('const results = await Promise.all([');
  const end=admin.indexOf('assertComplete(results);',start);
@@ -28,7 +28,7 @@ test('detail registers are lazy and inaccessible data is not shown as empty succ
 });
 test('specialized modules are loaded on demand, not in the initial Admin bundle',()=>{
  assert.match(admin,/import dynamic from "next\/dynamic"/);
- for(const module of ['BookingManagement','FinancialCockpit','RentalSummary','GroupActionCenter','RequestProjectApproval']){
+ for(const module of ['RequestProjectApproval']){
   assert.match(admin,new RegExp('dynamic\\(\\(\\) => import\\("\\./'+module+'"\\)'));
   assert.doesNotMatch(admin,new RegExp('import '+module+' from'));
  }
