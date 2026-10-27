@@ -20,6 +20,28 @@ export async function grantPartner(form:FormData){
  revalidatePath(path);
 }
 export type OwnerStayDecisionResult={status:'idle'|'success'|'error';message:string};
+export async function deleteOwnerStayRequest(
+ _previous:OwnerStayDecisionResult,form:FormData
+):Promise<OwnerStayDecisionResult>{
+ const {db}=await requireEstateAdmin();
+ const id=String(form.get('request_id')||'');
+ const reason=String(form.get('reason')||'').trim();
+ const status=String(form.get('expected_status')||'');
+ const checkIn=String(form.get('check_in')||'');
+ const checkOut=String(form.get('check_out')||'');
+ if(!UUID.test(id)||reason.length<5||reason.length>500||!['declined','cancelled'].includes(status)||
+    !/^\d{4}-\d{2}-\d{2}$/.test(checkIn)||!/^\d{4}-\d{2}-\d{2}$/.test(checkOut))
+  return {status:'error',message:'Provide a deletion reason of 5–500 characters and refresh if the request has changed.'};
+ const {data,error}=await db.rpc('mzs_admin_delete_closed_owner_stay',{
+  p_request_id:id,p_reason:reason,p_expected_status:status,p_check_in:checkIn,p_check_out:checkOut
+ });
+ if(error||data!==true)return {status:'error',message:'Deletion was not confirmed. The request may have changed or have a linked reservation. Refresh and review it before trying again.'};
+ revalidatePath(path);
+ revalidatePath('/admin');
+ revalidatePath('/admin/bookings');
+ revalidatePath('/admin/unified-bookings');
+ return {status:'success',message:'Closed owner-stay request deleted. An audit record has been retained.'};
+}
 /**
  * A calendar conflict is a normal business validation outcome, not a fatal
  * Next.js Server Action error. Never overwrite an existing booked period.
@@ -64,3 +86,4 @@ export async function adjustBookingPrice(form:FormData){
  revalidatePath(path);
  revalidatePath('/admin');
 }
+

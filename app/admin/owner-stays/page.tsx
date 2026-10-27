@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {requireEstateAdmin} from '../../../lib/security/estate-properties';
 import {grantPartner,adjustBookingPrice} from './actions';
 import OwnerStayDecision from './OwnerStayDecision';
+import OwnerStayCleanup from './OwnerStayCleanup';
 export const dynamic='force-dynamic';
 const money=(n:number|string|null)=>n===null?'Not priced':new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(Number(n));
 export default async function PropertyPartnerManagement(){
@@ -68,6 +69,7 @@ export default async function PropertyPartnerManagement(){
  </p>}
  {r.status==='requested'&&!conflict&&blocked&&<p role="alert" style={{color:'#e3a995'}}>Approval is disabled because the property or calendar could not be verified. You can still decline the request.</p>}
  {r.status==='requested'&&<OwnerStayDecision id={r.id} blocked={blocked}/>}
+ {['declined','cancelled'].includes(r.status)&&!r.booking_id&&<OwnerStayCleanup id={r.id} status={r.status} checkIn={r.check_in} checkOut={r.check_out}/>}
 
  </article>})}
  </section>
@@ -80,3 +82,4 @@ export default async function PropertyPartnerManagement(){
  <button style={field}>Save audited price</button></form></details>)}
  </section></main>;
 }
+
