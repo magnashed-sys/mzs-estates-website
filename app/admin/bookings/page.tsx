@@ -7,10 +7,10 @@ type RawParams=Record<string,string|string[]|undefined>;
 type Row={
  id:string;category:"Guest booking"|"Owner stay"|"Unavailable";
  property:string;checkIn:string;checkOut:string;status:string;
- amount:number|null;href:string;guestName:string;invoiceRecipient:string;sourceRef:string;
+ amount:number|null;paid:number;href:string;guestName:string;invoiceRecipient:string;sourceRef:string;
 };
 type Result={total:number;items:Row[];years:number[];properties:{id:string;name:string}[];
- summary:{guest:number;owner:number;blocked:number;requested:number};
+ summary:{agreed:number;paid:number;outstanding:number;credit:number;guest:number;owner:number;blocked:number;requested:number};
  offset:number;limit:number};
 const param=(input:RawParams,key:string)=>{
  const value=input[key];return typeof value==="string"?value.trim():"";
@@ -124,10 +124,14 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
        <p style={{fontSize:29,margin:"8px 0 0"}}>{amount??0}</p>
       </div>)}
    </section>}
+   {!error&&<section aria-label="Filtered payment totals" style={{display:"flex",flexWrap:"wrap",gap:12,margin:"18px 0"}}>
+    {([["Total booking value",payload?.summary?.agreed],["Paid",payload?.summary?.paid],["Outstanding",payload?.summary?.outstanding],["Overpaid / credit",payload?.summary?.credit]] as const).map(([label,value])=><div key={label} style={{...style,flex:"1 1 180px"}}><small>{label}</small><p style={{fontSize:26,margin:"8px 0"}}>{value==null?"Unavailable":money(value)}</p></div>)}
+    <p style={{width:"100%",color:"#b5ac9c",fontSize:12}}>Totals cover all matching confirmed guest bookings across all pages. Owner stays are complimentary. Paid includes historical settlements confirmed by the owner and excludes reversed receipts.</p>
+   </section>}
    {!error&&<section aria-label="Matching booking records" style={{...style,padding:0,overflow:"hidden"}}>
     <div style={{overflowX:"auto"}}>
-     <table style={{width:"100%",minWidth:1120,borderCollapse:"collapse",textAlign:"left"}}>
-      <thead style={{background:"#1e1b16"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Original reference","Property","Type","Check-in","Check-out","Status","Agreed amount"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #514839",fontWeight:500,color:"#d5c09a"}}>{h}</th>)}</tr></thead>
+     <table style={{width:"100%",minWidth:1400,borderCollapse:"collapse",textAlign:"left"}}>
+      <thead style={{background:"#1e1b16"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Original reference","Property","Type","Check-in","Check-out","Status","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #514839",fontWeight:500,color:"#d5c09a"}}>{h}</th>)}</tr></thead>
       <tbody>{rows.map(r=><tr key={r.category+r.id} style={{borderBottom:"1px solid #373229"}}>
        <td style={{padding:12}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?"Manage request →":"Open dossier →"}</Link></td>
        <td style={{padding:12}}>{r.guestName}</td>
@@ -139,6 +143,9 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
        <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkOut)}</td>
        <td style={{padding:12}}>{r.status.replaceAll("_"," ")}</td>
        <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Owner stay"?"Complimentary":money(r.amount)}</td>
+       <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"?money(r.paid):"—"}</td>
+       <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"&&r.status==="confirmed"&&r.amount!==null?money(Math.max(0,r.amount-r.paid)):"—"}</td>
+       <td style={{padding:12}}>{r.category==="Owner stay"?"Complimentary":r.category!=="Guest booking"||r.status!=="confirmed"?"Not applicable":r.amount===null?"Not priced":r.amount===0?"No charge":r.paid>r.amount?"Overpaid":r.paid>=r.amount?"Paid":r.paid>0?"Partly paid":"Unpaid"}</td>
       </tr>)}</tbody>
      </table>
     </div>
