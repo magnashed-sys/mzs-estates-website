@@ -83,6 +83,15 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
     <Link href="/admin/group/estates/contracts?view=invoices" style={{...control,...linkStyle}}>Contracts &amp; Invoices</Link>
     <Link href="/admin/group/estates/properties" style={{...control,...linkStyle}}>Properties</Link>
    </nav>
+   <section style={{...style,marginBottom:20}} aria-label="Accountant year export">
+    <h2>Accountant year overview</h2>
+    <p>Administrative allocation follows the arrival date, including stays crossing New Year. This is separate from the actual payment date and invoice issue date. Historical payments remain marked as paid with their original payment date unknown.</p>
+    <form action="/admin/bookings/accountant-export" method="GET" style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"end"}}>
+     <label>Arrival year<select name="year" required defaultValue={year??""} style={{...control,display:"block"}}><option value="" disabled>Select a year</option>{(payload?.years||[]).map(y=><option key={y} value={y}>{y}</option>)}</select></label>
+     <button type="submit" style={control} disabled={!!error}>Download accountant CSV</button>
+    </form>
+    <p style={{fontSize:12,color:"#b5ac9c"}}>Includes all active, confirmed guest bookings for the selected arrival year across properties, regardless of the search filters below. Owner stays, test bookings, cancellations and archived bookings are excluded. Recorded paid amounts are not bank-verified cashflow. No invoice is issued by this export.</p>
+   </section>
    <section style={style} aria-label="Search and filter bookings">
     <h2 style={{fontFamily:"Georgia,serif",fontWeight:400,fontSize:25,margin:"0 0 18px"}}>Find reservations</h2>
     <form action="/admin/bookings" method="GET" style={{display:"flex",gap:12,alignItems:"end",flexWrap:"wrap"}}>
@@ -160,3 +169,4 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
   </div>
  </main>;
 }
+
