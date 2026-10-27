@@ -1,4 +1,5 @@
 "use client";
+import {trackLead} from "../../lib/analytics/google";
 import PhoneInput from "../components/PhoneInput";
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 import {useTranslations} from 'next-intl';
@@ -54,6 +55,7 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
         setError(response.status === 429 ? t("rateLimit") : response.status === 400 ? t("checkDetails") : response.status === 413 ? t("shortenMessage") : t("we_could_not_confirm_your_request"));
         return;
       }
+      trackLead("intro_call");
       setReference(result.id);
       form.reset();
       setPhone("");
@@ -138,3 +140,4 @@ export default function IntroCallForm({ preview = false, sectionNumber = "04", s
     </section>
   );
 }
+

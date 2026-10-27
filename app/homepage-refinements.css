@@ -34,7 +34,7 @@
       transparent 35%,
       rgba(7, 8, 9, 0.15) 100%
     ),
-    url("/mzs-hero.png");
+    url("/images/home-hero-1536.webp");
 
   background-size: cover;
   background-position: center center;
@@ -194,7 +194,7 @@
         rgba(7, 8, 9, 0.55) 40%,
         rgba(7, 8, 9, 0.20) 100%
       ),
-      url("/mzs-hero.png");
+      url("/images/home-hero-1536.webp");
 
     background-position: center center;
   }
@@ -218,7 +218,7 @@
         rgba(7, 8, 9, 0.75) 55%,
         rgba(7, 8, 9, 0.88) 100%
       ),
-      url("/mzs-hero.png");
+      url("/images/home-hero-960.webp");
 
     background-position: 60% center;
   }
@@ -268,3 +268,4 @@
     transition: none;
   }
 }
+
