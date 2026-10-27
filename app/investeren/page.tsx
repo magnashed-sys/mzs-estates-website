@@ -50,7 +50,7 @@ export default function InvestorConcept(){
     <article><span className={s.index}>II</span><h3>Afspraken op papier</h3><p>Rente, looptijd, terugbetaling en het eerste hypotheekrecht worden vastgelegd in de overeenkomst en hypotheekdocumentatie.</p></article>
     <article><span className={s.index}>III</span><h3>Duidelijkheid over aflossing</h3><p>De hoofdsom wordt volledig afgelost aan het einde van de looptijd. Verlenging kan alleen met wederzijdse instemming, onder dan overeen te komen voorwaarden.</p></article>
    </div>
-   <aside className={s.risk}><strong>Zekerheid is geen garantie.</strong><p>Kapitaal verstrekken brengt risico’s met zich mee. Rentebetalingen of aflossing kunnen vertraging oplopen of uitblijven. Ook met een eerste hypotheekrecht kan bij verkoop van het vastgoed een tekort ontstaan. Je kunt een deel van je inleg verliezen.</p></aside>
+   <aside className={s.risk}><strong>Notarieel vastgelegde afspraken.</strong><p>Alle afspraken worden vastgelegd bij lokale notarissen. Dit omvat de overeengekomen rente, looptijd, terugbetaling en het eerste hypotheekrecht op het betreffende vastgoed.</p></aside>
   </section>
   <section id="werkwijze" className={s.process}>
    <div className={s.processHeading}><p className={s.eyebrow}>03 / VAN GESPREK NAAR SAMENWERKING</p><h2>Een persoonlijke aanpak.<br/><em>Van de eerste vraag tot de afspraken.</em></h2></div>
