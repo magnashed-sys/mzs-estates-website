@@ -1,3 +1,4 @@
+import {bookingAllocation} from "../../../../lib/estates/booking-accounting";
 import Link from "next/link";
 import {isMaseIssuer} from "../../../../lib/estates/booking-invoice";
 import {bookingReturnHref} from "../../../../lib/admin/booking-return";
@@ -102,13 +103,19 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
   </section>}
   {legacyResult.error&&<p role="alert" style={{color:"#e3a995"}}>Historical billing metadata could not be loaded. Check the source record before issuing invoices.</p>}
   <section style={{...card,marginTop:20}}><h2>Booking payments</h2>
+    {!owner&&b.status==="confirmed"&&!b.is_test&&<div style={{border:"1px solid #514839",padding:14}}>
+     <h3>Administrative year allocation</h3>
+     <p>Allocation date: <strong>{bookingAllocation(b.check_in).allocationDate}</strong> · Arrival year: <strong>{bookingAllocation(b.check_in).allocationYear}</strong></p>
+     <p>This reporting date follows the start of the stay. It is not a payment date or invoice issue date. Unknown original payment dates remain unknown; invoice issue dates are retained separately.</p>
+     <a href={"/admin/bookings/accountant-export?year="+bookingAllocation(b.check_in).allocationYear} style={{color:"#d5c09a"}}>Download this arrival year's accountant overview →</a>
+    </div>}
     <p>Recorded booking value: <strong>{money(b.quoted_total_eur)}</strong></p>
     <p>Receipts recorded against this booking: <strong>{receiptResult.error?"Unavailable":money(receiptTotal)}</strong></p>
     <p>Remaining balance: <strong>{receiptResult.error||b.quoted_total_eur===null?"Unavailable":money(Number(b.quoted_total_eur)-receiptTotal)}</strong></p>
     {receipts.some(r=>r.receipt_type==="historical_settlement"&&!r.reversed_at)&&<p style={{color:"#bcb2a4"}}>Historical payment confirmed by the owner and carried forward. The original payment date was not supplied; the registration date is not a bank transaction date.</p>}
     <p style={{color:"#bcb2a4"}}>These are manually registered booking receipts, not issued invoices or verified bank-feed transactions. The balance is based on the recorded booking total and these receipts only; it is not added to the recurring lease-contract payment ledger.</p>
     {receiptResult.error&&<p role="alert">Booking receipts could not be loaded. Do not rely on this balance.</p>}
-    {receipts.length>0&&<div style={{overflowX:"auto"}}><table style={{width:"100%",textAlign:"left"}}><thead><tr><th>Date</th><th>Amount</th><th>Reference</th><th>Notes</th><th>Correction</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on||"Historical · date unknown"}</td><td>{money(r.amount)}</td><td>{r.reference}</td><td>{r.notes||"—"}{r.reversed_at&&<p style={{color:"#e8b29c"}}>Reversed · {new Date(r.reversed_at).toLocaleString("en-GB")}<br/>{r.reversal_reason}</p>}</td><td>{r.reversed_at?"Reversed":<form action={reverseBookingReceipt} style={{display:"grid",gap:6}}><input type="hidden" name="receipt_id" value={r.id}/><input name="reason" required minLength={5} maxLength={500} placeholder="Reason for reversal" aria-label="Reversal reason" style={{padding:7}}/><button type="submit">Reverse receipt</button></form>}</td></tr>)}</tbody></table></div>}
+    {receipts.length>0&&<div style={{overflowX:"auto"}}><table style={{width:"100%",textAlign:"left"}}><thead><tr><th>Actual payment date</th><th>Amount</th><th>Reference</th><th>Notes</th><th>Correction</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on||"Historical · date unknown"}</td><td>{money(r.amount)}</td><td>{r.reference}</td><td>{r.notes||"—"}{r.reversed_at&&<p style={{color:"#e8b29c"}}>Reversed · {new Date(r.reversed_at).toLocaleString("en-GB")}<br/>{r.reversal_reason}</p>}</td><td>{r.reversed_at?"Reversed":<form action={reverseBookingReceipt} style={{display:"grid",gap:6}}><input type="hidden" name="receipt_id" value={r.id}/><input name="reason" required minLength={5} maxLength={500} placeholder="Reason for reversal" aria-label="Reversal reason" style={{padding:7}}/><button type="submit">Reverse receipt</button></form>}</td></tr>)}</tbody></table></div>}
     {chargeable&&!receiptResult.error&&<form action={recordBookingReceipt} style={{marginTop:22,display:"grid",gap:12,maxWidth:420}}>
       <h3>Record a received payment</h3>
       <input type="hidden" name="booking_id" value={id}/>
@@ -193,3 +200,4 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
   </section>
  </main>;
 }
+
