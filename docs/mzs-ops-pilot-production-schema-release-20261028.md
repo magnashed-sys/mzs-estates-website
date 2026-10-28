@@ -26,3 +26,7 @@ If application routing is impaired, revert to the recorded previous known-good V
 
 ## What this does not authorize
 No Production staff access, Catherine activation, copy of Production data into Staging, historical invoice imports, accountant ZIPs, expense mutation, work-order dispatch, external emails or financial postings. A future pilot activation must explicitly verify the existing account and physical-property assignment and undergo authenticated admin/staff, revoked-user, wrong-object and mobile acceptance.
+
+## Preview validation boundary
+- This release branch's Vercel Preview is connected **only** to the MZS Staging Supabase URL and public publishable key; the pilot enable flag is deliberately absent. This verifies the application's default-disabled behavior and does not execute Production SQL.
+- The Production environment variables are unchanged. The production schema is applied separately through a recorded, reviewed database migration only after CI and runtime checks are accepted.
