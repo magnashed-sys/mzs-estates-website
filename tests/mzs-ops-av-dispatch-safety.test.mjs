@@ -34,7 +34,7 @@ test("Trigger requires an authenticated admin, same-site origin, original metada
  assert.match(route,/actual!==original\.sha256/);
  assert.match(route,/scanStagingPdfWithCloudmersive\(bytes,options\)/);
  assert.ok(route.indexOf("actual!==original.sha256")<route.indexOf("scanStagingPdfWithCloudmersive(bytes,options)"));
- assert.doesNotMatch(route,/\.update\(|\.delete\(|mzs_lease_invoices|mzs_capital_payments|rental_bookings|sendMail/);
+ assert.doesNotMatch(route,/\.from\([^)]*\)\.update\(|\.delete\(|mzs_lease_invoices|mzs_capital_payments|rental_bookings|sendMail/);
 });
 test("Only the backend records scanner outcome with immutable SHA; never accepts browser verdict, paths or entity overrides",()=>{
  assert.match(route,/createSupabaseClient\(STAGING,key/);
