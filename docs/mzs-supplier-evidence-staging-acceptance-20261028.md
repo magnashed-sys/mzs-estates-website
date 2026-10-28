@@ -30,3 +30,19 @@ Do NOT enable real supplier-document uploads in Production until:
 6. Independent Production backup restoration evidence for rollout risk, and separate owner acceptance of file upload functionality.
 
 **This branch is not approval to promote the whole earlier Draft PR #143 or the Staging-only Storage SQL.**
+
+
+## Synthetic PDF admission and reusable sample
+
+- All Staging document uploads must pass the original PDF MIME, size, actual magic bytes, private login and same-origin checks. In addition, the untrusted byte sequence must start with a supported `%PDF-` version, contain a valid end marker and basic structure, and carry a **special exact MZS synthetic-test marker in its initial bytes**.
+- Obvious active instructions (JavaScript, OpenAction, Launch, embedded files, XFA, encrypted documents, etc.) are rejected. These are cheap **heuristics only**; they do not unpack compressed or obfuscated malicious content and are **NOT antivirus, content-disarm, or a malware-safety certification**.
+- Reproducible *fictional* one-page source: `scripts/generate-mzs-synthetic-expense-pdf.mjs`. Generate a local fixture using `node scripts/generate-mzs-synthetic-expense-pdf.mjs /tmp/mzs-synthetic-expense-test.pdf`; no customer/supplier data is used.
+- The matching client-side file input accepts PDFs only, and the active Group Administrator must confirm it is fictitious before submitting. The server makes the marker/magic check **before the private Storage mutation**.
+- Invalid, unmarked, too-large, truncated or obvious active-content documents never reach the upload call. Tests also check that the fixture can be parsed by `pdf-lib`.
+- The project has **no connected, authenticated malware scanning service**. Production real-document upload remains blocked regardless of this improvement; do not change the Production URL guard or import the evidence Storage migration until the scanner and quarantine lifecycle are implemented and tested.
+
+## Acceptance still outstanding
+
+- A real authenticated Staging browser upload and review with the generated sample fixture.
+- Malware scanning integration (fail closed on unknown/error/timeout), quarantine and controlled release, evidence-retention/deletion policy and correction/supersession after a reviewed original.
+- A verified isolated recovery rehearsal of the Production backup before Production private-file enablement.
