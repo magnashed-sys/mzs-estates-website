@@ -8,10 +8,20 @@ const stagingGuards=[
  "app/admin/workspaces/estates/staff/actions.ts",
  "app/admin/workspaces/estates/staff/review-actions.ts",
  "app/admin/workspaces/estates/staff/completion-actions.ts",
+ "app/admin/workspaces/estates/expenses/entity-link-actions.ts",
+ "app/admin/workspaces/estates/expenses/expense-draft-actions.ts",
+ "app/admin/workspaces/estates/expenses/evidence-review-actions.ts",
+ "app/admin/workspaces/estates/expenses/correction-actions.ts",
+ "app/admin/workspaces/estates/expenses/correction-decision-actions.ts",
+ "app/admin/workspaces/estates/expenses/replacement-actions.ts",
+ "app/admin/workspaces/estates/expenses/documents/route.ts",
+ "app/admin/workspaces/estates/expenses/documents/[id]/route.ts",
  "app/admin/workspaces/estates/expenses/accountant-export/route.ts",
  "app/admin/workspaces/estates/expenses/sales-export/route.ts",
+ "app/admin/workspaces/estates/expenses/accountant-bundle/route.ts",
  "app/api/admin/property-operations-costs/route.ts",
- "app/api/staff/maintenance-photo/route.ts"
+ "app/api/staff/maintenance-photo/route.ts",
+ "app/api/staff/maintenance-photo/[id]/route.ts"
 ];
 test("Draft staff, private evidence and accountant finance modules remain disabled in Production",()=>{
  for(const path of stagingGuards){
@@ -19,6 +29,24 @@ test("Draft staff, private evidence and accountant finance modules remain disabl
   assert.match(code,/process\.env\.VERCEL_ENV/,"missing server-only Vercel env guard: "+path);
   assert.match(code,/process\.env\.NEXT_PUBLIC_SUPABASE_URL/,"missing database routing check: "+path);
   assert.match(code,/senonkpxdtlhyhrubicg\.supabase\.co/,"missing isolated Staging project guard: "+path);
+ }
+});
+test("Direct admin Staff and Expense URLs fail closed before querying any Production table",()=>{
+ for(const path of [
+  "app/admin/workspaces/estates/staff/page.tsx",
+  "app/admin/workspaces/estates/expenses/page.tsx"
+ ]){
+  const code=source(path);
+  const page=code.slice(code.indexOf("export default async function "));
+  const firstDataRead=page.indexOf("await requireEstateAdmin()");
+  assert.ok(firstDataRead>0,"missing admin auth on "+path);
+  const guard=page.slice(0,firstDataRead);
+  assert.match(guard,/if\(process\.env\.VERCEL_ENV!=="preview"[\s\S]*?process\.env\.NEXT_PUBLIC_SUPABASE_URL!=="https:\/\/senonkpxdtlhyhrubicg\.supabase\.co"\)[\s\S]*?notFound\(\);/,"missing fail-closed pre-query server guard: "+path);
+ }
+});
+test("Staff page and mutations inherit the authenticated scope guard",()=>{
+ for(const path of ["app/staff/page.tsx","app/staff/actions.ts","app/staff/correction-actions.ts"]){
+  assert.match(source(path),/await requirePropertyStaff\(\)/,path+" must not bypass property grants");
  }
 });
 test("Every Production pilot needs separate test-data classification and cannot claim production-ready by default",()=>{
