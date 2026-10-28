@@ -59,13 +59,14 @@ test("expense preview route explicitly verifies the active administrator and com
  assert.match(page,/force-dynamic/);
  assert.doesNotMatch(page,/\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
 });
-test("preview cannot persist or issue invoices and stays visibly labelled as a draft",()=>{
+test("UI keeps sales invoicing, emails and payments disabled while drafts are explicitly staged",()=>{
  const page=read("app/admin/workspaces/estates/expenses/page.tsx");
  const component=read("app/admin/workspaces/estates/expenses/ExpenseCalculator.tsx");
  const cockpit=read("app/admin/workspaces/estates/page.tsx");
  assert.match(cockpit,/href="\/admin\/workspaces\/estates\/expenses"/);
- assert.match(page,/Niet opslaan/);
- assert.match(component,/nog uitgeschakeld/);
+ assert.match(page,/Staging · gecontroleerd/);
  assert.match(component,/expenseAllocationPreview\(/);
- assert.doesNotMatch(component,/\bfetch\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|[.]rpc\(|submit.*invoice/i);
+ assert.match(component,/<ExpenseDraftSaver/);
+ assert.doesNotMatch(component,/\bfetch\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|[.]rpc\(/);
+ assert.doesNotMatch(page,/sendMail\(|SMTP|mzs_issue_lease_invoice/);
 });
