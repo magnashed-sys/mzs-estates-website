@@ -3,7 +3,7 @@ import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 
 export type ScopeActionState={status:"idle"|"success"|"error";message:string};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Group Admin grants/revokes one property at a time, with immutable provenance. */
 export async function recordStaffScope(_prev:ScopeActionState,form:FormData):Promise<ScopeActionState>{
  if(process.env.VERCEL_ENV!=="preview"||
