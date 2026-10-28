@@ -38,6 +38,12 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
  ]);
  const registers=[issuers,properties,units,suppliers,links];
  if(registers.some(x=>x.error||x.count===null||x.data===null||x.data.length!==x.count))notFound();
+ // PostgREST returns HTTP 416 without count/data for an offset past the end.
+ // Re-read a single row with the same filters to find the last page safely.
+ if(drafts.error?.code==="PGRST103"&&filters.page>1){
+  const first=await draftQuery.range(0,0);
+  if(!first.error&&first.count!==null)redirect(expenseRegisterHref(filters,Math.max(1,Math.ceil(first.count/EXPENSE_PAGE_SIZE))));
+ }
  if(drafts.error||drafts.count===null||drafts.data===null)throw new Error("Het kostenregister kon niet worden geladen.");
  const pageCount=Math.max(1,Math.ceil(drafts.count/EXPENSE_PAGE_SIZE));
  if(filters.page>pageCount)redirect(expenseRegisterHref(filters,pageCount));

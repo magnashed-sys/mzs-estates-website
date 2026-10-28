@@ -28,7 +28,8 @@ async function renderRegister(pageNumber,count=201){
  const db={from(table){
   selections.push(table);let first=0,last=24;
   const builder={select(){return builder},order(column){calls.push(['order',table,column]);return builder},limit(){return builder},eq(){return builder},gte(){return builder},lte(){return builder},or(){return builder},range(a,b){first=a;last=b;calls.push(['range',a,b]);return builder},then(resolve){
-   const data=table==='mzs_ops_expense_drafts'?Array.from({length:Math.min(25,Math.max(0,count-first))},(_,i)=>({id:String(first+i),net_cents:100,vat_cents:21,gross_cents:121,status:'draft',source_document_status:'missing'})):[];
+   if(table==='mzs_ops_expense_drafts'&&first>0&&first>=count)return Promise.resolve({error:{code:'PGRST103'},count:null,data:null}).then(resolve);
+   const data=table==='mzs_ops_expense_drafts'?Array.from({length:Math.min(last-first+1,Math.max(0,count-first))},(_,i)=>({id:String(first+i),net_cents:100,vat_cents:21,gross_cents:121,status:'draft',source_document_status:'missing'})):[];
    return Promise.resolve({error:null,count:table==='mzs_ops_expense_drafts'?count:0,data}).then(resolve);
   }};return builder;
  }};
@@ -50,6 +51,6 @@ test('server register renders beyond the old 200-row ceiling using bounded, stab
  assert.ok(x.calls.some(c=>c[0]==='order'&&c[1]==='mzs_ops_expense_drafts'&&c[2]==='id'));
  assert.ok(x.result);
 });
-test('out-of-range page redirects to the final page instead of losing register access',async()=>{
+test('PostgREST 416 without count recovers the final page instead of losing register access',async()=>{
  await assert.rejects(renderRegister(10),/redirect:.*page=9/);
 });
