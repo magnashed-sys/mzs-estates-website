@@ -83,7 +83,7 @@ export default function ExpenseEvidenceReview({drafts,documents,events,scanEvent
  return <section className={styles.panel} style={{marginTop:22}} aria-labelledby="evidence-heading">
   <p className={styles.kicker}>06 / BRONDOCUMENTEN EN CONTROLE</p>
   <h2 id="evidence-heading">Originele factuur &amp; goedkeuring</h2>
-  <p className={styles.hint}>Alleen fictieve PDF-testbestanden op Staging. Ieder bestand gaat verplicht in quarantaine: zonder een echte, positieve SHA-256-gebonden scannerscan is er geen download of beoordeling mogelijk. Er is nog geen scanner aangesloten. Upload nooit echte leveranciersdocumenten.</p>
+  <p className={styles.hint}>Alleen fictieve PDF-testbestanden op Staging. Ieder bestand gaat verplicht in quarantaine: zonder een echte, positieve SHA-256-gebonden scannerscan is er geen download of beoordeling mogelijk. Er is nog geen malware-scanner aangesloten. Upload nooit echte leveranciersdocumenten.</p>
   {!enabled?<p className={styles.error} role="alert">Documentregister of controlehistorie is niet volledig beschikbaar. Uploaden en beoordelen zijn geblokkeerd.</p>:
    <><form onSubmit={upload} className={styles.fields} style={{marginTop:20}}>
     <label>Geregistreerd kostenconcept
