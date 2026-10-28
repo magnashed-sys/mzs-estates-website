@@ -5,7 +5,7 @@ import {buildOpsCostSummary,type OpsDraft,type OpsEvidence,type OpsReview,
 export const dynamic="force-dynamic";
 const headers={"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow"};
 const staging="https://senonkpxdtlhyhrubicg.supabase.co";
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Every page must be complete and based on the same reported total. */
 async function fullRegister(query:()=>any,limit=5000):Promise<any[]>{
  const rows:any[]=[],seen=new Set<string>();
