@@ -82,7 +82,7 @@ export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:
       "Voor dit concept is al een origineel bestand opgeslagen.":
       chosenReview?"Concept is eerder beoordeeld; upload geblokkeerd.":
       "Dit concept heeft nog geen brondocument."}</p>}
-    {!chosenDoc&&!chosenReview&&draftId&&<label>Origineel document (PDF, JPEG of PNG; maximaal 10 MB)
+    {!chosenDoc&&!chosenReview&&draftId&&<label>Origineel document (PDF, JPEG of PNG; maximaal 4 MB)
      <input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
       onChange={e=>setFile(e.target.files?.[0]||null)}/>
     </label>}
