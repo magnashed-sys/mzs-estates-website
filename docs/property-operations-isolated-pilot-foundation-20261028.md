@@ -28,6 +28,12 @@ Draft PR #143 includes broad Staging-only Property Operations, supplier expenses
 
 **The gate is not yet wired to live routes** and therefore no new employee pilot UI is reachable from this work. Do not claim the pilot is activated.
 
+## Rollback-only real Staging schema rehearsal — 28 October 2026
+
+The exact pilot DDL plan was executed against **MZS Staging only** inside one explicit transaction with its final `COMMIT` replaced by `ROLLBACK`. PostgreSQL accepted the complete schema plan. A separate read-only post-rehearsal query confirmed **0 pilot tables and 0 pilot views**, with the existing **19 Property Operations Staging tables** preserved. Read-only Production inspection separately confirmed **0 pilot tables and 0 Property Operations tables**. This validates DDL compatibility, **not** any Production migration, account-specific user acceptance, live staff workflows or restoration of a backup.
+
+Branch-specific Vercel Preview variables have been configured with **MZS Staging's public URL and publishable key only**. No Production environment variables or secrets were changed; the pilot enable flag remains absent/OFF.
+
 ## Automated verification included
 
 `tests/mzs-ops-isolated-pilot.test.mjs` runs PGlite role-based integration with independent synthetic accounts and properties:
