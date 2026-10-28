@@ -1,12 +1,13 @@
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 "use client";
 import {useActionState} from "react";
-import {recordStaffScope,initialScopeAction} from "./actions";
+import {recordStaffScope} from "./actions";
 import s from "../../../../staff/staff.module.css";
 
 type Member={id:string;full_name:string|null;role:string};
 type Property={id:string;name:string};
 export default function StaffScopeForm({members,properties}:{members:Member[];properties:Property[]}){
- const [state,action,pending]=useActionState(recordStaffScope,initialScopeAction);
+ const [state,action,pending]=useActionState(recordStaffScope,initialFormActionState);
  return <form className={s.form} action={action}>
   <h2>Toegang per object</h2>
   <p className={s.description}>Wijs alleen bestaande, actieve Staging-accounts toe. Dit verandert de cliëntrol niet en verleent geen toegang tot financiële dossiers.</p>
