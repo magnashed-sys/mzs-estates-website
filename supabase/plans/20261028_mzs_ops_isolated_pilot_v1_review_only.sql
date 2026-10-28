@@ -60,11 +60,13 @@ begin
  then raise exception 'Active Group Administrator required' using errcode='42501';end if;
  select * into target from public.mzs_ops_pilot_runs where id=new.run_id for update;
  if not found then raise exception 'Pilot run missing';end if;
+ -- Serialize activation of distinct runs on the same physical property.
+ perform 1 from public.mzs_estate_properties where id=target.property_id for update;
  select e.action into previous from public.mzs_ops_pilot_run_events e
   where e.run_id=new.run_id order by e.sequence_no desc limit 1;
- if (new.action='activate' and previous is not distinct from 'activate')
+ if (new.action='activate' and previous is not null)
   or (new.action='deactivate' and previous is distinct from 'activate')
- then raise exception 'Pilot run already has this state';end if;
+ then raise exception 'Pilot run can activate only once and deactivate only after activation';end if;
  if new.action='activate' and exists(
   select 1 from public.mzs_ops_pilot_runs r where r.property_id=target.property_id
    and r.id<>target.id and mzs_private.ops_pilot_run_active(r.id)
