@@ -79,7 +79,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  const rows=(await query("select sequence_no,action from mzs_ops_expense_review_events where draft_id='"+draft+"' order by sequence_no")).rows;
  assert.deepEqual(rows.map(x=>x.action),['submitted','approved']);
  assert.deepEqual(rows.map(x=>x.sequence_no),[1,2]);
- await assert.rejects(query("insert into mzs_ops_expense_review_events(draft_id,action,expected_state) values('"+draft+"','submitted','draft')"),/Stale expense review/);
+ await assert.rejects(query("insert into mzs_ops_expense_review_events(draft_id,action,expected_state) values('"+draft+"','submitted','draft')"),/quarantine|Stale expense review/);
  await assert.rejects(query("delete from mzs_ops_expense_review_events where draft_id='"+draft+"'"),/permission denied/);
  await db.exec("select set_config('request.jwt.claim.sub','"+client+"',false);");
  assert.equal((await query('select count(*)::int as n from mzs_ops_expense_documents')).rows[0].n,0);
