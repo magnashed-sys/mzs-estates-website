@@ -2,10 +2,10 @@
  * MZS accountancy rehearsal: exact source-derived sales and receipt records.
  * No accounting ledger, no inferred VAT, no transfer of unattributed payments.
  */
-export type InvoiceSource = "rental_contract"|"holiday_booking";
+export type InvoiceSource = "rental_contract"|"holiday_booking"|"external_cost_invoice";
 export type IssuedInvoice = {
   source:InvoiceSource;id:string;issuer_id:string;number:string;issued_on:string;
-  total:unknown;net_total?:unknown;vat_total?:unknown;contract_id?:string;booking_id?:string;
+  total:unknown;net_total?:unknown;vat_total?:unknown;contract_id?:string;booking_id?:string;batch_id?:string;status?:string;
 };
 export type ReceiptSource = "lease_payment"|"booking_receipt";
 export type RecordedReceipt = {
@@ -36,9 +36,10 @@ export function dateYear(value:string|null):number|null {
 }
 export function normalizeIssuedInvoice(i:IssuedInvoice,legalEntity:string,year:number){
   if(!uuid.test(legalEntity)||!uuid.test(i.id)||!uuid.test(i.issuer_id)||i.issuer_id!==legalEntity ||
-   !["rental_contract","holiday_booking"].includes(i.source) ||
+   !["rental_contract","holiday_booking","external_cost_invoice"].includes(i.source) ||
    (i.source==="rental_contract"&&!i.contract_id)||
    (i.source==="holiday_booking"&&!i.booking_id)||
+   (i.source==="external_cost_invoice"&&(!i.batch_id||!uuid.test(i.batch_id)||i.status!=="externally_issued"||i.net_total===undefined||i.vat_total===undefined))||
    typeof i.number!=="string"||!i.number.trim()||i.number.length>100 ||
    dateYear(i.issued_on)!==year)throw Error("Invoice is not attributable to exact entity/issue year");
   const total=euroCents(i.total),net=i.net_total===undefined?null:euroCents(i.net_total),
@@ -47,7 +48,7 @@ export function normalizeIssuedInvoice(i:IssuedInvoice,legalEntity:string,year:n
   if(net!==null&&vat!==null&&net+vat!==total)throw Error("Invoice VAT mismatch");
   return {
     source:i.source,invoice_id:i.id,issuer_id:i.issuer_id,invoice_number:i.number,
-    invoice_date:i.issued_on,source_document_id:i.source==="rental_contract"?i.contract_id!:i.booking_id!,
+    invoice_date:i.issued_on,source_document_id:i.source==="rental_contract"?i.contract_id!:i.source==="holiday_booking"?i.booking_id!:i.batch_id!,
     gross_eur:centsEuro(total),net_eur:net===null?"":centsEuro(net),
     vat_eur:vat===null?"":centsEuro(vat),
     vat_note:net===null?"Net/VAT not available in this issued invoice source; accountant to verify":"",

@@ -116,6 +116,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
     {filters.page<pageCount&&<Link href={expenseRegisterHref(filters,filters.page+1)}>Volgende pagina →</Link>}
    </nav>
   </section>
+  <p><Link href="/admin/workspaces/estates/history">Open opgeslagen historische weekopgaven en externe facturen →</Link></p>
   <WeeklyCostsImport/>
  </main>;
 }
