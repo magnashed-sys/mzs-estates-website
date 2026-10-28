@@ -56,7 +56,7 @@ test("accountant route is Staging only, entity/year scoped and refuses incomplet
  assert.match(route,/await requireEstateAdmin\(\)/);
  assert.match(route,/eq\("legal_entity_id",legalEntityId\)/);
  assert.match(route,/gte\("invoice_date",year\+"-01-01"\)/);
- assert.match(route,/correctionIds\.has\(d\.id\)/);
+ assert.match(route,/correctionPending/);
  assert.match(route,/Source document integrity mismatch/);
  assert.match(route,/Incomplete linked records/);
  assert.match(route,/Cache-Control":"private, no-store"/);
