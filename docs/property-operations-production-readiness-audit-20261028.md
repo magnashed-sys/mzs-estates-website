@@ -9,9 +9,9 @@
 - Production Supabase **currently has zero `mzs_ops_` public tables**. Staging has 19 protected `mzs_ops_` tables and two narrowly scoped directory views.
 - All 19 Staging `mzs_ops_` tables show RLS enabled. No anon SELECT, and no authenticated direct UPDATE/DELETE privileges. The directory views are `security_invoker=true`; employees are limited to explicitly assigned physical properties, not tenant/owner finance data.
 - Staging Security Advisor reported **no active findings specific to `mzs_ops_`** on the inspected head. Other legacy system findings may still exist; do not claim project-wide clean security.
-- Staging Performance Advisor reported **25 unindexed FK info findings** among these new operational tables. Additive covering indexes prepared in `supabase/migrations/20261028194500_mzs_ops_fk_indexes_staging.sql` (must validate before staging application).
+- Staging Performance Advisor reported **25 unindexed FK info findings** among these new operational tables. Additive covering indexes created in `supabase/migrations/20261028194500_mzs_ops_fk_indexes_staging.sql`, applied to MZS Staging after exact-head green CI. The advisor now reports **0 missing FK indexes specific to MZS Ops**; all 25 indexes were verified in PostgreSQL.
 - Vercel preview unauthenticated GET to `/staff`, `/admin/workspaces/estates/staff` and `/admin/workspaces/estates/expenses` returned the login experience rather than private administration.
-- Unauthenticated request to the new `/api/admin/property-operations-costs` previously returned **503** rather than allowing the authentication redirect / notFound to propagate. No private totals were returned. Corrected in commit following the reviewed head by moving `requireEstateAdmin()` outside the financial-source catch; re-verify on the new Preview.
+- Unauthenticated request to the new `/api/admin/property-operations-costs` previously returned **503** rather than propagating authentication redirect/notFound. It was fixed by moving `requireEstateAdmin()` outside the financial-source catch. Retest against the current Preview confirmed unauthenticated requests receive the **login experience**, with no private financial data exposed.
 - No grouped preview runtime errors were found for the previous three-hour interval, but logs being empty is **not** a substitute for authenticated browser acceptance.
 
 ### Verified unit/database integration
@@ -51,3 +51,10 @@ The GitHub test suite plus rollback-only Staging PostgreSQL checks have covered:
 ### Phase one completion definition
 
 The technical foundation and isolated database security are mature enough for **manual Staging acceptance**, not for an unattended Production switch. Production-readiness remains **NO-GO** until the blockers above have owner acceptance and supporting evidence. Preserve the strong distinction between technical CI, unauthenticated route probes, rolled-back PostgreSQL acceptance, and a real signed-in end-to-end browser test.
+
+### Verified post-remediation check
+
+- GitHub exact source SHA `5f376c4272bd94a18eeb30c982ca243c6c345c80` passed Platform tests, Next.js build, TypeScript and Phase 3A security guardrails.
+- Vercel deployment `https://mzs-group-bud2hjsem-mzs3.vercel.app` was READY for that commit. Public anonymous probe to staff/admin and cost API returned the sign-in experience and no private data.
+- Isolated Supabase Staging applied `mzs_ops_fk_indexes_staging`, verified 25 new FK indexes and 0 remaining MZS Ops unindexed FK advisor findings. New MZS Ops security advisor findings remained zero. Existing legacy warnings elsewhere are not thereby resolved.
+- Stage is still **NOT signed-in end-to-end accepted**. No cookies or connected authenticated browser session were available in this audit. Do not treat anonymous route smoke tests or Vercel READY as proof of actual admin/employee UX.
