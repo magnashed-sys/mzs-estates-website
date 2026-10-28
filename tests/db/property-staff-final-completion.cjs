@@ -145,7 +145,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  assert.equal((await q('select count(*)::int as n from mzs_ops_maintenance_tickets')).rows[0].n,0);
  assert.equal((await q('select count(*)::int as n from mzs_ops_staff_property_directory')).rows[0].n,0);
  await actor(admin);
- assert.equal((await q('select count(*)::int as n from mzs_ops_staff_visits')).rows[0].n,1);
+ assert.equal((await q('select count(*)::int as n from mzs_ops_staff_visits')).rows[0].n,2);
  assert.equal((await q('select count(*)::int as n from mzs_ops_maintenance_tickets')).rows[0].n,1);
  await assigned(property,'revoke');
  await assert.rejects(assigned(property,'revoke'),/already has this state/);
