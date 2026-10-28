@@ -12,6 +12,6 @@ test("System pilot navigation is gated by the exact server Production release",(
  assert.ok(source.includes('href="/admin/property-operations-pilot"'));
 });
 test("Production pilot does not become a finance or generic staff portal",()=>{
- assert.match(source,/Geen facturen, salarissen of leveranciersopdrachten/);
+ assert.match(source,/No invoices, payroll or supplier orders/);
  assert.doesNotMatch(source,/href=\"\/staff\"/);
 });

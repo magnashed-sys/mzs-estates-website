@@ -10,19 +10,19 @@ export type ExternalInvoice={id:string;batch_id:string;issuer_id:string;customer
 export type HistoryRow={id:string;batch_id:string;profile_id:string;reporting_year:number;reference:string;iso_week:number;period_from:string;period_until:string;original_location:string;category:string;description:string;cost_cents:number;recharge:'Ja'|'Nee'|'Te beoordelen';source_reference:string;source_check:string;source_billing_reference:string;invoice_id:string|null;billed_hours:number|null;recharge_cents:number|null};
 export type HistoryReport={snapshotAt:string;filters:HistoryFilters;batches:HistoryBatch[];rows:HistoryRow[];invoices:ExternalInvoice[];totalCost:number;rechargedCost:number;billedHours:number;reviewCount:number;notRechargeCount:number;groups:{location:string;count:number;cost:number;invoiced:number}[]};
 export function historyFilters(params:Record<string,string|string[]|undefined>,now=new Date()):HistoryFilters{
- const read=(key:string,fallback='')=>{const v=params[key];if(typeof v==='string')return v;if(v===undefined)return fallback;throw Error('Ongeldig historisch filter');};
+ const read=(key:string,fallback='')=>{const v=params[key];if(typeof v==='string')return v;if(v===undefined)return fallback;throw Error("Invalid historical filter");};
  const year=read('year',operationsDay(now).slice(0,4)),profile=read('profile');
- if(!/^20\d{2}$/.test(year)||(profile&&!uuid.test(profile)))throw Error('Kies een geldig jaar en account.');
+ if(!/^20\d{2}$/.test(year)||(profile&&!uuid.test(profile)))throw Error("Choose a valid year and account.");
  return {year:Number(year),profile:profile.toLowerCase(),page:pageNumber(read('page','1'))};
 }
 export function historyHref(f:HistoryFilters,page=1,csv=false){const q=new URLSearchParams({year:String(f.year)});if(f.profile)q.set('profile',f.profile);if(!csv)q.set('page',String(pageNumber(String(page))));return '/admin/workspaces/estates/history'+(csv?'/export':'')+'?'+q;}
-export function librarySourceHref(id:string){if(!/^libfile[_-][A-Za-z0-9_-]+$/.test(id))throw Error('Ongeldige bronverwijzing');return 'https://chatgpt.com/library?file_id='+encodeURIComponent(id)+'&account_id=personal';}
+export function librarySourceHref(id:string){if(!/^libfile[_-][A-Za-z0-9_-]+$/.test(id))throw Error("Invalid source reference");return 'https://chatgpt.com/library?file_id='+encodeURIComponent(id)+'&account_id=personal';}
 const validId=(v:unknown):v is string=>typeof v==='string'&&uuid.test(v);
 const cents=(n:unknown):n is number=>Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=100000000000;
 const date=(s:unknown):s is string=>{if(typeof s!=='string'||!/^20\d{2}-\d{2}-\d{2}$/.test(s))return false;try{dateYear(s);return true;}catch{return false;}};
 const text=(s:unknown,max:number,min=0):s is string=>typeof s==='string'&&s.length>=min&&s.length<=max;
 export function normalizeHistory(source:unknown,filters:HistoryFilters):HistoryReport{
- const fail=()=>{throw Error('Historische bron onvolledig of inconsistent. Er zijn geen gedeeltelijke totalen weergegeven.');};
+ const fail=()=>{throw Error("Historical source incomplete or inconsistent. No partial totals are displayed.");};
  if(!source||typeof source!=='object')return fail();const s=source as Record<string,unknown>;
  if(s.year!==filters.year||s.profile!==(filters.profile||null)||typeof s.snapshot_at!=='string'||!Number.isFinite(Date.parse(s.snapshot_at))||!Array.isArray(s.batches)||s.batches.length>1000||!Array.isArray(s.rows)||s.rows.length>10000||!Array.isArray(s.invoices)||s.invoices.length>1000)return fail();
  const batches=s.batches as HistoryBatch[],rows=s.rows as HistoryRow[],invoices=s.invoices as ExternalInvoice[];
@@ -52,7 +52,7 @@ export function normalizeHistory(source:unknown,filters:HistoryFilters):HistoryR
  for(const i of invoices){const t=it.get(i.id);if(!t||t.net!==i.net_cents||t.hours!==i.billed_hours)return fail();}
  return {snapshotAt:s.snapshot_at,filters,batches,rows,invoices,totalCost,rechargedCost,billedHours,reviewCount,notRechargeCount,groups:[...groups.values()].sort((a,b)=>a.location.localeCompare(b.location,'nl'))};
 }
-export async function loadHistory(db:Awaited<ReturnType<typeof createClient>>,filters:HistoryFilters){const {data,error}=await db.rpc('mzs_ops_historical_source',{p_year:filters.year,p_profile:filters.profile||null});if(error)throw Error('Historische opgaven konden niet volledig worden geladen.');return normalizeHistory(data,filters);}
+export async function loadHistory(db:Awaited<ReturnType<typeof createClient>>,filters:HistoryFilters){const {data,error}=await db.rpc('mzs_ops_historical_source',{p_year:filters.year,p_profile:filters.profile||null});if(error)throw Error("Historical statements could not be fully loaded.");return normalizeHistory(data,filters);}
 export function historyCsv(report:HistoryReport){
  const batches=new Map(report.batches.map(x=>[x.id,x])),invoices=new Map(report.invoices.map(x=>[x.id,x]));
  const columns=['snapshot_at','profile_id','employee','source_reference','week_from','week_until','original_location','category','description','original_cost_cents','source_message','source_check','recharge','external_invoice_id','invoice_number','invoice_status','billed_hours','billed_net_cents','actual_minutes','time_note','payment_status','source_file_id','source_sha256'];

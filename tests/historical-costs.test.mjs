@@ -9,7 +9,7 @@ test('historical costs preserve source costs and billed hours without reconstruc
 });
 test('history rejects missing/duplicate rows, broken invoice joins and inconsistent tax, hours, cost or source snapshots',()=>{
  const changes=[s=>s.rows.pop(),s=>s.rows[1].id=s.rows[0].id,s=>s.rows[1].reference=s.rows[0].reference,s=>s.rows[0].cost_cents++,s=>s.rows[0].cost_cents=1.5,s=>s.invoices[0].vat_cents++,s=>s.invoices[0].billed_hours++,s=>s.invoices[0].payment_status='paid',s=>s.invoices[0].status='draft',s=>s.invoices=[],s=>s.rows[0].invoice_id=null,s=>s.rows[0].billed_hours=null,s=>s.rows[0].recharge_cents=null,s=>s.rows[0].period_from='2026-02-08',s=>s.rows[0].profile_id=id(99),s=>s.batches[0].source_file_id='javascript:alert(1)',s=>s.batches[0].source_sha256='',s=>s.year=2025,s=>s.rows[0].source_check=null];
- for(const change of changes){const s=fixture();change(s);assert.throws(()=>h.normalizeHistory(s,filters()),/onvolledig|inconsistent/);}
+ for(const change of changes){const s=fixture();change(s);assert.throws(()=>h.normalizeHistory(s,filters()),/incomplete|inconsistent/);}
 });
 test('history filters use Madrid reporting year and canonical admin-only URLs and source links',()=>{
  assert.equal(h.historyFilters({},new Date('2026-12-31T23:30:00Z')).year,2027);
@@ -53,6 +53,6 @@ test('historical page checks active admin before data and paginates only detail 
  if(name.includes('historical-costs'))return h;throw Error(name);
  }});
  const render=page=>exports.default({searchParams:Promise.resolve({year:'2026',page})});
- if(denied){await assert.rejects(render('1'),/denied/);assert.deepEqual(calls,['environment','admin']);}else{const tree=await render('3'),json=JSON.stringify(tree);assert.equal((json.match(/SYN-/g)??[]).length,11);assert.match(json,/61,00/);await assert.rejects(render('999'),/redirect:.*page=3/);}}
+ if(denied){await assert.rejects(render('1'),/denied/);assert.deepEqual(calls,['environment','admin']);}else{const tree=await render('3'),json=JSON.stringify(tree);assert.equal((json.match(/SYN-/g)??[]).length,11);assert.match(json,/61\.00/);await assert.rejects(render('999'),/redirect:.*page=3/);}}
 });
 test('historical imports and external invoices enforce real PostgreSQL lifecycle, access and duplicate controls',()=>{const r=spawnSync(process.execPath,['tests/db/historical-costs.cjs'],{encoding:'utf8',timeout:120000});assert.equal(r.status,0,r.stdout+'\n'+r.stderr);});

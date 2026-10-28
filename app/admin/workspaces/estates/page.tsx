@@ -33,17 +33,17 @@ export default async function EstatesWorkspace(){
     <small>{x.label}</small><strong>{x.result.error||x.result.count===null?"Unavailable":x.result.count}</strong>
    </div>)}
   </section>
-  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db} scope="maintenance"/></Suspense>
+  <Suspense fallback={<p role="status">Loading action list…</p>}><OperationsActionCenter db={db} scope="maintenance"/></Suspense>
   <section className={styles.grid} aria-label="Property workflows">
-   <Link className={styles.card} href="/admin/workspaces/estates/actions?queue=triage"><small>ONDERHOUD</small><strong>Meldingen, planning &amp; werkopdrachten</strong><p>Volg onderhoud, toegewezen medewerkers, offertes en budgetbeslissingen op.</p><span>Open onderhoud →</span></Link>
+   <Link className={styles.card} href="/admin/workspaces/estates/actions?queue=triage"><small>MAINTENANCE</small><strong>Reports, planning &amp; work orders</strong><p>Follow up on maintenance, assigned staff, quotations and budget decisions.</p><span>Open maintenance →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/properties"><small>01 / PROPERTY REGISTER</small><strong>Properties & ownership</strong><p>Legal ownership, managing agents and property records.</p><span>Open property register →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/units"><small>02 / UNIT MANAGEMENT</small><strong>Rental units</strong><p>Rentable units, linked contracts and recorded rental amounts.</p><span>Open rental units →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/contracts"><small>03 / RENTAL ADMINISTRATION</small><strong>Contracts & invoices</strong><p>Tenants, agreements, invoicing entities and billing control.</p><span>Open contracts →</span></Link>
    {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/entities">
     <small>04 / ACCOUNTANCY PREPARATION</small>
-    <strong>Objecten &amp; juridische entiteiten</strong>
-    <p>Leg gecontroleerd vast welke juridische entiteit eigenaar, kostendrager of beheerder is, met bron en ingangsdatum.</p>
-    <span>Open juridische objectkoppelingen →</span>
+    <strong>Properties &amp; legal entities</strong>
+    <p>Record the verified legal owner, cost bearer or manager with supporting evidence and an effective date.</p>
+    <span>Open legal property associations →</span>
    </Link>}
    <Link className={styles.card} href="/admin/projects"><small>09 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
   </section>

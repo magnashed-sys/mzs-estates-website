@@ -4,7 +4,7 @@ import {accountantCsv} from './finance';
 import {operationsDay} from './action-queues';
 
 export type TimeFilters={from:string;until:string;property:string;profile:string;page:number};
-export const timeStates={approved:'Goedgekeurd',pending:'Te beoordelen',correction:'Correctie open',returned:'Teruggestuurd'} as const;
+export const timeStates={approved:"Approved",pending:"Awaiting review",correction:"Correction pending",returned:"Returned"} as const;
 export type TimeState=keyof typeof timeStates;
 type SourceVisit={id:string;property_id:string;profile_id:string;worked_on:string;actual_minutes:number;effective_minutes:number;task_category:string;description:string;correction_id:string|null;review_decision:'approved'|'rejected'|null;reviewed_at:string|null;correction_pending:boolean};
 type Option={id:string;name:string};
@@ -13,10 +13,10 @@ type Bucket={count:number;minutes:number};
 export type TimeTotals={count:number;minutes:number;originalMinutes:number}&Record<TimeState,Bucket>;
 export type TimeReport={generatedAt:string;filters:TimeFilters;properties:Option[];people:Option[];visits:TimeVisit[];total:TimeTotals;byPerson:[string,TimeTotals][];byProperty:[string,TimeTotals][];byMonth:[string,TimeTotals][]};
 export function timeFilters(params:Record<string,string|string[]|undefined>,now=new Date()):TimeFilters{
- const read=(key:string,fallback=''):string=>{const value=params[key];if(typeof value==='string')return value;if(value===undefined)return fallback;throw Error('Ongeldig rapportfilter');};
+ const read=(key:string,fallback=''):string=>{const value=params[key];if(typeof value==='string')return value;if(value===undefined)return fallback;throw Error("Invalid report filter");};
  const today=operationsDay(now),from=read('from',today.slice(0,7)+'-01'),until=read('until',today),property=read('property'),profile=read('profile');
- if(!validDate(from)||!validDate(until)||from>until||(Date.parse(until)-Date.parse(from))/86400000>365)throw Error('Kies een geldige periode van maximaal 366 dagen.');
- if((property&&!uuid.test(property))||(profile&&!uuid.test(profile)))throw Error('Kies een geldig object en account.');
+ if(!validDate(from)||!validDate(until)||from>until||(Date.parse(until)-Date.parse(from))/86400000>365)throw Error("Choose a valid period of up to 366 days.");
+ if((property&&!uuid.test(property))||(profile&&!uuid.test(profile)))throw Error("Choose a valid property and account.");
  return {from,until,property:property.toLowerCase(),profile:profile.toLowerCase(),page:pageNumber(read('page','1'))};
 }
 export function timeReportHref(filters:TimeFilters,page=1,csv=false){
@@ -26,7 +26,7 @@ export function timeReportHref(filters:TimeFilters,page=1,csv=false){
  return '/admin/workspaces/estates/time-report'+(csv?'/export':'')+'?'+q;
 }
 export function timeDossierHref(filters:TimeFilters,id:string){
- if(!uuid.test(id))throw Error('Ongeldig werkbezoek');
+ if(!uuid.test(id))throw Error("Invalid work visit");
  const q=new URLSearchParams({visit:id,reportFrom:filters.from,reportUntil:filters.until,reportProperty:filters.property,reportProfile:filters.profile,reportPage:String(filters.page)});
  return '/admin/workspaces/estates/staff?'+q+'#visit';
 }
@@ -35,13 +35,13 @@ export function timeReturnHref(params:Record<string,string|string[]|undefined>){
  try{return timeReportHref(timeFilters({from:params.reportFrom,until:params.reportUntil,property:params.reportProperty,profile:params.reportProfile,page:params.reportPage}),pageNumber(typeof params.reportPage==='string'?params.reportPage:undefined))+'#visits';}catch{return null;}
 }
 export function workDuration(minutes:number){
- if(!Number.isSafeInteger(minutes)||minutes<0)throw Error('Ongeldige tijdsduur');
+ if(!Number.isSafeInteger(minutes)||minutes<0)throw Error("Invalid duration");
  return `${Math.floor(minutes/60)}:${String(minutes%60).padStart(2,'0')}`;
 }
 const totals=():TimeTotals=>({count:0,minutes:0,originalMinutes:0,approved:{count:0,minutes:0},pending:{count:0,minutes:0},correction:{count:0,minutes:0},returned:{count:0,minutes:0}});
 function add(total:TimeTotals,row:TimeVisit){total.count++;total.minutes+=row.effective_minutes;total.originalMinutes+=row.actual_minutes;total[row.state].count++;total[row.state].minutes+=row.effective_minutes;}
 export function normalizeTimeReport(source:unknown,filters:TimeFilters):TimeReport{
- const fail=()=>{throw Error('De urenbron is onvolledig of gewijzigd. Vernieuw het rapport.');};
+ const fail=()=>{throw Error("The time source is incomplete or has changed. Refresh the report.");};
  if(!source||typeof source!=='object'||Array.isArray(source))return fail();
  const s=source as Record<string,unknown>;
  if(s.from!==filters.from||s.until!==filters.until||s.property!==(filters.property||null)||s.profile!==(filters.profile||null)||typeof s.generated_at!=='string'||!Number.isFinite(Date.parse(s.generated_at)))return fail();
@@ -49,7 +49,7 @@ export function normalizeTimeReport(source:unknown,filters:TimeFilters):TimeRepo
   if(!Array.isArray(value)||value.length>10000)return fail();
   const ids=new Set<string>();return value.map(row=>{
    if(!row||typeof row.id!=='string'||!uuid.test(row.id)||ids.has(row.id)||(row[field]!==null&&typeof row[field]!=='string'))return fail();
-   ids.add(row.id);return {id:row.id,name:row[field]?.trim()||(field==='name'?'Object zonder naam':'Account zonder naam')};
+   ids.add(row.id);return {id:row.id,name:row[field]?.trim()||(field==='name'?"Unnamed property":"Unnamed account")};
   }).sort((a,b)=>a.name.localeCompare(b.name,'nl')||a.id.localeCompare(b.id));
  }
  const properties=directory(s.properties,'name'),people=directory(s.people,'full_name');
@@ -69,7 +69,7 @@ export function normalizeTimeReport(source:unknown,filters:TimeFilters):TimeRepo
 }
 export async function loadTimeReport(db:Awaited<ReturnType<typeof createClient>>,filters:TimeFilters){
  const {data,error}=await db.rpc('mzs_ops_staff_time_report',{p_from:filters.from,p_until:filters.until,p_property:filters.property||null,p_profile:filters.profile||null});
- if(error)throw Error('Urenrapport niet beschikbaar. Beperk zo nodig de periode of filters en probeer opnieuw.');
+ if(error)throw Error("Time report unavailable. Narrow the period or filters if needed and retry.");
  return normalizeTimeReport(data,filters);
 }
 export function timeReportCsv(report:TimeReport){

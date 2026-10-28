@@ -12,7 +12,7 @@ export default async function GroupWorkspace(){
   <h1 className={styles.cockpitHeading}>Cockpit</h1>
   <FinancialCockpit refreshVersion={0}/>
   <GroupActionCenter refreshVersion={0}/>
-  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db}/></Suspense>
+  <Suspense fallback={<p role="status">Loading action list…</p>}><OperationsActionCenter db={db}/></Suspense>
   <DailyOperations/>
   <p className={styles.note}>The central overview reports recorded and forecast figures separately. Booked rent and scheduled loan interest do not prove cash receipt. Account approvals and administrative settings are available from Relationships and System.</p>
  </>;

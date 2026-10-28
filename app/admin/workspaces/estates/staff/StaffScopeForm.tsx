@@ -9,23 +9,23 @@ type Property={id:string;name:string};
 export default function StaffScopeForm({members,properties}:{members:Member[];properties:Property[]}){
  const [state,action,pending]=useActionState(recordStaffScope,initialFormActionState);
  return <form className={s.form} action={action}>
-  <h2>Toegang per object</h2>
-  <p className={s.description}>Wijs alleen bestaande, accounts toe. Dit verandert de cliëntrol niet en verleent geen toegang tot financiële dossiers.</p>
-  <label>Bestaand account<select name="profile_id" required defaultValue="">
-   <option value="" disabled>Selecteer bestaande actieve relatie</option>
+  <h2>Access by property</h2>
+  <p className={s.description}>Assign existing accounts only. This does not change the client role or grant access to financial dossiers.</p>
+  <label>Existing account<select name="profile_id" required defaultValue="">
+   <option value="" disabled>Select an existing active relationship</option>
    {members.map(m=><option key={m.id} value={m.id}>{m.full_name??"Onbenoemde relatie"} ({m.role})</option>)}
   </select></label>
-  <label>Vastgoedobject<select name="property_id" required defaultValue="">
-   <option value="" disabled>Kies vastgoedobject</option>
+  <label>Property<select name="property_id" required defaultValue="">
+   <option value="" disabled>Choose property</option>
    {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
   </select></label>
-  <label>Handeling<select name="scope_action" defaultValue="grant">
-   <option value="grant">Objecttoegang verlenen</option>
-   <option value="revoke">Objecttoegang intrekken</option>
+  <label>Action<select name="scope_action" defaultValue="grant">
+   <option value="grant">Grant property access</option>
+   <option value="revoke">Revoke property access</option>
   </select></label>
-  <label>Reden / gecontroleerde opdracht<textarea rows={3} name="reason" minLength={8} maxLength={500} required
-   placeholder="Wie heeft toestemming gegeven, voor welk object en waarom?"/></label>
-  <button type="submit" disabled={pending||!members.length||!properties.length}>{pending?"Registreren…":"Toegang registreren"}</button>
+  <label>Reason / verified assignment<textarea rows={3} name="reason" minLength={8} maxLength={500} required
+   placeholder="Who authorized access, for which property and why?"/></label>
+  <button type="submit" disabled={pending||!members.length||!properties.length}>{pending?"Recording…":"Record access"}</button>
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }

@@ -1,4 +1,4 @@
 'use client';
 export default function ActionsError({reset}:{reset:()=>void}){
- return <section role="alert"><h2>Actielijst niet beschikbaar</h2><p>De gegevens konden niet volledig worden geladen. Probeer het opnieuw; er wordt geen leeg of gedeeltelijk overzicht als volledig resultaat getoond.</p><button onClick={reset}>Opnieuw laden</button></section>;
+ return <section role="alert"><h2>Action list unavailable</h2><p>The complete data could not be loaded. Please retry; an empty or partial overview will not be presented as a complete result.</p><button onClick={reset}>Reload</button></section>;
 }

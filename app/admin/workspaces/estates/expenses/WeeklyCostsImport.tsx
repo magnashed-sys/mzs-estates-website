@@ -5,7 +5,7 @@ import {parseWeeklyCostsCsv,summarizeWeeklyCosts,
   weeklyCostsTemplate, type ImportedWeeklyCost} from "../../../../../lib/property-operations/weekly-import";
 import styles from "./expenses.module.css";
 
-const euro = (value:number) => new Intl.NumberFormat("nl-NL", {
+const euro = (value:number) => new Intl.NumberFormat("en-GB", {
   style:"currency",currency:"EUR"
 }).format(value/100);
 
@@ -29,7 +29,7 @@ export default function WeeklyCostsImport(){
   function clear(){readVersion.current++;setRows([]);setError("");setSourceName("");setFilter("alle");setRechargeFilter("alle");setPage(1);setInputVersion(v=>v+1);}
   function template(){
     const url=URL.createObjectURL(new Blob([weeklyCostsTemplate],{type:"text/csv;charset=utf-8"}));
-    const a=document.createElement("a");a.href=url;a.download="mzs-weekkosten-voorbeeld.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    const a=document.createElement("a");a.href=url;a.download="mzs-weekly-expenses-example.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
 
   async function readFile(file:File|undefined){
@@ -37,7 +37,7 @@ export default function WeeklyCostsImport(){
     setPage(1);setRows([]);setError("");setFilter("alle");setRechargeFilter("alle");setSourceName("");
     if(!file)return;
     if(file.size>1500000 || !/\.csv$/i.test(file.name)){
-      setError("Selecteer een CSV-bestand van maximaal 1,5 MB.");
+      setError("Select a CSV file of up to 1.5 MB.");
       return;
     }
     try {
@@ -45,74 +45,68 @@ export default function WeeklyCostsImport(){
       if(version!==readVersion.current)return;
       const loaded=parseWeeklyCostsCsv(text);
       setRows(loaded);setSourceName(file.name);
-    }catch(e){if(version!==readVersion.current)return;setError(e instanceof Error?e.message:"CSV kon niet worden gecontroleerd.");}
+    }catch(e){if(version!==readVersion.current)return;setError(e instanceof Error?e.message:"CSV could not be validated.");}
   }
 
   return <section className={styles.panel} aria-labelledby="weekly-costs-import" style={{marginTop:22}}>
-    <p className={styles.kicker}>04 / WEEKKOSTENCONTROLE</p>
-    <h2 id="weekly-costs-import">Weekopgaven controleren</h2>
-    <p className={styles.hint}>Laad een eerder samengesteld weekkosten-CSV vanaf je eigen apparaat. Het bestand wordt uitsluitend in deze browser verwerkt:
-      niet geüpload, niet opgeslagen in de database en niet gedeeld met GitHub of andere diensten.
-      Sluit de pagina om de gegevens uit dit overzicht te verwijderen.</p>
+    <p className={styles.kicker}>04 / WEEKLY EXPENSE REVIEW</p>
+    <h2 id="weekly-costs-import">Review weekly statements</h2>
+    <p className={styles.hint}>Load a previously prepared weekly expense CSV from your device. The file is processed only in this browser: it is not uploaded, stored in the database or shared with GitHub or other services. Close this page to clear the preview.</p>
     <div className={styles.fields} style={{marginTop:18}}>
-      <label>Weekkostenbestand (.csv)
+      <label>Weekly expense file (.csv)
         <input key={inputVersion} type="file" accept=".csv,text/csv" onChange={e=>{void readFile(e.currentTarget.files?.[0]);}}/>
       </label>
     </div>
-    <div className={styles.registerActions}><button type="button" className={styles.saveButton} onClick={template}>Download CSV-voorbeeld</button><button type="button" className={styles.saveButton} onClick={clear}>Wis ingelezen gegevens</button></div>
-    <p className={styles.hint}>Het voorbeeld bevat uitsluitend fictieve gegevens en toont de verwachte kolommen. De samenvatting hieronder betreft het volledige bestand; filters gelden voor de detailregels.</p>
-    {error&&<p role="alert" className={styles.error}>{error} De import is volledig afgewezen; er zijn geen deelbedragen ingeladen.</p>}
+    <div className={styles.registerActions}><button type="button" className={styles.saveButton} onClick={template}>Download CSV example</button><button type="button" className={styles.saveButton} onClick={clear}>Clear loaded data</button></div>
+    <p className={styles.hint}>The example contains only synthetic data and shows the expected columns. The summary covers the entire file; filters apply to detail rows.</p>
+    {error&&<p role="alert" className={styles.error}>{error} The import was rejected in full; no partial amounts were loaded.</p>}
     {summary&&<>
-      <p className={styles.hint}>Gelezen: {sourceName}. <strong>Alleen controleberekening; geen financiële boeking.</strong></p>
+      <p className={styles.hint}>Loaded: {sourceName}. <strong>Validation preview only; no financial posting.</strong></p>
       <div className={styles.importCards}>
-        <div><small>Bronregels</small><strong>{summary.rowCount}</strong></div>
-        <div><small>Oorspronkelijke kosten</small><strong>{euro(summary.totalCostCents)}</strong></div>
-        <div><small>Afzonderlijke doorbelasting</small><strong>{euro(summary.pricedRechargeCents)}</strong></div>
-        <div><small>Te beoordelen posten</small><strong>{summary.reviewCount}</strong></div>
+        <div><small>Source rows</small><strong>{summary.rowCount}</strong></div>
+        <div><small>Original expenses</small><strong>{euro(summary.totalCostCents)}</strong></div>
+        <div><small>Separate recharge</small><strong>{euro(summary.pricedRechargeCents)}</strong></div>
+        <div><small>Items to review</small><strong>{summary.reviewCount}</strong></div>
       </div>
       <p className={styles.hint}>
-        {summary.rechargeCount} regels bevatten een apart gespecificeerd doorbelastingsbedrag ({summary.estimatedBillableHours} geschatte factureerbare uren).
-        Dit zijn <strong>geen</strong> geregistreerde werktijden. Een eerder opgemaakte factuurreferentie wordt uitsluitend ter controle getoond;
-        de bedragen worden niet opnieuw aan inkomsten of een nieuwe factuur toegevoegd.
+        {summary.rechargeCount} rows contain a separately specified recharge amount ({summary.estimatedBillableHours} estimated billable hours). These are <strong>not</strong> recorded working hours. A previously issued invoice reference is shown only for review; amounts are not added again to income or a new invoice.
       </p>
       <div className={styles.tableScroll}>
-        <table aria-label="Kosten per locatie">
-          <thead><tr><th>Locatie</th><th>Regels</th><th>Kosten</th><th>Doorbelasting</th><th>Controle nodig</th></tr></thead>
+        <table aria-label="Expenses by location">
+          <thead><tr><th>Location</th><th>Rows</th><th>Expenses</th><th>Recharge</th><th>Review required</th></tr></thead>
           <tbody>{summary.groups.map(g=><tr key={g.location}>
             <td>{g.location}</td><td>{g.count}</td><td>{euro(g.costCents)}</td><td>{euro(g.rechargeCents)}</td><td>{g.reviewCount}</td>
           </tr>)}</tbody>
         </table>
       </div>
       <div className={styles.importFilters}>
-        <label>Locatie <select value={filter} onChange={e=>{setFilter(e.target.value);setPage(1);}}>
-          <option value="alle">Alle locaties</option>
+        <label>Location <select value={filter} onChange={e=>{setFilter(e.target.value);setPage(1);}}>
+          <option value="alle">All locations</option>
           {summary.groups.map(g=><option key={g.location} value={g.location}>{g.location}</option>)}
         </select></label>
-        <label>Doorbelasting <select value={rechargeFilter} onChange={e=>{setRechargeFilter(e.target.value);setPage(1);}}>
-          <option value="alle">Alle statussen</option><option value="Ja">Ja</option>
-          <option value="Nee">Nee</option><option value="Te beoordelen">Te beoordelen</option>
+        <label>Recharge <select value={rechargeFilter} onChange={e=>{setRechargeFilter(e.target.value);setPage(1);}}>
+          <option value="alle">All statuses</option><option value="Ja">Yes</option>
+          <option value="Nee">No</option><option value="Te beoordelen">Awaiting review</option>
         </select></label>
       </div>
-      <p className={styles.hint}>{filtered.length} detailregels · pagina {page} van {pages}. Filter op locatie en doorbelasting. Originele bronbenamingen blijven behouden; vergelijkbare benamingen worden alleen voor dit overzicht gegroepeerd.</p>
+      <p className={styles.hint}>{filtered.length} detail rows · page {page} of {pages}. Filter by location and recharge status. Original source names are preserved; similar names are grouped only for this overview.</p>
       <div className={styles.tableScroll}>
-        <table aria-label="Ingelezen weekregels">
-          <thead><tr><th>Bron</th><th>Week</th><th>Locatie</th><th>Omschrijving</th><th>Kosten</th><th>Facturatie</th><th>Doorbelasting</th></tr></thead>
+        <table aria-label="Imported weekly rows">
+          <thead><tr><th>Source</th><th>Week</th><th>Location</th><th>Description</th><th>Expenses</th><th>Billing</th><th>Recharge</th></tr></thead>
           <tbody>{shown.map(r=><tr key={r.reference}>
             <td>{r.sourceReference}</td><td>{r.week}</td><td>{r.originalLocation}</td>
-            <td>{r.description}</td><td>{euro(r.costCents)}</td><td>{r.recharge}</td>
+            <td>{r.description}</td><td>{euro(r.costCents)}</td><td>{r.recharge==='Ja'?'Yes':r.recharge==='Nee'?'No':'Awaiting review'}</td>
             <td>{r.rechargeCents===null?"—":euro(r.rechargeCents)}</td>
           </tr>)}</tbody>
         </table>
       </div>
-      <nav className={styles.registerActions} aria-label="Pagina’s met weekkosten">
-       <button type="button" className={styles.saveButton} disabled={page<=1} onClick={()=>setPage(p=>p-1)}>Vorige pagina</button>
-       <button type="button" className={styles.saveButton} disabled={page>=pages} onClick={()=>setPage(p=>p+1)}>Volgende pagina</button>
+      <nav className={styles.registerActions} aria-label="Weekly expense pages">
+       <button type="button" className={styles.saveButton} disabled={page<=1} onClick={()=>setPage(p=>p-1)}>Previous page</button>
+       <button type="button" className={styles.saveButton} disabled={page>=pages} onClick={()=>setPage(p=>p+1)}>Next page</button>
       </nav>
       <div className={styles.blocked}>
-        <strong>Rekening houden met bronkwaliteit</strong>
-        <p>Weekbedragen zijn geen afzonderlijke bewijsstukken of definitieve urenregistraties.
-          De juiste betaler, juridische eigenaar, oorspronkelijke facturen en eventuele eerdere verzending
-          moeten nog worden geverifieerd. Automatisch doorfactureren is daarom uitgeschakeld.</p>
+        <strong>Source quality considerations</strong>
+        <p>Weekly amounts are not individual supporting documents or final time records. The correct payer, legal owner, original invoices and any earlier delivery must still be verified. Automatic onward invoicing is therefore disabled.</p>
       </div>
     </>}
   </section>;

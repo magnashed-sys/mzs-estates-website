@@ -11,10 +11,10 @@ export async function GET(request:NextRequest){
  let filters:TimeFilters;try{
   const params:Record<string,string|string[]>={};for(const key of ['from','until','property','profile']){const values=query.getAll(key);if(values.length)params[key]=values.length===1?values[0]:values;}
   filters=timeFilters(params);
- }catch{return new Response('Kies geldige filters en een periode van maximaal 366 dagen.',{status:400,headers});}
+ }catch{return new Response("Choose valid filters and a period of up to 366 days.",{status:400,headers});}
  try{
   const report=await loadTimeReport(db,filters),csv=timeReportCsv(report);
-  if(Buffer.byteLength(csv,'utf8')>4*1024*1024)return new Response('De export is te groot. Beperk de periode, het object of de medewerker.',{status:413,headers});
-  return new Response(csv,{headers:{...headers,'Content-Type':'text/csv; charset=utf-8','Content-Disposition':`attachment; filename="MZS-Uren-${filters.from}-${filters.until}.csv"`}});
- }catch{return new Response('Urenexport niet beschikbaar. Vernieuw het rapport of beperk de selectie; er is geen gedeeltelijke export gemaakt.',{status:503,headers});}
+  if(Buffer.byteLength(csv,'utf8')>4*1024*1024)return new Response("The export is too large. Narrow the period, property or staff selection.",{status:413,headers});
+  return new Response(csv,{headers:{...headers,'Content-Type':'text/csv; charset=utf-8','Content-Disposition':`attachment; filename="MZS-Time-${filters.from}-${filters.until}.csv"`}});
+ }catch{return new Response("Time export unavailable. Refresh the report or narrow the selection; no partial export was created.",{status:503,headers});}
 }

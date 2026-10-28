@@ -66,7 +66,7 @@ test('action queues classify current work without counting corrections, overdue 
  const overdue=await lib.loadQueuePage(db,'overdue',1,today),planning=await lib.loadQueuePage(db,'planning',1,today);
  assert.deepEqual(Array.from(overdue.items,x=>x.id),[id(6),id(7)]);
  assert.deepEqual(Array.from(planning.items,x=>x.id),[id(4),id(11),id(12)]);
- assert.equal(overdue.items[0].property,'Fictief object');assert.equal(overdue.items[0].person,'Fictieve medewerker');assert.equal(overdue.items[1].person,'Nog niet toegewezen');
+ assert.equal(overdue.items[0].property,'Fictief object');assert.equal(overdue.items[0].person,'Fictieve medewerker');assert.equal(overdue.items[1].person,'Not yet assigned');
  const due=await lib.loadQueuePage(db,'today',1,today);assert.deepEqual(Array.from(due.items,x=>x.id),[id(10)]);
  const triage=await lib.loadQueuePage(db,'triage',1,today);assert.equal(triage.items[0].id,id(2));assert.equal(triage.items[0].urgent,true);
 });
@@ -86,8 +86,8 @@ test('unknown counts never become zero and missing dossier labels fail the whole
  const counts=await lib.loadQueueCounts(database({failTable:'mzs_ops_current_visits'}).db,today);
  assert.equal(counts.find(x=>x.key==='visits').count,null);assert.equal(counts.find(x=>x.key==='overdue').count,2);
  const unknown=await lib.loadQueueCounts(database({missingCount:true}).db,today);assert.ok(unknown.every(x=>x.count===null));
- await assert.rejects(lib.loadQueuePage(database({missingLabels:true}).db,'visits',1,today),/Dossiergegevens/);
- await assert.rejects(lib.loadQueuePage(database({failTable:'mzs_ops_current_visits'}).db,'visits',1,today),/volledig/);
+ await assert.rejects(lib.loadQueuePage(database({missingLabels:true}).db,'visits',1,today),/Dossier data/);
+ await assert.rejects(lib.loadQueuePage(database({failTable:'mzs_ops_current_visits'}).db,'visits',1,today),/fully loaded/);
 });
 test('planning day uses Madrid midnight, including summer/winter DST; URL inputs stay canonical',()=>{
  assert.equal(lib.operationsDay(new Date('2026-10-28T23:30:00Z')),'2026-10-29');
@@ -95,7 +95,7 @@ test('planning day uses Madrid midnight, including summer/winter DST; URL inputs
  assert.equal(lib.operationsDay(new Date('2026-10-25T22:30:00Z')),'2026-10-25');
  assert.equal(lib.queueKey(['visits']),null);assert.equal(lib.queueKey('visits&other=1'),null);
  assert.equal(lib.queueHref('visits',Infinity),'/admin/workspaces/estates/actions?queue=visits&page=1');
- assert.throws(()=>lib.dossierHref('visits','javascript:alert(1)'),/Ongeldig/);
+ assert.throws(()=>lib.dossierHref('visits','javascript:alert(1)'),/Invalid/);
 });
 test('action page checks environment and active administrator before reading queues',async()=>{
  for(const deny of ['environment','admin']){

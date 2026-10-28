@@ -15,7 +15,7 @@ export async function GET(request:NextRequest){
  if(!staffEnvironmentAvailable())return new Response(null,{status:404,headers});
  const {db}=await requireEstateAdmin();
  const q=new URL(request.url).searchParams,entity=q.get("entity")??"",rawYear=q.get("year")??"";
- if(!uuid.test(entity)||!/^20\d{2}$/.test(rawYear)||Number(rawYear)>2100)return new Response("Ongeldige entiteit of jaar.",{status:400,headers});
+ if(!uuid.test(entity)||!/^20\d{2}$/.test(rawYear)||Number(rawYear)>2100)return new Response("Invalid entity or year.",{status:400,headers});
  const year=Number(rawYear);
  try{
   const {data:source,error:sourceError}=await db.rpc("mzs_ops_accountant_source",{p_entity:entity});
@@ -75,5 +75,5 @@ export async function GET(request:NextRequest){
   if(zip.length>4*1024*1024)throw Error("Export exceeds response limit");
   return new Response(new Uint8Array(zip),{headers:{...headers,"Content-Type":"application/zip",
    "Content-Disposition":'attachment; filename="MZS-Sales-Receipts-'+year+'-'+entity.slice(0,8)+'.zip"'}});
- }catch{return new Response("Onvolledige financiële brongegevens: geen export aangemaakt.",{status:503,headers});}
+ }catch{return new Response("Incomplete financial source data: no export was created.",{status:503,headers});}
 }

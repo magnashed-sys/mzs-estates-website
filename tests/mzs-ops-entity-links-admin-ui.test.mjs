@@ -33,8 +33,8 @@ test("Every mutation needs explicit evidence and server-side revalidation, with 
  assert.match(action,/error\?\.code==="23505"/);
  assert.doesNotMatch(action,/\.update\(|\.delete\(|sendMail|\.rpc\(|mzs_lease_invoices|mzs_capital_payments/);
  assert.match(form,/name="confirmed" value="yes" required/);
- assert.match(form,/onveranderbare controlehistorie/);
- assert.match(form,/niet worden\s+verwijderd/);
+ assert.match(form,/immutable audit history/);
+ assert.match(form,/cannot be removed/);
 });
 test("Navigation is admin-only, visually accessible, and links only to isolated module",()=>{
  assert.match(navigation,/await requireEstateAdmin\(\)/);

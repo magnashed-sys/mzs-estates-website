@@ -27,31 +27,28 @@ export default async function PropertyEntityAttributionPage(){
  const propertyName=new Map(p.map(v=>[v.id,v.name]));
  const entityName=new Map(e.map(v=>[v.id,v.name]));
  const relationshipLabels:Record<string,string>={
-  owner:"Juridische eigenaar",payer:"Kostendrager / betaler",manager:"Beheerder"
+  owner:"Legal owner",payer:"Cost bearer / payer",manager:"Manager"
  };
- const date=(value:string)=>new Date(value+"T12:00:00Z").toLocaleDateString("nl-NL",{timeZone:"Europe/Madrid"});
+ const date=(value:string)=>new Date(value+"T12:00:00Z").toLocaleDateString("en-GB",{timeZone:"Europe/Madrid"});
  return <main className={styles.main}>
-  <Link href="/admin/workspaces/estates" className={styles.back}>Terug naar Estates</Link>
+  <Link href="/admin/workspaces/estates" className={styles.back}>Back to Estates</Link>
   <header className={styles.header}>
-   <p className={styles.kicker}>MZS GROUP / ESTATES / INTERNE CONTROLE</p>
-   <h1>Objecten &amp; juridische entiteiten</h1>
-   <p>Registreer welke juridische entiteit eigenaar, kostendrager of beheerder is van een fysiek vastgoedobject.
-    Iedere koppeling heeft een ingangsdatum en gecontroleerde bewijsbron.</p>
-   <p className={styles.emphasis}>Dit is een administratieve toerekening — geen nieuwe factuur,
-    betaling, fiscale vaststelling of automatische eigendomsoverdracht.</p>
+   <p className={styles.kicker}>MZS GROUP / ESTATES / INTERNAL CONTROL</p>
+   <h1>Properties &amp; legal entities</h1>
+   <p>Record which legal entity owns, bears the costs of or manages a physical property. Each association has an effective date and verified supporting evidence.</p>
+   <p className={styles.emphasis}>This is an administrative allocation, not a new invoice, payment, tax determination or automatic transfer of ownership.</p>
   </header>
   <section className={styles.panel}>
-   <h2>Geverifieerde koppelingen ({links.count})</h2>
-   {existing.length===0?<p>Er zijn nog geen juridische objectkoppelingen geregistreerd.
-    Selecteer hieronder pas een entiteit wanneer je de onderbouwing hebt gecontroleerd.</p>:
-    <div className={styles.scroll} role="region" tabIndex={0} aria-label="Juridische objectkoppelingen">
+   <h2>Verified associations ({links.count})</h2>
+   {existing.length===0?<p>No legal property associations have been recorded yet. Select an entity below only after checking the supporting evidence.</p>:
+    <div className={styles.scroll} role="region" tabIndex={0} aria-label="Legal property associations">
      <table>
-      <thead><tr><th>Object</th><th>Juridische entiteit</th><th>Relatie</th><th>Geldig vanaf</th>
-       <th>Geldig tot</th><th>Bewijsbron</th></tr></thead>
+      <thead><tr><th>Property</th><th>Legal entity</th><th>Relationship</th><th>Valid from</th>
+       <th>Valid until</th><th>Evidence reference</th></tr></thead>
       <tbody>{existing.map(link=><tr key={link.id}>
-       <td>{propertyName.get(link.property_id)??"Onbekend object"}</td>
-       <td>{entityName.get(link.legal_entity_id)??"Onbekende entiteit"}</td>
-       <td>{relationshipLabels[link.relationship_type]??"Onbekende relatie"}</td>
+       <td>{propertyName.get(link.property_id)??"Unknown property"}</td>
+       <td>{entityName.get(link.legal_entity_id)??"Unknown entity"}</td>
+       <td>{relationshipLabels[link.relationship_type]??"Unknown relationship"}</td>
        <td>{date(link.effective_from)}</td>
        <td>{link.effective_until?date(link.effective_until):"—"}</td>
        <td>{link.evidence_reference}</td>

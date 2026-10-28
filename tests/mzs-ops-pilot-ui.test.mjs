@@ -46,7 +46,7 @@ test("Pilot administrator is checked server-side and every direct admin page che
  assert.match(gate,/actor\.role!=="admin"/);
  assert.match(page,/await requireOpsPilotAdmin\(\)/);
  assert.match(page,/x\.count===x\.data\.length/);
- assert.match(page,/AFGESCHERMD — GEEN ECHTE FACTURATIE/);
+ assert.match(page,/ISOLATED — NO REAL BILLING/);
  assert.match(actions,/^"use server"/);
  assert.match(actions,/await requireOpsPilotAdmin\(\)/g);
  for(const table of [
@@ -61,5 +61,5 @@ test("Pilot admin controls require explicit owner-stage checks and default to sa
  assert.match(ui,/defaultValue="revoke"/);
  assert.match(ui,/confirmed_stage/);
  assert.match(actions,/form\.get\("confirmed_stage"\)!=="yes"/g);
- assert.match(actions,/Maximaal één actuele medewerker/);
+ assert.match(actions,/Only one current staff member/);
 });

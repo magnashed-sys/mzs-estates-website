@@ -48,13 +48,13 @@ test('CSV quotes, commas in amount, quoted semicolons and BOM parse without drop
 });
 test('import rejects duplicates, partial data and unexplained assumed hours',()=>{
  const r=record('CW0001','Zorgbalans','25,00','Ja','1','25,00','invoice');
- assert.throws(()=>parseWeeklyCostsCsv(csv([r,r])),/Dubbele/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([r.slice(0,8)])),/velden/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Ja','1','','invoice')])),/Inconsistente/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Te beoordelen','1','25,00','invoice')])),/Inconsistente/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Ja','','','invoice')])),/referentie zonder doorbelasting/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','1.234,00','Nee')])),/bedrag/);
- assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Nee')]).replace('2026-02-09','2026-02-30')),/Controleer jaar/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([r,r])),/Duplicate/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([r.slice(0,8)])),/fields/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Ja','1','','invoice')])),/Inconsistent/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Te beoordelen','1','25,00','invoice')])),/Inconsistent/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Ja','','','invoice')])),/reference without recharge/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','1.234,00','Nee')])),/amount/);
+ assert.throws(()=>parseWeeklyCostsCsv(csv([record('CW0002','Zorg','20,00','Nee')]).replace('2026-02-09','2026-02-30')),/Check the year/);
 });
 test('admin import remains browser-only, requires CSV explicitly and has no network mutations',()=>{
  const component=readFileSync(new URL('../app/admin/workspaces/estates/expenses/WeeklyCostsImport.tsx',import.meta.url),'utf8');

@@ -7,12 +7,12 @@ export async function allRows<T>(fetchPage:(from:number,to:number)=>PromiseLike<
  const rows:T[]=[];let total:number|null=null;
  for(let offset=0;offset<10000;offset+=500){
   const r=await fetchPage(offset,offset+499);
-  if(r.error||!r.data||r.count===null||(total!==null&&total!==r.count))throw Error('Gegevens konden niet volledig worden geladen. Vernieuw de pagina.');
+  if(r.error||!r.data||r.count===null||(total!==null&&total!==r.count))throw Error("The complete data could not be loaded. Refresh the page.");
   total=r.count;rows.push(...r.data);
   if(rows.length===total)return rows;
   if(!r.data.length)break;
  }
- throw Error('Dit overzicht is te groot om volledig te laden. Neem contact op met de beheerder.');
+ throw Error("This overview is too large to load completely. Contact the administrator.");
 }
 export async function loadRegisters(db:DB,params:Params,admin=false){
  const requestedProperty=one(params.property),property=requestedProperty&&uuid.test(requestedProperty)?requestedProperty:undefined;
@@ -21,7 +21,7 @@ export async function loadRegisters(db:DB,params:Params,admin=false){
   const query=()=>{let q=db.from(table).select('*',{count:'exact'});if(property)q=q.eq('property_id',property);return q.order(sort,{ascending:false}).order('id');};
   let result=await query().range((number-1)*25,number*25-1);
   if((result.error?.code==='PGRST103')||(!result.error&&result.count!==null&&(number-1)*25>=result.count&&number>1)){number=1;result=await query().range(0,24);}
-  if(result.error||!result.data||result.count===null)throw Error('Het register kon niet worden geladen. Vernieuw de pagina.');
+  if(result.error||!result.data||result.count===null)throw Error("The register could not be loaded. Refresh the page.");
   return {rows:result.data,total:result.count,page:number};
  }
  const [visits,tickets]=await Promise.all([page('mzs_ops_current_visits','vpage','worked_on'),page('mzs_ops_current_tickets','tpage','created_at')]);
@@ -30,7 +30,7 @@ export async function loadRegisters(db:DB,params:Params,admin=false){
   visitId&&uuid.test(visitId)?db.from('mzs_ops_current_visits').select('*').eq('id',visitId).maybeSingle():Promise.resolve({data:null,error:null}),
   ticketId&&uuid.test(ticketId)?db.from('mzs_ops_current_tickets').select('*').eq('id',ticketId).maybeSingle():Promise.resolve({data:null,error:null})
  ]);
- if(visit.error||ticket.error)throw Error('Detail kon niet worden geladen.');
+ if(visit.error||ticket.error)throw Error("Detail could not be loaded.");
  const [corrections,reviews,events]=await Promise.all([
   visit.data?allRows<Correction>((a,b)=>db.from('mzs_ops_visit_correction_requests').select('id,visit_id,proposed_minutes,reason,created_at',{count:'exact'}).eq('visit_id',visit.data.id).order('sequence_no',{ascending:false}).range(a,b)):Promise.resolve([]),
   visit.data?allRows<{id:string;decision:string;reason:string;reviewed_minutes:number;reviewed_at:string;billable_minutes?:number;reviewed_by?:string}>((a,b)=>db.from(admin?'mzs_ops_visit_reviews':'mzs_ops_staff_review_status').select('*',{count:'exact'}).eq('visit_id',visit.data.id).order('reviewed_at',{ascending:false}).order('id').range(a,b)):Promise.resolve([]),
