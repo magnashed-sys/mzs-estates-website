@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import StaffScopeForm from "./StaffScopeForm";
 import StaffReviews from "./StaffReviews";
@@ -6,6 +7,10 @@ import StaffFinalAdmin from "./StaffFinalAdmin";
 import s from "../../../../staff/staff.module.css";
 export const dynamic="force-dynamic";
 export default async function AdminStaffOperations(){
+  // Direct URL access must fail closed before any Production data query.
+  if(process.env.VERCEL_ENV!=="preview" ||
+     process.env.NEXT_PUBLIC_SUPABASE_URL!=="https://senonkpxdtlhyhrubicg.supabase.co")
+    notFound();
  const {db}=await requireEstateAdmin();
  const results=await Promise.all([
   db.from("profiles").select("id,full_name,role,is_active",{count:"exact"}).eq("is_active",true).in("role",["client","partner"]).order("full_name").limit(500),
