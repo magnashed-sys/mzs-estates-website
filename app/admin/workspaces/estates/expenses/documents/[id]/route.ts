@@ -22,7 +22,7 @@ export async function GET(
   .createSignedUrl(data.storage_path,60,{download:true});
  if(signError||!signed?.signedUrl)
   return new NextResponse(null,{status:503,headers:{"Cache-Control":"no-store"}});
- return NextResponse.redirect(signed.signedUrl,302,{
-  headers:{"Cache-Control":"no-store","Referrer-Policy":"no-referrer"}
+ return NextResponse.redirect(signed.signedUrl,{
+  status:302,headers:{"Cache-Control":"no-store","Referrer-Policy":"no-referrer"}
  });
 }
