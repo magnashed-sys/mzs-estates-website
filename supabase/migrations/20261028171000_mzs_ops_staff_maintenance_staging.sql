@@ -5,6 +5,7 @@ begin;
 
 create table public.mzs_ops_staff_scope_events (
  id uuid primary key default gen_random_uuid(),
+ sequence_no bigint generated always as identity unique,
  profile_id uuid not null references public.profiles(id) on delete restrict,
  property_id uuid not null references public.mzs_estate_properties(id) on delete restrict,
  action text not null check (action in ('grant','revoke')),
@@ -12,7 +13,7 @@ create table public.mzs_ops_staff_scope_events (
  recorded_by uuid not null default auth.uid() references public.profiles(id) on delete restrict,
  created_at timestamptz not null default now()
 );
-create index ops_staff_event_scope on public.mzs_ops_staff_scope_events(profile_id,property_id,created_at desc,id desc);
+create index ops_staff_event_scope on public.mzs_ops_staff_scope_events(profile_id,property_id,sequence_no desc);
 alter table public.mzs_ops_staff_scope_events enable row level security;
 revoke all on public.mzs_ops_staff_scope_events from public,anon,authenticated,service_role;
 grant select on public.mzs_ops_staff_scope_events to authenticated;
@@ -38,7 +39,7 @@ begin
  perform 1 from public.profiles where id=new.profile_id for update;
  select e.action into previous_action from public.mzs_ops_staff_scope_events e
  where e.profile_id=new.profile_id and e.property_id=new.property_id
- order by e.created_at desc,e.id desc limit 1;
+ order by e.sequence_no desc limit 1;
  if (new.action='grant' and previous_action='grant') or
    (new.action='revoke' and previous_action is distinct from 'grant')
  then raise exception 'Scope already has this state';end if;
@@ -58,7 +59,7 @@ returns boolean language sql security definer stable set search_path='' as $fn$
  ) and coalesce((
   select e.action='grant' from public.mzs_ops_staff_scope_events e
   where e.profile_id=(select auth.uid()) and e.property_id=p_property_id
-  order by e.created_at desc,e.id desc limit 1
+  order by e.sequence_no desc limit 1
  ),false)
 $fn$;
 revoke all on function mzs_private.ops_can_work_on_property(uuid)
@@ -155,6 +156,24 @@ revoke all on function mzs_private.ops_validate_ticket()
  from public,anon,authenticated,service_role;
 create trigger ops_ticket_guard before insert on public.mzs_ops_maintenance_tickets
  for each row execute function mzs_private.ops_validate_ticket();
+
+-- Dedicated narrow directory views: staff must NOT receive the existing
+-- properties/units SELECT policies, which would expose tenant and owner data.
+-- The views use explicit current-actor filtering and expose only safe labels.
+create view public.mzs_ops_staff_property_directory
+ with (security_barrier=true) as
+ select p.id,p.name,p.address
+ from public.mzs_estate_properties p
+ where mzs_private.ops_can_work_on_property(p.id);
+create view public.mzs_ops_staff_unit_directory
+ with (security_barrier=true) as
+ select u.id,u.property_id,u.address
+ from public.mzs_estate_units u
+ where mzs_private.ops_can_work_on_property(u.property_id);
+revoke all on public.mzs_ops_staff_property_directory from public,anon,authenticated,service_role;
+revoke all on public.mzs_ops_staff_unit_directory from public,anon,authenticated,service_role;
+grant select on public.mzs_ops_staff_property_directory,public.mzs_ops_staff_unit_directory
+ to authenticated;
 
 comment on table public.mzs_ops_staff_visits is
  'Actual minutes per individual staff visit. No automatically generated billable minutes, wages or invoices.';
