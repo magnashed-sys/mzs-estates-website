@@ -167,7 +167,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
    </section>
    <p className={s.footerNote}>Financial Cockpit · Scope: {entityLabel} · Not a bank statement, operating profit calculation or audited financial report.</p>
   </>}
-  {process.env.NEXT_PUBLIC_SUPABASE_URL==='https://senonkpxdtlhyhrubicg.supabase.co' &&
+  {process.env.VERCEL_ENV==='preview' && process.env.NEXT_PUBLIC_SUPABASE_URL==='https://senonkpxdtlhyhrubicg.supabase.co' &&
     <PropertyOperationsFinancialPanel year={year} month={month} entity={entity} refreshVersion={refreshVersion+retry}/>}
  </section>;
 }
