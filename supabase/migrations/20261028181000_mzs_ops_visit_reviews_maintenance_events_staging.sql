@@ -14,8 +14,8 @@ create table public.mzs_ops_visit_reviews (
  billable_minutes integer not null default 0 check(billable_minutes between 0 and 2000),
  reviewed_by uuid not null default auth.uid() references public.profiles(id) on delete restrict,
  reviewed_at timestamptz not null default now(),
- check(
-  (decision='approved' and recharge_class='review_candidate' and
+ check(decision='approved' or recharge_class='not_billable'),
+ check(  (decision='approved' and recharge_class='review_candidate' and
    minimum_minutes between 0 and 960 and increment_minutes between 1 and 960)
   or ((recharge_class='not_billable' or decision='rejected') and
    minimum_minutes is null and increment_minutes is null and billable_minutes=0)
