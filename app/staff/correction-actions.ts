@@ -2,7 +2,6 @@
 import {revalidatePath} from "next/cache";
 import {requirePropertyStaff} from "../../lib/security/property-staff";
 export type CorrectionState={status:"idle"|"success"|"error";message:string};
-export const initialCorrectionState:CorrectionState={status:"idle",message:""};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Original work log remains immutable. Corrections require administrator decision. */
 export async function requestVisitCorrection(_prev:CorrectionState,form:FormData):Promise<CorrectionState>{
