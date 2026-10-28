@@ -129,7 +129,7 @@ export default function ExpenseCalculator({issuers,properties,units,suppliers,pa
         {outcome && "allocation" in outcome && outcome.allocation && <div className={styles.result} aria-live="polite">
           <div className={styles.identity}>
             <strong>{selectedIssuer?.name}</strong>
-            <span>Entiteit niet juridisch aan dit object geverifieerd</span>
+            <span>{payerLinks.some(l=>l.property_id===propertyId&&l.legal_entity_id===issuerId&&l.effective_from<=invoiceDate&&(l.effective_until===null||l.effective_until>=invoiceDate)) ? "Kostendrager geverifieerd voor deze factuurdatum" : "Kostendrager nog niet geverifieerd voor deze factuurdatum"}</span>
             <strong>{selectedProperty?.name}</strong>
             <span>{selectedSupplier?.name} · {invoiceNumber.trim()}</span>
             <span>{categories.find(x=>x[0]===category)?.[1]} · {invoiceDate}</span>
