@@ -2,6 +2,7 @@ import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
+import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
 import styles from "./expenses.module.css";
 export const dynamic="force-dynamic";
 
@@ -29,6 +30,19 @@ export default async function PropertyExpenseConceptsPage(){
  const issuerNames=new Map((issuers.data??[]).map(x=>[x.id,x.name]));
  const propertyNames=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const supplierNames=new Map((suppliers.data??[]).map(x=>[x.id,x.name]));
+ // Staging-only evidence registers are never queried from Production.
+ const stagingEvidence=process.env.VERCEL_ENV==="preview" &&
+   process.env.NEXT_PUBLIC_SUPABASE_URL==="https://senonkpxdtlhyhrubicg.supabase.co";
+ const [documents,reviews]=stagingEvidence?await Promise.all([
+  db.from("mzs_ops_expense_documents")
+   .select("id,draft_id,sha256,mime_type,file_size",{count:"exact"})
+   .order("created_at",{ascending:false}).limit(200),
+  db.from("mzs_ops_expense_review_events")
+   .select("draft_id,sequence_no,action,created_at",{count:"exact"})
+   .order("created_at",{ascending:false}).limit(300)
+ ]):[null,null];
+ const evidenceComplete=!!documents&&!!reviews&&
+   [documents,reviews].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
  const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
@@ -72,5 +86,11 @@ export default async function PropertyExpenseConceptsPage(){
      </table>
     </div>}
   </section>
+  {stagingEvidence&&<ExpenseEvidenceReview
+   drafts={(drafts.data??[]).map(d=>({id:d.id,supplier_invoice_number:d.supplier_invoice_number,invoice_date:d.invoice_date,status:d.status}))}
+   documents={evidenceComplete?documents!.data??[]:[]}
+   events={evidenceComplete?reviews!.data??[]:[]}
+   enabled={evidenceComplete}
+  />}
  </main>;
 }
