@@ -2,7 +2,7 @@ import {NextRequest,NextResponse} from "next/server";
 import {createClient} from "../../../../../lib/supabase/server";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 /** RLS-gated one-minute URL; never expose storage paths directly to the UI. */
 export async function GET(_request:NextRequest,{params}:{params:Promise<{id:string}>}){
  const noStore={"Cache-Control":"no-store","Referrer-Policy":"no-referrer"};
