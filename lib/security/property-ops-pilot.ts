@@ -4,7 +4,15 @@ import {resolvePilotEnvironment} from "../property-operations/pilot-environment"
 
 /** A server-side flag never replaces verified Supabase identity or RLS. */
 async function requirePilotIdentity(){
- if(resolvePilotEnvironment(process.env)===null)notFound();
+ const pilotEnvironment=resolvePilotEnvironment({
+  VERCEL_ENV:process.env.VERCEL_ENV,
+  NEXT_PUBLIC_SUPABASE_URL:process.env.NEXT_PUBLIC_SUPABASE_URL,
+  VERCEL_GIT_COMMIT_SHA:process.env.VERCEL_GIT_COMMIT_SHA,
+  MZS_OPS_STAGING_PILOT_ENABLED:process.env.MZS_OPS_STAGING_PILOT_ENABLED,
+  MZS_OPS_PRODUCTION_PILOT_ENABLED:process.env.MZS_OPS_PRODUCTION_PILOT_ENABLED,
+  MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA:process.env.MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA
+ });
+ if(pilotEnvironment===null)notFound();
  const db=await createClient();
  const {data:{user},error}=await db.auth.getUser();
  if(error||!user)redirect("/login");
