@@ -6,6 +6,7 @@ import PropertyEntityLinks from "./PropertyEntityLinks";
 import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
 import ExpenseCorrections from "./ExpenseCorrections";
 import CorrectionDecisions from "./CorrectionDecisions";
+import ExpenseReplacementLinks from "./ExpenseReplacementLinks";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +42,7 @@ export default async function PropertyExpensesPage() {
   const linksComplete = !!linkResult && !linkResult.error && linkResult.count !== null &&
     linkResult.data !== null && linkResult.data.length === linkResult.count;
   const draftResult = stagingEnabled ? await db.from("mzs_ops_expense_drafts")
-    .select("id,property_id,legal_entity_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,allocations,status,source_document_status",{count:"exact"})
+    .select("id,property_id,legal_entity_id,supplier_relationship_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,allocations,status,source_document_status",{count:"exact"})
     .order("created_at",{ascending:false}).limit(200) : null;
   const draftsComplete = !!draftResult && !draftResult.error && draftResult.count !== null &&
     draftResult.data !== null && draftResult.data.length === draftResult.count;
@@ -67,6 +68,12 @@ export default async function PropertyExpensesPage() {
   const decisionsComplete = !!decisionResult && !decisionResult.error &&
     decisionResult.count !== null && decisionResult.data !== null &&
     decisionResult.data.length === decisionResult.count;
+  const replacementResult = stagingEnabled && correctionsComplete ? await db.from("mzs_ops_expense_replacements")
+    .select("id,correction_id,replacement_draft_id",{count:"exact"})
+    .order("linked_at",{ascending:false}).limit(200) : null;
+  const replacementsComplete = !!replacementResult && !replacementResult.error &&
+    replacementResult.count!==null && replacementResult.data !== null &&
+    replacementResult.data.length===replacementResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -121,6 +128,18 @@ export default async function PropertyExpensesPage() {
         proposals={correctionsComplete ? correctionResult!.data! : []}
         decisions={decisionsComplete ? decisionResult!.data! : []}
         enabled={correctionsComplete && decisionsComplete}
+      />}
+      {stagingEnabled && <ExpenseReplacementLinks
+        corrections={correctionsComplete ? correctionResult!.data! : []}
+        decisions={decisionsComplete ? decisionResult!.data! : []}
+        drafts={draftsComplete ? draftResult!.data!.map(d=>({
+          id:d.id,property_id:d.property_id,legal_entity_id:d.legal_entity_id,
+          supplier_relationship_id:d.supplier_relationship_id,supplier_invoice_number:d.supplier_invoice_number
+        })) : []}
+        reviews={evidenceComplete ? reviewResult!.data! : []}
+        documents={evidenceComplete ? documentResult!.data! : []}
+        links={replacementsComplete ? replacementResult!.data! : []}
+        enabled={draftsComplete && correctionsComplete && decisionsComplete && evidenceComplete && replacementsComplete}
       />}
       {stagingEnabled && incomplete.length === 0 && <section className={styles.panel} style={{marginTop:22}}>
         <p className={styles.kicker}>09 / VERKOOPFACTUREN EN ONTVANGSTEN – PROEFEXPORT</p>
