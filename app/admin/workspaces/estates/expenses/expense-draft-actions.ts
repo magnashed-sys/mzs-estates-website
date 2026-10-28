@@ -63,7 +63,7 @@ export async function savePropertyExpenseDraft(
        throw new Error("Invalid unit ID");
      const unitId=row.unit_id as string|null;
      const n=row.net_cents,v=row.vat_cents;
-     if(!Number.isSafeInteger(n)||!Number.isSafeInteger(v)||
+     if(typeof n!=="number"||typeof v!=="number"||!Number.isSafeInteger(n)||!Number.isSafeInteger(v)||
         (n as number)<0||(v as number)<0|| (n as number)>100000000000||(v as number)>100000000000)
        throw new Error("Invalid cents");
      const key=unitId??"whole-property";
