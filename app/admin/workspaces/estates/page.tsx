@@ -1,21 +1,11 @@
 import {Suspense} from "react";
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
-import {resolvePilotEnvironment} from "../../../../lib/property-operations/pilot-environment";
 import OperationsActionCenter from "../../OperationsActionCenter";
 import styles from "../workspace.module.css";
 export const dynamic="force-dynamic";
 export default async function EstatesWorkspace(){
  const {db}=await requireEstateAdmin();
- // Only show the link when the Production pilot is explicitly enabled for this exact commit.
- // Authorization on the destination is checked again with auth + RLS on every request.
- const isolatedPilotAvailable=resolvePilotEnvironment({
-  VERCEL_ENV:process.env.VERCEL_ENV,
-  NEXT_PUBLIC_SUPABASE_URL:process.env.NEXT_PUBLIC_SUPABASE_URL,
-  VERCEL_GIT_COMMIT_SHA:process.env.VERCEL_GIT_COMMIT_SHA,
-  MZS_OPS_PRODUCTION_PILOT_ENABLED:process.env.MZS_OPS_PRODUCTION_PILOT_ENABLED,
-  MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA:process.env.MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA
- })==="production";
  const entityLinksAvailable=(process.env.VERCEL_ENV==="production" &&
   process.env.NEXT_PUBLIC_SUPABASE_URL==="https://ptrnjzmcehrhbsfxntgw.supabase.co") ||
   (process.env.VERCEL_ENV==="preview" &&
@@ -34,7 +24,7 @@ export default async function EstatesWorkspace(){
  return <>
   <section className={styles.intro}>
    <p className={styles.kicker}>MZS ESTATES / PROPERTY COCKPIT</p>
-   <h1 className={styles.heading}>Real estate management.</h1>
+   <h1 className={styles.heading}>Real Estate.</h1>
    <p className={styles.lead}>Property holdings, rentable units, rental contracts and booking workflows. Each register loads in its own dedicated administration route; no client-account or Capital dossier list is loaded here.</p>
   </section>
   {unavailable.length>0&&<p className={styles.error} role="alert">Some property counts could not be verified ({unavailable.map(x=>x.label).join(", ")}). No incomplete totals are presented for those sections.</p>}
@@ -43,8 +33,9 @@ export default async function EstatesWorkspace(){
     <small>{x.label}</small><strong>{x.result.error||x.result.count===null?"Unavailable":x.result.count}</strong>
    </div>)}
   </section>
-  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db}/></Suspense>
+  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db} scope="maintenance"/></Suspense>
   <section className={styles.grid} aria-label="Property workflows">
+   <Link className={styles.card} href="/admin/workspaces/estates/actions?queue=triage"><small>ONDERHOUD</small><strong>Meldingen, planning &amp; werkopdrachten</strong><p>Volg onderhoud, toegewezen medewerkers, offertes en budgetbeslissingen op.</p><span>Open onderhoud →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/properties"><small>01 / PROPERTY REGISTER</small><strong>Properties & ownership</strong><p>Legal ownership, managing agents and property records.</p><span>Open property register →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/units"><small>02 / UNIT MANAGEMENT</small><strong>Rental units</strong><p>Rentable units, linked contracts and recorded rental amounts.</p><span>Open rental units →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/contracts"><small>03 / RENTAL ADMINISTRATION</small><strong>Contracts & invoices</strong><p>Tenants, agreements, invoicing entities and billing control.</p><span>Open contracts →</span></Link>
@@ -54,24 +45,6 @@ export default async function EstatesWorkspace(){
     <p>Leg gecontroleerd vast welke juridische entiteit eigenaar, kostendrager of beheerder is, met bron en ingangsdatum.</p>
     <span>Open juridische objectkoppelingen →</span>
    </Link>}
-   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/expenses">
-    <small>05 / OBJECTKOSTEN · CONCEPT</small>
-    <strong>Inkoopkosten &amp; kostenverdeling</strong>
-    <p>Bereken kosten per object en unit en leg uitsluitend gecontroleerde concepten vast; geen betalingen of factuuruitgifte.</p>
-    <span>Open kostenconcepten →</span>
-   </Link>}
-   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/staff"><small>06 / DAGELIJKS BEHEER</small><strong>Medewerkers &amp; onderhoud</strong><p>Werkbezoeken, urenbeoordeling, correcties en onderhoudsplanning per object.</p><span>Open medewerkersbeheer →</span></Link>}
-   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/reports"><small>RAPPORTAGE &amp; ACCOUNTANT</small><strong>Kostenrapportage &amp; exports</strong><p>Kostenconcepten per maand, object en categorie; facturen en ontvangsten per juridische entiteit.</p><span>Open rapportage →</span></Link>}
-   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/time-report"><small>UREN &amp; CONTROLE</small><strong>Urenrapportage</strong><p>Geregistreerde en beoordeelde tijd per periode, medewerker en object, met CSV-download.</p><span>Open urenrapport →</span></Link>}
-   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/history"><small>HISTORIE &amp; FACTUREN</small><strong>Historische weekopgaven</strong><p>Oorspronkelijke kostenopgaven van medewerkers met gekoppelde externe facturen.</p><span>Open historisch register →</span></Link>}
-   {isolatedPilotAvailable&&<Link className={styles.card} href="/admin/property-operations-pilot">
-    <small>04 / PROPERTY OPERATIONS · PILOT</small>
-    <strong>Medewerkers &amp; onderhoud — testomgeving</strong>
-    <p>Beheer uitsluitend fictieve pilotruns en objectgebonden testtoegang. Geen facturen, salarissen of leveranciersopdrachten.</p>
-    <span>Open afgeschermde pilot →</span>
-   </Link>}
-   <Link className={styles.card} href="/admin/bookings"><small>07 / RESERVATIONS</small><strong>Bookings</strong><p>Current and historical bookings, private stays, year filters and payments.</p><span>Open Bookings →</span></Link>
-   <Link className={styles.card} href="/admin/owner-stays"><small>08 / OWNER & PARTNER</small><strong>Owner stays</strong><p>Complimentary stays, availability checks and booking approval.</p><span>Manage owner stays →</span></Link>
    <Link className={styles.card} href="/admin/projects"><small>09 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
   </section>
   <p className={styles.note}>Counts represent registered records, not monthly revenue or paid invoices. The financial cockpit provides separate reporting of contracted, forecast and actually received amounts.</p>

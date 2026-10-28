@@ -76,14 +76,13 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
    <h1 style={{fontFamily:"Georgia,serif",fontWeight:400,fontSize:"clamp(36px,5vw,58px)",margin:"8px 0"}}>Bookings.</h1>
    <p style={{color:"#b5ac9c",maxWidth:850,lineHeight:1.8}}>Central reservations and owner stays. Search and filter your full booking history in the database, then open an audited dossier. Original booking details and corrected billing recipients remain available.</p>
    <nav aria-label="Booking workflows" style={{display:"flex",gap:10,flexWrap:"wrap",margin:"24px 0"}}>
-    <Link href="/admin/bookings" style={{...control,...linkStyle,borderColor:"#d5c09a"}}>All Bookings</Link>
     <Link href="/admin/bookings/operations" style={{...control,...linkStyle}}>Requests &amp; Calendar</Link>
     <Link href="/admin/bookings/operations?scope=test" style={{...control,...linkStyle}}>Test cleanup</Link>
     <Link href="/admin/owner-stays" style={{...control,...linkStyle}}>Owner stays</Link>
     <Link href="/admin/group/estates/contracts?view=invoices" style={{...control,...linkStyle}}>Contracts &amp; Invoices</Link>
     <Link href="/admin/group/estates/properties" style={{...control,...linkStyle}}>Properties</Link>
    </nav>
-   <section style={{...style,marginBottom:20}} aria-label="Accountant year export">
+   <section style={{...style,marginBottom:20}} id="accountant-export" aria-label="Accountant year export">
     <h2>Accountant year overview</h2>
     <p>Administrative allocation follows the arrival date, including stays crossing New Year. This is separate from the actual payment date and invoice issue date. Historical payments remain marked as paid with their original payment date unknown.</p>
     <form action="/admin/bookings/accountant-export" method="GET" style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"end"}}>

@@ -1,3 +1,4 @@
+import WorkspaceNavigation from "../workspaces/WorkspaceNavigation";
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
 import { isPhase3aPreviewIsolated } from "../../../lib/security/phase3a-preview-isolation";
@@ -47,5 +48,5 @@ export default async function CapitalRequestsLayout({
     }
   }
 
-  return <>{children}</>;
+  return <>{profile.role==="admin"&&<WorkspaceNavigation/>}{children}</>;
 }

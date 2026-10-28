@@ -18,7 +18,7 @@ test("legacy entry links preserve filters and route each register",()=>{
 test("specialist routes independently enforce administrator access",()=>{
  for(const route of ["accounts","member-companies","projects","system"]){
   const code=readFileSync(new URL("../app/admin/"+route+"/page.tsx",import.meta.url),"utf8");
-  assert.ok(code.indexOf("await requireEstateAdmin()")<code.indexOf("return <AdminPanels"));
+  assert.ok(code.indexOf("await requireEstateAdmin()")<code.indexOf("<AdminPanels"));
  }
  const panel=readFileSync(new URL("../app/admin/AdminPanels.tsx",import.meta.url),"utf8");
  assert.ok(panel.includes('profile?.role !== "admin"'));

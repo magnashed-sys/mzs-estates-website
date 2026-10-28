@@ -30,3 +30,8 @@
 .actions a{border:1px solid #66553c;color:#ddc69f;text-decoration:none;padding:12px 17px}
 .actions a:hover{border-color:#e7d4b4}
 @media(max-width:580px){.nav a{flex:1 0 auto;text-align:center}.shell{padding:18px}.card{min-height:175px}}
+
+.cockpitHeading{font:400 28px/1.2 Georgia,serif;margin:0 0 18px;color:#ddc599}
+.nav a:focus-visible{outline:2px solid #e7d4b4;outline-offset:3px}
+.nav a[aria-disabled=true]{opacity:.55;cursor:wait}
+@media(max-width:760px){.nav{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:10px;margin-bottom:22px}.nav a{flex:0 0 auto;white-space:nowrap;min-height:44px;display:flex;align-items:center;justify-content:center}.headerTag{display:none}}

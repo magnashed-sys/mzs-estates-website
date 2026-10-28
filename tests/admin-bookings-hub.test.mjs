@@ -6,7 +6,7 @@ const source = path => readFileSync(new URL("../"+path, import.meta.url),"utf8")
 
 test("canonical navigation keeps Bookings beside Group and routes legacy operations",()=>{
  const nav=source("app/admin/workspaces/WorkspaceNavigation.tsx");
- assert.ok(nav.indexOf('label:"Bookings"')<nav.indexOf('label:"MZS Estates"'));
+ assert.ok(nav.indexOf('label:"Bookings"')<nav.indexOf('label:"Real Estate"'));
  assert.match(nav,/href:"\/admin\/bookings"/);
  const operations=source("app/admin/bookings/operations/page.tsx");
  assert.match(operations,/await requireEstateAdmin\(\)/);

@@ -446,10 +446,6 @@ export default function AdminPanels({section,initialFilter="pending"}:{section:T
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">MZS Administration</p><h1>{section==="relationships"?"Accounts & requests.":section==="companies"?"Member companies.":section==="projects"?"Projects & access.":"System."}</h1></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? "Refreshing…" : "Refresh dashboard"}</button><small>{updated ? `Dashboard updated ${updated} · Madrid time` : ""}</small></div></div>
       <WorkspaceNavigation disabled={locked}/>
-      <nav className="admin-nav" aria-label="Management registers">
-        {([["relationships","Accounts & requests"],["companies","Member companies"],["projects","Projects & access"],["analytics","System"]] as const).map(([key,label])=>
-          <Link key={key} href={routes[key]} onClick={guardLink} aria-disabled={locked} aria-current={tab===key?"page":undefined} className="admin-button">{label}</Link>)}
-      </nav>
       {reviewing && <p className="admin-help">Close the open review to switch sections, change filters or refresh the dashboard.</p>}
       {notice && <p className="admin-notice" role="status">{notice}</p>}
       {tab === "relationships" && <>

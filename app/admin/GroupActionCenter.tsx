@@ -31,7 +31,7 @@ export default function GroupActionCenter({refreshVersion}:{refreshVersion:numbe
    if(outbox.error)issues.push("Email queue");
    else {
     const failed=(outbox.data||[]).filter(x=>x.status==="failed");
-    if(failed.length)all.push({id:"email-failed",title:failed.length+" email delivery failures",detail:"Check outgoing notifications",href:"/admin?tab=overview",category:"SYSTEM",date:failed[0].created_at});
+    if(failed.length)all.push({id:"email-failed",title:failed.length+" email delivery failures",detail:"Check outgoing notifications",href:"/admin/accounts",category:"SYSTEM",date:failed[0].created_at});
    }
    all.sort((a,b)=>b.date.localeCompare(a.date));
    setActions(all.slice(0,12));setUnavailable(issues);setLoading(false);

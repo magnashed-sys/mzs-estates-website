@@ -31,6 +31,7 @@ export default async function RelationshipsWorkspace(){
    <Link className={styles.card} href="/admin/project-access"><small>03 / ACCESS CONTROL</small><strong>Project permissions</strong><p>Grant or revoke individual access without changing public accounts.</p><span>Manage permissions →</span></Link>
    <Link className={styles.card} href="/admin/relationships?new=person"><small>04 / NEW CONTACT</small><strong>Create relationship</strong><p>Add a person to the CRM without giving them platform login rights.</p><span>Add person →</span></Link>
    <Link className={styles.card} href="/admin/relationships?new=company"><small>05 / ORGANISATIONS</small><strong>Create company</strong><p>Register legal and correspondence details separately from account access.</p><span>Add company →</span></Link>
+   <Link className={styles.card} href="/admin/member-companies"><small>MEMBER COMPANIES</small><strong>Account-linked companies</strong><p>Review companies submitted by members and their account associations.</p><span>Open member companies →</span></Link>
   </section>
   <p className={styles.note}>Self-declared companies and CRM relationships are not interchangeable with verified legal ownership or access permissions. Existing administrator and client-role checks are unchanged.</p>
  </>;

@@ -1,4 +1,6 @@
 const routes:Record<string,string>={
+ staff:"/admin/workspaces/staff",
+ cockpit:"/admin/workspaces/group",accountancy:"/admin/workspaces/accountancy",
  overview:"/admin/workspaces/group",estates:"/admin/workspaces/estates",capital:"/admin/workspaces/capital",
  contracts:"/admin/group/estates/contracts",bookings:"/admin/bookings/operations",
  relationships:"/admin/accounts",companies:"/admin/member-companies",projects:"/admin/projects",analytics:"/admin/system"
