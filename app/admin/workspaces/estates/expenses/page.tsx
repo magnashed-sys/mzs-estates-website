@@ -2,6 +2,7 @@ import Link from "next/link";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
 import WeeklyCostsImport from "./WeeklyCostsImport";
+import PropertyEntityLinks from "./PropertyEntityLinks";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,13 @@ export default async function PropertyExpensesPage() {
   const incomplete = registers.filter(({value}) =>
     value.error || value.count === null || value.data === null || value.data.length !== value.count
   );
+  const stagingEnabled = process.env.VERCEL_ENV === "preview" &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co";
+  const linkResult = stagingEnabled ? await db.from("mzs_ops_property_entity_links")
+    .select("id,property_id,legal_entity_id,relationship_type,effective_from,verified_at,evidence_reference",{count:"exact"})
+    .order("verified_at",{ascending:false}).limit(500) : null;
+  const linksComplete = !!linkResult && !linkResult.error && linkResult.count !== null &&
+    linkResult.data !== null && linkResult.data.length === linkResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -66,6 +74,13 @@ export default async function PropertyExpensesPage() {
       )}
 
       <WeeklyCostsImport />
+      {incomplete.length === 0 && issuerResult.data && propertyResult.data && <PropertyEntityLinks
+        issuers={issuerResult.data.map(({id,name})=>({id,name}))}
+        properties={propertyResult.data.map(({id,name})=>({id,name}))}
+        links={linksComplete ? linkResult!.data! : []}
+        enabled={linksComplete}
+      />}
+
       <div className={styles.nextSteps}>
         <h2>Voorbereid voor de volgende fase</h2>
         <div className={styles.nextGrid}>
