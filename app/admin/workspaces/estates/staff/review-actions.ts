@@ -3,7 +3,6 @@ import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 
 export type StaffReviewState={status:"idle"|"success"|"error";message:string};
-export const initialStaffReviewState:StaffReviewState={status:"idle",message:""};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const staging="https://senonkpxdtlhyhrubicg.supabase.co";
 function validReason(s:string,min=8,max=1000){
