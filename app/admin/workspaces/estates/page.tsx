@@ -14,6 +14,10 @@ export default async function EstatesWorkspace(){
   MZS_OPS_PRODUCTION_PILOT_ENABLED:process.env.MZS_OPS_PRODUCTION_PILOT_ENABLED,
   MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA:process.env.MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA
  })==="production";
+ const entityLinksAvailable=(process.env.VERCEL_ENV==="production" &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL==="https://ptrnjzmcehrhbsfxntgw.supabase.co") ||
+  (process.env.VERCEL_ENV==="preview" &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL==="https://senonkpxdtlhyhrubicg.supabase.co");
  const [properties,units,contracts]=await Promise.all([
   db.from("mzs_estate_properties").select("id",{count:"exact",head:true}),
   db.from("mzs_estate_units").select("id",{count:"exact",head:true}),
@@ -41,15 +45,21 @@ export default async function EstatesWorkspace(){
    <Link className={styles.card} href="/admin/group/estates/properties"><small>01 / PROPERTY REGISTER</small><strong>Properties & ownership</strong><p>Legal ownership, managing agents and property records.</p><span>Open property register →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/units"><small>02 / UNIT MANAGEMENT</small><strong>Rental units</strong><p>Rentable units, linked contracts and recorded rental amounts.</p><span>Open rental units →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/contracts"><small>03 / RENTAL ADMINISTRATION</small><strong>Contracts & invoices</strong><p>Tenants, agreements, invoicing entities and billing control.</p><span>Open contracts →</span></Link>
+   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/entities">
+    <small>04 / ACCOUNTANCY PREPARATION</small>
+    <strong>Objecten &amp; juridische entiteiten</strong>
+    <p>Leg gecontroleerd vast welke juridische entiteit eigenaar, kostendrager of beheerder is, met bron en ingangsdatum.</p>
+    <span>Open juridische objectkoppelingen →</span>
+   </Link>}
    {isolatedPilotAvailable&&<Link className={styles.card} href="/admin/property-operations-pilot">
     <small>04 / PROPERTY OPERATIONS · PILOT</small>
     <strong>Medewerkers &amp; onderhoud — testomgeving</strong>
     <p>Beheer uitsluitend fictieve pilotruns en objectgebonden testtoegang. Geen facturen, salarissen of leveranciersopdrachten.</p>
     <span>Open afgeschermde pilot →</span>
    </Link>}
-   <Link className={styles.card} href="/admin/bookings"><small>05 / RESERVATIONS</small><strong>Bookings</strong><p>Current and historical bookings, private stays, year filters and payments.</p><span>Open Bookings →</span></Link>
-   <Link className={styles.card} href="/admin/owner-stays"><small>06 / OWNER & PARTNER</small><strong>Owner stays</strong><p>Complimentary stays, availability checks and booking approval.</p><span>Manage owner stays →</span></Link>
-   <Link className={styles.card} href="/admin/projects"><small>07 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
+   <Link className={styles.card} href="/admin/bookings"><small>06 / RESERVATIONS</small><strong>Bookings</strong><p>Current and historical bookings, private stays, year filters and payments.</p><span>Open Bookings →</span></Link>
+   <Link className={styles.card} href="/admin/owner-stays"><small>07 / OWNER & PARTNER</small><strong>Owner stays</strong><p>Complimentary stays, availability checks and booking approval.</p><span>Manage owner stays →</span></Link>
+   <Link className={styles.card} href="/admin/projects"><small>08 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>
   </section>
   <p className={styles.note}>Counts represent registered records, not monthly revenue or paid invoices. The financial cockpit provides separate reporting of contracted, forecast and actually received amounts.</p>
  </>;
