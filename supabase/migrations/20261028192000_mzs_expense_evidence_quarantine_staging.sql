@@ -77,6 +77,13 @@ create function mzs_private.ops_evidence_review_scan_gate()
 returns trigger language plpgsql security definer set search_path='' as $fn$
 declare source_id uuid; expected_sha text; cleared boolean;
 begin
+ -- The quarantine trigger may run BEFORE the normal review trigger.
+ -- Reject unauthorised clients first, without exposing scan/source state.
+ if (select auth.uid()) is null
+    or (select public.is_admin()) is distinct from true
+    or new.actor_id is distinct from (select auth.uid()) then
+   raise exception 'Administrator review required' using errcode='42501';
+ end if;
  if new.action in ('submitted','approved') then
    select d.id,d.sha256 into source_id,expected_sha
    from public.mzs_ops_expense_documents d
