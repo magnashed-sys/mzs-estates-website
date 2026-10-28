@@ -27,6 +27,7 @@ function DraftReviewForm({draft,state}: {draft:Cost;state:"draft"|"submitted"|"a
    {state==="submitted"&&decision==="rejected"&&<label>Afwijsreden
      <input type="text" required name="reason" minLength={8} maxLength={1000} placeholder="Beschrijf waarom correctie nodig is"/>
    </label>}
+   <label className={styles.approvalLine}><input type="checkbox" name="confirmed_synthetic_review" value="yes" required/> Ik bevestig dat uitsluitend fictieve Staging-testgegevens worden beoordeeld. Geen financiële boeking.</label>
    <button className={styles.saveButton} type="submit" disabled={pending}>
      {pending?"Bezig…":state==="draft"?"Indienen ter controle":"Beslissing vastleggen"}
    </button>
