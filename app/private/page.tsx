@@ -17,6 +17,7 @@ import CapitalDossiers from "./capital/CapitalDossiers";
 type Category = "rentals" | "investments" | "capital";
 type ViewState = "loading" | "ready" | "pending" | "denied" | "error";
 type MemberRole = "client" | "partner";
+type PilotAccess = {propertyName:string};
 
 type Project = {
   id: string;
@@ -110,6 +111,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
   const [items, setItems] = useState<Opportunity[]>([]);
   const [capitalDossierCount, setCapitalDossierCount] = useState<number | null>(null);
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const [pilotAccess,setPilotAccess] = useState<PilotAccess|null>(null);
   const [active, setActive] = useState<Category>("rentals");
   const [error, setError] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -153,6 +155,18 @@ const categories: { id: Category; title: string; description?: string; shortTitl
           setViewState("pending");
           return;
         }
+
+        // Check a private server endpoint for an exact, active pilot scope. A client
+        // cannot create access by changing the dashboard; the server and RLS decide.
+        void fetch("/api/private/pilot-access",{cache:"no-store"})
+          .then(async response=>{
+            if(!response.ok) return;
+            const payload:unknown=await response.json();
+            if(!mounted||!payload||typeof payload!=="object"||!("available" in payload)||
+               payload.available!==true||!("propertyName" in payload)||
+               typeof payload.propertyName!=="string")return;
+            setPilotAccess({propertyName:payload.propertyName});
+          }).catch(()=>{ /* No visible access when the pilot is unavailable. */ });
 
         // Capital dossiers are granted individually and are not financing project offerings.
         // Read the same protected endpoint used by the Capital dossier cards.
@@ -317,6 +331,20 @@ const categories: { id: Category; title: string; description?: string; shortTitl
                 <p className={styles.asideNote}>{t("aside")}</p>
               </aside>
             </section>
+
+            {pilotAccess&&(
+              <section className={styles.pilotAccess} aria-labelledby="pilot-access-title">
+                <div className={styles.pilotAccessCopy}>
+                  <p className={styles.pilotAccessKicker}>PROPERTY OPERATIONS / PERSOONLIJKE PILOT</p>
+                  <h2 id="pilot-access-title">Medewerkers &amp; onderhoud</h2>
+                  <p>Je hebt toegang tot je toegewezen testobject: <strong>{pilotAccess.propertyName}</strong>.</p>
+                  <p className={styles.pilotAccessNote}>Alleen fictieve testbezoeken en onderhoudsmeldingen · geen financiële verwerking.</p>
+                </div>
+                <Link className={styles.pilotAccessLink} href="/pilot/staff">
+                  Open medewerkersomgeving <span aria-hidden="true"><ArrowUpRightIcon /></span>
+                </Link>
+              </section>
+            )}
 
             <RelationshipOverview />
 
