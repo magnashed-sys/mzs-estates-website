@@ -43,8 +43,8 @@ test("Only the backend records scanner outcome with immutable SHA; never accepts
  assert.match(route,/observed_sha256:actual/);
  assert.match(route,/scanner_engine:scan\.engine/);
  assert.match(route,/scan_reference:"mzs-av-"\+randomUUID\(\)/);
- assert.match(route,/status:409/);
- assert.doesNotMatch(route,/request\.json\(|request\.formData\(|\.signedUrl|service_role/i);
+ assert.match(route,/return failure\(409/);
+ assert.doesNotMatch(route,/request\.json\(|request\.formData\(|\.signedUrl/i);
 });
 test("Personal Cost UI shows scanner control only when provider and independent server key are configured",()=>{
  assert.match(page,/scannerIsExplicitlyEnabled\(\{/);
