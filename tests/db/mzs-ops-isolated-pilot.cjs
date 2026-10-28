@@ -65,6 +65,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  await assert.rejects(runEvent(second,'activate'),/Another pilot is active/i);
  await assert.rejects(scope(run,inactive,'grant'),/active client\/partner/i);
  await scope(run,staff,'grant');
+ await assert.rejects(scope(run,other,'grant'),/Only one current pilot worker per run/i);
  await assert.rejects(scope(run,staff,'grant'),/already has this state/i);
  await actor(staff);
  const labels=(await query('select property_name,property_address from public.mzs_ops_pilot_my_properties')).rows;
