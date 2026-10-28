@@ -137,3 +137,29 @@
   .welcome h1 { font-size: 42px; }
 }
 @media(prefers-reduced-motion:reduce){.category,.propertyImage{transition:none;}}
+
+
+/* Individual staff access is shown only after a live server-side RLS check. */
+.pilotAccess {
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:24px; padding:clamp(22px,3vw,34px);
+  margin:26px 0 34px; border:1px solid rgba(213,192,154,.42);
+  background:linear-gradient(120deg,#231e18,#171512 70%,#12110f);
+}
+.pilotAccessCopy {flex:1 1 320px;min-width:0}
+.pilotAccessKicker {margin:0 0 12px;color:#d5c09a;letter-spacing:.16em;font-size:10px}
+.pilotAccessCopy h2 {font:400 clamp(25px,3vw,36px)/1.2 Georgia,serif;color:#f0e9de;margin:0 0 10px}
+.pilotAccessCopy p {color:#d0c7ba;font-size:13px;line-height:1.65;margin:0}
+.pilotAccessCopy p strong {color:#f0e9de}
+.pilotAccessCopy .pilotAccessNote {color:#a9a092;font-size:12px;margin-top:10px}
+.pilotAccessLink {
+  flex:0 1 auto;display:inline-flex;align-items:center;justify-content:center;
+  gap:16px;padding:16px 19px;min-height:52px;color:#17130e!important;
+  background:#e4cfaa;border:1px solid #e4cfaa;font-size:12px;
+  font-weight:600;letter-spacing:.04em;text-align:center;
+}
+.pilotAccessLink:hover {background:#f0e9de;border-color:#f0e9de}
+@media(max-width:650px){
+  .pilotAccess{margin:20px 0 28px;gap:20px}
+  .pilotAccessLink{width:100%;flex:1 1 100%}
+}
