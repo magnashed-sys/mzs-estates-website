@@ -62,6 +62,7 @@ export default async function EstatesWorkspace(){
    </Link>}
    {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/staff"><small>06 / DAGELIJKS BEHEER</small><strong>Medewerkers &amp; onderhoud</strong><p>Werkbezoeken, urenbeoordeling, correcties en onderhoudsplanning per object.</p><span>Open medewerkersbeheer →</span></Link>}
    {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/reports"><small>RAPPORTAGE &amp; ACCOUNTANT</small><strong>Kostenrapportage &amp; exports</strong><p>Kostenconcepten per maand, object en categorie; facturen en ontvangsten per juridische entiteit.</p><span>Open rapportage →</span></Link>}
+   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/time-report"><small>UREN &amp; CONTROLE</small><strong>Urenrapportage</strong><p>Geregistreerde en beoordeelde tijd per periode, medewerker en object, met CSV-download.</p><span>Open urenrapport →</span></Link>}
    {isolatedPilotAvailable&&<Link className={styles.card} href="/admin/property-operations-pilot">
     <small>04 / PROPERTY OPERATIONS · PILOT</small>
     <strong>Medewerkers &amp; onderhoud — testomgeving</strong>
