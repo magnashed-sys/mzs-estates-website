@@ -5,7 +5,7 @@ import Link from "next/link";
 import type {OpsCostSummary} from "../../lib/property-operations/financial-summary";
 import s from "./FinancialCockpit.module.css";
 
-type Data=OpsCostSummary&{
+type Data=Omit<OpsCostSummary,"properties">&{
  properties:(OpsCostSummary["properties"][number]&{propertyName?:string})[]
 };
 const euro=(n:number)=>new Intl.NumberFormat("en-GB",{
