@@ -111,6 +111,27 @@ export default async function PropertyExpensesPage() {
         enabled={draftsComplete && evidenceComplete && correctionsComplete}
       />}
       {stagingEnabled && incomplete.length === 0 && <section className={styles.panel} style={{marginTop:22}}>
+        <p className={styles.kicker}>09 / VERKOOPFACTUREN EN ONTVANGSTEN – PROEFEXPORT</p>
+        <h2>Uitgereikte facturen en betaalregistraties</h2>
+        <p className={styles.hint}>Afzonderlijke ZIP-proefexport voor huurcontracten en vakantieboekingen. Ontvangsten worden aan uitgegeven facturen gekoppeld; administratieve terugboekingen en ongedateerde historische ontvangsten blijven apart. Dit is geen sluitende bankafstemming, fiscale aangifte of volledige boekhouding.</p>
+        <form action="/admin/workspaces/estates/expenses/sales-export" method="GET" className={styles.fields} style={{marginTop:16}}>
+          <div className={styles.twoFields}>
+            <label>Juridische entiteit
+              <select name="entity" required defaultValue="">
+                <option disabled value="">Selecteer een entiteit</option>
+                {(issuerResult.data??[]).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
+              </select>
+            </label>
+            <label>Jaar (factuurdatum of ontvangstdatum)
+              <select name="year" defaultValue="2026" required>
+                {[2025,2026,2027,2028].map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
+            </label>
+          </div>
+          <button type="submit" className={styles.saveButton}>Download aanvullende verkoop- en ontvangstenproefexport (ZIP)</button>
+        </form>
+      </section>}
+      {stagingEnabled && incomplete.length === 0 && <section className={styles.panel} style={{marginTop:22}}>
         <p className={styles.kicker}>08 / ACCOUNTANT – PROEFEXPORT</p>
         <h2>Export per juridische entiteit</h2>
         <p className={styles.hint}>Een beveiligd ZIP-proefpakket met goedgekeurde inkoopkosten, originele documenten, kostenverdelingen en uitzonderingen. Dit is nog geen volledige boekhouding of belastingexport: verkoopfacturen, betalingen en kapitaaldossiers zijn niet opgenomen.</p>
