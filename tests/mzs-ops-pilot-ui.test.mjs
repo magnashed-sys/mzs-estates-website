@@ -6,7 +6,8 @@ const src=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 test("Pilot staff identity is checked server-side, before reading any trial records",()=>{
  const gate=src("lib/security/property-ops-pilot.ts");
  const page=src("app/pilot/staff/page.tsx");
- assert.match(gate,/resolvePilotEnvironment\(process\.env\)/);
+ assert.match(gate,/resolvePilotEnvironment\(\{/);
+ assert.match(gate,/MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA:process\.env\.MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA/);
  assert.match(gate,/auth\.getUser\(\)/);
  assert.match(gate,/profile\.is_active!==true/);
  assert.match(gate,/\["client","partner"\]/);
