@@ -71,11 +71,14 @@ export async function POST(request:NextRequest){
   draft_id:draftId,storage_path:path,sha256,mime_type:detected.mime,file_size:bytes.length
  });
  if(metaError){
-   // Best effort clean-up: Storage policy allows deletion only if NO metadata references the path.
-   await db.storage.from(bucket).remove([path]);
-   return fail("Documentregistratie is mislukt. Controleer het concept voordat je opnieuw probeert.",409);
+   // Quarantine denies ordinary SELECT (including an unregistered object).
+   // Deleting an orphan may therefore also fail. Never claim success or a
+   // complete cleanup without checking the Storage API response.
+   const {error:cleanupError}=await db.storage.from(bucket).remove([path]);
+   if(cleanupError)return fail("Registratie mislukt en automatische quarantaine-opruiming niet bevestigd. Controleer het opslagregister vóór een nieuwe poging.",503);
+   return fail("Documentregistratie mislukt; het ongeregistreerde testbestand is opgeruimd.",409);
  }
- return NextResponse.json({ok:true,message:"Fictief PDF-testbestand gekoppeld op Staging. Geen echte leveranciersdocumenten toegestaan."},{
-  status:201,headers:{"Cache-Control":"no-store"}
+ return NextResponse.json({ok:true,message:"Fictief PDF-testbestand in quarantaine geregistreerd. Download en beoordeling blijven UIT totdat een echte scanner vrijgave geeft.",quarantined:true},{
+  status:202,headers:{"Cache-Control":"no-store"}
  });
 }
