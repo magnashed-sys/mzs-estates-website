@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
+import WeeklyCostsImport from "./WeeklyCostsImport";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export default async function PropertyExpensesPage() {
         />
       )}
 
+      <WeeklyCostsImport />
       <div className={styles.nextSteps}>
         <h2>Voorbereid voor de volgende fase</h2>
         <div className={styles.nextGrid}>
