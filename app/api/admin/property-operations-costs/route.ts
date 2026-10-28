@@ -33,8 +33,10 @@ async function fullRegister(query:()=>any,limit=5000):Promise<any[]>{
 export async function GET(request:NextRequest){
  if(process.env.VERCEL_ENV!=="preview"||process.env.NEXT_PUBLIC_SUPABASE_URL!==staging)
   return Response.json({error:"Not available"},{status:404,headers});
+ // Authentication and Next.js redirect/notFound must run OUTSIDE the catch below.
+ // Catch only incomplete financial register reads, not unauthorized access.
+ const {db}=await requireEstateAdmin();
  try{
-  const {db}=await requireEstateAdmin();
   const q=request.nextUrl.searchParams;
   const year=Number(q.get("year")??"");
   const entityId=q.get("entity")??"";
