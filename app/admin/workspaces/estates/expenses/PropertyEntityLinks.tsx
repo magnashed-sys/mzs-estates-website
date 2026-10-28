@@ -1,7 +1,8 @@
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 "use client";
 
 import {useActionState} from "react";
-import {addVerifiedPropertyEntityLink,initialEntityLinkState} from "./entity-link-actions";
+import {addVerifiedPropertyEntityLink} from "./entity-link-actions";
 import styles from "./expenses.module.css";
 
 type Named={id:string;name:string};
@@ -13,7 +14,7 @@ const relationNames:{[key:string]:string}={owner:"Juridische eigenaar",payer:"Ko
 export default function PropertyEntityLinks({
  properties,issuers,links,enabled
 }:{properties:Named[];issuers:Named[];links:Existing[];enabled:boolean}){
- const [state,action,pending]=useActionState(addVerifiedPropertyEntityLink,initialEntityLinkState);
+ const [state,action,pending]=useActionState(addVerifiedPropertyEntityLink,initialFormActionState);
  const propertyName=(id:string)=>properties.find(x=>x.id===id)?.name||"Onbekend object";
  const issuerName=(id:string)=>issuers.find(x=>x.id===id)?.name||"Onbekende entiteit";
  return <section className={styles.panel} aria-labelledby="entity-links" style={{marginTop:22}}>
