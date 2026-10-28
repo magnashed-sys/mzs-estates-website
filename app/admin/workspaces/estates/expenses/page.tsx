@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
 import WeeklyCostsImport from "./WeeklyCostsImport";
@@ -17,6 +18,10 @@ export const dynamic = "force-dynamic";
  * The object -> legal entity linkage must be verified before persistence.
  */
 export default async function PropertyExpensesPage() {
+  // Direct URL access must fail closed before any Production data query.
+  if(process.env.VERCEL_ENV!=="preview" ||
+     process.env.NEXT_PUBLIC_SUPABASE_URL!=="https://senonkpxdtlhyhrubicg.supabase.co")
+    notFound();
   const {db} = await requireEstateAdmin();
   const [issuerResult, propertyResult, unitResult, supplierResult] = await Promise.all([
     db.from("mzs_lease_issuers").select("id,name,kind,prefix",{count:"exact"}).order("name").limit(500),
