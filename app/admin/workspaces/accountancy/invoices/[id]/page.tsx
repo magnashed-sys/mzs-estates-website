@@ -1,0 +1,16 @@
+import Link from 'next/link';
+import {notFound} from 'next/navigation';
+import {requireEstateAdmin} from '../../../../../../lib/security/estate-properties';
+import {requireStaffEnvironment} from '../../../../../../lib/security/property-staff';
+import {uuid} from '../../../../../../lib/property-operations/staff-work';
+import {archiveFilters,archiveHref,type ArchiveInvoice} from '../../../../../../lib/property-operations/invoice-archive';
+import s from '../../../../../staff/staff.module.css';
+export const dynamic='force-dynamic';
+export default async function ArchivedInvoice({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{returnTo?:string}>}){
+ requireStaffEnvironment();const {db}=await requireEstateAdmin();const {id}=await params;if(!uuid.test(id))notFound();
+ const {data,error}=await db.from('mzs_invoice_archive').select('*').eq('id',id).maybeSingle();if(error)throw Error('Factuur kon niet worden geladen');if(!data)notFound();
+ const row=data as ArchiveInvoice&{raw_source:Record<string,string>};
+ const {data:batch,error:batchError}=await db.from('mzs_invoice_archive_batches').select('source_name,source_sha256,source_columns,imported_at').eq('id',row.batch_id).single();if(batchError||!batch)throw Error('Importbron ontbreekt');
+ let back=archiveHref(archiveFilters({year:row.issued_on.slice(0,4)}));try{const value=(await searchParams).returnTo;if(value){const u=new URL(value,'https://archive.invalid');if(u.origin==='https://archive.invalid'&&u.pathname==='/admin/workspaces/accountancy/invoices'){const p:Record<string,string|string[]>={};for(const k of u.searchParams.keys())p[k]=u.searchParams.getAll(k).length===1?u.searchParams.get(k)!:u.searchParams.getAll(k);const f=archiveFilters(p);back=archiveHref(f,f.page);}}}catch{}
+ return <main className={s.adminPage}><Link href={back}>← Terug naar factuurselectie</Link><h1>Factuur {row.number}</h1><p>{row.customer_name} · {row.issuer_name} · {row.issued_on}</p><section className={s.panel}><h2>Oorspronkelijke Gripp-gegevens</h2><div className={s.tableWrap}><table className={s.table}><tbody>{(batch.source_columns as string[]).map(k=><tr key={k}><th scope="row">{k}</th><td style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{row.raw_source[k]||'—'}</td></tr>)}</tbody></table></div></section>{row.source_credit_reference&&<p>De bron noemt factuur <Link href={archiveHref({year:null,q:row.source_credit_reference,balance:'all',page:1})}>{row.source_credit_reference}</Link> als oorspronkelijke factuur. Dit is nog geen afzonderlijk goedgekeurde koppeling.</p>}<section className={s.panel}><h2>Herkomst en verwerking</h2><p>{batch.source_name} · CSV-record {row.source_row} · geïmporteerd {String(batch.imported_at).slice(0,10)}</p><p style={{overflowWrap:'anywhere'}}>SHA-256: {batch.source_sha256}</p><p>EUR is de importvaluta; geen valutaveld in de bron. Betaalstanden zijn historische totalen zonder betaaldata. Relatie-, object- en periodekoppelingen zijn nog niet vastgesteld. Er is geen nieuwe factuur of bankmutatie aangemaakt.</p></section></main>;
+}
