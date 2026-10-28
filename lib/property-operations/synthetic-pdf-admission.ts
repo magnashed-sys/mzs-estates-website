@@ -10,7 +10,8 @@ export const MAX_SYNTHETIC_PDF_BYTES=4_194_304;
 export type SyntheticPdfCheck={ok:true}|{ok:false;reason:string};
 
 export function checkSyntheticExpensePdf(bytes:Uint8Array):SyntheticPdfCheck{
- if(!(bytes instanceof Uint8Array)||bytes.length<128||bytes.length>MAX_SYNTHETIC_PDF_BYTES)
+ if(!bytes||!ArrayBuffer.isView(bytes)||bytes.BYTES_PER_ELEMENT!==1||
+    bytes.length<128||bytes.length>MAX_SYNTHETIC_PDF_BYTES)
   return {ok:false,reason:"Ongeldige grootte van het PDF-testbestand."};
  const text=Buffer.from(bytes).toString("latin1");
  if(!/^%PDF-(?:1\.[0-7]|2\.0)\r?\n/.test(text))
