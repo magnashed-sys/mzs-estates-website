@@ -1,7 +1,8 @@
 "use client";
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 import {useMemo,useState,useActionState} from "react";
 import {inputEuroCents} from "../../../../../lib/property-operations/expense-preview";
-import {proposeSupplierCostCorrection,initialCostCorrectionState} from "./correction-actions";
+import {proposeSupplierCostCorrection} from "./correction-actions";
 import styles from "./expenses.module.css";
 type Source={
  id:string;supplier_invoice_number:string;description:string;
@@ -16,7 +17,7 @@ function euro(cents:unknown){
 export default function ExpenseCorrections({
  drafts,events,requests,enabled
 }:{drafts:Source[];events:Review[];requests:Correction[];enabled:boolean}){
- const [state,action,pending]=useActionState(proposeSupplierCostCorrection,initialCostCorrectionState);
+ const [state,action,pending]=useActionState(proposeSupplierCostCorrection,initialFormActionState);
  const [draftId,setDraftId]=useState("");
  const [description,setDescription]=useState("");
  const [net,setNet]=useState("");
