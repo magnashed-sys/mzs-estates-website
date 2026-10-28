@@ -33,6 +33,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
   'create policy profiles_self_read on public.profiles for select to authenticated using(id=auth.uid());'
  ].join('\n'));
  await db.exec(fs.readFileSync('supabase/migrations/20261028171000_mzs_ops_staff_maintenance_staging.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/20261028173000_mzs_ops_secure_staff_directory_staging.sql','utf8'));
  const q=(s)=>db.query(s);
  const actor=async id=>{await db.exec("set role authenticated;select set_config('request.jwt.claim.sub','"+id+"',false);");};
  const assigned=(p=property,action='grant')=>q(
