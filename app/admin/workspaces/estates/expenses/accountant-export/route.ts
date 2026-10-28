@@ -18,7 +18,8 @@ type Draft={
 };
 type Review={draft_id:string;sequence_no:number;action:string};
 type Evidence={draft_id:string;storage_path:string;sha256:string;mime_type:string;file_size:number};
-type Correction={draft_id:string;reason:string};
+type Correction={id:string;draft_id:string;reason:string};
+type Decision={id:string;correction_id:string;decision:string};
 type Supplier={id:string;name:string};
 
 function money(v:unknown):number{
@@ -72,6 +73,19 @@ async function linkedRows(db:any,table:string,draftIds:string[],fields:string){
  return all;
 }
 
+async function decisionRows(db:any,correctionIds:string[]):Promise<Decision[]>{
+ const all:Decision[]=[];
+ for(let start=0;start<correctionIds.length;start+=80){
+  const ids=correctionIds.slice(start,start+80);
+  const q=await db.from("mzs_ops_expense_correction_decisions")
+   .select("id,correction_id,decision",{count:"exact"}).in("correction_id",ids).limit(500);
+  if(q.error||!q.data||q.count===null||q.data.length!==q.count)
+   throw Error("Incomplete correction decision register");
+  all.push(...q.data);
+ }
+ return all;
+}
+
 /** Incomplete pilot export: approved property purchase expenses only, not complete legal books. */
 export async function GET(request:NextRequest){
  if(process.env.VERCEL_ENV!=="preview"||process.env.NEXT_PUBLIC_SUPABASE_URL!==staging)
@@ -99,6 +113,14 @@ export async function GET(request:NextRequest){
    linkedRows(db,"mzs_ops_expense_documents",ids,"id,draft_id,storage_path,sha256,mime_type,file_size"),
    linkedRows(db,"mzs_ops_expense_correction_requests",ids,"id,draft_id,reason")
   ]) as [Review[],Evidence[],Correction[]];
+  const decisions=await decisionRows(db,corrections.map(x=>x.id));
+  const decisionMap=new Map<string,string>();
+  for(const d of decisions){
+   if(decisionMap.has(d.correction_id)||!corrections.some(c=>c.id===d.correction_id)||
+    !["declined","replacement_required"].includes(d.decision))throw Error("Invalid correction decision");
+   decisionMap.set(d.correction_id,d.decision);
+  }
+  const correctionMap=new Map<string,Correction>();
   const reviewMap=new Map<string,Review>(),docMap=new Map<string,Evidence>(),correctionIds=new Set<string>();
   for(const r of reviews){
    if(!ids.includes(r.draft_id))throw Error("Cross-entity review");
@@ -112,6 +134,7 @@ export async function GET(request:NextRequest){
   for(const c of corrections){
    if(!ids.includes(c.draft_id)||correctionIds.has(c.draft_id))throw Error("Duplicate or cross-entity correction");
    correctionIds.add(c.draft_id);
+   correctionMap.set(c.draft_id,c);
   }
 
   const supplierIds=[...new Set(drafts.map(x=>x.supplier_relationship_id))];
@@ -135,14 +158,16 @@ export async function GET(request:NextRequest){
    const allocation=attachments(d.id,d.allocations,net,vat);
    const state=reviewMap.get(d.id)?.action??"draft";
    const doc=docMap.get(d.id);
-   const hasCorrection=correctionIds.has(d.id);
+   const correction=correctionMap.get(d.id);
+   const decision=correction?decisionMap.get(correction.id):null;
+   const correctionPending=!!correction && decision!=="declined";
    if(!["draft","submitted","approved","rejected"].includes(state))throw Error("Unknown review status");
-   const ready=state==="approved"&&!hasCorrection;
+   const ready=state==="approved"&&!correctionPending;
    if(!ready){
     exceptionRows.push({
      draft_id:d.id,invoice_number:d.supplier_invoice_number,invoice_date:d.invoice_date,
-     review_status:state,has_original:!!doc,correction_pending:hasCorrection,
-     reason:hasCorrection?"Correction proposal awaiting resolution":
+     review_status:state,has_original:!!doc,correction_pending:correctionPending,
+     reason:correctionPending?(decision==="replacement_required"?"Replacement evidence and new financial review required":"Correction proposal awaiting decision"):
       !doc?"Original invoice not uploaded":"Not an approved supplier expense",
      net_eur:amount(net),vat_eur:amount(vat),gross_eur:amount(gross)
     });
@@ -198,7 +223,8 @@ export async function GET(request:NextRequest){
    "Unresolved/pending/uncorrected cost drafts: "+exceptionRows.length,
    "Included: approved supplier costs, original evidence, property allocations.",
    "Not included: sales invoices, payments, bank reconciliations, payroll, capital or tax returns.",
-   "Pending corrections exclude the original cost from the approved purchase CSV.",
+   "Pending or replacement-required corrections exclude the original cost from approved purchases.",
+   "Declined corrections preserve the previously approved original; every decision remains in the audit register.",
    "All amounts EUR; VAT values originate from supplier cost records, not a tax determination.",
    "Source document SHA-256 and per-file hashes appear in manifest.json.",
    "No real personal records are seeded automatically by this preview.",
