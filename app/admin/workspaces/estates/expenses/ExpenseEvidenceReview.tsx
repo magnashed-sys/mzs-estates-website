@@ -9,13 +9,14 @@ import styles from "./expenses.module.css";
 type Cost={id:string;supplier_invoice_number:string;invoice_date:string;status:string};
 type Evidence={id:string;draft_id:string;sha256:string;mime_type:string;file_size:number};
 type Event={draft_id:string;sequence_no:number;action:string;created_at:string};
-type Props={drafts:Cost[];documents:Evidence[];events:Event[];enabled:boolean};
-function DraftReviewForm({draft,state}: {draft:Cost;state:"draft"|"submitted"|"approved"|"rejected"}) {
+type ScanEvent={document_id:string;observed_sha256:string;verdict:string;id:number};
+type Props={drafts:Cost[];documents:Evidence[];events:Event[];scanEvents:ScanEvent[];enabled:boolean};
+function DraftReviewForm({draft,state,scanCleared}: {draft:Cost;state:"draft"|"submitted"|"approved"|"rejected";scanCleared:boolean}) {
  const [result,action,pending]=useActionState(changeExpenseReview,initialFormActionState);
  const [decision,setDecision]=useState<"submitted"|"approved"|"rejected">(
   state==="draft"?"submitted":"approved");
- const permitted=state==="draft"||state==="submitted";
- if(!permitted)return <span className={styles.hint}>{state==="approved"?"Goedgekeurd – definitief":"Afgewezen – correctieworkflow volgt"}</span>;
+ const permitted=(state==="draft"||state==="submitted")&&scanCleared;
+ if(!permitted)return <span className={styles.hint}>{state==="approved"?"Goedgekeurd – definitief":state==="rejected"?"Afgewezen – correctieworkflow volgt":"Quarantaine: wacht op gecontroleerde scanvrijgave"}</span>;
  return <form action={action} className={styles.evidenceActions}>
    <input type="hidden" name="draft_id" value={draft.id}/>
    <input type="hidden" name="expected_state" value={state}/>
@@ -34,7 +35,7 @@ function DraftReviewForm({draft,state}: {draft:Cost;state:"draft"|"submitted"|"a
    {result.message&&<p role="status" className={result.status==="error"?styles.error:styles.hint}>{result.message}</p>}
   </form>;
 }
-export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:Props){
+export default function ExpenseEvidenceReview({drafts,documents,events,scanEvents,enabled}:Props){
  const [draftId,setDraftId]=useState("");
  const [file,setFile]=useState<File|null>(null);
  const [busy,setBusy]=useState(false);
@@ -46,6 +47,15 @@ export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:
   const prior=latest.get(event.draft_id);
   if(!prior||event.sequence_no>prior.sequence_no)latest.set(event.draft_id,event);
  }
+ const latestScan=new Map<string,ScanEvent>();
+ for(const scan of scanEvents){
+  const previous=latestScan.get(scan.document_id);
+  if(!previous||scan.id>previous.id)latestScan.set(scan.document_id,scan);
+ }
+ const isCleared=(d:Evidence)=>{
+  const scan=latestScan.get(d.id);
+  return scan?.verdict==="clean"&&scan.observed_sha256===d.sha256;
+ };
  const byDraft=new Map(documents.map(d=>[d.draft_id,d]));
  const chosenDoc=byDraft.get(draftId);
  const chosenReview=latest.get(draftId);
@@ -65,7 +75,7 @@ export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:
    const data:unknown=await response.json();
    const result=data as {ok?:boolean;message?:string};
    if(!response.ok||!result.ok)throw new Error(result.message||"Bestand is niet opgeslagen.");
-   setFile(null);setSyntheticConfirmed(false);setMessage("Fictief PDF-bestand gekoppeld. Controleer het Staging-dossier.");
+   setFile(null);setSyntheticConfirmed(false);setMessage("Fictief PDF-bestand in quarantaine opgeslagen. Download en beoordeling blijven geblokkeerd totdat een echte scanner heeft vrijgegeven.");
    router.refresh();
   }catch(err){setMessage(err instanceof Error?err.message:"Upload mislukt.");}
   finally{setBusy(false);}
@@ -73,7 +83,7 @@ export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:
  return <section className={styles.panel} style={{marginTop:22}} aria-labelledby="evidence-heading">
   <p className={styles.kicker}>06 / BRONDOCUMENTEN EN CONTROLE</p>
   <h2 id="evidence-heading">Originele factuur &amp; goedkeuring</h2>
-  <p className={styles.hint}>Uitsluitend MZS Staging met fictieve PDF-testbestanden. Privé-opslag, SHA-256-integriteitswaarde en geen overschrijven. Er is nog geen malware-scanner of formele bewaartermijn geïmplementeerd; upload daarom nooit echte leveranciersdocumenten.</p>
+  <p className={styles.hint}>Alleen fictieve PDF-testbestanden op Staging. Ieder bestand gaat verplicht in quarantaine: zonder een echte, positieve SHA-256-gebonden scannerscan is er geen download of beoordeling mogelijk. Er is nog geen malware-scanner aangesloten. Upload nooit echte leveranciersdocumenten.</p>
   {!enabled?<p className={styles.error} role="alert">Documentregister of controlehistorie is niet volledig beschikbaar. Uploaden en beoordelen zijn geblokkeerd.</p>:
    <><form onSubmit={upload} className={styles.fields} style={{marginTop:20}}>
     <label>Geregistreerd kostenconcept
@@ -101,9 +111,9 @@ export default function ExpenseEvidenceReview({drafts,documents,events,enabled}:
        const doc=byDraft.get(d.id),event=latest.get(d.id),state=(event?.action??"draft") as "draft"|"submitted"|"approved"|"rejected";
        return <tr key={d.id}>
         <td>{d.supplier_invoice_number}</td>
-        <td>{doc?<a href={"/admin/workspaces/estates/expenses/documents/"+doc.id} target="_blank" rel="noopener noreferrer">Download origineel</a>:"Nog geen bestand"}</td>
+        <td>{doc?(isCleared(doc)?<a href={"/admin/workspaces/estates/expenses/documents/"+doc.id} target="_blank" rel="noopener noreferrer">Download origineel</a>:<span className={styles.hint}>Quarantaine — niet vrijgegeven</span>):"Nog geen bestand"}</td>
         <td>{state==="draft"?"Concept":state==="submitted"?"In behandeling":state==="approved"?"Goedgekeurd":"Afgewezen"}</td>
-        <td>{doc?<DraftReviewForm draft={d} state={state}/>:<span className={styles.hint}>Upload vereist</span>}</td>
+        <td>{doc?<DraftReviewForm draft={d} state={state} scanCleared={isCleared(doc)}/>:<span className={styles.hint}>Upload vereist</span>}</td>
        </tr>;
       })}</tbody>
     </table>
