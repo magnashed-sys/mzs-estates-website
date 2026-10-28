@@ -22,7 +22,7 @@ test("Candidate is default OFF, with no live account, invoice, booking, or capit
  const cleaned=lines.replace(/'(?:''|[^'])*'/g,"''");
  assert.match(cleaned,/ops_pilot_run_active/);
  assert.match(cleaned,/security_invoker=true/);
- assert.match(cleaned,/Pilot run can activate only once/);
+ assert.match(candidate,/Pilot run can activate only once/);
  assert.doesNotMatch(cleaned,/\b(?:insert into|update|delete from|truncate|drop table|alter table)\s+public\.(?:profiles|mzs_lease_|mzs_booking_|mzs_capital_|rental_bookings)/i);
  assert.doesNotMatch(cleaned,/\binsert\s+into\s+public\.mzs_ops_pilot_(?:runs|run_events|access_events|visits|tickets)/i);
 });
