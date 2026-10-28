@@ -55,7 +55,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
  const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
-  <Link href="/admin/workspaces/estates" className={styles.back}>Terug naar Estates</Link>
+  <Link href="/admin/workspaces/accountancy" className={styles.back}>Terug naar Accountancy</Link>
   <header className={styles.heading}>
    <div>
     <p className={styles.kicker}>MZS GROUP / ESTATES / KOSTENADMINISTRATIE</p>

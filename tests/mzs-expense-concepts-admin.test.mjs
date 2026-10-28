@@ -6,7 +6,7 @@ const page=read("app/admin/workspaces/estates/expenses/page.tsx");
 const action=read("app/admin/workspaces/estates/expenses/expense-draft-actions.ts");
 const form=read("app/admin/workspaces/estates/expenses/ExpenseDraftSaver.tsx");
 const calculator=read("app/admin/workspaces/estates/expenses/ExpenseCalculator.tsx");
-const nav=read("app/admin/workspaces/estates/page.tsx");
+const nav=read("app/admin/workspaces/accountancy/page.tsx");
 
 test("Admin expense route only reads isolated registers and rejects wrong environment",()=>{
  assert.match(page,/VERCEL_ENV==="production"/);
