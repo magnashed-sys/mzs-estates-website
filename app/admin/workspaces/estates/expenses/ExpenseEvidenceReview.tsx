@@ -10,7 +10,7 @@ type Cost={id:string;supplier_invoice_number:string;invoice_date:string;status:s
 type Evidence={id:string;draft_id:string;sha256:string;mime_type:string;file_size:number};
 type Event={draft_id:string;sequence_no:number;action:string;created_at:string};
 type ScanEvent={document_id:string;observed_sha256:string;verdict:string;id:number};
-type Props={drafts:Cost[];documents:Evidence[];events:Event[];scanEvents:ScanEvent[];enabled:boolean};
+type Props={drafts:Cost[];documents:Evidence[];events:Event[];scanEvents:ScanEvent[];enabled:boolean;scannerAvailable:boolean};
 function DraftReviewForm({draft,state,scanCleared}: {draft:Cost;state:"draft"|"submitted"|"approved"|"rejected";scanCleared:boolean}) {
  const [result,action,pending]=useActionState(changeExpenseReview,initialFormActionState);
  const [decision,setDecision]=useState<"submitted"|"approved"|"rejected">(
@@ -35,12 +35,14 @@ function DraftReviewForm({draft,state,scanCleared}: {draft:Cost;state:"draft"|"s
    {result.message&&<p role="status" className={result.status==="error"?styles.error:styles.hint}>{result.message}</p>}
   </form>;
 }
-export default function ExpenseEvidenceReview({drafts,documents,events,scanEvents,enabled}:Props){
+export default function ExpenseEvidenceReview({drafts,documents,events,scanEvents,enabled,scannerAvailable}:Props){
  const [draftId,setDraftId]=useState("");
  const [file,setFile]=useState<File|null>(null);
  const [busy,setBusy]=useState(false);
  const [syntheticConfirmed,setSyntheticConfirmed]=useState(false);
  const [message,setMessage]=useState("");
+ const [scanBusy,setScanBusy]=useState<string|null>(null);
+ const [scanMessage,setScanMessage]=useState("");
  const router=useRouter();
  const latest=new Map<string,Event>();
  for(const event of events){
@@ -80,10 +82,27 @@ export default function ExpenseEvidenceReview({drafts,documents,events,scanEvent
   }catch(err){setMessage(err instanceof Error?err.message:"Upload mislukt.");}
   finally{setBusy(false);}
  }
+ async function runScan(id:string){
+  if(!scannerAvailable||scanBusy)return;
+  setScanBusy(id);setScanMessage("");
+  try{
+   const response=await fetch("/admin/workspaces/estates/expenses/documents/"+encodeURIComponent(id)+"/scan",{
+    method:"POST",credentials:"same-origin",cache:"no-store"
+   });
+   const value:unknown=await response.json();
+   const result=(value&&typeof value==="object"?value:{}) as {ok?:boolean;message?:string};
+   if(!response.ok||result.ok!==true)throw new Error(result.message||"Scan kon niet worden voltooid.");
+   setScanMessage(result.message||"Het scanresultaat is vastgelegd.");
+   router.refresh();
+  }catch(error){
+   setScanMessage(error instanceof Error?error.message:"Scannen mislukt.");
+  }finally{setScanBusy(null);}
+ }
  return <section className={styles.panel} style={{marginTop:22}} aria-labelledby="evidence-heading">
   <p className={styles.kicker}>06 / BRONDOCUMENTEN EN CONTROLE</p>
   <h2 id="evidence-heading">Originele factuur &amp; goedkeuring</h2>
   <p className={styles.hint}>Alleen fictieve PDF-testbestanden op Staging. Ieder bestand gaat verplicht in quarantaine: zonder een echte, positieve SHA-256-gebonden scannerscan is er geen download of beoordeling mogelijk. Er is nog geen malware-scanner aangesloten. Upload nooit echte leveranciersdocumenten.</p>
+  {!scannerAvailable&&<p role="status" className={styles.hint}>Externe malwarescanner nog niet geconfigureerd en goedgekeurd. Scannen, downloaden en beoordelen blijven geblokkeerd.</p>}
   {!enabled?<p className={styles.error} role="alert">Documentregister of controlehistorie is niet volledig beschikbaar. Uploaden en beoordelen zijn geblokkeerd.</p>:
    <><form onSubmit={upload} className={styles.fields} style={{marginTop:20}}>
     <label>Geregistreerd kostenconcept
@@ -104,6 +123,7 @@ export default function ExpenseEvidenceReview({drafts,documents,events,scanEvent
     <button className={styles.saveButton} disabled={!canUpload} type="submit">{busy?"Bezig…":"Origineel veilig koppelen"}</button>
     {message&&<p role="status" className={message.includes("mislukt")?styles.error:styles.hint}>{message}</p>}
    </form>
+   {scanMessage&&<p role="status" className={styles.hint}>{scanMessage}</p>}
    <div className={styles.tableScroll} style={{marginTop:20}}>
     <table aria-label="Brondocumenten en status">
       <thead><tr><th>Inkoopconcept</th><th>Origineel</th><th>Controle</th><th>Actie</th></tr></thead>
@@ -113,7 +133,15 @@ export default function ExpenseEvidenceReview({drafts,documents,events,scanEvent
         <td>{d.supplier_invoice_number}</td>
         <td>{doc?(isCleared(doc)?<a href={"/admin/workspaces/estates/expenses/documents/"+doc.id} target="_blank" rel="noopener noreferrer">Download origineel</a>:<span className={styles.hint}>Quarantaine — niet vrijgegeven</span>):"Nog geen bestand"}</td>
         <td>{state==="draft"?"Concept":state==="submitted"?"In behandeling":state==="approved"?"Goedgekeurd":"Afgewezen"}</td>
-        <td>{doc?<DraftReviewForm draft={d} state={state} scanCleared={isCleared(doc)}/>:<span className={styles.hint}>Upload vereist</span>}</td>
+        <td>{doc?<div>
+         <DraftReviewForm draft={d} state={state} scanCleared={isCleared(doc)}/>
+         {scannerAvailable&&!isCleared(doc)&&
+          (!latestScan.get(doc.id)||latestScan.get(doc.id)?.verdict==="unscannable")&&
+          <button type="button" className={styles.saveButton}
+           onClick={()=>void runScan(doc.id)} disabled={scanBusy!==null}>
+           {scanBusy===doc.id?"Scannen…":"Start externe virusscan"}
+          </button>}
+        </div>:<span className={styles.hint}>Upload vereist</span>}</td>
        </tr>;
       })}</tbody>
     </table>
