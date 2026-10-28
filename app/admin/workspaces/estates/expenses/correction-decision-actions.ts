@@ -3,7 +3,6 @@ import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 
 export type CorrectionDecisionState={status:"idle"|"success"|"error";message:string};
-export const initialCorrectionDecision:CorrectionDecisionState={status:"idle",message:""};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Does not post corrected amounts or change the original invoice/document. */
