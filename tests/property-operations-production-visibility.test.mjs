@@ -8,6 +8,6 @@ test("Staging-only navigation and money panel are not displayed in Production",(
  assert.match(estates,/operationsStaging&&\(/);
  assert.match(estates,/\/admin\/workspaces\/estates\/staff/);
  assert.match(estates,/\/admin\/workspaces\/estates\/expenses/);
- assert.match(finance,/process\.env\.VERCEL_ENV==='preview'/);
+ assert.match(finance,/NEXT_PUBLIC_SUPABASE_URL/);
  assert.match(finance,/PropertyOperationsFinancialPanel/);
 });
