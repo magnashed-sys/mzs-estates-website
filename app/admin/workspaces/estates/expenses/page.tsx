@@ -214,6 +214,27 @@ export default async function PropertyExpensesPage() {
         enabled={linksComplete}
       />}
 
+      {stagingEnabled && incomplete.length===0 && <section className={styles.panel} style={{marginTop:22}}>
+        <p className={styles.kicker}>10 / GECOMBINEERD ACCOUNTANTSPAKKET · PROEFVERSIE</p>
+        <h2>Één download, twee gecontroleerde deelrapporten</h2>
+        <p className={styles.hint}>Deze bundel bevat afzonderlijke ZIP's voor de goedgekeurde inkoopkosten en de geregistreerde verkoopfacturen/ontvangsten, inclusief hun eigen uitzonderingen. Het is nog geen sluitende boekhouding. De beveiligde proefdownload is vanwege de eerste technische limiet beperkt tot 3 MB aan deelrapporten.</p>
+        <form method="GET" action="/admin/workspaces/estates/expenses/accountant-bundle" className={styles.fields} style={{marginTop:15}}>
+          <div className={styles.twoFields}>
+            <label>Juridische entiteit
+              <select required name="entity" defaultValue="">
+                <option value="" disabled>Selecteer entiteit</option>
+                {(issuerResult.data??[]).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
+              </select>
+            </label>
+            <label>Boekjaar
+              <select name="year" required defaultValue="2026">
+                {[2025,2026,2027,2028].map(y=><option value={y} key={y}>{y}</option>)}
+              </select>
+            </label>
+          </div>
+          <button type="submit" className={styles.saveButton}>Download gecombineerde proefbundel (ZIP)</button>
+        </form>
+      </section>}
       <div className={styles.nextSteps}>
         <h2>Voorbereid voor de volgende fase</h2>
         <div className={styles.nextGrid}>
