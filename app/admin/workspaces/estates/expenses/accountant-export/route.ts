@@ -20,6 +20,7 @@ type Review={draft_id:string;sequence_no:number;action:string};
 type Evidence={draft_id:string;storage_path:string;sha256:string;mime_type:string;file_size:number};
 type Correction={id:string;draft_id:string;reason:string};
 type Decision={id:string;correction_id:string;decision:string};
+type Replacement={id:string;correction_id:string;replacement_draft_id:string};
 type Supplier={id:string;name:string};
 
 function money(v:unknown):number{
@@ -121,6 +122,21 @@ export async function GET(request:NextRequest){
    decisionMap.set(d.correction_id,d.decision);
   }
   const correctionMap=new Map<string,Correction>();
+  const replacements:Replacement[]=[];
+  for(let start=0;start<corrections.length;start+=80){
+   const ids=corrections.slice(start,start+80).map(x=>x.id);
+   const q=await db.from("mzs_ops_expense_replacements")
+    .select("id,correction_id,replacement_draft_id",{count:"exact"}).in("correction_id",ids).limit(200);
+   if(q.error||!q.data||q.count===null||q.data.length!==q.count)
+    throw Error("Incomplete replacement lineage register");
+   replacements.push(...q.data);
+  }
+  const replacementByCorrection=new Map<string,Replacement>();
+  for(const r of replacements){
+    if(replacementByCorrection.has(r.correction_id) ||
+       !corrections.some(c=>c.id===r.correction_id))throw Error("Invalid replacement lineage");
+    replacementByCorrection.set(r.correction_id,r);
+  }
   const reviewMap=new Map<string,Review>(),docMap=new Map<string,Evidence>(),correctionIds=new Set<string>();
   for(const r of reviews){
    if(!ids.includes(r.draft_id))throw Error("Cross-entity review");
@@ -146,7 +162,7 @@ export async function GET(request:NextRequest){
    for(const s of res.data as Supplier[])supplierMap.set(s.id,s.name);
   }
 
-  const purchaseRows:Record<string,unknown>[]=[],allocationRows:Record<string,unknown>[]=[],exceptionRows:Record<string,unknown>[]=[];
+  const purchaseRows:Record<string,unknown>[]=[],allocationRows:Record<string,unknown>[]=[],exceptionRows:Record<string,unknown>[]=[],lineageRows:Record<string,unknown>[]=[];
   const files:ArchiveFile[]=[];
   const fileManifest:{name:string;sha256:string;bytes:number}[]=[];
   const add=(name:string,bytes:Uint8Array)=>{files.push({name,bytes});fileManifest.push({name,sha256:exportHash(bytes),bytes:bytes.length});};
@@ -161,13 +177,23 @@ export async function GET(request:NextRequest){
    const correction=correctionMap.get(d.id);
    const decision=correction?decisionMap.get(correction.id):null;
    const correctionPending=!!correction && decision!=="declined";
+   const replacement=correction?replacementByCorrection.get(correction.id):null;
+   if(replacement && decision!=="replacement_required")
+     throw Error("Unexpected replacement when correction was not required");
+   if(correction)lineageRows.push({
+     original_draft_id:d.id,original_supplier_invoice_number:d.supplier_invoice_number,
+     correction_id:correction.id,decision:decision??"pending",
+     replacement_draft_id:replacement?.replacement_draft_id??"",
+     replacement_supplier_invoice_number:drafts.find(row=>row.id===replacement?.replacement_draft_id)?.supplier_invoice_number??"",
+     original_export_treatment:correctionPending?"excluded_as_exception":"original_may_be_included_if_approved"
+   });
    if(!["draft","submitted","approved","rejected"].includes(state))throw Error("Unknown review status");
    const ready=state==="approved"&&!correctionPending;
    if(!ready){
     exceptionRows.push({
      draft_id:d.id,invoice_number:d.supplier_invoice_number,invoice_date:d.invoice_date,
      review_status:state,has_original:!!doc,correction_pending:correctionPending,
-     reason:correctionPending?(decision==="replacement_required"?"Replacement evidence and new financial review required":"Correction proposal awaiting decision"):
+     reason:correctionPending?(decision==="replacement_required"?(replacement?"Original superseded by a separately approved corrected invoice":"Replacement evidence and new financial review required"):"Correction proposal awaiting decision"):
       !doc?"Original invoice not uploaded":"Not an approved supplier expense",
      net_eur:amount(net),vat_eur:amount(vat),gross_eur:amount(gross)
     });
@@ -214,6 +240,10 @@ export async function GET(request:NextRequest){
    "draft_id","invoice_number","invoice_date","review_status","has_original",
    "correction_pending","reason","net_eur","vat_eur","gross_eur"
   ],exceptionRows)));
+  add("correction-lineage.csv",exportBytes(csv([
+   "original_draft_id","original_supplier_invoice_number","correction_id","decision",
+   "replacement_draft_id","replacement_supplier_invoice_number","original_export_treatment"
+  ],lineageRows)));
   const readme=[
    "MZS GROUP — PROPERTY OPERATIONS ACCOUNTANT EXPORT — STAGING REHEARSAL",
    "NOT A COMPLETE LEGAL ACCOUNTING EXPORT. DO NOT FILE A TAX RETURN FROM THIS DATA.",
@@ -223,7 +253,8 @@ export async function GET(request:NextRequest){
    "Unresolved/pending/uncorrected cost drafts: "+exceptionRows.length,
    "Included: approved supplier costs, original evidence, property allocations.",
    "Not included: sales invoices, payments, bank reconciliations, payroll, capital or tax returns.",
-   "Pending or replacement-required corrections exclude the original cost from approved purchases.",
+   "Pending or replacement-required corrections exclude original approved costs; see correction-lineage.csv.",
+   "Replacement drafts require their own source document and independent approval, and are exported in their own issue year.",
    "Declined corrections preserve the previously approved original; every decision remains in the audit register.",
    "All amounts EUR; VAT values originate from supplier cost records, not a tax determination.",
    "Source document SHA-256 and per-file hashes appear in manifest.json.",
@@ -233,7 +264,7 @@ export async function GET(request:NextRequest){
   add("manifest.json",exportBytes(JSON.stringify({
    kind:"mzs-property-operations-staging-partial-export",year,
    legal_entity_id:legalEntityId,legal_entity_name:entity.name,
-   purchase_rows:purchaseRows.length,exceptions:exceptionRows.length,
+   purchase_rows:purchaseRows.length,exceptions:exceptionRows.length,correction_lineages:lineageRows.length,
    completeness:"partial—not statutory accountancy",
    files:fileManifest
   },null,2)+"\n"));
