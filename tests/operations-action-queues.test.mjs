@@ -113,6 +113,6 @@ test('action page checks environment and active administrator before reading que
 });
 test('successful operation invalidation refreshes both dashboards and the complete queue',()=>{
  const paths=[],exports={};vm.runInNewContext(compile('lib/property-operations/revalidate.ts'),{exports,require:()=>({revalidatePath:path=>paths.push(path)})});
- exports.revalidateOperations();assert.deepEqual(paths,['/staff','/admin/workspaces/estates/staff','/admin/workspaces/estates/actions','/admin/workspaces/estates','/admin/workspaces/group']);
+ exports.revalidateOperations();assert.deepEqual(paths,['/staff','/admin/workspaces/estates/staff','/admin/workspaces/estates/actions','/admin/workspaces/estates/time-report','/admin/workspaces/estates','/admin/workspaces/group']);
 });
 test.after(async()=>{await pg.close();});
