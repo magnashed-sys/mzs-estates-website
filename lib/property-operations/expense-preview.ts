@@ -33,7 +33,7 @@ export function expenseAllocationPreview(
   if (!propertyId || typeof propertyId !== "string") throw new Error("Select a property.");
   const uniqueUnits = [...new Set(availableUnitIds)];
   if (uniqueUnits.length !== availableUnitIds.length) {
-    throw new Error("Dubbele units in objectregister.");
+    throw new Error("Duplicate units in property register.");
   }
   const targets = mode === "property" ? [propertyId] :
     mode === "unit" ?
