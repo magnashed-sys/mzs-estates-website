@@ -6,7 +6,7 @@ import {normalizeIssuedInvoice,receiptEvents,dateYear,type IssuedInvoice,type Re
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
 const staging="https://senonkpxdtlhyhrubicg.supabase.co";
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow"};
 const colsI=["source","invoice_id","issuer_id","invoice_number","invoice_date","source_document_id","gross_eur","net_eur","vat_eur","vat_note","currency"];
 const colsR=["source","receipt_id","invoice_id","source_reference","receipt_type","original_received_on","administrative_reversed_on","vat_note","event","event_date","amount_eur"];
