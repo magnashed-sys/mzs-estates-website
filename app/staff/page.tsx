@@ -11,7 +11,18 @@ export default async function StaffPortalPage(){
   db.from("mzs_ops_maintenance_tickets").select("id,property_id,priority,title,status,created_at",{count:"exact"})
    .eq("reported_by",user.id).order("created_at",{ascending:false}).limit(100)
  ]);
- const complete=[u,v,t].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.count===x.data.length);
+ const staffTicketIds=(t.data??[]).map(x=>x.id);
+ const eventResult=staffTicketIds.length>0 ? await db.from("mzs_ops_maintenance_events")
+  .select("id,ticket_id,sequence_no,action",{count:"exact"})
+  .in("ticket_id",staffTicketIds).order("sequence_no",{ascending:false}).limit(200) : null;
+ const eventsComplete=staffTicketIds.length===0 || (!!eventResult &&
+  !eventResult.error&&eventResult.count!==null&&eventResult.data!==null&&
+  eventResult.data.length===eventResult.count);
+ const latestStatus=new Map<string,string>();
+ if(eventsComplete&&eventResult?.data)for(const e of eventResult.data){
+  if(!latestStatus.has(e.ticket_id))latestStatus.set(e.ticket_id,e.action);
+ }
+ const complete=eventsComplete&&[u,v,t].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.count===x.data.length);
  const name=(id:string)=>properties.find(p=>p.id===id)?.name??"Object";
  return <main className={s.main}>
   <header className={s.head}>
@@ -40,7 +51,7 @@ export default async function StaffPortalPage(){
        <div className={s.tableWrap}><table>
         <thead><tr><th>Melding</th><th>Object</th><th>Urgentie</th><th>Status</th></tr></thead>
         <tbody>{t.data!.map(x=><tr key={x.id}>
-         <td>{x.title}</td><td>{name(x.property_id)}</td><td>{x.priority}</td><td>{x.status}</td>
+         <td>{x.title}</td><td>{name(x.property_id)}</td><td>{x.priority}</td><td>{latestStatus.get(x.id)??x.status}</td>
         </tr>)}</tbody>
        </table></div>}
      </section>
