@@ -72,7 +72,8 @@ test("Production pilot SQL preflight is strictly read-only and checks existing r
  const sql=source("supabase/plans/20261028_property_operations_production_pilot_preflight.sql");
  const executable=sql.split("\n").filter(line=>!line.trim().startsWith("--")).join("\n");
  assert.match(executable,/begin transaction read only;/i);
- assert.doesNotMatch(executable,/\b(?:create|alter|drop|truncate|insert|update|delete|grant|revoke|do|call)\b/i);
+ const withoutSqlLiterals=executable.replace(/'(?:''|[^'])*'/g,"''");
+ assert.doesNotMatch(withoutSqlLiterals,/\b(?:create|alter|drop|truncate|insert|update|delete|grant|revoke|do|call)\b/i);
  for(const register of [
   "rental_bookings","mzs_booking_invoices","mzs_booking_receipts",
   "mzs_lease_contracts","mzs_lease_invoices","mzs_lease_payments",
