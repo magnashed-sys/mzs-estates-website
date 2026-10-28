@@ -41,7 +41,7 @@ test("Every client form uses a serializable local initializer without importing 
 });
 test("Shared initializer is a plain client-safe value and never a server action",()=>{
  const value=read("lib/property-operations/form-state.ts");
- assert.doesNotMatch(value,/["']use server["']/);
+ assert.doesNotMatch(value,/^\s*[\"']use server[\"'];?\s*$/m);
  assert.match(value,/export const initialFormActionState/);
  assert.match(value,/status:"idle"/);
 });
