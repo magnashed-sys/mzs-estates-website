@@ -2,7 +2,7 @@
 import {revalidatePath} from "next/cache";
 import {requirePropertyStaff} from "../../lib/security/property-staff";
 type StaffActionState={status:"idle"|"success"|"error";message:string};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const day=/^20\d\d-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])$/;
 function dateValid(value:string){
  if(!day.test(value))return false;
