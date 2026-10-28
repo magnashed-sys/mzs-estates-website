@@ -20,3 +20,18 @@
 .forms button:disabled{opacity:.5;cursor:default}
 .error{color:#8e2d32!important;font-size:.86rem}.success{color:#19573e!important;font-size:.86rem}
 @media(max-width:760px){.main{padding:28px 16px 70px}.forms{grid-template-columns:1fr}.panel{padding:18px}}
+
+
+/* Read-only administrator review of synthetic work and maintenance records. */
+.historyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start;margin:0 0 22px}
+.historyGrid .panel{margin:0;min-width:0}
+.historyHint{font-size:.83rem;color:#63727d!important;margin:0 0 14px}
+.historyList{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.panel .historyItem{display:block;border:1px solid #e1e6ea;background:#f8f9fa;padding:16px;min-width:0}
+.historyTop{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 14px;margin-bottom:10px}
+.historyTop strong{font-size:.96rem;color:#192d39;overflow-wrap:anywhere}
+.historyTop span{font-size:.77rem;color:#596875;overflow-wrap:anywhere}
+.panel .historyItem p{font-size:.85rem;margin:6px 0;line-height:1.55;overflow-wrap:anywhere}
+.panel .historyItem p strong{font-weight:600;color:#293f4d}
+.panel .historyItem .historyDescription{white-space:pre-wrap;color:#324754}
+@media(max-width:760px){.historyGrid{grid-template-columns:1fr;gap:16px}.panel .historyItem{padding:13px}}
