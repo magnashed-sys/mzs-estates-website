@@ -1,6 +1,7 @@
 "use client";
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 import {useActionState,useState} from "react";
-import {linkSupplierReplacement,initialReplacementState} from "./replacement-actions";
+import {linkSupplierReplacement} from "./replacement-actions";
 import styles from "./expenses.module.css";
 type Correction={id:string;draft_id:string};
 type Decision={correction_id:string;decision:string};
@@ -11,7 +12,7 @@ type Link={id:string;correction_id:string;replacement_draft_id:string};
 function ReplacementForm({correction,drafts,reviewed,documentIds}:{
  correction:Correction;drafts:Draft[];reviewed:Map<string,string>;documentIds:Set<string>
 }){
- const [state,action,pending]=useActionState(linkSupplierReplacement,initialReplacementState);
+ const [state,action,pending]=useActionState(linkSupplierReplacement,initialFormActionState);
  const [replacementId,setReplacementId]=useState("");
  const original=drafts.find(d=>d.id===correction.draft_id);
  const valid=original?drafts.filter(d=>d.id!==original.id &&
