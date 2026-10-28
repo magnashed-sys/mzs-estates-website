@@ -66,15 +66,6 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  await assert.rejects(query("insert into mzs_ops_expense_review_events(draft_id,action,expected_state) values('"+draft+"','submitted','draft')"),/Stale expense review/);
  await assert.rejects(query("delete from mzs_ops_expense_review_events where draft_id='"+draft+"'"),/permission denied/);
 
- const decision=(choice,reference)=>query(
-  "insert into public.mzs_ops_expense_correction_decisions(correction_id,decision,reason) values('"
-  +correction+"','"+choice+"','"+reference+"') returning id");
- const declined=(await decision('declined','Supplier invoice original remains correct')).rows[0].id;
- assert.ok(declined);
- assert.equal((await query("select decision from public.mzs_ops_expense_correction_decisions where correction_id='"+correction+"'")).rows[0].decision,'declined');
- await assert.rejects(decision('replacement_required','Second decision forbidden'),/duplicate key|already been resolved/);
- await assert.rejects(query("update public.mzs_ops_expense_correction_decisions set decision='replacement_required' where id='"+declined+"'"),/permission denied/);
- await assert.rejects(query("delete from public.mzs_ops_expense_correction_decisions where id='"+declined+"'"),/permission denied/);
  await db.exec("select set_config('request.jwt.claim.sub','"+client+"',false);");
  assert.equal((await query('select count(*)::int as n from mzs_ops_expense_documents')).rows[0].n,0);
  assert.equal((await query('select count(*)::int as n from mzs_ops_expense_review_events')).rows[0].n,0);
@@ -93,6 +84,15 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  await assert.rejects(query(correctionSql(20000,4200)),/duplicate key/);
  await assert.rejects(query("update public.mzs_ops_expense_correction_requests set proposed_net_cents=0 where id='"+correction+"'"),/permission denied/);
  await assert.rejects(query("delete from public.mzs_ops_expense_correction_requests where id='"+correction+"'"),/permission denied/);
+ const decision=(choice,reference)=>query(
+  "insert into public.mzs_ops_expense_correction_decisions(correction_id,decision,reason) values('"
+  +correction+"','"+choice+"','"+reference+"') returning id");
+ const declined=(await decision('declined','Supplier invoice original remains correct')).rows[0].id;
+ assert.ok(declined);
+ assert.equal((await query("select decision from public.mzs_ops_expense_correction_decisions where correction_id='"+correction+"'")).rows[0].decision,'declined');
+ await assert.rejects(decision('replacement_required','Second decision forbidden'),/duplicate key|already been resolved/);
+ await assert.rejects(query("update public.mzs_ops_expense_correction_decisions set decision='replacement_required' where id='"+declined+"'"),/permission denied/);
+ await assert.rejects(query("delete from public.mzs_ops_expense_correction_decisions where id='"+declined+"'"),/permission denied/);
  await db.exec("select set_config('request.jwt.claim.sub','"+client+"',false);");
  assert.equal((await query("select count(*)::int as n from public.mzs_ops_expense_correction_requests")).rows[0].n,0);
  await assert.rejects(query(correctionSql(12500,2625)),/row-level security|Active administrator required|permission denied/);
