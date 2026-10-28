@@ -67,3 +67,19 @@ test("Production operational navigation remains intentionally gated until piloti
  assert.match(estates,/process\.env\.VERCEL_ENV==="preview"/);
  assert.match(fin,/NEXT_PUBLIC_SUPABASE_URL==='https:\/\/senonkpxdtlhyhrubicg\.supabase\.co'/);
 });
+
+test("Production pilot SQL preflight is strictly read-only and checks existing registers",()=>{
+ const sql=source("supabase/plans/20261028_property_operations_production_pilot_preflight.sql");
+ const executable=sql.split("\n").filter(line=>!line.trim().startsWith("--")).join("\n");
+ assert.match(executable,/begin transaction read only;/i);
+ assert.doesNotMatch(executable,/\b(?:create|alter|drop|truncate|insert|update|delete|grant|revoke|do|call)\b/i);
+ for(const register of [
+  "rental_bookings","mzs_booking_invoices","mzs_booking_receipts",
+  "mzs_lease_contracts","mzs_lease_invoices","mzs_lease_payments",
+  "mzs_capital_deals","mzs_capital_payments",
+  "mzs_owner_stay_requests","mzs_estate_properties","mzs_estate_units"
+ ])assert.ok(sql.includes("public."+register),"missing protected register "+register);
+ assert.match(executable,/relrowsecurity/);
+ assert.match(executable,/has_table_privilege\('anon'/);
+ assert.match(executable,/commit;/i);
+});
