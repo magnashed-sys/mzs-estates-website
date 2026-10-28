@@ -1,6 +1,7 @@
 import {NextRequest} from 'next/server';
 import {requireContractAdmin} from '../../../../lib/security/estate-contracts';
 import {capitalDealsEnabled} from '../../../../lib/security/capital-deals';
+import {readFinancialArchive} from '../../../../lib/finance/archive-register';
 import {readRegister} from '../../../../lib/estates/read-register';
 import {type Booking,type LoanDeal,type LoanInstalment,type LoanPayment} from '../../../../lib/finance/financial-cockpit';
 import {buildFinancialPhase2,type AttributedLease,type AttributedPayment,type LeaseInvoice,type Issuer} from '../../../../lib/finance/financial-report';
@@ -31,13 +32,13 @@ export async function GET(request:NextRequest){
   const today=madridToday(),currentYear=Number(today.slice(0,4));
   const requested=request.nextUrl.searchParams.get('year');
   const year=requested===null?currentYear:Number(requested);
-  if(!Number.isInteger(year)||year<currentYear-1||year>currentYear+1)
+  if(!Number.isInteger(year)||![2026,currentYear-1,currentYear,currentYear+1].includes(year))
    return Response.json({error:'Invalid reporting year'},{status:400,headers});
   const capitalOn=capitalDealsEnabled();
   const entityId=request.nextUrl.searchParams.get('entity')||'all';
   if(entityId!=='all'&&entityId!=='unassigned'&&!/^[a-f0-9-]{36}$/i.test(entityId))
    return Response.json({error:'Invalid entity filter'},{status:400,headers});
-  const [contracts,rentPayments,bookings,deals,instalments,loanPayments,issuers,invoices]=await Promise.all([
+  const [contracts,rentPayments,bookings,deals,instalments,loanPayments,issuers,invoices,archiveInvoices]=await Promise.all([
    readRegister(db,'mzs_lease_contracts'),
    readRegister(db,'mzs_lease_payments'),
    listBookings(db),
@@ -45,14 +46,15 @@ export async function GET(request:NextRequest){
    capitalOn?readRegister(db,'mzs_capital_instalments'):Promise.resolve([]),
    capitalOn?readRegister(db,'mzs_capital_payments'):Promise.resolve([]),
    readRegister(db,'mzs_lease_issuers'),
-   readRegister(db,'mzs_lease_invoices')
+   readRegister(db,'mzs_lease_invoices'),
+   readFinancialArchive(db,year)
   ]);
   const result=buildFinancialPhase2({
    year,asOf:today,entityId,
    contracts:contracts as AttributedLease[],rentPayments:rentPayments as AttributedPayment[],
    bookings,deals:deals as LoanDeal[],instalments:instalments as LoanInstalment[],
    loanPayments:loanPayments as LoanPayment[],loansAvailable:capitalOn,
-   issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[]
+   issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[],archiveInvoices
   });
   return Response.json(result,{headers});
  }catch{

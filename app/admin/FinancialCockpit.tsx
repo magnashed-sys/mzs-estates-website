@@ -44,11 +44,12 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   if(!data||loading)return;
   const headers=['Month','Expected rent EUR','Recorded rent receipts EUR','Scheduled interest income EUR',
    'Scheduled interest expense EUR','Recorded interest received EUR','Recorded interest paid EUR',
-   'Net forecast EUR','Net recorded EUR'];
+   'Net forecast EUR','Net recorded EUR','Gripp included in report','Gripp invoice count','Gripp invoiced excl VAT EUR','Gripp invoiced incl VAT EUR','Gripp settled in source EUR (payment date unknown)','Gripp open in source EUR (snapshot date unknown)'];
   const lines=[headers.join(';'),...data.rows.map(r=>[
    r.month,r.rentForecast,r.rentReceived,r.interestIn,r.interestOut,r.interestReceived,r.interestPaid,
    Math.round((r.rentForecast+r.interestIn-r.interestOut)*100)/100,
-   Math.round((r.rentReceived+r.interestReceived-r.interestPaid)*100)/100
+   Math.round((r.rentReceived+r.interestReceived-r.interestPaid)*100)/100,
+   ...(()=>{const h=data.historical.rows.find(h=>h.month===r.month)!;return [data.historical.enabled?'yes':'no',h.count,h.netCents/100,h.grossCents/100,h.paidCents/100,h.openCents/100];})()
   ].join(';'))];
   const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
@@ -64,10 +65,10 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  return <section className={s.cockpit} aria-labelledby="financial-cockpit-heading">
   <div className={s.top}>
    <div><p className={s.eyebrow}>MZS GROUP / FINANCIAL OVERVIEW</p><h2 id="financial-cockpit-heading">Financial Cockpit</h2>
-    <p className={s.lead}>Contractual forecasts, scheduled loan interest and confirmed holiday bookings — one read-only overview.</p></div>
+    <p className={s.lead}>Contractual forecasts, historical invoicing, scheduled interest and recorded payments.</p></div>
    <div className={s.controls}>
     <label>Year<select value={year} onChange={e=>setYear(Number(e.target.value))}>
-     {[current.year-1,current.year,current.year+1].map(y=><option key={y} value={y}>{y}</option>)}
+     {[...new Set([2026,current.year-1,current.year,current.year+1])].sort((a,b)=>a-b).map(y=><option key={y} value={y}>{y}</option>)}
     </select></label>
     <label>Month<select value={month} onChange={e=>setMonth(Number(e.target.value))}>
      {Array.from({length:12},(_,i)=><option key={i} value={i+1}>{monthLabel(year+'-'+String(i+1).padStart(2,'0'))}</option>)}
@@ -102,6 +103,19 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
      <Link className={s.cardLink} href="/admin?tab=bookings">View bookings ↗</Link>
     </div>
    </div>
+   {data.historical.enabled&&<section className={s.reportTable} aria-label="Historical invoicing 2026">
+    <div className={s.panelHeading}><div><p className={s.eyebrow}>GRIPP / {year}</p><h3>Historical invoicing.</h3></div><Link className={s.cardLink} href={'/admin/workspaces/accountancy/invoices?year='+year}>View source invoices ↗</Link></div>
+    <p className={s.scopeNote}>{data.historical.totals.count} invoices in the selected reporting entity, including {data.historical.totals.credits} credit invoice(s). Totals use the invoice date; credit amounts reduce the totals.</p>
+    <div className={s.metrics}>
+     {[
+      ['Invoiced excluding VAT',data.historical.totals.netCents],
+      ['Invoiced including VAT',data.historical.totals.grossCents],
+      ['Settled according to Gripp',data.historical.totals.paidCents],
+      ['Open according to Gripp',data.historical.totals.openCents]
+     ].map(([label,value])=><div className={s.metric} key={label}><span className={s.kicker}>{label}</span><strong className={s.metricValue}>{displayEuroExact(Number(value)/100)}</strong><p className={s.metricLine}>Calendar year {year} · selected entity</p></div>)}
+    </div>
+    <p className={s.note}>Included in this report as invoicing, not recognised revenue or dated bank receipts. Amounts can include deposits and rent for other periods. Gripp balances are source snapshots with no reliable snapshot or payment date. They are not added to forecasts, current MZS receivables or recorded cash movements. Customer, property and revenue-period allocation still needs review. The archive link opens all issuers for this year.</p>
+   </section>}
    <section className={s.netStrip} aria-label="Forecast and recorded cash movements">
      <div><span>Annual net cashflow forecast</span><strong>{displayEuro(data.report.expectedNet)}</strong><small>Contract rent + interest income − interest expense. Excludes bookings, principal and other operating costs.</small></div>
      <div><span>Recorded net cash movements</span><strong>{displayEuro(data.report.recordedNet)}</strong><small>Only MZS payment entries. Not a fully reconciled bank balance.</small></div>
@@ -154,15 +168,16 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
    <section className={s.reportTable} aria-label="Monthly financial reporting">
     <div className={s.panelHeading}><div><p className={s.eyebrow}>FINANCIAL REPORT / {year}</p><h3>Forecast versus recorded.</h3></div><button className={s.refresh} type="button" onClick={exportCsv}>Export report CSV ↓</button></div>
     <div className={s.tableScroll}><table>
-     <thead><tr><th>Month</th><th>Rent forecast</th><th>Interest in</th><th>Interest out</th><th>Net forecast</th><th>Net recorded</th></tr></thead>
+     <thead><tr><th>Month</th><th>Rent forecast</th><th>Interest in</th><th>Interest out</th><th>Net forecast</th><th>Net recorded</th>{data.historical.enabled&&<><th>Gripp invoiced excl. VAT</th><th>Gripp invoiced incl. VAT</th><th>Gripp source open</th></>}</tr></thead>
      <tbody>{rows.map(r=><tr key={r.month}><th scope="row">{monthLabel(r.month)} {year}</th>
       <td>{displayEuro(r.rentForecast)}</td><td>{loanAttributed?displayEuro(r.interestIn):'—'}</td>
       <td>{loanAttributed?displayEuro(r.interestOut):'—'}</td>
       <td>{displayEuro(r.rentForecast+r.interestIn-r.interestOut)}</td>
       <td>{displayEuro(r.rentReceived+r.interestReceived-r.interestPaid)}</td>
+      {data.historical.enabled&&(()=>{const h=data.historical.rows.find(h=>h.month===r.month)!;return <><td>{displayEuroExact(h.netCents/100)}</td><td>{displayEuroExact(h.grossCents/100)}</td><td>{displayEuroExact(h.openCents/100)}</td></>;})()}
      </tr>)}</tbody>
     </table></div>
-    <p className={s.note}>Only interest assigned to the selected entity is included; unlinked interest appears under Unassigned. Exports follow the selected reporting scope.</p>
+    <p className={s.note}>Only interest assigned to the selected entity is included; unlinked interest appears under Unassigned. Exports follow the selected reporting scope. Gripp columns group invoices by issue month; source settlements are not monthly cash receipts.</p>
    </section>
    <p className={s.footerNote}>Financial Cockpit · Scope: {entityLabel} · Not a bank statement, operating profit calculation or audited financial report.</p>
   </>}
