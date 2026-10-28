@@ -7,7 +7,7 @@ import s from './staff.module.css';
 type Data=Awaited<ReturnType<typeof loadRegisters>>;
 export default function WorkRegisters({data,params,properties,members=[],assignees=members,admin=false}:{data:Data;params:Params;properties:Property[];members?:Member[];assignees?:Member[];admin?:boolean}){
  const base=admin?'/admin/workspaces/estates/staff':'/staff';
- const url=(key:string,value:string,anchor='')=>{const q=new URLSearchParams();for(const k of ['property','vpage','tpage','visit','ticket']){const v=one(params[k]);if(v)q.set(k,v);}q.set(key,value);return base+'?'+q.toString()+anchor;};
+ const url=(key:string,value:string,anchor='')=>{const q=new URLSearchParams();for(const k of ['property','vpage','tpage','visit','ticket','inbox','inboxPage']){const v=one(params[k]);if(v)q.set(k,v);}q.set(key,value);return base+'?'+q.toString()+anchor;};
  const property=(id:string)=>properties.find(p=>p.id===id)?.name??'Object';
  const person=(id:string|null)=>members.find(m=>m.id===id)?.full_name??(id?'Toegewezen medewerker':'Nog niet toegewezen');
  const status=(v:Data['visits']['rows'][number])=>v.correction_pending?'Correctie te beoordelen':v.review_decision==='approved'?'Goedgekeurd':v.review_decision==='rejected'?'Teruggestuurd':'Te beoordelen';

@@ -3,6 +3,9 @@ import {requireEstateAdmin} from '../../../../../lib/security/estate-properties'
 import {requireStaffEnvironment} from '../../../../../lib/security/property-staff';
 import {loadRegisters,allRows,type Params} from '../../../../../lib/property-operations/staff-data';
 import type {Property,Member} from '../../../../../lib/property-operations/staff-work';
+import {queueKey,queueHref} from '../../../../../lib/property-operations/action-queues';
+import {pageNumber} from '../../../../../lib/property-operations/staff-work';
+import {one} from '../../../../../lib/property-operations/staff-data';
 import StaffScopeForm from './StaffScopeForm';
 import WorkOrders,{type Order} from './WorkOrders';
 import WorkRegisters from '../../../../staff/WorkRegisters';
@@ -10,6 +13,7 @@ import s from '../../../../staff/staff.module.css';
 export const dynamic='force-dynamic';
 export default async function StaffAdmin({searchParams}:{searchParams:Promise<Params>}){
  requireStaffEnvironment();const {db}=await requireEstateAdmin();const params=await searchParams;
+ const inbox=queueKey(one(params.inbox)),inboxPage=pageNumber(one(params.inboxPage));
  const [data,properties,members,scopes,summary]=await Promise.all([
  loadRegisters(db,params,true),
  allRows<Property>((a,b)=>db.from('mzs_estate_properties').select('id,name',{count:'exact'}).order('id').range(a,b)),
@@ -28,7 +32,7 @@ export default async function StaffAdmin({searchParams}:{searchParams:Promise<Pa
  const today=new Date().toISOString().slice(0,10);
  const assignedMembers=data.ticket?members.filter(m=>m.role==='admin'||scopes.some(x=>x.profile_id===m.id&&x.property_id===data.ticket!.property_id)):members;
  // Keep all names in the register but restrict the assignee selector separately.
- return <main className={s.adminPage}><Link href="/admin/workspaces/estates">← Vastgoedbeheer</Link><h1>Medewerkers &amp; onderhoud</h1><p>Beoordeel werkelijke uren, beslis over correcties en volg onderhoud op. Toegang voor medewerkers wordt hier per object toegewezen.</p>
+ return <main className={s.adminPage}><Link href="/admin/workspaces/estates">← Vastgoedbeheer</Link>{inbox&&<p><Link href={queueHref(inbox,inboxPage)} prefetch={false}>← Terug naar actielijst</Link></p>}<h1>Medewerkers &amp; onderhoud</h1><p>Beoordeel werkelijke uren, beslis over correcties en volg onderhoud op. Toegang voor medewerkers wordt hier per object toegewezen.</p>
  <section className={s.panel}><h2>Overzicht per object · alle registraties</h2><div className={s.tableWrap}><table className={s.table}><thead><tr><th>Object</th><th>Open onderhoud</th><th>Uren te beoordelen</th><th>Goedgekeurde uren</th><th>Kostenconcepten incl. btw</th></tr></thead><tbody>{summary.map(p=><tr key={p.property_id}><td><Link href={'?property='+p.property_id}>{p.name}</Link></td><td>{p.open_tickets}</td><td>{p.pending_visits} bezoeken</td><td>{(Number(p.approved_minutes)/60).toLocaleString('nl-NL',{maximumFractionDigits:2})}</td><td>{(Number(p.expense_draft_cents)/100).toLocaleString('nl-NL',{style:'currency',currency:'EUR'})}</td></tr>)}</tbody></table></div><p>Kostenconcepten zijn nog geen betaalde kosten. Uren hebben hier geen geldwaarde. Een open correctie telt mee bij de te beoordelen bezoeken.</p></section>
  <WorkRegisters data={data} params={params} properties={properties} members={members} assignees={assignedMembers} admin/>
  {data.ticket&&<WorkOrders ticket={data.ticket} orders={orders} issuers={issuers} suppliers={suppliers} payerIds={payers.filter(p=>p.effective_from<=today&&(!p.effective_until||p.effective_until>=today)).map(p=>p.legal_entity_id)} history={orderHistory}/>}

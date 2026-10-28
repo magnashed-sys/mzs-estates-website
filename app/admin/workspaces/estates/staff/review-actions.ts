@@ -1,12 +1,12 @@
 'use server';
-import {revalidatePath} from 'next/cache';
+import {revalidateOperations} from '../../../../../lib/property-operations/revalidate';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {requireStaffEnvironment} from '../../../../../lib/security/property-staff';
 import {uuid,validDate,type WorkState} from '../../../../../lib/property-operations/staff-work';
 
 function result(error:unknown):WorkState{
  if(error)return {status:'error',message:'Niet opgeslagen. Controleer de huidige status, toewijzing en invoer; vernieuw de pagina als deze inmiddels is veranderd.'};
- revalidatePath('/staff');revalidatePath('/admin/workspaces/estates/staff');
+ revalidateOperations();
  return {status:'success',message:'Beslissing vastgelegd in de historie.'};
 }
 const text=(form:FormData,key:string)=>String(form.get(key)??'').trim();

@@ -1,6 +1,8 @@
+import {Suspense} from "react";
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import {resolvePilotEnvironment} from "../../../../lib/property-operations/pilot-environment";
+import OperationsActionCenter from "../../OperationsActionCenter";
 import styles from "../workspace.module.css";
 export const dynamic="force-dynamic";
 export default async function EstatesWorkspace(){
@@ -41,6 +43,7 @@ export default async function EstatesWorkspace(){
     <small>{x.label}</small><strong>{x.result.error||x.result.count===null?"Unavailable":x.result.count}</strong>
    </div>)}
   </section>
+  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db}/></Suspense>
   <section className={styles.grid} aria-label="Property workflows">
    <Link className={styles.card} href="/admin/group/estates/properties"><small>01 / PROPERTY REGISTER</small><strong>Properties & ownership</strong><p>Legal ownership, managing agents and property records.</p><span>Open property register →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/units"><small>02 / UNIT MANAGEMENT</small><strong>Rental units</strong><p>Rentable units, linked contracts and recorded rental amounts.</p><span>Open rental units →</span></Link>

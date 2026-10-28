@@ -1,5 +1,5 @@
 "use server";
-import {revalidatePath} from "next/cache";
+import {revalidateOperations} from '../../lib/property-operations/revalidate';
 import {requirePropertyStaff} from "../../lib/security/property-staff";
 type StaffActionState={status:"idle"|"success"|"error";message:string};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,8 +36,7 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
    actual_minutes:minutes,task_category:category,description
  });
  if(error)return {status:"error",message:"Werkbezoek niet geregistreerd. Controleer je objecttoegang, datum en unit."};
- revalidatePath("/staff");
- revalidatePath("/admin/workspaces/estates/staff");
+ revalidateOperations();
  return {status:"success",message:"Werkelijke bezoektijd vastgelegd. Dit is geen loonbetaling of cliëntfactuur."};
 }
 /** Report only, no automatic supplier work order or customer recharge. */
@@ -58,7 +57,6 @@ export async function reportMaintenanceTicket(_previous:StaffActionState,form:Fo
   property_id:propertyId,unit_id:unitId,priority,title,description
  });
  if(error)return {status:"error",message:"Onderhoudsmelding niet opgeslagen. Controleer objectrechten en unit."};
- revalidatePath("/staff");
- revalidatePath("/admin/workspaces/estates/staff");
+ revalidateOperations();
  return {status:"success",message:"Onderhoudsmelding geregistreerd voor beoordeling. Er is nog geen werkopdracht verstrekt."};
 }

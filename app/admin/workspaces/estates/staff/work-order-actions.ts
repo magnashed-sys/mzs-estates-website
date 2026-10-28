@@ -1,5 +1,5 @@
 'use server';
-import {revalidatePath} from 'next/cache';
+import {revalidateOperations} from '../../../../../lib/property-operations/revalidate';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {requireStaffEnvironment} from '../../../../../lib/security/property-staff';
 import {uuid,type WorkState} from '../../../../../lib/property-operations/staff-work';
@@ -8,7 +8,7 @@ const value=(form:FormData,key:string)=>String(form.get(key)??'').trim();
 const valid=(s:string,min:number,max:number)=>s.length>=min&&s.length<=max&&!/[\u0000-\u001f\u007f]/u.test(s);
 function result(error:unknown,message:string):WorkState{
  if(error)return {status:'error',message:'Niet opgeslagen. Controleer de huidige status, kostendrager, offerte en bedragen; ververs bij een gelijktijdige wijziging.'};
- revalidatePath('/admin/workspaces/estates/staff');revalidatePath('/staff');return {status:'success',message};
+ revalidateOperations();return {status:'success',message};
 }
 export async function createInternalWorkOrder(_previous:WorkState,form:FormData):Promise<WorkState>{
  requireStaffEnvironment();const {db}=await requireEstateAdmin();

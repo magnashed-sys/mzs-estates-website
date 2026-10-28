@@ -1,12 +1,14 @@
+import {Suspense} from "react";
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
+import OperationsActionCenter from "../../OperationsActionCenter";
 import DailyOperations from "../../DailyOperations";
 import FinancialCockpit from "../../FinancialCockpit";
 import GroupActionCenter from "../../GroupActionCenter";
 import styles from "../workspace.module.css";
 export const dynamic="force-dynamic";
 export default async function GroupWorkspace(){
- await requireEstateAdmin();
+ const {db}=await requireEstateAdmin();
  return <>
   <section className={styles.intro}>
    <p className={styles.kicker}>MZS GROUP / GROUP COCKPIT</p>
@@ -21,6 +23,7 @@ export default async function GroupWorkspace(){
   </section>
   <FinancialCockpit refreshVersion={0}/>
   <GroupActionCenter refreshVersion={0}/>
+  <Suspense fallback={<p role="status">Actielijst laden…</p>}><OperationsActionCenter db={db}/></Suspense>
   <DailyOperations/>
   <p className={styles.note}>The central overview reports recorded and forecast figures separately. Booked rent and scheduled loan interest do not prove cash receipt. Account approvals and administrative settings are available from Relationships and System.</p>
  </>;
