@@ -68,3 +68,24 @@
 .tableScroll tbody tr:hover{background:rgba(213,192,154,.07)}
 @media(max-width:850px){.netStrip{grid-template-columns:1fr}}
 @media(max-width:560px){.reportTable .panelHeading{flex-wrap:wrap;align-items:flex-start}.reportTable .refresh{width:100%}}
+
+
+/* Property Operations accrual sidecar — deliberately not mixed into cashflow KPI */
+.opsSection{margin-top:20px;padding:clamp(20px,3vw,30px);border:1px solid #75634a;background:#181610}
+.opsSection h3{font:400 clamp(25px,3vw,34px)/1.25 Georgia,serif;margin:8px 0 14px;color:#efe3d1}
+.opsSection h4{font:400 22px Georgia,serif;color:#e7d6b8;margin:3px 0 14px}
+.opsCards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:22px 0}
+.opsCards>div{display:flex;flex-direction:column;gap:10px;padding:17px 14px;border:1px solid #635239;background:#201d17;min-width:0}
+.opsCards small{font:10px/1.5 Arial,sans-serif;color:#cdb893;letter-spacing:.07em;text-transform:uppercase}
+.opsCards strong{font:400 clamp(19px,2.4vw,28px)/1.25 Georgia,serif;color:#f0e9dc;white-space:nowrap;font-variant-numeric:tabular-nums}
+.opsCards span{font:11px/1.55 Arial,sans-serif;color:#b8ab98}
+.opsGrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin:28px 0 14px}
+.opsMonthRows{display:grid;gap:12px}
+.opsMonthRow{display:grid;grid-template-columns:40px minmax(0,1fr) 102px;gap:10px;align-items:center;color:#c3b6a1;font-size:11px}
+.opsMonthRow>strong{text-align:right;color:#e9d7b8;font:12px/1.4 Arial,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+.opsBarTrack{height:7px;background:#302c24;overflow:hidden}
+.opsBarTrack>span{height:100%;display:block;background:#baa07d}
+.opsSecondHead{margin-top:25px!important}
+.opsCaveat{margin-top:24px;padding-top:15px;border-top:1px solid #504637;color:#bdaf9b;font-size:11px;line-height:1.75}
+@media(max-width:1150px){.opsCards{grid-template-columns:repeat(2,minmax(0,1fr))}.opsGrid{grid-template-columns:1fr}}
+@media(max-width:530px){.opsSection{padding:17px 14px}.opsCards{grid-template-columns:1fr}.opsMonthRow{grid-template-columns:30px minmax(0,1fr) 92px;gap:7px}.opsCards strong{font-size:25px}}

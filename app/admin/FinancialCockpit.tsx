@@ -3,6 +3,7 @@ import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import type {MonthlyMoney} from '../../lib/finance/financial-cockpit';
 import type {FinancialPhase2,FinancialEntity} from '../../lib/finance/financial-report';
+import PropertyOperationsFinancialPanel from './PropertyOperationsFinancialPanel';
 import s from './FinancialCockpit.module.css';
 
 function madridParts(){
@@ -166,5 +167,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
    </section>
    <p className={s.footerNote}>Financial Cockpit · Scope: {entityLabel} · Not a bank statement, operating profit calculation or audited financial report.</p>
   </>}
+  {process.env.NEXT_PUBLIC_SUPABASE_URL==='https://senonkpxdtlhyhrubicg.supabase.co' &&
+    <PropertyOperationsFinancialPanel year={year} month={month} entity={entity} refreshVersion={refreshVersion+retry}/>}
  </section>;
 }

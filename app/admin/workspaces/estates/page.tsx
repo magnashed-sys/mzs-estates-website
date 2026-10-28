@@ -4,6 +4,8 @@ import styles from "../workspace.module.css";
 export const dynamic="force-dynamic";
 export default async function EstatesWorkspace(){
  const {db}=await requireEstateAdmin();
+ const operationsStaging = process.env.VERCEL_ENV==="preview" &&
+   process.env.NEXT_PUBLIC_SUPABASE_URL==="https://senonkpxdtlhyhrubicg.supabase.co";
  const [properties,units,contracts]=await Promise.all([
   db.from("mzs_estate_properties").select("id",{count:"exact",head:true}),
   db.from("mzs_estate_units").select("id",{count:"exact",head:true}),
@@ -31,6 +33,8 @@ export default async function EstatesWorkspace(){
    <Link className={styles.card} href="/admin/group/estates/properties"><small>01 / PROPERTY REGISTER</small><strong>Properties & ownership</strong><p>Legal ownership, managing agents and property records.</p><span>Open property register →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/units"><small>02 / UNIT MANAGEMENT</small><strong>Rental units</strong><p>Rentable units, linked contracts and recorded rental amounts.</p><span>Open rental units →</span></Link>
    <Link className={styles.card} href="/admin/group/estates/contracts"><small>03 / RENTAL ADMINISTRATION</small><strong>Contracts & invoices</strong><p>Tenants, agreements, invoicing entities and billing control.</p><span>Open contracts →</span></Link>
+   {operationsStaging&&(<Link className={styles.card} href="/admin/workspaces/estates/expenses"><small>04 / PROPERTY OPERATIONS PREVIEW</small><strong>Objectkosten &amp; inkoopfacturen</strong><p>Bekijk per juridische entiteit en object een voorbeeld van kosten- en unitverdeling. Nog geen opslag.</p><span>Open de conceptberekening →</span></Link>)}
+   {operationsStaging&&(<Link className={styles.card} href="/admin/workspaces/estates/staff"><small>05 / STAFF & MAINTENANCE PREVIEW</small><strong>Medewerkers & onderhoud</strong><p>Objectgebonden medewerkerstoegang, werkelijke minuten en onderhoudsmeldingen op Staging.</p><span>Open Staff &amp; Maintenance →</span></Link>)}
    <Link className={styles.card} href="/admin/bookings"><small>04 / RESERVATIONS</small><strong>Bookings</strong><p>Current and historical bookings, private stays, year filters and payments.</p><span>Open Bookings →</span></Link>
    <Link className={styles.card} href="/admin/owner-stays"><small>05 / OWNER & PARTNER</small><strong>Owner stays</strong><p>Complimentary stays, availability checks and booking approval.</p><span>Manage owner stays →</span></Link>
    <Link className={styles.card} href="/admin/projects"><small>06 / PROJECT PRESENTATIONS</small><strong>Projects & access</strong><p>Private listings, project materials and client permissions.</p><span>Manage projects →</span></Link>

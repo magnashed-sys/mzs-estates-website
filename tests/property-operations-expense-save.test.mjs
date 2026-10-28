@@ -1,0 +1,30 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+test("draft expense creation is Staging-only, guarded, audited and cannot issue/send",()=>{
+ const action=read("app/admin/workspaces/estates/expenses/expense-draft-actions.ts");
+ assert.match(action,/"use server"/);
+ assert.match(action,/process\.env\.VERCEL_ENV!=="preview"/);
+ assert.match(action,/https:\/\/senonkpxdtlhyhrubicg\.supabase\.co/);
+ assert.match(action,/await requireEstateAdmin\(\)/);
+ assert.match(action,/db\.from\("mzs_ops_expense_drafts"\)\.insert/);
+ assert.doesNotMatch(action,/sendMail|SMTP|mzs_lease_invoices|mzs_booking_invoices|service_role/);
+ const sql=read("supabase/migrations/20261028123000_mzs_ops_expense_drafts_staging.sql");
+ assert.match(sql,/mzs_ops_validate_expense_draft/);
+ assert.match(sql,/Verified property paying entity required/);
+ assert.match(sql,/mzs_ops_expense_draft_audit/);
+ assert.match(sql,/created_by\s*=/);
+ assert.doesNotMatch(sql,/\bgrant\s+(update|delete)\b/i);
+});
+test("financial draft form is disabled without a verified paying entity and complete register",()=>{
+ const component=read("app/admin/workspaces/estates/expenses/ExpenseDraftSaver.tsx");
+ const calculator=read("app/admin/workspaces/estates/expenses/ExpenseCalculator.tsx");
+ const page=read("app/admin/workspaces/estates/expenses/page.tsx");
+ assert.match(component,/l\.property_id===selection\.propertyId/);
+ assert.match(component,/l\.legal_entity_id===selection\.entityId/);
+ assert.match(component,/disabled=\{!canSave\}/);
+ assert.match(calculator,/<ExpenseDraftSaver/);
+ assert.match(page,/draftResult\.data\.length === draftResult\.count/);
+ assert.match(page,/canSaveDraft=\{draftsComplete\}/);
+});
