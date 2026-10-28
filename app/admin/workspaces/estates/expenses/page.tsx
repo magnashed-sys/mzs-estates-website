@@ -33,10 +33,15 @@ export default async function PropertyExpensesPage() {
   const stagingEnabled = process.env.VERCEL_ENV === "preview" &&
     process.env.NEXT_PUBLIC_SUPABASE_URL === "https://senonkpxdtlhyhrubicg.supabase.co";
   const linkResult = stagingEnabled ? await db.from("mzs_ops_property_entity_links")
-    .select("id,property_id,legal_entity_id,relationship_type,effective_from,verified_at,evidence_reference",{count:"exact"})
+    .select("id,property_id,legal_entity_id,relationship_type,effective_from,effective_until,verified_at,evidence_reference",{count:"exact"})
     .order("verified_at",{ascending:false}).limit(500) : null;
   const linksComplete = !!linkResult && !linkResult.error && linkResult.count !== null &&
     linkResult.data !== null && linkResult.data.length === linkResult.count;
+  const draftResult = stagingEnabled ? await db.from("mzs_ops_expense_drafts")
+    .select("id,property_id,legal_entity_id,supplier_invoice_number,invoice_date,category,net_cents,vat_cents,gross_cents,status,source_document_status",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(200) : null;
+  const draftsComplete = !!draftResult && !draftResult.error && draftResult.count !== null &&
+    draftResult.data !== null && draftResult.data.length === draftResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -70,10 +75,29 @@ export default async function PropertyExpensesPage() {
           properties={propertyResult.data!}
           units={unitResult.data!}
           suppliers={supplierResult.data!}
+          payerLinks={linksComplete ? linkResult!.data!.filter(x=>x.relationship_type==="payer").map(x=>({
+            property_id:x.property_id,legal_entity_id:x.legal_entity_id,
+            effective_from:x.effective_from,effective_until:x.effective_until
+          })) : []}
+          canSaveDraft={draftsComplete}
         />
       )}
 
       <WeeklyCostsImport />
+      {draftsComplete ? <section className={styles.panel} style={{marginTop:22}}>
+        <p className={styles.kicker}>05 / INKOOPCONCEPTEN</p>
+        <h2>Vastgelegde kostenconcepten ({draftResult!.count})</h2>
+        <p className={styles.hint}>Alle bedragen hieronder zijn concepten zonder brondocument en worden niet als betaalde kosten of definitieve inkoopfacturen geteld.</p>
+        {draftResult!.data!.length===0 ? <p className={styles.hint}>Nog geen kostenconcepten vastgelegd op Staging.</p> :
+          <div className={styles.tableScroll}><table>
+            <thead><tr><th>Factuurreferentie</th><th>Factuurdatum</th><th>Kostensoort</th><th>Excl. btw</th><th>Btw</th><th>Totaal</th><th>Status</th></tr></thead>
+            <tbody>{draftResult!.data!.map(row=><tr key={row.id}>
+              <td>{row.supplier_invoice_number}</td><td>{row.invoice_date}</td><td>{row.category}</td>
+              <td>{(Number(row.net_cents)/100).toFixed(2)}</td><td>{(Number(row.vat_cents)/100).toFixed(2)}</td>
+              <td>{(Number(row.gross_cents)/100).toFixed(2)}</td><td>{row.status} · document {row.source_document_status}</td>
+            </tr>)}</tbody>
+          </table></div>}
+      </section> : stagingEnabled && <p className={styles.error} role="alert">De kostenconcepten konden niet volledig worden geladen. Opslaan is daarom uitgeschakeld.</p>}
       {incomplete.length === 0 && issuerResult.data && propertyResult.data && <PropertyEntityLinks
         issuers={issuerResult.data.map(({id,name})=>({id,name}))}
         properties={propertyResult.data.map(({id,name})=>({id,name}))}
