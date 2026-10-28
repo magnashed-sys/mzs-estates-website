@@ -1,8 +1,10 @@
 import {notFound} from "next/navigation";
+import type {Metadata} from "next";
 import {requireOpsPilotStaff} from "../../../lib/security/property-ops-pilot";
 import PilotForms from "./PilotForms";
 import s from "./pilot.module.css";
 export const dynamic="force-dynamic";
+export const metadata:Metadata={robots:{index:false,follow:false},title:"MZS Group | Afgeschermde pilot"};
 
 /** The pilot is absent unless server flag, exact deployment, live account and DB grant all pass. */
 export default async function PropertyOpsPilotStaffPage(){
