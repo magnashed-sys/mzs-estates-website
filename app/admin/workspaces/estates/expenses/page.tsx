@@ -33,16 +33,19 @@ export default async function PropertyExpenseConceptsPage(){
  // Staging-only evidence registers are never queried from Production.
  const stagingEvidence=process.env.VERCEL_ENV==="preview" &&
    process.env.NEXT_PUBLIC_SUPABASE_URL==="https://senonkpxdtlhyhrubicg.supabase.co";
- const [documents,reviews]=stagingEvidence?await Promise.all([
+ const [documents,reviews,scans]=stagingEvidence?await Promise.all([
   db.from("mzs_ops_expense_documents")
    .select("id,draft_id,sha256,mime_type,file_size",{count:"exact"})
    .order("created_at",{ascending:false}).limit(200),
   db.from("mzs_ops_expense_review_events")
    .select("draft_id,sequence_no,action,created_at",{count:"exact"})
-   .order("created_at",{ascending:false}).limit(300)
- ]):[null,null];
- const evidenceComplete=!!documents&&!!reviews&&
-   [documents,reviews].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
+   .order("created_at",{ascending:false}).limit(300),
+  db.from("mzs_ops_expense_document_scan_events")
+   .select("document_id,verdict,observed_sha256,id",{count:"exact"})
+   .order("id",{ascending:false}).limit(300)
+ ]):[null,null,null];
+ const evidenceComplete=!!documents&&!!reviews&&!!scans&&
+   [documents,reviews,scans].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
  const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
@@ -90,6 +93,7 @@ export default async function PropertyExpenseConceptsPage(){
    drafts={(drafts.data??[]).map(d=>({id:d.id,supplier_invoice_number:d.supplier_invoice_number,invoice_date:d.invoice_date,status:d.status}))}
    documents={evidenceComplete?documents!.data??[]:[]}
    events={evidenceComplete?reviews!.data??[]:[]}
+   scanEvents={evidenceComplete?scans!.data??[]:[]}
    enabled={evidenceComplete}
   />}
  </main>;
