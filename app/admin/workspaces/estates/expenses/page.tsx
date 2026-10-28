@@ -3,6 +3,7 @@ import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
 import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
+import {scannerIsExplicitlyEnabled} from "../../../../../lib/property-operations/scanner/cloudmersive-advanced";
 import styles from "./expenses.module.css";
 export const dynamic="force-dynamic";
 
@@ -46,6 +47,13 @@ export default async function PropertyExpenseConceptsPage(){
  ]):[null,null,null];
  const evidenceComplete=!!documents&&!!reviews&&!!scans&&
    [documents,reviews,scans].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
+ const scannerAvailable=stagingEvidence && scannerIsExplicitlyEnabled({
+  environment:process.env.VERCEL_ENV,
+  supabaseUrl:process.env.NEXT_PUBLIC_SUPABASE_URL,
+  enabled:process.env.MZS_OPS_AV_SCAN_ENABLED,
+  processorApproved:process.env.MZS_OPS_AV_PROCESSOR_APPROVED,
+  apiKey:process.env.MZS_OPS_CLOUDMERSIVE_API_KEY
+ })&&Boolean(process.env.MZS_OPS_STAGING_SCANNER_SERVICE_ROLE_KEY?.length);
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
  const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
@@ -94,6 +102,7 @@ export default async function PropertyExpenseConceptsPage(){
    documents={evidenceComplete?documents!.data??[]:[]}
    events={evidenceComplete?reviews!.data??[]:[]}
    scanEvents={evidenceComplete?scans!.data??[]:[]}
+   scannerAvailable={scannerAvailable}
    enabled={evidenceComplete}
   />}
  </main>;
