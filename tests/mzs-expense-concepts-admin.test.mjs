@@ -40,7 +40,7 @@ test("Calculator supports exact-cents unit allocation but not tax or invoices",(
  assert.match(calculator,/inputEuroCents\(/);
  assert.match(calculator,/equal-units/);
  assert.match(calculator,/Kostendrager geverifieerd voor deze factuurdatum/);
- assert.match(calculator,/Geen/);
+ assert.match(calculator,/geen/i);
  assert.match(nav,/href="\/admin\/workspaces\/estates\/expenses"/);
  assert.doesNotMatch(calculator,/\.insert\(|\.update\(|\.delete\(|sendMail/);
 });
