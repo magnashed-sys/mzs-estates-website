@@ -83,7 +83,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   {loading&&<div className={s.status} role="status">Loading verified financial registers…</div>}
   {error&&<div className={s.failure} role="alert">{error}</div>}
   {data&&!loading&&<>
-   <div className={s.scopeNote}>Reporting scope: <strong>{entityLabel}</strong>. Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.</div>
+   <p><a href="/admin/workspaces/estates/reports">Kostenconcepten per object en accountants-export →</a></p><div className={s.scopeNote}>Reporting scope: <strong>{entityLabel}</strong>. Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.</div>
    <div className={s.metrics}>
     {cards.map(card=><div key={card.title} className={s.metric}>
      <div className={s.metricHead}><span className={s.kicker}>{card.title}</span><span className={s.dot} data-kind={card.accent}/></div>
