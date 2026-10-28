@@ -19,12 +19,13 @@ export async function GET(request:NextRequest){
  const year=Number(rawYear);
  try{
   const {data:source,error:sourceError}=await db.rpc("mzs_ops_accountant_source",{p_entity:entity});
-  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts))throw Error("Incomplete accountant snapshot");
+  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external))throw Error("Incomplete accountant snapshot");
   const leases=source.leases as (IssuedInvoice&{contract_id:string})[],bookings=source.bookings as (IssuedInvoice&{booking_id:string})[];
   const issuer={data:source.issuer as {id:string;name:string}};
   const issued:IssuedInvoice[]=[
    ...leases.map(x=>({...x,source:"rental_contract" as const})),
-   ...bookings.map(x=>({...x,source:"holiday_booking" as const}))
+   ...bookings.map(x=>({...x,source:"holiday_booking" as const})),
+   ...(source.external as IssuedInvoice[]).map(x=>({...x,source:"external_cost_invoice" as const}))
   ];
   const invoiceNumbers=new Set<string>();
   for(const x of issued){
@@ -58,12 +59,13 @@ export async function GET(request:NextRequest){
   add("README.txt",[
    "MZS ISSUED SALES AND REGISTERED RECEIPTS — PARTIAL ACCOUNTANT EXPORT",
    "Entity: "+issuer.data.name+" / "+entity,"Year: "+year,"Source snapshot: "+source.snapshot_at,
-   "Includes issued rental/booking invoices and separately dated registered receipt events.",
+   "Includes issued rental/booking invoices, externally issued historical-cost invoices and separately dated registered receipt events.",
    "A receipt may relate to an invoice issued in another year.",
    "Administrative reversal does not establish a bank refund.",
    "Receipts with unknown dates are listed as undated exceptions in every selected year; no receipt year is inferred.",
    "Uninvoiced bookings and unattributable payments are outside this partial report.",
    "Rental invoice VAT/net components are blank and require accountant verification.",
+   "External invoice amounts/VAT are copied from the issued document; no receipt, delivery or bank event is inferred.",
    "No source is changed, invoiced, paid or emailed."
   ].join("\n")+"\n");
   add("manifest.json",JSON.stringify({kind:"partial-sales-receipts",entity,year,
