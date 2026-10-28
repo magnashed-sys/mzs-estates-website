@@ -1,6 +1,7 @@
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 "use client";
 import {useActionState,useState} from "react";
-import {reviewActualVisit,recordTicketProgress,initialStaffReviewState} from "./review-actions";
+import {reviewActualVisit,recordTicketProgress} from "./review-actions";
 import s from "../../../../staff/staff.module.css";
 
 type Visit={id:string;profile_id:string;property_id:string;worked_on:string;actual_minutes:number;task_category:string};
@@ -23,7 +24,7 @@ const statusLabels:Record<string,string>={
 function VisitReviewForm({visit,name,propertyName,review}:{
  visit:Visit;name:string;propertyName:string;review:VisitReview|null
 }){
- const [result,action,pending]=useActionState(reviewActualVisit,initialStaffReviewState);
+ const [result,action,pending]=useActionState(reviewActualVisit,initialFormActionState);
  const [decision,setDecision]=useState("approved");
  const [className,setClassName]=useState("not_billable");
  if(review)return <div className={s.note}>
@@ -64,7 +65,7 @@ function VisitReviewForm({visit,name,propertyName,review}:{
 function TicketReviewForm({ticket,status,propertyName}:{
  ticket:Ticket;status:string;propertyName:string
 }){
- const [result,submit,pending]=useActionState(recordTicketProgress,initialStaffReviewState);
+ const [result,submit,pending]=useActionState(recordTicketProgress,initialFormActionState);
  const available=transitions[status]??[];
  return <form className={s.form} action={submit}>
   <h2>{ticket.title}</h2>
