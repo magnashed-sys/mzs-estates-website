@@ -7,7 +7,7 @@ export async function readFinancialArchive(db:SupabaseClient,year:number):Promis
  const rows:HistoricalInvoice[]=[];
  let expected:number|undefined;
  for(let offset=0;offset<100000;offset+=500){
-  const {data,error,count}=await db.from('mzs_invoice_archive')
+  const {data,error,count}=await db.from('mzs_invoice_archive_active')
    .select('id,issuer_id,number,issued_on,net_cents,gross_cents,source_paid_cents,source_open_cents',{count:'exact'})
    .gte('issued_on',year+'-01-01').lt('issued_on',(year+1)+'-01-01')
    .order('id').range(offset,offset+499);
