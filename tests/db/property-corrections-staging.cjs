@@ -78,7 +78,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  const correction=(await query(correctionSql(12500,2625))).rows[0].id;
  assert.ok(correction);
  assert.equal((await query("select count(*)::int as n from public.mzs_ops_expense_correction_requests where draft_id='"+draft+"'")).rows[0].n,1);
- assert.equal((await query("select net_cents from public.mzs_ops_expense_drafts where id='"+draft+"'")).rows[0].net_cents,'10000');
+ assert.equal((await query("select net_cents from public.mzs_ops_expense_drafts where id='"+draft+"'")).rows[0].net_cents,10000);
  await assert.rejects(query(correctionSql(20000,4200)),/duplicate key/);
  await assert.rejects(query("update public.mzs_ops_expense_correction_requests set proposed_net_cents=0 where id='"+correction+"'"),/permission denied/);
  await assert.rejects(query("delete from public.mzs_ops_expense_correction_requests where id='"+correction+"'"),/permission denied/);
