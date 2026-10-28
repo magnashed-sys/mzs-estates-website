@@ -38,8 +38,8 @@ export async function POST(request:NextRequest){
  const draftId=data.get("draft_id");
  const source=data.get("file");
  if(typeof draftId!=="string"||!uuid.test(draftId)||
-    !(source instanceof File)||source.size<1||source.size>10485760)
-  return fail("Selecteer een geldig kostenconcept en een bestand tot 10 MB.",400);
+    !(source instanceof File)||source.size<1||source.size>4194304)
+  return fail("Selecteer een geldig kostenconcept en een bestand tot 4 MB.",400);
  const [{data:draft,error:draftError},{data:existing,error:existingError},
         {data:reviews,error:reviewError}]=await Promise.all([
     db.from("mzs_ops_expense_drafts").select("id").eq("id",draftId).maybeSingle(),
