@@ -4,7 +4,7 @@ import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 
 export type ReviewActionState={status:"idle"|"success"|"error";message:string};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** An explicit reviewed action; no direct changes to the cost original. */
 export async function changeExpenseReview(
