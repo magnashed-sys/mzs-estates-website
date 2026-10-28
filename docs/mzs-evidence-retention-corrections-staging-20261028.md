@@ -29,3 +29,7 @@ All correction forms require an additional explicit confirmation that this is fi
 2. SQL rollback-only test on Staging, followed by separately logged additive Staging migration for the two append-only retention tables.
 3. Verify RLS, zero rows, no anon access, no authenticated UPDATE/DELETE, old correction rows and private file counts unchanged; check Supabase advisors.
 4. Keep Draft PR stacked on the Staging AV adapter PR, and never merge into `main` or set Production environment variables.
+
+## Release guard
+
+This PR must remain Draft and unmerged even after Staging acceptance. Any staging write requires a real authenticated Group Admin account; synthetic SQL transaction tests are rolled back. The Production expense route does not query these new tables or render correction/retention controls. No retention proposal is legally binding until the relevant local accountant verifies it.
