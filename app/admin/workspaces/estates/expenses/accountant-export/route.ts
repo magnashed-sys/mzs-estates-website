@@ -6,7 +6,7 @@ import {buildAccountantZip,exportHash,exportBytes,type ArchiveFile} from "../../
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
 const staging="https://senonkpxdtlhyhrubicg.supabase.co";
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow"};
 const fail=()=>new Response("Volledige financiële proefexport niet beschikbaar. Geen gedeeltelijk bestand gegenereerd.",{status:503,headers});
 
