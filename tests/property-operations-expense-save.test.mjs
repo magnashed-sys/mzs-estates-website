@@ -14,7 +14,7 @@ test("draft expense creation is Staging-only, guarded, audited and cannot issue/
  assert.match(sql,/mzs_ops_validate_expense_draft/);
  assert.match(sql,/Verified property paying entity required/);
  assert.match(sql,/mzs_ops_expense_draft_audit/);
- assert.match(sql,/created_by =/);
+ assert.match(sql,/created_by\s*=/);
  assert.doesNotMatch(sql,/\bgrant\s+(update|delete)\b/i);
 });
 test("financial draft form is disabled without a verified paying entity and complete register",()=>{
