@@ -5,9 +5,9 @@ import {requireStaffEnvironment} from '../../../../../lib/security/property-staf
 import {uuid,validDate,type WorkState} from '../../../../../lib/property-operations/staff-work';
 
 function result(error:unknown):WorkState{
- if(error)return {status:'error',message:'Niet opgeslagen. Controleer de huidige status, toewijzing en invoer; vernieuw de pagina als deze inmiddels is veranderd.'};
+ if(error)return {status:'error',message:"Not saved. Check the current status, assignment and inputs; refresh the page if these have changed."};
  revalidateOperations();
- return {status:'success',message:'Beslissing vastgelegd in de historie.'};
+ return {status:'success',message:"Decision recorded in the history."};
 }
 const text=(form:FormData,key:string)=>String(form.get(key)??'').trim();
 const reasonValid=(v:string)=>v.length>=8&&v.length<=1000&&!/[\u0000-\u001f\u007f]/u.test(v);

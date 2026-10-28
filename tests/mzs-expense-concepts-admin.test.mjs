@@ -39,8 +39,8 @@ test("Calculator supports exact-cents unit allocation but not tax or invoices",(
  assert.match(calculator,/expenseAllocationPreview\(/);
  assert.match(calculator,/inputEuroCents\(/);
  assert.match(calculator,/equal-units/);
- assert.match(calculator,/Kostendrager geverifieerd voor deze factuurdatum/);
- assert.match(calculator,/geen/i);
+ assert.match(calculator,/Cost-bearing entity verified for this invoice date/);
+ assert.match(calculator,/This calculation has not been saved or approved yet/);
  assert.match(nav,/href="\/admin\/workspaces\/estates\/expenses"/);
  assert.doesNotMatch(calculator,/\.insert\(|\.update\(|\.delete\(|sendMail/);
 });

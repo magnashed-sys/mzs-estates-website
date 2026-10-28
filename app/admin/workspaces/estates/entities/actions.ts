@@ -23,7 +23,7 @@ export async function addPropertyEntityLink(
 ):Promise<EntityLinkActionState>{
  // Direct server action must fail closed before accessing any real database.
  if(!allowedEnvironment())
-  return {status:"error",message:"Deze administratie is niet beschikbaar in deze omgeving."};
+  return {status:"error",message:"This administration is unavailable in this environment."};
  const {db}=await requireEstateAdmin();
  const propertyId=String(form.get("property_id")??"").trim();
  const entityId=String(form.get("legal_entity_id")??"").trim();
@@ -31,27 +31,27 @@ export async function addPropertyEntityLink(
  const effectiveFrom=String(form.get("effective_from")??"").trim();
  const evidence=String(form.get("evidence_reference")??"").trim();
  if(form.get("confirmed")!=="yes")
-  return {status:"error",message:"Bevestig eerst dat je de juridische of administratieve onderbouwing hebt gecontroleerd."};
+  return {status:"error",message:"First confirm that you have checked the legal or administrative evidence."};
  if(!uuid.test(propertyId)||!uuid.test(entityId)||!["owner","payer","manager"].includes(relation))
-  return {status:"error",message:"Selecteer een bestaand object, een juridische entiteit en het relatietype."};
+  return {status:"error",message:"Select an existing property, legal entity and relationship type."};
  if(!realDate(effectiveFrom))
-  return {status:"error",message:"Controleer de ingangsdatum van de koppeling."};
+  return {status:"error",message:"Check the association's effective date."};
  if(evidence.length<6||evidence.length>500||/[\u0000-\u001f\u007f]/u.test(evidence))
-  return {status:"error",message:"Vul een gecontroleerde bewijsbron van 6 tot 500 tekens in."};
+  return {status:"error",message:"Enter a verified evidence reference of 6 to 500 characters."};
  const [property,issuer]=await Promise.all([
   db.from("mzs_estate_properties").select("id").eq("id",propertyId).maybeSingle(),
   db.from("mzs_lease_issuers").select("id").eq("id",entityId).maybeSingle()
  ]);
  if(property.error||issuer.error||!property.data||!issuer.data)
-  return {status:"error",message:"Het object of de juridische entiteit is niet gevonden; er is niets opgeslagen."};
+  return {status:"error",message:"The property or legal entity was not found; nothing was saved."};
  const {error}=await db.from("mzs_ops_property_entity_links").insert({
   property_id:propertyId,legal_entity_id:entityId,relationship_type:relation,
   effective_from:effectiveFrom,evidence_reference:evidence
  });
  if(error?.code==="23505")
-  return {status:"error",message:"Deze combinatie met dezelfde ingangsdatum bestaat al."};
+  return {status:"error",message:"This combination already exists with the same effective date."};
  if(error)
-  return {status:"error",message:"De koppeling is niet geregistreerd. Er zijn geen bestaande gegevens aangepast."};
+  return {status:"error",message:"The association was not recorded. No existing data was changed."};
  revalidatePath(page);
- return {status:"success",message:"De koppeling en de auditregistratie zijn vastgelegd. Er is geen factuur of betaling aangemaakt."};
+ return {status:"success",message:"The association and audit entry have been recorded. No invoice or payment was created."};
 }

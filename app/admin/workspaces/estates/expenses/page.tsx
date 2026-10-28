@@ -17,7 +17,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
  if(!allowed)notFound();
  const {db}=await requireEstateAdmin();
  let filters;
- try{filters=expenseFilters(await searchParams);}catch(error){return <main className={styles.main}><h1>Objectkosten</h1><p role="alert">{error instanceof Error?error.message:"Ongeldige filters."}</p><Link href="/admin/workspaces/estates/expenses">Wis filters</Link></main>;}
+ try{filters=expenseFilters(await searchParams);}catch(error){return <main className={styles.main}><h1>Property expenses</h1><p role="alert">{error instanceof Error?error.message:"Invalid filters."}</p><Link href="/admin/workspaces/estates/expenses">Clear filters</Link></main>;}
  let draftQuery=db.from("mzs_ops_expense_drafts")
   .select("id,property_id,legal_entity_id,supplier_relationship_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,source_document_status,status,created_at",{count:"exact"})
   .order("created_at",{ascending:false}).order("id",{ascending:false});
@@ -44,33 +44,33 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
   const first=await draftQuery.range(0,0);
   if(!first.error&&first.count!==null)redirect(expenseRegisterHref(filters,Math.max(1,Math.ceil(first.count/EXPENSE_PAGE_SIZE))));
  }
- if(drafts.error||drafts.count===null||drafts.data===null)throw new Error("Het kostenregister kon niet worden geladen.");
+ if(drafts.error||drafts.count===null||drafts.data===null)throw new Error("The expense register could not be loaded.");
  const pageCount=Math.max(1,Math.ceil(drafts.count/EXPENSE_PAGE_SIZE));
  if(filters.page>pageCount)redirect(expenseRegisterHref(filters,pageCount));
- if(drafts.data.length!==Math.min(EXPENSE_PAGE_SIZE,Math.max(0,drafts.count-offset)))throw new Error("Het kostenregister is onvolledig geladen. Probeer opnieuw.");
+ if(drafts.data.length!==Math.min(EXPENSE_PAGE_SIZE,Math.max(0,drafts.count-offset)))throw new Error("The expense register was not fully loaded. Please retry.");
  const totals=expensePageTotals(drafts.data);
  const issuerNames=new Map((issuers.data??[]).map(x=>[x.id,x.name]));
  const propertyNames=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const supplierNames=new Map((suppliers.data??[]).map(x=>[x.id,x.name]));
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
- const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
+ const formatCents=(value:number)=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
-  <Link href="/admin/workspaces/accountancy" className={styles.back}>Terug naar Accountancy</Link>
+  <Link href="/admin/workspaces/accountancy" className={styles.back}>Back to Accountancy</Link>
   <header className={styles.heading}>
    <div>
-    <p className={styles.kicker}>MZS GROUP / ESTATES / KOSTENADMINISTRATIE</p>
-    <h1>Objectkosten &amp; inkoopconcepten</h1>
-    <p>Bereken de verdeling van inkoopkosten over een object of over de bijbehorende units. Bewaar alleen gecontroleerde concepten voor de juiste juridische kostendrager.</p>
+    <p className={styles.kicker}>MZS GROUP / ESTATES / EXPENSE ADMINISTRATION</p>
+    <h1>Property expenses &amp; purchase drafts</h1>
+    <p>Calculate purchase expense allocation across a property or its units. Save only verified drafts for the correct legal cost bearer.</p>
    </div>
   </header>
   <section className={styles.panel} aria-label="Belangrijke beperkingen">
-   <h2>Conceptfase — geen financiële boeking</h2>
-   <p>Deze pagina registreert nog geen definitieve inkoopfacturen, betalingen, btw-aangiften of doorbelastingen. Een opgeslagen concept is onveranderbaar en wordt voorzien van een auditregistratie. Documentaanlevering en controle worden in een volgende fase aangesloten.</p>
+   <h2>Draft stage — no financial posting</h2>
+   <p>This page does not yet record final supplier invoices, payments, VAT returns or recharges. A saved draft is immutable and receives an audit entry. Document delivery and verification will be connected in a later phase.</p>
    {payerLinks.length===0&&<p role="status" className={styles.notice}>
-    Er is nog geen geverifieerde kostendrager. Je kunt alvast bedragen berekenen, maar opslaan blijft geblokkeerd totdat de juiste juridische entiteit aan het object is gekoppeld. <Link href="/admin/workspaces/estates/entities">Open de juridische objectkoppelingen</Link>.
+    No verified cost bearer is available yet. You can calculate amounts, but saving remains blocked until the correct legal entity is associated with the property. <Link href="/admin/workspaces/estates/entities">Open legal property associations</Link>.
    </p>}
   </section>
-  <p><Link href="/admin/workspaces/estates/reports">Kostenrapportage en accountants-export openen →</Link></p>
+  <p><Link href="/admin/workspaces/estates/reports">Open expense reporting and accountant export →</Link></p>
   <ExpenseCalculator
    issuers={issuers.data??[]}
    properties={properties.data??[]}
@@ -79,44 +79,44 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
    payerLinks={payerLinks}
    canSaveDraft={true}
   />
-  <section className={styles.panel} aria-label="Vastgelegde kostenconcepten" id="expense-register" style={{marginTop:22}}>
-   <p className={styles.kicker}>03 / INTERNE CONTROLE</p>
-   <h2>Inkoopkostenconcepten ({drafts.count})</h2>
+  <section className={styles.panel} aria-label="Recorded expense drafts" id="expense-register" style={{marginTop:22}}>
+   <p className={styles.kicker}>03 / INTERNAL REVIEW</p>
+   <h2>Purchase expense drafts ({drafts.count})</h2>
    <form method="get" action="/admin/workspaces/estates/expenses#expense-register" className={styles.registerFilters}>
-    <label>Zoeken op referentie of omschrijving<input name="q" defaultValue={filters.q} maxLength={100} placeholder="Bijvoorbeeld onderhoud"/></label>
-    <label>Object<select name="property" defaultValue={filters.property}><option value="">Alle objecten</option>{properties.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-    <label>Betalende entiteit<select name="entity" defaultValue={filters.entity}><option value="">Alle entiteiten</option>{issuers.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-    <label>Leverancier<select name="supplier" defaultValue={filters.supplier}><option value="">Alle leveranciers</option>{suppliers.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-    <label>Factuurdatum vanaf<input type="date" name="from" defaultValue={filters.from}/></label>
-    <label>Factuurdatum tot en met<input type="date" name="until" defaultValue={filters.until}/></label>
-    <div className={styles.registerActions}><button type="submit" className={styles.saveButton}>Toon resultaten</button><Link href="/admin/workspaces/estates/expenses#expense-register">Wis filters</Link></div>
+    <label>Search by reference or description<input name="q" defaultValue={filters.q} maxLength={100} placeholder="For example, maintenance"/></label>
+    <label>Property<select name="property" defaultValue={filters.property}><option value="">All properties</option>{properties.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+    <label>Paying entity<select name="entity" defaultValue={filters.entity}><option value="">All entities</option>{issuers.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+    <label>Supplier<select name="supplier" defaultValue={filters.supplier}><option value="">All suppliers</option>{suppliers.data!.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+    <label>Invoice date from<input type="date" name="from" defaultValue={filters.from}/></label>
+    <label>Invoice date through<input type="date" name="until" defaultValue={filters.until}/></label>
+    <div className={styles.registerActions}><button type="submit" className={styles.saveButton}>Show results</button><Link href="/admin/workspaces/estates/expenses#expense-register">Clear filters</Link></div>
    </form>
-   <p className={styles.hint} role="status">{drafts.count} resultaten · pagina {filters.page} van {pageCount}. Per pagina maximaal {EXPENSE_PAGE_SIZE} concepten.</p>
-   <div className={styles.importCards} aria-label="Totalen op deze pagina">
-    <div><small>Netto · deze pagina</small><strong>{formatCents(totals.net)}</strong></div>
-    <div><small>Btw · deze pagina</small><strong>{formatCents(totals.vat)}</strong></div>
-    <div><small>Bruto · deze pagina</small><strong>{formatCents(totals.gross)}</strong></div>
+   <p className={styles.hint} role="status">{drafts.count} results · page {filters.page} of {pageCount}. Maximum per page: {EXPENSE_PAGE_SIZE} drafts.</p>
+   <div className={styles.importCards} aria-label="Totals on this page">
+    <div><small>Net · this page</small><strong>{formatCents(totals.net)}</strong></div>
+    <div><small>VAT · this page</small><strong>{formatCents(totals.vat)}</strong></div>
+    <div><small>Gross · this page</small><strong>{formatCents(totals.gross)}</strong></div>
    </div>
-   {drafts.data.length===0?<p>Geen kostenconcepten gevonden voor deze selectie.</p>:
-    <div className={styles.tableScroll} role="region" tabIndex={0} aria-label="Inkoopkostenconcepten">
+   {drafts.data.length===0?<p>No expense drafts match this selection.</p>:
+    <div className={styles.tableScroll} role="region" tabIndex={0} aria-label="Purchase expense drafts">
      <table>
-      <thead><tr><th>Datum</th><th>Object</th><th>Betalende entiteit</th><th>Leverancier</th><th>Referentie</th><th>Bedrag</th><th>Status</th></tr></thead>
+      <thead><tr><th>Date</th><th>Property</th><th>Paying entity</th><th>Supplier</th><th>Reference</th><th>Amount</th><th>Status</th></tr></thead>
       <tbody>{(drafts.data??[]).map(d=><tr key={d.id}>
-       <td>{d.invoice_date}</td><td>{propertyNames.get(d.property_id)??"Onbekend object"}</td>
-       <td>{issuerNames.get(d.legal_entity_id)??"Onbekende entiteit"}</td>
-       <td>{supplierNames.get(d.supplier_relationship_id)??"Onbekende relatie"}</td>
+       <td>{d.invoice_date}</td><td>{propertyNames.get(d.property_id)??"Unknown property"}</td>
+       <td>{issuerNames.get(d.legal_entity_id)??"Unknown entity"}</td>
+       <td>{supplierNames.get(d.supplier_relationship_id)??"Unknown relationship"}</td>
        <td>{d.supplier_invoice_number}</td><td>{formatCents(d.gross_cents)}</td>
-       <td>{d.status==="draft"?"Concept":d.status} · {d.source_document_status==="missing"?"bron ontbreekt":d.source_document_status}
-        <details><summary>Details</summary><p className={styles.detailText}>{d.description}</p><p>Categorie: {d.category}</p><p>Netto {formatCents(d.net_cents)} · btw {formatCents(d.vat_cents)}</p></details></td>
+       <td>{d.status==="draft"?"Concept":d.status} · {d.source_document_status==="missing"?"source missing":d.source_document_status}
+        <details><summary>Details</summary><p className={styles.detailText}>{d.description}</p><p>Category: {d.category}</p><p>Net {formatCents(d.net_cents)} · VAT {formatCents(d.vat_cents)}</p></details></td>
       </tr>)}</tbody>
      </table>
     </div>}
-   <nav className={styles.registerActions} aria-label="Pagina's met kostenconcepten">
-    {filters.page>1&&<Link href={expenseRegisterHref(filters,filters.page-1)}>← Vorige pagina</Link>}
-    {filters.page<pageCount&&<Link href={expenseRegisterHref(filters,filters.page+1)}>Volgende pagina →</Link>}
+   <nav className={styles.registerActions} aria-label="Expense draft pages">
+    {filters.page>1&&<Link href={expenseRegisterHref(filters,filters.page-1)}>← Previous page</Link>}
+    {filters.page<pageCount&&<Link href={expenseRegisterHref(filters,filters.page+1)}>Next page →</Link>}
    </nav>
   </section>
-  <p><Link href="/admin/workspaces/estates/history">Open opgeslagen historische weekopgaven en externe facturen →</Link></p>
+  <p><Link href="/admin/workspaces/estates/history">Open saved historical weekly statements and external invoices →</Link></p>
   <WeeklyCostsImport/>
  </main>;
 }

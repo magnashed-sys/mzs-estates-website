@@ -19,8 +19,8 @@ test("History lists preserve correct actor, property and source timestamps with 
  assert.match(page,/\.order\("created_at",\{ascending:false\}\)\.limit\(50\)/g);
  assert.match(page,/x\.count>=x\.data\.length/);
  assert.match(page,/x\.count<=50\?x\.count===x\.data\.length:x\.data\.length===50/);
- assert.match(page,/Laatste \{visits\.data!\.length\} van \{visits\.count\}/);
- assert.match(page,/Laatste \{tickets\.data!\.length\} van \{tickets\.count\}/);
+ assert.match(page,/Latest \{visits\.data!\.length\} of \{visits\.count\}/);
+ assert.match(page,/Latest \{tickets\.data!\.length\} of \{tickets\.count\}/);
  assert.match(page,/memberNames\.get\(visit\.submitted_by\)/);
  assert.match(page,/memberNames\.get\(ticket\.reported_by\)/);
  assert.match(page,/propertyNames\.get\(visit\.property_id\)/);
@@ -31,8 +31,8 @@ test("History lists preserve correct actor, property and source timestamps with 
 test("Prior inactive pilot workers remain in audit history but not grant dropdown",()=>{
  assert.match(page,/select\("id,full_name,role,is_active"/);
  assert.match(page,/members=\{\(members\.data\?\?\[\]\)\.filter\(member=>member\.is_active===true\)\}/);
- assert.match(page,/Onderhoudsmeldingen \(\{tickets\.count\}\)/);
- assert.match(page,/Werkbezoeken \(\{visits\.count\}\)/);
+ assert.match(page,/Maintenance reports \(\{tickets\.count\}\)/);
+ assert.match(page,/Work visits \(\{visits\.count\}\)/);
  assert.match(styles,/\.historyGrid\{/);
  assert.match(styles,/@media\(max-width:760px\)/);
  assert.match(styles,/\.historyDescription\{white-space:pre-wrap/);

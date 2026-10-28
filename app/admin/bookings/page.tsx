@@ -1,3 +1,5 @@
+import {Fragment} from 'react';
+import {bookingToday,bookingTodayBoundary} from '../../../lib/estates/booking-timeline';
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {requireEstateAdmin} from "../../../lib/security/estate-properties";
@@ -67,6 +69,8 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
   const bookingId=r.category==="Owner stay"?ownerBookings.get(r.id):r.id;
   return bookingId?"/admin/bookings/"+bookingId+"?"+new URLSearchParams({returnTo}).toString():"/admin/owner-stays#request-"+r.id;
  };
+ const today=bookingToday(),boundary=bookingTodayBoundary(rows,today);
+ const todayLine=<tr data-today-boundary={today}><td colSpan={12} style={{padding:'14px 12px',borderTop:'3px solid #d5c09a',borderBottom:'1px solid #d5c09a',background:'#30291e',color:'#f4dfb8'}}><strong>Today · {formatDate(today)}</strong><span style={{marginLeft:16,fontSize:12}}>Later arrivals above · Today and earlier arrivals below{boundary===0?' · No later arrivals on this page':boundary===rows.length?' · Earlier arrivals may be on the next page':''}</span></td></tr>;
  const loadedFrom=total===0?0:offset+1;
  const loadedTo=Math.min(offset+rows.length,total);
  return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"36px clamp(18px,4vw,60px)"}}>
@@ -82,15 +86,6 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
     <Link href="/admin/group/estates/contracts?view=invoices" style={{...control,...linkStyle}}>Contracts &amp; Invoices</Link>
     <Link href="/admin/group/estates/properties" style={{...control,...linkStyle}}>Properties</Link>
    </nav>
-   <section style={{...style,marginBottom:20}} id="accountant-export" aria-label="Accountant year export">
-    <h2>Accountant year overview</h2>
-    <p>Administrative allocation follows the arrival date, including stays crossing New Year. This is separate from the actual payment date and invoice issue date. Historical payments remain marked as paid with their original payment date unknown.</p>
-    <form action="/admin/bookings/accountant-export" method="GET" style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"end"}}>
-     <label>Arrival year<select name="year" required defaultValue={year??""} style={{...control,display:"block"}}><option value="" disabled>Select a year</option>{(payload?.years||[]).map(y=><option key={y} value={y}>{y}</option>)}</select></label>
-     <button type="submit" style={control} disabled={!!error}>Download accountant CSV</button>
-    </form>
-    <p style={{fontSize:12,color:"#b5ac9c"}}>Includes all active, confirmed guest bookings for the selected arrival year across properties, regardless of the search filters below. Owner stays, test bookings, cancellations and archived bookings are excluded. Recorded paid amounts are not bank-verified cashflow. No invoice is issued by this export.</p>
-   </section>
    <section style={style} aria-label="Search and filter bookings">
     <h2 style={{fontFamily:"Georgia,serif",fontWeight:400,fontSize:25,margin:"0 0 18px"}}>Find reservations</h2>
     <form action="/admin/bookings" method="GET" style={{display:"flex",gap:12,alignItems:"end",flexWrap:"wrap"}}>
@@ -138,23 +133,22 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
    </section>}
    {!error&&<section aria-label="Matching booking records" style={{...style,padding:0,overflow:"hidden"}}>
     <div style={{overflowX:"auto"}}>
-     <table style={{width:"100%",minWidth:1400,borderCollapse:"collapse",textAlign:"left"}}>
-      <thead style={{background:"#1e1b16"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Original reference","Property","Type","Check-in","Check-out","Status","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #514839",fontWeight:500,color:"#d5c09a"}}>{h}</th>)}</tr></thead>
-      <tbody>{rows.map(r=><tr key={r.category+r.id} style={{borderBottom:"1px solid #373229"}}>
+     <table style={{width:"100%",minWidth:1250,borderCollapse:"collapse",textAlign:"left"}}>
+      <thead style={{background:"#1e1b16"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Property","Type","Check-in","Check-out","Status","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #514839",fontWeight:500,color:"#d5c09a"}}>{h}</th>)}</tr></thead>
+      <tbody>{rows.map((r,index)=><Fragment key={r.category+r.id}>{index===boundary&&todayLine}<tr style={{borderBottom:"1px solid #373229"}}>
        <td style={{padding:12}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?"Manage request →":"Open dossier →"}</Link></td>
        <td style={{padding:12}}>{r.guestName}</td>
        <td style={{padding:12}}>{r.invoiceRecipient||"—"}</td>
-       <td style={{padding:12,whiteSpace:"nowrap",fontSize:12}}>{r.sourceRef||"—"}</td>
        <td style={{padding:12}}>{r.property}</td>
        <td style={{padding:12}}>{r.category}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkIn)}</td>
+       <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkIn)}{r.checkIn<=today&&r.checkOut>today&&["confirmed","approved"].includes(r.status)&&r.category!=="Unavailable"&&<><br/><small style={{color:"#d5c09a"}}>Current stay</small></>}</td>
        <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkOut)}</td>
        <td style={{padding:12}}>{r.status.replaceAll("_"," ")}</td>
        <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Owner stay"?"Complimentary":money(r.amount)}</td>
        <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"?money(r.paid):"—"}</td>
        <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"&&r.status==="confirmed"&&r.amount!==null?money(Math.max(0,r.amount-r.paid)):"—"}</td>
        <td style={{padding:12}}>{r.category==="Owner stay"?"Complimentary":r.category!=="Guest booking"||r.status!=="confirmed"?"Not applicable":r.amount===null?"Not priced":r.amount===0?"No charge":r.paid>r.amount?"Overpaid":r.paid>=r.amount?"Paid":r.paid>0?"Partly paid":"Unpaid"}</td>
-      </tr>)}</tbody>
+      </tr></Fragment>)}{rows.length>0&&boundary===rows.length&&todayLine}</tbody>
      </table>
     </div>
     {!rows.length&&<p style={{padding:22}}>No reservations match these filters. Change the year or search terms.</p>}

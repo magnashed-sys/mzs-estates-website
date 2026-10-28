@@ -19,6 +19,6 @@ export async function GET(_req:NextRequest,{params}:{params:Promise<{id:string}>
  const bytes=new Uint8Array(await file.data.arrayBuffer());
  if(bytes.length!==data.byte_size||createHash('sha256').update(bytes).digest('hex')!==data.sha256)throw Error('Integrity mismatch');
  const safe=await normalizeMaintenancePhoto(bytes);
- return new NextResponse(new Uint8Array(safe),{headers:{...headers,'Content-Type':'image/jpeg','Content-Disposition':'inline; filename="onderhoudsfoto.jpg"'}});
+ return new NextResponse(new Uint8Array(safe),{headers:{...headers,'Content-Type':'image/jpeg','Content-Disposition':"inline; filename=\"maintenance-photo.jpg\""}});
  }catch{return new NextResponse(null,{status:422,headers});}
 }

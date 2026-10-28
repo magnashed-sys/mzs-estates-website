@@ -135,7 +135,7 @@ function ContractForm({contract,properties,units,members,relationships,issuers,p
   </div></section>
   <section className={s.panel}><h2>Recurring invoice</h2><div className={s.grid}>
    <Field label="Periodic invoice subject" wide><input required maxLength={500} value={subject} onChange={e=>setSubject(e.target.value)}/></Field>
-   <Field label="Invoice month language"><select value={language} onChange={e=>setLanguage(e.target.value)}><option value="nl">Nederlands</option><option value="en">English</option><option value="es">Español</option></select></Field>
+   <Field label="Invoice month language"><select value={language} onChange={e=>setLanguage(e.target.value)}><option value="nl">Dutch</option><option value="en">English</option><option value="es">Spanish</option></select></Field>
    <p className={s.help}>Available placeholders: {'{unitadres}'}, {'{maand}'}, {'{jaar}'}. The month always comes from the rental period.</p>
    <div className={`${s.preview} ${s.wide}`}>{example??'Choose a complete first invoice month to preview the subject (YYYY-MM).'}</div>
   </div><div className={s.toolbar}><button type="button" className={s.secondary} disabled={!chosen.length} onClick={suggestAmounts}>Suggest amounts from selected units</button></div>

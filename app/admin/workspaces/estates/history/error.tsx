@@ -1,2 +1,2 @@
 'use client';
-export default function HistoryError({reset}:{reset:()=>void}){return <section role="alert"><h2>Historische opgaven niet beschikbaar</h2><p>De brongegevens konden niet volledig worden geladen. Er worden geen gedeeltelijke totalen getoond.</p><button onClick={reset}>Opnieuw laden</button></section>;}
+export default function HistoryError({reset}:{reset:()=>void}){return <section role="alert"><h2>Historical statements unavailable</h2><p>The source data could not be fully loaded. No partial totals are shown.</p><button onClick={reset}>Reload</button></section>;}

@@ -33,9 +33,9 @@ export async function savePropertyExpenseDraft(
    process.env.NEXT_PUBLIC_SUPABASE_URL==="https://ptrnjzmcehrhbsfxntgw.supabase.co") ||
   (process.env.VERCEL_ENV==="preview" &&
    process.env.NEXT_PUBLIC_SUPABASE_URL==="https://senonkpxdtlhyhrubicg.supabase.co")))
-   return {status:"error",message:"Kostenconcepten kunnen in deze omgeving niet worden opgeslagen."};
+   return {status:"error",message:"Expense drafts cannot be saved in this environment."};
  if(formData.get("confirmed_real_draft")!=="yes")
-   return {status:"error",message:"Bevestig eerst dat dit een gecontroleerd, onveranderbaar kostenconcept betreft."};
+   return {status:"error",message:"First confirm that this is a verified, immutable expense draft."};
  const {db}=await requireEstateAdmin();
  const propertyId=requiredUuid(formData,"property_id");
  const entityId=requiredUuid(formData,"legal_entity_id");
@@ -51,7 +51,7 @@ export async function savePropertyExpenseDraft(
     description.length<2||description.length>500||/[\u0000-\u001f\u007f]/.test(description)||
     !categories.includes(category)||net===null||vat===null||net+vat<=0||
     allocationRaw.length<2||allocationRaw.length>15000) {
-   return {status:"error",message:"Controleer alle verplichte velden en de bedragen."};
+   return {status:"error",message:"Check all required fields and amounts."};
  }
  let allocations:{unit_id:string|null;net_cents:number;vat_cents:number}[];
  try{
@@ -78,16 +78,16 @@ export async function savePropertyExpenseDraft(
       allocations.reduce((sum,a)=>sum+a.vat_cents,0)!==vat)
       throw new Error("Mismatched amounts");
  }catch{
-   return {status:"error",message:"De kostenverdeling is ongeldig of sluit niet aan op de factuurbedragen."};
+   return {status:"error",message:"The expense allocation is invalid or does not reconcile with the invoice amounts."};
  }
  const {error}=await db.from("mzs_ops_expense_drafts").insert({
    property_id:propertyId,legal_entity_id:entityId,supplier_relationship_id:supplierId,
    supplier_invoice_number:number,invoice_date:date,category,description,
    net_cents:net,vat_cents:vat,allocations
  });
- if(error?.code==="23505")return {status:"error",message:"Deze leveranciersfactuur is al als concept geregistreerd voor deze entiteit."};
- if(error?.code==="23514")return {status:"error",message:"De gekozen entiteit is op deze datum niet als kostendrager aan dit object gekoppeld."};
- if(error)return {status:"error",message:"Concept kon niet worden opgeslagen. Controleer de betaalentiteit, toegewezen units en de actuele rechten."};
+ if(error?.code==="23505")return {status:"error",message:"This supplier invoice has already been recorded as a draft for this entity."};
+ if(error?.code==="23514")return {status:"error",message:"The selected entity is not associated with this property as cost bearer on this date."};
+ if(error)return {status:"error",message:"The draft could not be saved. Check the paying entity, assigned units and current permissions."};
  revalidatePath("/admin/workspaces/estates/expenses");
- return {status:"success",message:"Inkoopkosten zijn als concept vastgelegd met audit. Geen betaling, goedkeuring of uitgaande factuur gemaakt."};
+ return {status:"success",message:"Purchase expenses recorded as a draft with an audit trail. No payment, approval or outgoing invoice was created."};
 }

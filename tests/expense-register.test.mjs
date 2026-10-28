@@ -10,8 +10,8 @@ const lib={};vm.runInNewContext(compile('lib/property-operations/expense-registe
 const {expenseFilters,expenseRegisterHref,expensePageTotals}=lib;
 test('expense filters validate identity and dates, strip query syntax and preserve paging filters',()=>{
  assert.throws(()=>expenseFilters({property:'not-an-id'}),/filter/);
- assert.throws(()=>expenseFilters({from:'2026-02-30'}),/datum/);
- assert.throws(()=>expenseFilters({from:'2026-10-20',until:'2026-10-01'}),/einddatum/);
+ assert.throws(()=>expenseFilters({from:'2026-02-30'}),/date/);
+ assert.throws(()=>expenseFilters({from:'2026-10-20',until:'2026-10-01'}),/end date/);
  const f=expenseFilters({q:'onderhoud,()%_"\\',page:'9',from:'2026-01-01'});
  assert.equal(f.q,'onderhoud');assert.equal(f.page,9);
  assert.match(expenseRegisterHref(f,8),/q=onderhoud&from=2026-01-01&page=8#expense-register$/);
@@ -20,8 +20,8 @@ test('expense filters validate identity and dates, strip query syntax and preser
 test('page totals reconcile exact cents and reject malformed amounts',()=>{
  const x=expensePageTotals([{net_cents:101,vat_cents:21,gross_cents:122},{net_cents:99,vat_cents:0,gross_cents:99}]);
  assert.equal(x.net,200);assert.equal(x.vat,21);assert.equal(x.gross,221);
- assert.throws(()=>expensePageTotals([{net_cents:101,vat_cents:21,gross_cents:121}]),/betrouwbaar/);
- assert.throws(()=>expensePageTotals([{net_cents:'101',vat_cents:21,gross_cents:122}]),/betrouwbaar/);
+ assert.throws(()=>expensePageTotals([{net_cents:101,vat_cents:21,gross_cents:121}]),/reliably/);
+ assert.throws(()=>expensePageTotals([{net_cents:'101',vat_cents:21,gross_cents:122}]),/reliably/);
 });
 async function renderRegister(pageNumber,count=201){
  const calls=[];const selections=[];

@@ -31,7 +31,7 @@ test('reports keep exact source minutes and mutually exclusive correction/review
 });
 test('incomplete or contradictory snapshots fail as a whole instead of generating plausible partial totals',()=>{
  const mutations=[s=>s.record_count--,s=>s.visits.push(s.visits[0]),s=>s.people.pop(),s=>s.properties=[],s=>s.visits[0].worked_on='2026-11-01',s=>s.visits[0].actual_minutes=45.5,s=>s.visits[0].effective_minutes=9601,s=>s.visits[0].effective_minutes=46,s=>s.visits[0].review_decision='unknown',s=>s.visits[0].review_decision='approved',s=>s.visits[0].correction_pending=undefined,s=>s.visits[0].correction_id='invalid',s=>s.generated_at='bad',s=>s.profile=id(201),s=>s.people.push(s.people[0]),s=>s.properties[0].name=123];
- for(const mutate of mutations){const source=fixture();mutate(source);assert.throws(()=>lib.normalizeTimeReport(source,filters()),/onvolledig/);}
+ for(const mutate of mutations){const source=fixture();mutate(source);assert.throws(()=>lib.normalizeTimeReport(source,filters()),/incomplete/);}
 });
 test('dossier navigation retains the report period, person, property and page without accepting external returns',()=>{
  const f={...filters(),property:id(101),profile:id(201),page:3},href=lib.timeDossierHref(f,id(1)),params=Object.fromEntries(new URL(href,'https://fixture.invalid').searchParams);
@@ -57,7 +57,7 @@ function route({environment=true,denied=false,source=fixture(),csv,queryFailure=
 test('time export guards access before input/query and returns private complete CSV',async()=>{
  const off=route({environment:false});assert.equal((await off.get()).status,404);assert.deepEqual(off.calls,['environment']);
  const denied=route({denied:true});await assert.rejects(denied.get(),/denied/);assert.deepEqual(denied.calls,['environment','admin']);
- const ok=route(),response=await ok.get();assert.equal(response.status,200);assert.equal(response.headers.get('Cache-Control'),'private, no-store');assert.equal(response.headers.get('X-Content-Type-Options'),'nosniff');assert.match(response.headers.get('Content-Disposition'),/MZS-Uren-2026-09-01-2026-10-31.csv/);assert.equal(parseCsv('\ufeff'+await response.text()).length,7);assert.deepEqual(ok.calls,['environment','admin','query']);
+ const ok=route(),response=await ok.get();assert.equal(response.status,200);assert.equal(response.headers.get('Cache-Control'),'private, no-store');assert.equal(response.headers.get('X-Content-Type-Options'),'nosniff');assert.match(response.headers.get('Content-Disposition'),/MZS-Time-2026-09-01-2026-10-31.csv/);assert.equal(parseCsv('\ufeff'+await response.text()).length,7);assert.deepEqual(ok.calls,['environment','admin','query']);
 });
 test('export errors reject duplicate filters, unavailable or incomplete sources and oversize output without partial CSV',async()=>{
  const invalid=route();assert.equal((await invalid.get('from=2026-09-01&from=2026-10-01')).status,400);assert.ok(!invalid.calls.includes('query'));
@@ -80,7 +80,7 @@ test('report pagination retains complete totals while showing only the chosen 25
  const source=fixture();source.visits=Array.from({length:61},(_,i)=>row(i+1));source.record_count=61;
  const p=page({source}),tree=await p.render({page:'3'}),elements=[];function walk(x){if(!x||typeof x!=='object')return;if(Array.isArray(x))return x.forEach(walk);elements.push(x);walk(x.props?.children);}walk(tree);
  assert.equal(elements.filter(e=>e.props?.href?.includes('/staff?visit=')).length,11);
- const serialized=JSON.stringify(tree);assert.match(serialized,/45:45/);assert.match(serialized,/totalen hierboven gelden voor alle /);
+ const serialized=JSON.stringify(tree);assert.match(serialized,/45:45/);assert.match(serialized,/totals above cover all /);
  await assert.rejects(p.render({page:'999'}),/redirect:.*from=2026-09-01&until=2026-10-31&page=3/);
 });
 test('time snapshot RPC enforces real PostgreSQL access, revisions, filters and capacity limits',()=>{

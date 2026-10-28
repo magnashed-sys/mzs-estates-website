@@ -1,5 +1,5 @@
 export const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export const statusLabels:Record<string,string>={reported:'Gemeld',triaged:'Beoordeeld',scheduled:'Ingepland',in_progress:'In uitvoering',resolved:'Opgelost',reopened:'Heropend',closed:'Afgesloten'};
+export const statusLabels:Record<string,string>={reported:"Reported",triaged:"Reviewed",scheduled:"Scheduled",in_progress:"In progress",resolved:"Resolved",reopened:"Reopened",closed:"Closed"};
 export const transitions:Record<string,string[]>={reported:['triaged'],triaged:['triaged','scheduled','in_progress','resolved'],scheduled:['triaged','scheduled','in_progress','resolved'],in_progress:['in_progress','scheduled','resolved'],resolved:['reopened','closed'],reopened:['triaged','scheduled','in_progress','resolved'],closed:['reopened']};
 export type WorkState={status:'idle'|'success'|'error';message:string};
 export type Visit={id:string;property_id:string;profile_id:string;worked_on:string;actual_minutes:number;effective_minutes:number;task_category:string;description:string;correction_id:string|null;review_decision:string|null;review_reason:string|null;correction_pending:boolean};

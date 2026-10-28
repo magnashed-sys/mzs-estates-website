@@ -1,2 +1,2 @@
 'use client';
-export default function ErrorBoundary({reset}:{reset:()=>void}){return <section role="alert"><h1>Factuurarchief niet beschikbaar</h1><p>De volledige gegevens konden niet worden geladen.</p><button onClick={reset}>Opnieuw proberen</button></section>;}
+export default function ErrorBoundary({reset}:{reset:()=>void}){return <section role="alert"><h1>Invoice archive unavailable</h1><p>The complete data could not be loaded.</p><button onClick={reset}>Try again</button></section>;}

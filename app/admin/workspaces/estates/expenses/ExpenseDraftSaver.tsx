@@ -27,10 +27,10 @@ export default function ExpenseDraftSaver({
    net_cents:r.netCents,vat_cents:r.vatCents
  }))??[];
  return <div className={styles.blocked}>
-  <strong>Conceptregistratie — MZS Group</strong>
-  <p>Een kostenconcept is nog geen goedgekeurde inkoopfactuur. Het originele leveranciersdocument, de betaling en eventuele doorbelasting worden in een volgende fase verwerkt.</p>
-  {!linked&&selection&&<p role="status">Koppel eerst de geselecteerde juridische entiteit als <strong>kostendrager / betaler</strong> aan dit object met een ingangsdatum op of vóór de factuurdatum.</p>}
-  {!available&&<p role="alert">Het register voor conceptkosten is niet beschikbaar of niet volledig gelezen.</p>}
+  <strong>Draft record — MZS Group</strong>
+  <p>An expense draft is not yet an approved supplier invoice. The original supplier document, payment and any recharge will be processed in a later phase.</p>
+  {!linked&&selection&&<p role="status">First associate the selected legal entity as <strong>cost bearer / payer</strong> to this property with an effective date on or before the invoice date.</p>}
+  {!available&&<p role="alert">The expense draft register is unavailable or was not fully loaded.</p>}
   <form action={action} className={styles.draftSaveForm}>
    <input type="hidden" name="property_id" value={selection?.propertyId??""}/>
    <input type="hidden" name="legal_entity_id" value={selection?.entityId??""}/>
@@ -42,9 +42,9 @@ export default function ExpenseDraftSaver({
    <input type="hidden" name="net_cents" value={selection?.netCents??0}/>
    <input type="hidden" name="vat_cents" value={selection?.vatCents??0}/>
    <input type="hidden" name="allocations" value={JSON.stringify(allocations)}/>
-   <label className={styles.approvalLine}><input type="checkbox" name="confirmed_real_draft" value="yes" required/> Ik heb de kostendrager, factuurdatum, leverancier en bedragen gecontroleerd. Dit is een onveranderbaar kostenconcept, geen definitieve factuur.</label>
+   <label className={styles.approvalLine}><input type="checkbox" name="confirmed_real_draft" value="yes" required/> I have checked the cost-bearing entity, invoice date, supplier and amounts. This is an immutable expense draft, not a final invoice.</label>
    <button className={styles.saveButton} disabled={!canSave} type="submit">
-    {pending?"Concept opslaan…":"Bewaar inkoopkosten als concept"}
+    {pending?"Saving draft…":"Save purchase expenses as a draft"}
    </button>
    {state.message&&<p role="status" className={state.status==="error"?styles.error:styles.hint}>{state.message}</p>}
   </form>

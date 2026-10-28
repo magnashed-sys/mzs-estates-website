@@ -12,12 +12,12 @@ export type AllocationPreview = {
 /** For preview only: never used to establish a legal-property association. */
 export function inputEuroCents(raw: string): number {
   if (typeof raw !== "string" || !/^\d{1,9}([,.]\d{1,2})?$/.test(raw.trim())) {
-    throw new Error("Voer een geldig bedrag met maximaal twee decimalen in.");
+    throw new Error("Enter a valid amount with up to two decimal places.");
   }
   const [euros, decimals = ""] = raw.trim().replace(",", ".").split(".");
   const cents = Number(euros) * 100 + Number(decimals.padEnd(2, "0"));
   if (!Number.isSafeInteger(cents) || cents > 100_000_000_000) {
-    throw new Error("Bedrag is te hoog.");
+    throw new Error("Amount is too high.");
   }
   return cents;
 }
@@ -30,7 +30,7 @@ export function expenseAllocationPreview(
   availableUnitIds: readonly string[],
   chosenUnitId?: string
 ): AllocationPreview[] {
-  if (!propertyId || typeof propertyId !== "string") throw new Error("Selecteer een object.");
+  if (!propertyId || typeof propertyId !== "string") throw new Error("Select a property.");
   const uniqueUnits = [...new Set(availableUnitIds)];
   if (uniqueUnits.length !== availableUnitIds.length) {
     throw new Error("Dubbele units in objectregister.");
@@ -39,8 +39,8 @@ export function expenseAllocationPreview(
     mode === "unit" ?
       (chosenUnitId && uniqueUnits.includes(chosenUnitId) ? [chosenUnitId] : []) :
       mode === "equal-units" ? uniqueUnits.slice().sort() : [];
-  if (!targets.length) throw new Error("Selecteer een geldige unit of kies het hele object.");
-  if (targets.length > 100) throw new Error("Te veel units voor één verdeling.");
+  if (!targets.length) throw new Error("Select a valid unit or choose the entire property.");
+  if (targets.length > 100) throw new Error("Too many units for one allocation.");
 
   const base = Math.floor(10000 / targets.length);
   const remainder = 10000 % targets.length;

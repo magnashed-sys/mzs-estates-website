@@ -15,7 +15,7 @@ export async function recordStaffScope(_prev:ScopeActionState,form:FormData):Pro
  const reason=String(form.get("reason")??"").trim();
  if(!uuid.test(profileId)||!uuid.test(propertyId)||!["grant","revoke"].includes(action)||
    reason.length<8||reason.length>500||/[\u0000-\u001f\u007f]/u.test(reason))
-  return {status:"error",message:"Selecteer een bestaande relatie, object, handeling en onderbouwing."};
+  return {status:"error",message:"Select an existing relationship, property, action and supporting reason."};
  const [user,property]=await Promise.all([
   db.from("profiles").select("id,role,is_active").eq("id",profileId).maybeSingle(),
   db.from("mzs_estate_properties").select("id").eq("id",propertyId).maybeSingle()
@@ -23,13 +23,13 @@ export async function recordStaffScope(_prev:ScopeActionState,form:FormData):Pro
  if(user.error||!user.data||(action==="grant"&&!user.data.is_active)||
     (action==="grant"&&!["client","partner"].includes(user.data.role))||
     property.error||!property.data)
-  return {status:"error",message:"Actief account of object niet gevonden. Er is niets opgeslagen."};
+  return {status:"error",message:"Active account or property not found. Nothing was saved."};
  const {error}=await db.from("mzs_ops_staff_scope_events").insert({
    profile_id:profileId,property_id:propertyId,action,reason
  });
- if(error)return {status:"error",message:"De toewijzing kon niet worden verwerkt. Controleer de vorige toegangstoestand."};
+ if(error)return {status:"error",message:"The assignment could not be processed. Check the previous access state."};
  revalidatePath("/admin/workspaces/estates/staff");
  return {status:"success",message:action==="grant"?
-  "Medewerker heeft nu toegang tot dit specifieke object. Geen andere dossierrechten gewijzigd.":
-  "Objecttoegang is ingetrokken en met reden vastgelegd."};
+  "The staff member now has access to this specific property. Other dossier permissions are unchanged.":
+  "Property access revoked and the reason recorded."};
 }

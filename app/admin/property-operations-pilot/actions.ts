@@ -12,11 +12,11 @@ export async function createPilotRun(_prev:PilotAdminState,form:FormData):Promis
  const propertyId=String(form.get("property_id")??"");
  const purpose=String(form.get("purpose")??"").trim();
  if(form.get("confirmed_synthetic")!=="yes"||!uuid.test(propertyId)||!valid(purpose,12,300))
-  return {status:"error",message:"Controleer het object, het uitsluitend synthetische doel en de bevestiging."};
+  return {status:"error",message:"Check the property, synthetic-only purpose and confirmation."};
  const {error}=await db.from("mzs_ops_pilot_runs").insert({property_id:propertyId,purpose});
- if(error)return {status:"error",message:"Pilotrun niet aangemaakt. Er is niets geactiveerd."};
+ if(error)return {status:"error",message:"Pilot run could not be created. Nothing was activated."};
  revalidatePath(path);
- return {status:"success",message:"Nieuwe pilotrun gemaakt, standaard UIT. Er is nog geen medewerker toegang verleend."};
+ return {status:"success",message:"New pilot run created, OFF by default. No staff access has been granted yet."};
 }
 /** Terminal deactivation is the first emergency stop; never toggles Production features. */
 export async function changePilotRunState(_prev:PilotAdminState,form:FormData):Promise<PilotAdminState>{
@@ -26,13 +26,13 @@ export async function changePilotRunState(_prev:PilotAdminState,form:FormData):P
  const reason=String(form.get("reason")??"").trim();
  if(form.get("confirmed_stage")!=="yes"||!uuid.test(runId)||
   !["activate","deactivate"].includes(action)||!valid(reason,10,500))
-  return {status:"error",message:"Controleer run, actie, reden en expliciete bevestiging."};
+  return {status:"error",message:"Check the run, action, reason and explicit confirmation."};
  const {error}=await db.from("mzs_ops_pilot_run_events").insert({run_id:runId,action,reason});
- if(error)return {status:"error",message:"Statuswijziging geweigerd. De run kan al gestopt zijn of een andere run actief zijn."};
+ if(error)return {status:"error",message:"Status change refused. The run may already be stopped or another run may be active."};
  revalidatePath(path);
  return {status:"success",message:action==="deactivate"?
-  "PILOT GESTOPT: terminale blokkade voor alle medewerkers. Historie blijft bewaard.":
-  "Pilotrun geactiveerd, maar nog niemand heeft toegang zonder afzonderlijke objecttoewijzing."};
+  "PILOT STOPPED: permanent block for all staff. History is preserved.":
+  "Pilot run activated. Separate property assignment is still required for access."};
 }
 /** One current synthetic pilot worker per run, no existing client role mutation. */
 export async function changePilotWorkerScope(_prev:PilotAdminState,form:FormData):Promise<PilotAdminState>{
@@ -43,13 +43,13 @@ export async function changePilotWorkerScope(_prev:PilotAdminState,form:FormData
  const reason=String(form.get("reason")??"").trim();
  if(form.get("confirmed_stage")!=="yes"||!uuid.test(runId)||!uuid.test(profileId)||
   !["grant","revoke"].includes(action)||!valid(reason,10,500))
-  return {status:"error",message:"Controleer de bestaande relatie, run, handeling, reden en bevestiging."};
+  return {status:"error",message:"Check the existing relationship, run, action, reason and confirmation."};
  const {error}=await db.from("mzs_ops_pilot_access_events").insert({
   run_id:runId,profile_id:profileId,action,reason
  });
- if(error)return {status:"error",message:"Toegang niet aangepast. Maximaal één actuele medewerker per actieve run."};
+ if(error)return {status:"error",message:"Access was not changed. Only one current staff member is allowed per active run."};
  revalidatePath(path);
  return {status:"success",message:action==="revoke"?
-  "Medewerkerstoegang ingetrokken; bestaande sessies verliezen ook lees- en schrijfrechten.":
-  "Medewerker toegevoegd voor alleen deze ene actieve pilotrun, zonder wijziging van accountrol."};
+  "Staff access revoked; existing sessions also lose read and write permissions.":
+  "Staff member added to this active pilot run only; account role unchanged."};
 }
