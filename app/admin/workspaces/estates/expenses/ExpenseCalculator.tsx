@@ -3,12 +3,13 @@
 import {useMemo, useState} from "react";
 import {expenseAllocationPreview, inputEuroCents, type ExpenseAllocationMode} from "../../../../../lib/property-operations/expense-preview";
 import styles from "./expenses.module.css";
+import ExpenseDraftSaver,{type PayerLink,type DraftSelection} from "./ExpenseDraftSaver";
 
 type Issuer = {id:string;name:string;kind:string|null;prefix:string};
 type Property = {id:string;name:string;address:string;country_code:string};
 type Unit = {id:string;property_id:string;address:string};
 type Supplier = {id:string;name:string;kind:string|null};
-type Props = {issuers:Issuer[];properties:Property[];units:Unit[];suppliers:Supplier[]};
+type Props = {issuers:Issuer[];properties:Property[];units:Unit[];suppliers:Supplier[];payerLinks:PayerLink[];canSaveDraft:boolean};
 
 const categories = [
   ["electricity","Elektriciteit"],["gas","Gas"],["water","Water"],
@@ -24,7 +25,7 @@ const formatCents = (value:number) => new Intl.NumberFormat("nl-NL",{
  * Dry-run only: no fetch, server action, local storage, Supabase writes or upload.
  * Display calculations are not a legal entity/property verification.
  */
-export default function ExpenseCalculator({issuers,properties,units,suppliers}:Props) {
+export default function ExpenseCalculator({issuers,properties,units,suppliers,payerLinks,canSaveDraft}:Props) {
   const [issuerId,setIssuerId] = useState("");
   const [supplierId,setSupplierId] = useState("");
   const [propertyId,setPropertyId] = useState("");
@@ -68,6 +69,12 @@ export default function ExpenseCalculator({issuers,properties,units,suppliers}:P
     }
   },[ready,invoiceDate,invoiceNumber,description,netInput,vatInput,mode,propertyId,propertyUnits,unitId]);
 
+  const draftSelection:DraftSelection|null = outcome && "allocation" in outcome && outcome.allocation ? {
+    propertyId,entityId:issuerId,supplierId,invoiceNumber:invoiceNumber.trim(),
+    invoiceDate,category,description:description.trim(),
+    netCents:outcome.netCents,vatCents:outcome.vatCents,
+    allocation:outcome.allocation.map(x=>({targetId:x.targetId,netCents:x.netCents,vatCents:x.vatCents}))
+  } : null;
   return (
     <div className={styles.columns}>
       <section className={styles.panel} aria-labelledby="expense-entry">
@@ -144,9 +151,10 @@ export default function ExpenseCalculator({issuers,properties,units,suppliers}:P
           </table></div>
           <p className={styles.hint}>Verdeling in exacte centen; geen afrondingsverschil. Deze berekening is nog niet opgeslagen of goedgekeurd.</p>
         </div>}
+        <ExpenseDraftSaver selection={draftSelection} payerLinks={payerLinks} available={canSaveDraft} enabled={canSaveDraft}/>
         <div className={styles.blocked}>
-          <strong>Opslaan, uploaden en doorfactureren zijn nog uitgeschakeld.</strong>
-          <p>De eerste database-uitbreiding, object-entiteitskoppelingen, documentbeveiliging en goedkeuringsproces moeten vóór ingebruikname worden getest.</p>
+          <strong>Goedkeuring, bronbestanden en doorfacturatie zijn nog uitgeschakeld.</strong>
+          <p>Kostenconcepten kunnen alleen worden vastgelegd na een geverifieerde object-entiteitskoppeling. Uploads, betalingen en definitieve facturen worden afzonderlijk ontwikkeld en gecontroleerd.</p>
         </div>
       </section>
     </div>
