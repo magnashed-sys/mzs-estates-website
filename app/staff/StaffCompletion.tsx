@@ -61,19 +61,18 @@ function PhotoUploader({tickets,photos}:{tickets:Ticket[];photos:Photo[]}){
   {message&&<p role="status" className={s.description}>{message}</p>}
  </form>;
 }
-export default function StaffCompletion({visits,tickets,corrections,reviewedVisitIds,photos}:{
+export default function StaffCompletion({visits,tickets,corrections,photos}:{
  visits:Visit[];tickets:Ticket[];corrections:Correction[];
- reviewedVisitIds:string[];photos:Photo[]
+ photos:Photo[]
 }){
  const revised=new Set(corrections.map(x=>x.visit_id));
- const reviewed=new Set(reviewedVisitIds);
- const candidates=visits.filter(v=>!revised.has(v.id)&&!reviewed.has(v.id));
+ const candidates=visits.filter(v=>!revised.has(v.id));
  const [chosen,setChosen]=useState("");
  const selected=candidates.find(x=>x.id===chosen);
  return <section className={s.history} aria-label="Aanvullende medewerkerstaken">
   <div>
    <h2>Mijn urencorrecties</h2>
-   <p className={s.description}>Alleen nog onbeoordeelde bezoeken kunnen een correctievoorstel krijgen. De beheerder beslist afzonderlijk.</p>
+   <p className={s.description}>Correcties worden uitsluitend voor nog onbeoordeelde bezoeken geaccepteerd. De beheerder beslist afzonderlijk; het systeem weigert al beoordeelde bezoeken.</p>
    {corrections.length>0&&<p className={s.description}>{corrections.length} correctievoorstel(len) in je historie.</p>}
    {candidates.length===0?<p className={s.description}>Geen onbeoordeelde bezoeken om te corrigeren.</p>:
     <>
