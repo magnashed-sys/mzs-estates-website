@@ -5,6 +5,7 @@ import WeeklyCostsImport from "./WeeklyCostsImport";
 import PropertyEntityLinks from "./PropertyEntityLinks";
 import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
 import ExpenseCorrections from "./ExpenseCorrections";
+import CorrectionDecisions from "./CorrectionDecisions";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,12 @@ export default async function PropertyExpensesPage() {
   const correctionsComplete = !!correctionResult && !correctionResult.error &&
     correctionResult.count !== null && correctionResult.data !== null &&
     correctionResult.data.length === correctionResult.count;
+  const decisionResult = stagingEnabled && correctionsComplete ? await db.from("mzs_ops_expense_correction_decisions")
+    .select("id,correction_id,decision,decided_at",{count:"exact"})
+    .order("decided_at",{ascending:false}).limit(200) : null;
+  const decisionsComplete = !!decisionResult && !decisionResult.error &&
+    decisionResult.count !== null && decisionResult.data !== null &&
+    decisionResult.data.length === decisionResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -72,10 +79,10 @@ export default async function PropertyExpensesPage() {
         <span className={styles.previewPill}>Staging · gecontroleerd</span>
       </div>
       <div className={styles.notice} role="status">
-        <strong>Voorbeeldomgeving, uitsluitend lezen en berekenen.</strong>
+        <strong>Staging-omgeving voor gecontroleerde kostenadministratie.</strong>
         <p>Deze pagina maakt geen uitgaande facturen of betalingen aan. Er is nog geen geverifieerde
         juridische koppeling tussen objecten en entiteiten. Een hier gekozen combinatie is daarom
-        alleen een concept. Kostenconcepten, originele bestanden en administratieve controles worden uitsluitend op Staging geregistreerd; doorfactureren, betalen en accountantsexport blijven uitgeschakeld.</p>
+        alleen een concept. Kostenconcepten, originele bestanden en administratieve controles worden uitsluitend op Staging geregistreerd; doorfactureren en betalen blijven uitgeschakeld. Voor accountants zijn uitsluitend gedeeltelijke ZIP-proefexports beschikbaar.</p>
       </div>
 
       {incomplete.length > 0 ? (
@@ -109,6 +116,11 @@ export default async function PropertyExpensesPage() {
         events={evidenceComplete ? reviewResult!.data! : []}
         requests={correctionsComplete ? correctionResult!.data! : []}
         enabled={draftsComplete && evidenceComplete && correctionsComplete}
+      />}
+      {stagingEnabled && <CorrectionDecisions
+        proposals={correctionsComplete ? correctionResult!.data! : []}
+        decisions={decisionsComplete ? decisionResult!.data! : []}
+        enabled={correctionsComplete && decisionsComplete}
       />}
       {stagingEnabled && incomplete.length === 0 && <section className={styles.panel} style={{marginTop:22}}>
         <p className={styles.kicker}>09 / VERKOOPFACTUREN EN ONTVANGSTEN – PROEFEXPORT</p>
