@@ -1,6 +1,7 @@
 import {createHash, randomUUID} from "node:crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {requireEstateAdmin} from "../../../../../../lib/security/estate-properties";
+import {checkSyntheticExpensePdf} from "../../../../../../lib/property-operations/synthetic-pdf-admission";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -58,6 +59,8 @@ export async function POST(request:NextRequest){
  if(bytes.length!==source.size)return fail("Bestandsgrootte komt niet overeen.",400);
  const detected=fileType(bytes);
  if(!detected||detected.mime!=="application/pdf")return fail("Alleen fictieve PDF-testbestanden zijn toegestaan.",400);
+ const admission=checkSyntheticExpensePdf(bytes);
+ if(!admission.ok)return fail(admission.reason,400);
  const path=draftId.toLowerCase()+"/"+randomUUID()+"."+detected.ext;
  const sha256=createHash("sha256").update(bytes).digest("hex");
  const {error:uploadError}=await db.storage.from(bucket).upload(path,bytes,{
