@@ -133,8 +133,8 @@ function splitCents(total: number, rows: readonly { key: string; basisPoints: nu
   amount(total);
   const calculated = rows.map(row => {
     const dividend = BigInt(total) * BigInt(row.basisPoints);
-    return { key: row.key, base: Number(dividend / 10000n),
-      remainder: Number(dividend % 10000n) };
+    return { key: row.key, base: Number(dividend / BigInt(10000)),
+      remainder: Number(dividend % BigInt(10000)) };
   });
   let pennies = total - calculated.reduce((s,x) => s + x.base, 0);
   const winners = [...calculated].sort((a,b) => b.remainder - a.remainder ||
