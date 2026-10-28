@@ -37,3 +37,28 @@ test("Staff trial forms display synthetic-only notice and do not issue anything"
  assert.match(page,/Geen echte facturatie/);
  assert.doesNotMatch(page,/service_role|auth\.admin|SUPABASE_SECRET/);
 });
+
+test("Pilot administrator is checked server-side and every direct admin page checks complete registers",()=>{
+ const gate=src("lib/security/property-ops-pilot.ts");
+ const page=src("app/admin/property-operations-pilot/page.tsx");
+ const actions=src("app/admin/property-operations-pilot/actions.ts");
+ assert.match(gate,/actor\.role!=="admin"/);
+ assert.match(page,/await requireOpsPilotAdmin\(\)/);
+ assert.match(page,/x\.count===x\.data\.length/);
+ assert.match(page,/AFGESCHERMD — GEEN ECHTE FACTURATIE/);
+ assert.match(actions,/^"use server"/);
+ assert.match(actions,/await requireOpsPilotAdmin\(\)/g);
+ for(const table of [
+  "mzs_ops_pilot_runs","mzs_ops_pilot_run_events","mzs_ops_pilot_access_events"
+ ])assert.match(actions,new RegExp(table));
+ assert.doesNotMatch(actions,/mzs_lease_|mzs_booking_|mzs_capital_|sendMail|\.update\(|\.delete\(/);
+});
+test("Pilot admin controls require explicit owner-stage checks and default to safe actions",()=>{
+ const ui=src("app/admin/property-operations-pilot/PilotAdminForms.tsx");
+ const actions=src("app/admin/property-operations-pilot/actions.ts");
+ assert.match(ui,/defaultValue="deactivate"/);
+ assert.match(ui,/defaultValue="revoke"/);
+ assert.match(ui,/confirmed_stage/);
+ assert.match(actions,/form\.get\("confirmed_stage"\)!=="yes"/g);
+ assert.match(actions,/Maximaal één actuele medewerker/);
+});
