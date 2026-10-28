@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import StaffScopeForm from "./StaffScopeForm";
+import StaffReviews from "./StaffReviews";
 import s from "../../../../staff/staff.module.css";
 export const dynamic="force-dynamic";
 export default async function AdminStaffOperations(){
@@ -10,10 +11,12 @@ export default async function AdminStaffOperations(){
   db.from("mzs_estate_properties").select("id,name",{count:"exact"}).order("name").limit(500),
   db.from("mzs_ops_staff_scope_events").select("id,sequence_no,profile_id,property_id,action,reason,created_at",{count:"exact"}).order("sequence_no",{ascending:false}).limit(1000),
   db.from("mzs_ops_staff_visits").select("id,profile_id,property_id,worked_on,actual_minutes,task_category",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
-  db.from("mzs_ops_maintenance_tickets").select("id,reported_by,property_id,title,priority,status,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(1000)
+  db.from("mzs_ops_maintenance_tickets").select("id,reported_by,property_id,title,priority,status,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_visit_reviews").select("id,visit_id,decision,recharge_class,billable_minutes",{count:"exact"}).order("reviewed_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_maintenance_events").select("id,ticket_id,sequence_no,action,note",{count:"exact"}).order("sequence_no",{ascending:false}).limit(1000)
  ]);
  const ok=results.every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
- const [profiles,properties,events,visits,tickets]=results;
+ const [profiles,properties,events,visits,tickets,visitReviews,maintenanceEvents]=results;
  const names=new Map((profiles.data??[]).map(x=>[x.id,x.full_name??"Onbekend account"]));
  const propertyName=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const latest=new Map<string,{profile_id:string;property_id:string;action:string;reason:string}>();
@@ -72,6 +75,14 @@ export default async function AdminStaffOperations(){
        </table></div>}
      </section>
     </div>
+    <StaffReviews
+      visits={visits.data!}
+      reviews={visitReviews.data!}
+      tickets={tickets.data!}
+      events={maintenanceEvents.data!}
+      members={Object.fromEntries(names)}
+      properties={Object.fromEntries(propertyName)}
+    />
    </>}
  </main>;
 }
