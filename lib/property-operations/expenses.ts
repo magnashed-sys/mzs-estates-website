@@ -144,7 +144,7 @@ function splitCents(total: number, rows: readonly { key: string; basisPoints: nu
 }
 
 export function normalizePurchaseExpense(input: PurchaseExpenseInput, verified: VerifiedPropertyScope): NormalisedExpense {
-  if (!input || !verified || !(verified.propertyIds instanceof Set) ||
+  if (!input || !verified || typeof verified.propertyIds?.has !== 'function' ||
     !verified.unitProperties || typeof verified.unitProperties !== 'object') {
     throw new Error('Verified property/entity scope is required');
   }
