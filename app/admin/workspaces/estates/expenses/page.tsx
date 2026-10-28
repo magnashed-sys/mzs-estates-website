@@ -4,6 +4,7 @@ import ExpenseCalculator from "./ExpenseCalculator";
 import WeeklyCostsImport from "./WeeklyCostsImport";
 import PropertyEntityLinks from "./PropertyEntityLinks";
 import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
+import ExpenseCorrections from "./ExpenseCorrections";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function PropertyExpensesPage() {
   const linksComplete = !!linkResult && !linkResult.error && linkResult.count !== null &&
     linkResult.data !== null && linkResult.data.length === linkResult.count;
   const draftResult = stagingEnabled ? await db.from("mzs_ops_expense_drafts")
-    .select("id,property_id,legal_entity_id,supplier_invoice_number,invoice_date,category,net_cents,vat_cents,gross_cents,status,source_document_status",{count:"exact"})
+    .select("id,property_id,legal_entity_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,allocations,status,source_document_status",{count:"exact"})
     .order("created_at",{ascending:false}).limit(200) : null;
   const draftsComplete = !!draftResult && !draftResult.error && draftResult.count !== null &&
     draftResult.data !== null && draftResult.data.length === draftResult.count;
@@ -53,6 +54,12 @@ export default async function PropertyExpensesPage() {
     documentResult.data !== null && reviewResult.data !== null &&
     documentResult.data.length === documentResult.count &&
     reviewResult.data.length === reviewResult.count;
+  const correctionResult = stagingEnabled && draftsComplete ? await db.from("mzs_ops_expense_correction_requests")
+    .select("id,draft_id,reason,created_at",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(200) : null;
+  const correctionsComplete = !!correctionResult && !correctionResult.error &&
+    correctionResult.count !== null && correctionResult.data !== null &&
+    correctionResult.data.length === correctionResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -94,6 +101,37 @@ export default async function PropertyExpensesPage() {
       )}
 
       <WeeklyCostsImport />
+      {stagingEnabled && <ExpenseCorrections
+        drafts={draftsComplete ? draftResult!.data!.map(d=>({id:d.id,
+          supplier_invoice_number:d.supplier_invoice_number,description:d.description,
+          property_id:d.property_id,net_cents:d.net_cents,vat_cents:d.vat_cents,
+          allocations:d.allocations})) : []}
+        events={evidenceComplete ? reviewResult!.data! : []}
+        requests={correctionsComplete ? correctionResult!.data! : []}
+        enabled={draftsComplete && evidenceComplete && correctionsComplete}
+      />}
+      {stagingEnabled && incomplete.length === 0 && <section className={styles.panel} style={{marginTop:22}}>
+        <p className={styles.kicker}>08 / ACCOUNTANT – PROEFEXPORT</p>
+        <h2>Export per juridische entiteit</h2>
+        <p className={styles.hint}>Een beveiligd ZIP-proefpakket met goedgekeurde inkoopkosten, originele documenten, kostenverdelingen en uitzonderingen. Dit is nog geen volledige boekhouding of belastingexport: verkoopfacturen, betalingen en kapitaaldossiers zijn niet opgenomen.</p>
+        <form method="GET" action="/admin/workspaces/estates/expenses/accountant-export" className={styles.fields} style={{marginTop:16}}>
+          <div className={styles.twoFields}>
+            <label>Juridische entiteit
+              <select required name="entity" defaultValue="">
+                <option value="" disabled>Selecteer juridische entiteit</option>
+                {(issuerResult.data??[]).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
+              </select>
+            </label>
+            <label>Boekjaar (factuurdatum)
+              <select required name="year" defaultValue="2026">
+                {[2025,2026,2027,2028].map(year=><option key={year} value={year}>{year}</option>)}
+              </select>
+            </label>
+          </div>
+          <button className={styles.saveButton} type="submit" disabled={!correctionsComplete || !evidenceComplete || !draftsComplete}>Download gecontroleerde proefexport (ZIP)</button>
+        </form>
+      </section>}
+
       {stagingEnabled && <ExpenseEvidenceReview
         drafts={draftsComplete ? draftResult!.data!.map(d=>({
           id:d.id,supplier_invoice_number:d.supplier_invoice_number,
