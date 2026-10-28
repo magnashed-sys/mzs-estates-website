@@ -16,8 +16,15 @@ export async function GET(
  const {id}=await params;
  if(!uuid.test(id))return new NextResponse(null,{status:404});
  const {data,error}=await db.from("mzs_ops_expense_documents")
-  .select("storage_path").eq("id",id).maybeSingle();
+  .select("id,storage_path,sha256").eq("id",id).maybeSingle();
  if(error||!data)return new NextResponse(null,{status:404,headers:{"Cache-Control":"no-store"}});
+ // No verified scanner is connected yet. The latest verdict must explicitly
+ // be CLEAN and match the source SHA; absent/error/malicious = quarantine.
+ const {data:latest,error:scanError}=await db.from("mzs_ops_expense_document_scan_events")
+  .select("verdict,observed_sha256").eq("document_id",id)
+  .order("id",{ascending:false}).limit(1).maybeSingle();
+ if(scanError||!latest||latest.verdict!=="clean"||latest.observed_sha256!==data.sha256)
+  return new NextResponse(null,{status:423,headers:{"Cache-Control":"no-store"}});
  const {data:signed,error:signError}=await db.storage.from("mzs-ops-expense-evidence")
   .createSignedUrl(data.storage_path,60,{download:true});
  if(signError||!signed?.signedUrl)
