@@ -1,11 +1,12 @@
 "use client";
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 import {useActionState} from "react";
-import {decideCorrection,initialCorrectionDecision} from "./correction-decision-actions";
+import {decideCorrection} from "./correction-decision-actions";
 import styles from "./expenses.module.css";
 type Proposal={id:string;draft_id:string;reason:string};
 type Decision={correction_id:string;decision:string};
 function DecisionForm({item}:{item:Proposal}){
- const [state,action,pending]=useActionState(decideCorrection,initialCorrectionDecision);
+ const [state,action,pending]=useActionState(decideCorrection,initialFormActionState);
  return <form action={action} className={styles.fields} style={{margin:"14px 0 25px"}}>
   <input type="hidden" name="correction_id" value={item.id}/>
   <strong>Voorstel voor kostendossier {item.draft_id.slice(0,8)}</strong>
