@@ -70,6 +70,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
     Er is nog geen geverifieerde kostendrager. Je kunt alvast bedragen berekenen, maar opslaan blijft geblokkeerd totdat de juiste juridische entiteit aan het object is gekoppeld. <Link href="/admin/workspaces/estates/entities">Open de juridische objectkoppelingen</Link>.
    </p>}
   </section>
+  <p><Link href="/admin/workspaces/estates/reports">Kostenrapportage en accountants-export openen →</Link></p>
   <ExpenseCalculator
    issuers={issuers.data??[]}
    properties={properties.data??[]}
