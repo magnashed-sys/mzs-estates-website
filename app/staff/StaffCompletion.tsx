@@ -1,7 +1,8 @@
+import {initialFormActionState} from "../../lib/property-operations/form-state";
 "use client";
 import {useActionState,useState} from "react";
 import {useRouter} from "next/navigation";
-import {requestVisitCorrection,initialCorrectionState} from "./correction-actions";
+import {requestVisitCorrection} from "./correction-actions";
 import s from "./staff.module.css";
 
 type Visit={id:string;worked_on:string;actual_minutes:number;property_id:string};
@@ -10,7 +11,7 @@ type Correction={id:string;visit_id:string;proposed_minutes:number;reason:string
 type Photo={id:string;ticket_id:string};
 
 function CorrectionRequest({visit}:{visit:Visit}){
- const [state,action,pending]=useActionState(requestVisitCorrection,initialCorrectionState);
+ const [state,action,pending]=useActionState(requestVisitCorrection,initialFormActionState);
  return <form className={s.form} action={action}>
   <h2>Uren corrigeren</h2>
   <p className={s.description}>Bezoek {visit.worked_on}: origineel {visit.actual_minutes} minuten. Dit wordt niet overschreven.</p>
