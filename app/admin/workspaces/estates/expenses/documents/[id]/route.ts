@@ -3,7 +3,7 @@ import {requireEstateAdmin} from "../../../../../../../lib/security/estate-prope
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Create a one-minute, private, download-only URL. Never expose Storage paths. */
 export async function GET(
