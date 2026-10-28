@@ -1,15 +1,20 @@
 import {requirePropertyStaff} from "../../lib/security/property-staff";
 import StaffForms from "./StaffForms";
+import StaffCompletion from "./StaffCompletion";
 import s from "./staff.module.css";
 export const dynamic="force-dynamic";
 export default async function StaffPortalPage(){
  const {db,user,properties}=await requirePropertyStaff();
- const [u,v,t]=await Promise.all([
+ const [u,v,t,c,photo]=await Promise.all([
   db.from("mzs_ops_staff_unit_directory").select("id,property_id,address",{count:"exact"}).order("address").limit(500),
   db.from("mzs_ops_staff_visits").select("id,property_id,worked_on,actual_minutes,task_category,description",{count:"exact"})
    .eq("profile_id",user.id).order("worked_on",{ascending:false}).limit(100),
   db.from("mzs_ops_maintenance_tickets").select("id,property_id,priority,title,status,created_at",{count:"exact"})
-   .eq("reported_by",user.id).order("created_at",{ascending:false}).limit(100)
+   .eq("reported_by",user.id).order("created_at",{ascending:false}).limit(100),
+  db.from("mzs_ops_visit_correction_requests").select("id,visit_id,proposed_minutes,reason",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(100),
+  db.from("mzs_ops_maintenance_photos").select("id,ticket_id",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(300)
  ]);
  const staffTicketIds=(t.data??[]).map(x=>x.id);
  const eventResult=staffTicketIds.length>0 ? await db.from("mzs_ops_maintenance_events")
@@ -22,7 +27,7 @@ export default async function StaffPortalPage(){
  if(eventsComplete&&eventResult?.data)for(const e of eventResult.data){
   if(!latestStatus.has(e.ticket_id))latestStatus.set(e.ticket_id,e.action);
  }
- const complete=eventsComplete&&[u,v,t].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.count===x.data.length);
+ const complete=eventsComplete&&[u,v,t,c,photo].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.count===x.data.length);
  const name=(id:string)=>properties.find(p=>p.id===id)?.name??"Object";
  return <main className={s.main}>
   <header className={s.head}>
@@ -34,6 +39,12 @@ export default async function StaffPortalPage(){
   {!complete?<p role="alert" className={s.error}>Eén of meer registers zijn niet volledig beschikbaar. Invoer is geblokkeerd om verkeerde objecttoewijzingen te voorkomen.</p>:
    <>
     <StaffForms properties={properties} units={u.data!}/>
+    <StaffCompletion
+      visits={v.data!}
+      tickets={t.data!}
+      corrections={c.data!}
+      photos={photo.data!}
+    />
     <div className={s.history}>
      <section>
       <h2>Mijn recente werkbezoeken</h2>
