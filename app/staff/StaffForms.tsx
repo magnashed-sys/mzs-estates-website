@@ -1,12 +1,13 @@
+import {initialFormActionState} from "../../lib/property-operations/form-state";
 "use client";
 import {useActionState,useState} from "react";
-import {saveActualStaffVisit,reportMaintenanceTicket,initialStaffAction} from "./actions";
+import {saveActualStaffVisit,reportMaintenanceTicket} from "./actions";
 import s from "./staff.module.css";
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
 
 function ActualVisitForm({properties,units}:{properties:Property[];units:Unit[]}){
- const [state,action,pending]=useActionState(saveActualStaffVisit,initialStaffAction);
+ const [state,action,pending]=useActionState(saveActualStaffVisit,initialFormActionState);
  const [propertyId,setPropertyId]=useState(properties[0]?.id??"");
  const availableUnits=units.filter(u=>u.property_id===propertyId);
  return <form className={s.form} action={action}>
@@ -37,7 +38,7 @@ function ActualVisitForm({properties,units}:{properties:Property[];units:Unit[]}
  </form>;
 }
 function MaintenanceForm({properties,units}:{properties:Property[];units:Unit[]}){
- const [state,action,pending]=useActionState(reportMaintenanceTicket,initialStaffAction);
+ const [state,action,pending]=useActionState(reportMaintenanceTicket,initialFormActionState);
  const [propertyId,setPropertyId]=useState(properties[0]?.id??"");
  const availableUnits=units.filter(u=>u.property_id===propertyId);
  return <form className={s.form} action={action}>
