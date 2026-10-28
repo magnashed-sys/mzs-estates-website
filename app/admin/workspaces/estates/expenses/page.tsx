@@ -3,6 +3,7 @@ import {requireEstateAdmin} from "../../../../../lib/security/estate-properties"
 import ExpenseCalculator from "./ExpenseCalculator";
 import WeeklyCostsImport from "./WeeklyCostsImport";
 import PropertyEntityLinks from "./PropertyEntityLinks";
+import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
 import styles from "./expenses.module.css";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,16 @@ export default async function PropertyExpensesPage() {
     .order("created_at",{ascending:false}).limit(200) : null;
   const draftsComplete = !!draftResult && !draftResult.error && draftResult.count !== null &&
     draftResult.data !== null && draftResult.data.length === draftResult.count;
+  const [documentResult, reviewResult] = stagingEnabled && draftsComplete ? await Promise.all([
+    db.from("mzs_ops_expense_documents").select("id,draft_id,sha256,mime_type,file_size",{count:"exact"}).order("created_at",{ascending:false}).limit(200),
+    db.from("mzs_ops_expense_review_events").select("draft_id,sequence_no,action,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(500)
+  ]) : [null,null];
+  const evidenceComplete = !!documentResult && !!reviewResult &&
+    !documentResult.error && !reviewResult.error &&
+    documentResult.count !== null && reviewResult.count !== null &&
+    documentResult.data !== null && reviewResult.data !== null &&
+    documentResult.data.length === documentResult.count &&
+    reviewResult.data.length === reviewResult.count;
   return (
     <section className={styles.main}>
       <Link className={styles.back} href="/admin/workspaces/estates">← Terug naar Estates</Link>
@@ -51,14 +62,13 @@ export default async function PropertyExpensesPage() {
           <h1>Objectkosten &amp; inkoopfacturen</h1>
           <p>Controleer de verdeling van leverancierskosten per object en unit en bereid de administratie per juridische entiteit voor.</p>
         </div>
-        <span className={styles.previewPill}>Niet opslaan · concept</span>
+        <span className={styles.previewPill}>Staging · gecontroleerd</span>
       </div>
       <div className={styles.notice} role="status">
         <strong>Voorbeeldomgeving, uitsluitend lezen en berekenen.</strong>
-        <p>Deze pagina maakt nog geen inkoopfacturen of boekingen aan. Er is nog geen geverifieerde
+        <p>Deze pagina maakt geen uitgaande facturen of betalingen aan. Er is nog geen geverifieerde
         juridische koppeling tussen objecten en entiteiten. Een hier gekozen combinatie is daarom
-        alleen een concept. Bestanden uploaden, goedkeuren, doorfactureren en accountantsexport
-        worden pas geactiveerd nadat de database en toegangsrechten afzonderlijk zijn getest.</p>
+        alleen een concept. Kostenconcepten, originele bestanden en administratieve controles worden uitsluitend op Staging geregistreerd; doorfactureren, betalen en accountantsexport blijven uitgeschakeld.</p>
       </div>
 
       {incomplete.length > 0 ? (
@@ -84,10 +94,19 @@ export default async function PropertyExpensesPage() {
       )}
 
       <WeeklyCostsImport />
+      {stagingEnabled && <ExpenseEvidenceReview
+        drafts={draftsComplete ? draftResult!.data!.map(d=>({
+          id:d.id,supplier_invoice_number:d.supplier_invoice_number,
+          invoice_date:d.invoice_date,status:d.status
+        })) : []}
+        documents={evidenceComplete ? documentResult!.data! : []}
+        events={evidenceComplete ? reviewResult!.data! : []}
+        enabled={draftsComplete && evidenceComplete}
+      />}
       {draftsComplete ? <section className={styles.panel} style={{marginTop:22}}>
         <p className={styles.kicker}>05 / INKOOPCONCEPTEN</p>
         <h2>Vastgelegde kostenconcepten ({draftResult!.count})</h2>
-        <p className={styles.hint}>Alle bedragen hieronder zijn concepten zonder brondocument en worden niet als betaalde kosten of definitieve inkoopfacturen geteld.</p>
+        <p className={styles.hint}>Kostenconcepten zijn geen betaalde kosten; afzonderlijke brondocumenten en controlebeslissingen worden verderop getoond.</p>
         {draftResult!.data!.length===0 ? <p className={styles.hint}>Nog geen kostenconcepten vastgelegd op Staging.</p> :
           <div className={styles.tableScroll}><table>
             <thead><tr><th>Factuurreferentie</th><th>Factuurdatum</th><th>Kostensoort</th><th>Excl. btw</th><th>Btw</th><th>Totaal</th><th>Status</th></tr></thead>
