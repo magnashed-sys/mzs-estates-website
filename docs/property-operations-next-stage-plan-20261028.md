@@ -95,7 +95,7 @@ Acceptance: mixed company and private owner, 2026-2027 boundary, missing documen
 1. For each registered property, which existing legal entity is its owner, payer and manager, on which date and based on what evidence?
 2. Which original supplier invoices are available and which historical chat expenses are only informational?
 3. For Catherine, is work invoiced as an external supplier/contractor or entered by her via a staff account? Support both without assuming employment.
-4. What recharge tariff/rule and VAT treatment are confirmed per debtor/property? Preserve invoice 7113 as already issued, with no duplicate.
+4. What recharge tariff/rule and VAT treatment are confirmed per debtor/property? Treat invoice 7113 as previously prepared; confirm its actual issuance and payment status before any import, and never generate a duplicate.
 5. Do local accountants need optional country-specific labels/columns beyond the general ZIP+CSV/PDF export?
 
 Suggested immediate next branch: **protected supplier source-document storage + draft correction workflow**, without automatic approvals; accountant export contract fixtures can be built in parallel.
