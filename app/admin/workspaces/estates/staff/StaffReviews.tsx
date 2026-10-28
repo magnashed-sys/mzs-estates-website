@@ -45,6 +45,7 @@ function VisitReviewForm({visit,name,propertyName,review}:{
    <option value="not_billable">Niet doorbelasten</option>
    <option value="review_candidate">Ter beoordeling voor doorbelasting</option>
   </select></label>
+  {decision==="rejected"&&<input type="hidden" name="recharge_class" value="not_billable"/>}
   {decision==="approved"&&className==="review_candidate"&&<div className={s.two}>
    <label>Minimum minuten (expliciete afspraak)
     <input name="minimum_minutes" type="number" min={0} max={960} step={1} required placeholder="Bijvoorbeeld 60"/>
