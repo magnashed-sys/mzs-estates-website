@@ -53,7 +53,8 @@ export default async function PropertyExpenseConceptsPage(){
   enabled:process.env.MZS_OPS_AV_SCAN_ENABLED,
   processorApproved:process.env.MZS_OPS_AV_PROCESSOR_APPROVED,
   apiKey:process.env.MZS_OPS_CLOUDMERSIVE_API_KEY
- })&&Boolean(process.env.MZS_OPS_STAGING_SCANNER_SERVICE_ROLE_KEY?.length);
+ })&&Boolean(process.env.MZS_OPS_STAGING_SCANNER_SERVICE_ROLE_KEY &&
+ process.env.MZS_OPS_STAGING_SCANNER_SERVICE_ROLE_KEY.length>=40);
  const payerLinks=(links.data??[]).filter(x=>x.relationship_type==="payer");
  const formatCents=(value:number)=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(value/100);
  return <main className={styles.main}>
