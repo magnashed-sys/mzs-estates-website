@@ -1,0 +1,22 @@
+.main{max-width:1120px;margin:0 auto;padding:52px 24px 90px;color:#192b38}
+.header{margin-bottom:30px}.header h1{font-size:clamp(2rem,4vw,3.2rem);font-weight:500;letter-spacing:-.035em;margin:9px 0}
+.eyebrow{font-size:.72rem;letter-spacing:.17em;text-transform:uppercase;color:#7d8c9a}
+.lead{max-width:750px;line-height:1.7;color:#5c6670}
+.badge{display:inline-block;margin-top:16px;border:1px solid #c48b53;color:#805327;padding:7px 12px;font-size:.72rem;font-weight:700;letter-spacing:.1em}
+.panel{border:1px solid #dce2e6;background:#fff;padding:24px;margin:0 0 22px}
+.panel h2{font-size:1.23rem;font-weight:600;margin:0 0 12px}
+.panel p,.panel li{color:#4e5c66;line-height:1.65}
+.panel ul{list-style:none;padding:0;margin:12px 0 0}
+.panel li{border-top:1px solid #e5e8ec;padding:12px 0;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
+.panel li strong{color:#172c3a;font-weight:600}.panel li span{overflow-wrap:anywhere}
+.forms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+.forms form{display:grid;gap:14px;margin-top:18px}
+.forms label{display:grid;gap:6px;font-weight:600;font-size:.87rem;color:#263e4e}
+.forms input:not([type=checkbox]),.forms textarea,.forms select{width:100%;padding:11px 12px;border:1px solid #bcc9d2;border-radius:0;background:#fff;color:#162d3c;font:inherit}
+.forms textarea{min-height:92px;resize:vertical}
+.forms .check{display:flex;align-items:flex-start;gap:8px;font-size:.8rem;font-weight:400;line-height:1.5}
+.forms .check input{margin-top:4px}
+.forms button{background:#1b3345;color:white;border:0;padding:14px 18px;cursor:pointer;font:inherit}
+.forms button:disabled{opacity:.5;cursor:default}
+.error{color:#8e2d32!important;font-size:.86rem}.success{color:#19573e!important;font-size:.86rem}
+@media(max-width:760px){.main{padding:28px 16px 70px}.forms{grid-template-columns:1fr}.panel{padding:18px}}
