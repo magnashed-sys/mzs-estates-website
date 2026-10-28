@@ -24,8 +24,8 @@ test("Draft save remains an explicit, immutable, authenticated administrative ac
  assert.match(action,/confirmed_real_draft/);
  assert.match(action,/await requireEstateAdmin\(\)/);
  assert.match(action,/db\.from\("mzs_ops_expense_drafts"\)\.insert/);
- assert.match(action,/db\.from\("mzs_estate_properties"\)/);
- assert.match(action,/db\.from\("mzs_lease_issuers"\)/);
+ assert.match(action,/propertyId=requiredUuid/);
+ assert.match(action,/entityId=requiredUuid/);
  assert.match(action,/supplier_relationship_id/);
  assert.match(action,/\.reduce\(\(sum,a\)=>sum\+a\.net_cents/);
  assert.match(action,/error\?\.code==="23505"/);
