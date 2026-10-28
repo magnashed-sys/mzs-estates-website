@@ -3,7 +3,6 @@ import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 
 export type OpsActionState={status:"idle"|"success"|"error";message:string};
-export const initialOpsAction:OpsActionState={status:"idle",message:""};
 const staging="https://senonkpxdtlhyhrubicg.supabase.co";
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function amount(raw:FormDataEntryValue|null){
