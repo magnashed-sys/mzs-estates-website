@@ -1,0 +1,42 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+test("supplier document endpoint requires active Group Admin and isolated Staging, checks origin and actual PDF/JPEG/PNG signatures",()=>{
+ const route=read("app/admin/workspaces/estates/expenses/documents/route.ts");
+ assert.match(route,/export async function POST/);
+ assert.match(route,/process\.env\.VERCEL_ENV!=="preview"/);
+ assert.match(route,/await requireEstateAdmin\(\)/);
+ assert.match(route,/originIsValid\(request\)/);
+ assert.match(route,/source\.size>4194304/);
+ assert.match(route,/fileType\(bytes\)/);
+ assert.match(route,/createHash\("sha256"\)/);
+ assert.match(route,/randomUUID\(\)/);
+ assert.match(route,/upsert:false/);
+ assert.match(route,/mzs_ops_expense_documents"\)\.insert/);
+ assert.match(route,/remove\(\[path\]\)/);
+ assert.doesNotMatch(route,/service_role|SMTP|sendMail|mzs_lease_invoices/);
+});
+test("download route is no-store, private, signed for 60 seconds, with exact document ID and admin guard",()=>{
+ const route=read("app/admin/workspaces/estates/expenses/documents/[id]/route.ts");
+ assert.match(route,/export async function GET/);
+ assert.match(route,/await requireEstateAdmin\(\)/);
+ assert.match(route,/mzs_ops_expense_documents/);
+ assert.match(route,/createSignedUrl\(data\.storage_path,60,\{download:true\}\)/);
+ assert.match(route,/Cache-Control":"no-store"/);
+});
+test("financial review stays separate from email and issuing, requires actual source evidence and a controlled status transition",()=>{
+ const ui=read("app/admin/workspaces/estates/expenses/ExpenseEvidenceReview.tsx");
+ const action=read("app/admin/workspaces/estates/expenses/evidence-review-actions.ts");
+ const sql=read("supabase/migrations/20261028134000_mzs_ops_evidence_review_staging.sql");
+ assert.match(ui,/enabled&&/);
+ assert.match(ui,/originee?l|origineel/i);
+ assert.match(action,/await requireEstateAdmin\(\)/);
+ assert.match(action,/expected_state:expected/);
+ assert.match(action,/mzs_ops_expense_review_events"\)\.insert/);
+ assert.match(sql,/ops_validate_review/);
+ assert.match(sql,/Original supplier document required/);
+ assert.match(sql,/ops_evidence_upload on storage\.objects/);
+ assert.match(sql,/ops_evidence_remove_unregistered/);
+ assert.doesNotMatch(action,/SMTP|sendMail|service_role|mzs_booking_invoices/);
+});
