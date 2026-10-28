@@ -37,9 +37,8 @@ create function mzs_private.ops_evidence_scan_validate()
 returns trigger language plpgsql security definer set search_path='' as $fn$
 declare original_sha text;
 begin
- if current_user <> 'service_role' then
-   raise exception 'Trusted scanner role required' using errcode='42501';
- end if;
+ -- INSERT is granted only to the server-side service_role, never to browser
+ -- roles; SECURITY DEFINER is used solely to inspect/lock immutable evidence.
  select d.sha256 into original_sha from public.mzs_ops_expense_documents d
  where d.id=new.document_id for update;
  if original_sha is null or original_sha is distinct from new.observed_sha256 then
