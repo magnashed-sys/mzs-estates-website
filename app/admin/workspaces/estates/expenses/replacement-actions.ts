@@ -2,7 +2,7 @@
 import {revalidatePath} from "next/cache";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 export type ReplacementState={status:"idle"|"success"|"error";message:string};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /**
  * Link two existing immutable, separately approved supplier originals.
  * This NEVER issues another customer invoice or posts an amount.
