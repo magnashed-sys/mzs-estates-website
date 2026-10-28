@@ -99,8 +99,8 @@ begin
   then raise exception 'Invalid expense allocations';end if;
   for allocation in select value from jsonb_array_elements(new.allocations) loop
     if jsonb_typeof(allocation) <> 'object' or
-      jsonb_typeof(allocation->'net_cents') <> 'number' or
-      jsonb_typeof(allocation->'vat_cents') <> 'number' or
+      jsonb_typeof(allocation->'net_cents') is distinct from 'number' or
+      jsonb_typeof(allocation->'vat_cents') is distinct from 'number' or
       (allocation->>'net_cents') !~ '^[0-9]{1,12}$' or
       (allocation->>'vat_cents') !~ '^[0-9]{1,12}$'
     then raise exception 'Only explicit integer-cent allocations are allowed';end if;
