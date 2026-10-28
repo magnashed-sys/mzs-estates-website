@@ -42,6 +42,9 @@ export async function GET(request:NextRequest){
     !(entityId==="all"||entityId==="unassigned"||uuid.test(entityId)))
    return Response.json({error:"Invalid reporting period or entity"},{status:400,headers});
   const issuers=await fullRegister(()=>db.from("mzs_lease_issuers").select("id,name",{count:"exact"}).order("id"));
+  const properties=await fullRegister(()=>db.from("mzs_estate_properties")
+   .select("id,name",{count:"exact"}).order("id"));
+  const propertyById=new Map(properties.map(x=>[x.id,x.name]));
   const ids=new Set(issuers.map(x=>x.id));
   if(entityId!=="all"&&entityId!=="unassigned"&&!ids.has(entityId))
    return Response.json({error:"Unknown reporting entity"},{status:400,headers});
@@ -59,14 +62,18 @@ export async function GET(request:NextRequest){
    fullRegister(()=>db.from("mzs_ops_expense_replacements")
     .select("id,correction_id,replacement_draft_id",{count:"exact"}).order("id"))
   ]);
-  for(const d of drafts)if(!ids.has(d.legal_entity_id))
-   throw Error("Unknown legal cost entity");
+  for(const d of drafts){
+   if(!ids.has(d.legal_entity_id))throw Error("Unknown legal cost entity");
+   if(!propertyById.has(d.property_id))throw Error("Missing physical cost property");
+  }
   const result=buildOpsCostSummary({
    year,entityId,drafts:drafts as OpsDraft[],documents:documents as OpsEvidence[],
    reviews:reviews as OpsReview[],corrections:corrections as OpsCorrection[],
    decisions:decisions as OpsDecision[],replacements:replacements as OpsReplacement[]
   });
-  return Response.json(result,{headers});
+  return Response.json({...result,properties:result.properties.map(item=>({
+   ...item,propertyName:propertyById.get(item.propertyId)
+  }))},{headers});
  }catch{
   return Response.json({error:"Operating cost registers could not be fully verified. No partial totals are shown."},{status:503,headers});
  }
