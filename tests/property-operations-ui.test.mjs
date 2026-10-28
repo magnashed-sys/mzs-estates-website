@@ -67,5 +67,5 @@ test("preview cannot persist or issue invoices and stays visibly labelled as a d
  assert.match(page,/Niet opslaan/);
  assert.match(component,/nog uitgeschakeld/);
  assert.match(component,/expenseAllocationPreview\(/);
- assert.doesNotMatch(component,/\bfetch\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|server action|submit.*invoice/i);
+ assert.doesNotMatch(component,/\bfetch\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|[.]rpc\(|submit.*invoice/i);
 });
