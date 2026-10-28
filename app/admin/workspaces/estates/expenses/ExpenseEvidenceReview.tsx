@@ -1,8 +1,9 @@
 "use client";
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 
 import {useActionState,useState} from "react";
 import {useRouter} from "next/navigation";
-import {changeExpenseReview,initialReviewActionState} from "./evidence-review-actions";
+import {changeExpenseReview} from "./evidence-review-actions";
 import styles from "./expenses.module.css";
 
 type Cost={id:string;supplier_invoice_number:string;invoice_date:string;status:string};
@@ -10,7 +11,7 @@ type Evidence={id:string;draft_id:string;sha256:string;mime_type:string;file_siz
 type Event={draft_id:string;sequence_no:number;action:string;created_at:string};
 type Props={drafts:Cost[];documents:Evidence[];events:Event[];enabled:boolean};
 function DraftReviewForm({draft,state}: {draft:Cost;state:"draft"|"submitted"|"approved"|"rejected"}) {
- const [result,action,pending]=useActionState(changeExpenseReview,initialReviewActionState);
+ const [result,action,pending]=useActionState(changeExpenseReview,initialFormActionState);
  const [decision,setDecision]=useState<"submitted"|"approved"|"rejected">(
   state==="draft"?"submitted":"approved");
  const permitted=state==="draft"||state==="submitted";
