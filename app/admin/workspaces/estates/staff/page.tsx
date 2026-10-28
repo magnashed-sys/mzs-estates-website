@@ -2,6 +2,7 @@ import Link from "next/link";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import StaffScopeForm from "./StaffScopeForm";
 import StaffReviews from "./StaffReviews";
+import StaffFinalAdmin from "./StaffFinalAdmin";
 import s from "../../../../staff/staff.module.css";
 export const dynamic="force-dynamic";
 export default async function AdminStaffOperations(){
@@ -13,10 +14,21 @@ export default async function AdminStaffOperations(){
   db.from("mzs_ops_staff_visits").select("id,profile_id,property_id,worked_on,actual_minutes,task_category",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
   db.from("mzs_ops_maintenance_tickets").select("id,reported_by,property_id,title,priority,status,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
   db.from("mzs_ops_visit_reviews").select("id,visit_id,decision,recharge_class,billable_minutes",{count:"exact"}).order("reviewed_at",{ascending:false}).limit(1000),
-  db.from("mzs_ops_maintenance_events").select("id,ticket_id,sequence_no,action,note",{count:"exact"}).order("sequence_no",{ascending:false}).limit(1000)
+  db.from("mzs_ops_maintenance_events").select("id,ticket_id,sequence_no,action,note",{count:"exact"}).order("sequence_no",{ascending:false}).limit(1000),
+  db.from("mzs_ops_visit_correction_requests").select("id,visit_id,proposed_minutes,reason",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_visit_correction_decisions").select("id,correction_id,decision",{count:"exact"}).order("decided_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_maintenance_work_orders").select("id,ticket_id,quotation_reference,approved_budget_net_cents,approved_budget_vat_cents",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_maintenance_work_order_decisions").select("id,work_order_id,decision",{count:"exact"}).order("decided_at",{ascending:false}).limit(1000),
+  db.from("mzs_ops_maintenance_photos").select("id,ticket_id",{count:"exact"}).order("created_at",{ascending:false}).limit(1000),
+  db.from("mzs_lease_issuers").select("id,name",{count:"exact"}).order("name").limit(500),
+  db.from("mzs_lease_relationships").select("id,name",{count:"exact"}).order("name").limit(500),
+  db.from("mzs_ops_property_entity_links").select("id,property_id,legal_entity_id,relationship_type",{count:"exact"}).limit(1000)
  ]);
  const ok=results.every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
- const [profiles,properties,events,visits,tickets,visitReviews,maintenanceEvents]=results;
+ const [
+  profiles,properties,events,visits,tickets,visitReviews,maintenanceEvents,
+  corrections,decisions,orders,orderDecisions,photos,issuers,suppliers,payers
+ ]=results;
  const names=new Map((profiles.data??[]).map(x=>[x.id,x.full_name??"Onbekend account"]));
  const propertyName=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const latest=new Map<string,{profile_id:string;property_id:string;action:string;reason:string}>();
@@ -82,6 +94,19 @@ export default async function AdminStaffOperations(){
       events={maintenanceEvents.data!}
       members={Object.fromEntries(names)}
       properties={Object.fromEntries(propertyName)}
+    />
+    <StaffFinalAdmin
+      corrections={corrections.data!}
+      correctionDecisions={decisions.data!}
+      visits={visits.data!}
+      tickets={tickets.data!}
+      events={maintenanceEvents.data!}
+      issuers={issuers.data!}
+      suppliers={suppliers.data!}
+      links={payers.data!}
+      orders={orders.data!}
+      orderDecisions={orderDecisions.data!}
+      photos={photos.data!}
     />
    </>}
  </main>;
