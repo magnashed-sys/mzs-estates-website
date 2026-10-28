@@ -1,0 +1,41 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+test("replacement link guard is active admin Staging only and originals remain immutable",()=>{
+ const action=read("app/admin/workspaces/estates/expenses/replacement-actions.ts");
+ const sql=read("supabase/migrations/20261028163000_mzs_ops_expense_replacements_staging.sql");
+ const page=read("app/admin/workspaces/estates/expenses/page.tsx");
+ assert.match(action,/VERCEL_ENV!=="preview"/);
+ assert.match(action,/await requireEstateAdmin\(\)/);
+ assert.match(action,/mzs_ops_expense_replacements"\)\.insert/);
+ assert.doesNotMatch(action,/sendMail|SMTP|service_role|mzs_lease_invoices/);
+ assert.match(sql,/replacement_required/);
+ assert.match(sql,/new_review is distinct from 'approved'/);
+ assert.match(sql,/mzs_ops_expense_documents/);
+ assert.match(sql,/original.legal_entity_id is distinct from new_draft.legal_entity_id/);
+ assert.match(sql,/original.supplier_relationship_id is distinct from new_draft.supplier_relationship_id/);
+ assert.match(sql,/original.property_id is distinct from new_draft.property_id/);
+ assert.doesNotMatch(sql,/\bgrant\s+(update|delete)\b/i);
+ assert.match(page,/replacementsComplete/);
+});
+test("corrective originals are excluded from purchase figures, with explicit lineage file",()=>{
+ const route=read("app/admin/workspaces/estates/expenses/accountant-export/route.ts");
+ assert.match(route,/replacementByCorrection/);
+ assert.match(route,/correctionPending/);
+ assert.match(route,/correction-lineage\.csv/);
+ assert.match(route,/Source document integrity mismatch/);
+ assert.match(route,/Incomplete replacement lineage register/);
+});
+test("combined accountant rehearsal refuses one missing subsidiary and never calls external URL",()=>{
+ const bundle=read("app/admin/workspaces/estates/expenses/accountant-bundle/route.ts");
+ assert.match(bundle,/await requireEstateAdmin\(\)/);
+ assert.match(bundle,/VERCEL_ENV!=="preview"/);
+ assert.match(bundle,/purchaseRehearsal\(request\)/);
+ assert.match(bundle,/salesRehearsal\(request\)/);
+ assert.match(bundle,/purchases.status!==200\|\|sales.status!==200/);
+ assert.match(bundle,/3\*1024\*1024/);
+ assert.match(bundle,/statutory_complete:false/);
+ assert.match(bundle,/private, no-store/);
+ assert.doesNotMatch(bundle,/\bfetch\(|sendMail|service_role|process\.env\.SUPABASE_SERVICE/);
+});
