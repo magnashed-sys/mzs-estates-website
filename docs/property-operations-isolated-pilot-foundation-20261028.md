@@ -1,6 +1,6 @@
 # MZS Group — Isolated Production Pilot Foundation (separate review slice)
 
-**Status 28 October 2026:** code and review-only SQL on an independent development branch. **NOT migrated or deployed to Production.** Not activated on Staging or Production. This is a technical foundation, not a finished employee or admin UI.
+**Status 28 October 2026:** code and review-only SQL on an independent development branch. **NOT migrated or deployed to Production.** Not activated on Staging or Production. This is an implementation-ready technical foundation with initial Staff and Group Admin pages, still disabled and not authenticated-browser accepted.
 
 ## Why separate from Draft PR #143?
 
@@ -26,13 +26,20 @@ Draft PR #143 includes broad Staging-only Property Operations, supplier expenses
 - Neither flag is set or modified by this branch. No client-side environment variable grants access.
 - The database needs a separately approved activation event and an exact current grant, even if the server gate is enabled.
 
-**The gate is not yet wired to live routes** and therefore no new employee pilot UI is reachable from this work. Do not claim the pilot is activated.
+**The server gate is wired to the new Staff and Group Admin pilot routes**. It defaults OFF because the enabling flags are absent. No new pilot UI is reachable until an explicitly approved Staging/Production setup, current database run and assignment exist.
 
 ## Rollback-only real Staging schema rehearsal — 28 October 2026
 
 The exact pilot DDL plan was executed against **MZS Staging only** inside one explicit transaction with its final `COMMIT` replaced by `ROLLBACK`. PostgreSQL accepted the complete schema plan. A separate read-only post-rehearsal query confirmed **0 pilot tables and 0 pilot views**, with the existing **19 Property Operations Staging tables** preserved. Read-only Production inspection separately confirmed **0 pilot tables and 0 Property Operations tables**. This validates DDL compatibility, **not** any Production migration, account-specific user acceptance, live staff workflows or restoration of a backup.
 
 Branch-specific Vercel Preview variables have been configured with **MZS Staging's public URL and publishable key only**. No Production environment variables or secrets were changed; the pilot enable flag remains absent/OFF.
+
+## First pilot UI on the independent Draft branch (not activated)
+
+- `/pilot/staff`: mobile-friendly narrowly scoped staff portal. It checks the active existing profile and exactly one currently granted pilotrun; shows only safe property labels, synthetic visits and own maintenance reports. Both forms validate the fictitious-only confirmation and derive the run and property exclusively from the database, never browser-submitted IDs.
+- `/admin/property-operations-pilot`: active Group Administrator can prepare a default-OFF run, explicitly activate or terminally deactivate it, and grant or revoke one already-existing client/partner. Mutations are audited by append-only database triggers. The UI defaults to **stop** and **revoke** actions.
+- No general menu links or existing real financial workflows are modified. The pilot is unreachable unless an exact server-side allowlisted environment and approved SHA check succeeds, with RLS providing an independent layer.
+- **No authenticated browser acceptance or live migration has been completed.** The SQL remains a review-only plan and must be migrated on Staging after review, before these UI routes can be used.
 
 ## Automated verification included
 
@@ -55,7 +62,7 @@ These are automated code/SQL rehearsal checks, **not** signed-in mobile/browser 
 
 1. Obtain green CI on the exact new Draft PR head; peer review SQL SECURITY DEFINER scope, RLS and concurrency; verify latest Supabase security guidance.
 2. Adapt this reviewed plan into an additive Supabase CLI-generated migration **for isolated Staging only**, applying it there after owner-confirmed test accounts and in-memory DB acceptance. Never seed Production profiles or import Catherine's records.
-3. Build a small Stage-only Group Admin and staff pilot UI using the above server gates. Explicitly validate login, existing-role identity, one assigned property and separate synthetic records. Do not copy the 100+ file accountancy feature branch.
+3. Test the new narrowly scoped Staff and Group Admin pilot UI on Staging after applying a reviewed Stage-only migration. Explicitly validate login, existing-role identity, one assigned property, synthetic records and immediate revocation. Do not copy the 100+ file accountancy feature branch.
 4. Add optional visit-review/correction and maintenance lifecycle, after unit, supplier and privacy tests. Photos remain OFF until EXIF, content/malware, retention and signed download decisions.
 5. Rehearse the revised **Production-specific** migration on a restored Production-like database, verify a successful recovery and compare read-only register baselines. Production backup/PITR restoration evidence is not yet available.
 6. Only then request *separate* approval for Production schema (default OFF), separately for deploying the pilot UI (OFF) and separately for activation of one verified existing account and one property. Catherine's exact duties/property cannot be inferred from her profile alone.
