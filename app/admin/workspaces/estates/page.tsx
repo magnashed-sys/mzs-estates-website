@@ -57,6 +57,7 @@ export default async function EstatesWorkspace(){
     <p>Bereken kosten per object en unit en leg uitsluitend gecontroleerde concepten vast; geen betalingen of factuuruitgifte.</p>
     <span>Open kostenconcepten →</span>
    </Link>}
+   {entityLinksAvailable&&<Link className={styles.card} href="/admin/workspaces/estates/staff"><small>06 / DAGELIJKS BEHEER</small><strong>Medewerkers &amp; onderhoud</strong><p>Werkbezoeken, urenbeoordeling, correcties en onderhoudsplanning per object.</p><span>Open medewerkersbeheer →</span></Link>}
    {isolatedPilotAvailable&&<Link className={styles.card} href="/admin/property-operations-pilot">
     <small>04 / PROPERTY OPERATIONS · PILOT</small>
     <strong>Medewerkers &amp; onderhoud — testomgeving</strong>

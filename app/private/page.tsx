@@ -111,6 +111,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
   const [items, setItems] = useState<Opportunity[]>([]);
   const [capitalDossierCount, setCapitalDossierCount] = useState<number | null>(null);
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const [staffAccess,setStaffAccess] = useState(false);
   const [pilotAccess,setPilotAccess] = useState<PilotAccess|null>(null);
   const [active, setActive] = useState<Category>("rentals");
   const [error, setError] = useState("");
@@ -155,6 +156,12 @@ const categories: { id: Category; title: string; description?: string; shortTitl
           setViewState("pending");
           return;
         }
+
+        void fetch("/api/private/staff-access",{cache:"no-store"}).then(async response=>{
+          if(!response.ok)return;
+          const payload:unknown=await response.json();
+          if(mounted&&payload&&typeof payload==="object"&&"available" in payload&&payload.available===true)setStaffAccess(true);
+        }).catch(()=>{});
 
         // Check a private server endpoint for an exact, active pilot scope. A client
         // cannot create access by changing the dashboard; the server and RLS decide.
@@ -332,6 +339,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
               </aside>
             </section>
 
+            {staffAccess&&<section className={styles.pilotAccess} aria-labelledby="staff-access-title"><div className={styles.pilotAccessCopy}><p className={styles.pilotAccessKicker}>PROPERTY OPERATIONS</p><h2 id="staff-access-title">Mijn werkbezoeken &amp; onderhoud</h2><p>Registreer werkzaamheden en volg meldingen voor je toegewezen objecten.</p></div><Link className={styles.pilotAccessLink} href="/staff">Open werkoverzicht <span aria-hidden="true"><ArrowUpRightIcon/></span></Link></section>}
             {pilotAccess&&(
               <section className={styles.pilotAccess} aria-labelledby="pilot-access-title">
                 <div className={styles.pilotAccessCopy}>
