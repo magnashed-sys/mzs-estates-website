@@ -106,6 +106,8 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  const rights=(await query("select c.relname,c.relrowsecurity,has_table_privilege('anon',c.oid,'SELECT') as anonymous_read,has_table_privilege('authenticated',c.oid,'UPDATE') as can_update,has_table_privilege('authenticated',c.oid,'DELETE') as can_delete from pg_class c where c.relname like 'mzs_ops_pilot_%' and c.relkind='r'")).rows;
  assert.equal(rights.length,tableNames.length);
  assert.ok(rights.every(x=>x.relrowsecurity&&!x.anonymous_read&&!x.can_update&&!x.can_delete));
+ // Fixture's legacy tables deliberately grant NO authenticated read: inspect as test superuser.
+ await db.exec('reset role');
  assert.equal((await query('select count(*)::int as n from public.mzs_lease_contracts')).rows[0].n,0);
  assert.equal((await query('select count(*)::int as n from public.mzs_booking_invoices')).rows[0].n,0);
  assert.equal((await query('select count(*)::int as n from public.mzs_capital_payments')).rows[0].n,0);
