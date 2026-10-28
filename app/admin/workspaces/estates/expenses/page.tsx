@@ -3,6 +3,10 @@ import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
 import ExpenseEvidenceReview from "./ExpenseEvidenceReview";
+import ExpenseCorrections from "./ExpenseCorrections";
+import CorrectionDecisions from "./CorrectionDecisions";
+import ExpenseReplacementLinks from "./ExpenseReplacementLinks";
+import ExpenseRetentionControls from "./ExpenseRetentionControls";
 import {scannerIsExplicitlyEnabled} from "../../../../../lib/property-operations/scanner/cloudmersive-advanced";
 import styles from "./expenses.module.css";
 export const dynamic="force-dynamic";
@@ -23,7 +27,7 @@ export default async function PropertyExpenseConceptsPage(){
   db.from("mzs_lease_relationships").select("id,name,kind",{count:"exact"}).order("name").limit(300),
   db.from("mzs_ops_property_entity_links").select("property_id,legal_entity_id,relationship_type,effective_from,effective_until",{count:"exact"}).limit(300),
   db.from("mzs_ops_expense_drafts")
-   .select("id,property_id,legal_entity_id,supplier_relationship_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,source_document_status,status,created_at",{count:"exact"})
+   .select("id,property_id,legal_entity_id,supplier_relationship_id,supplier_invoice_number,invoice_date,category,description,net_cents,vat_cents,gross_cents,allocations,source_document_status,status,created_at",{count:"exact"})
    .order("created_at",{ascending:false}).limit(200)
  ]);
  const registers=[issuers,properties,units,suppliers,links,drafts];
@@ -47,6 +51,27 @@ export default async function PropertyExpenseConceptsPage(){
  ]):[null,null,null];
  const evidenceComplete=!!documents&&!!reviews&&!!scans&&
    [documents,reviews,scans].every(x=>!x.error&&x.count!==null&&x.data!==null&&x.data.length===x.count);
+ // Production never queries or exposes the following Staging-only review and
+ // retention registries. Fail closed if any paginated register is incomplete.
+ const [corrections,decisions,replacements,retentionProposals,legalHolds]=stagingEvidence?
+  await Promise.all([
+   db.from("mzs_ops_expense_correction_requests")
+    .select("id,draft_id,reason",{count:"exact"}).order("created_at",{ascending:false}).limit(200),
+   db.from("mzs_ops_expense_correction_decisions")
+    .select("correction_id,decision",{count:"exact"}).order("decided_at",{ascending:false}).limit(200),
+   db.from("mzs_ops_expense_replacements")
+    .select("id,correction_id,replacement_draft_id",{count:"exact"}).order("linked_at",{ascending:false}).limit(200),
+   db.from("mzs_ops_expense_retention_proposals")
+    .select("id,legal_entity_id,jurisdiction_code,proposed_years,legal_source_reference,status",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(200),
+   db.from("mzs_ops_expense_document_holds")
+    .select("id,document_id,hold_reason,created_at",{count:"exact"})
+    .order("created_at",{ascending:false}).limit(200)
+  ]):[null,null,null,null,null];
+ const additional=[corrections,decisions,replacements,retentionProposals,legalHolds];
+ const additionalComplete=additional.every(x=>x!==null&&!x.error&&x.count!==null&&
+  x.data!==null&&x.data.length===x.count);
+
  const scannerAvailable=stagingEvidence && scannerIsExplicitlyEnabled({
   environment:process.env.VERCEL_ENV,
   supabaseUrl:process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -106,5 +131,43 @@ export default async function PropertyExpenseConceptsPage(){
    scannerAvailable={scannerAvailable}
    enabled={evidenceComplete}
   />}
+  {stagingEvidence&&<>
+   <ExpenseCorrections
+    drafts={(drafts.data??[]).map(d=>({
+     id:d.id,supplier_invoice_number:d.supplier_invoice_number,
+     description:d.description,property_id:d.property_id,
+     net_cents:d.net_cents,vat_cents:d.vat_cents,allocations:d.allocations
+    }))}
+    events={evidenceComplete?reviews!.data??[]:[]}
+    requests={additionalComplete?corrections!.data??[]:[]}
+    enabled={evidenceComplete&&additionalComplete}
+   />
+   <CorrectionDecisions
+    proposals={additionalComplete?corrections!.data??[]:[]}
+    decisions={additionalComplete?decisions!.data??[]:[]}
+    enabled={additionalComplete}
+   />
+   <ExpenseReplacementLinks
+    corrections={additionalComplete?corrections!.data??[]:[]}
+    decisions={additionalComplete?decisions!.data??[]:[]}
+    drafts={(drafts.data??[]).map(d=>({
+     id:d.id,property_id:d.property_id,legal_entity_id:d.legal_entity_id,
+     supplier_relationship_id:d.supplier_relationship_id,
+     supplier_invoice_number:d.supplier_invoice_number
+    }))}
+    reviews={evidenceComplete?reviews!.data??[]:[]}
+    documents={evidenceComplete?documents!.data??[]:[]}
+    links={additionalComplete?replacements!.data??[]:[]}
+    enabled={evidenceComplete&&additionalComplete}
+   />
+   <ExpenseRetentionControls
+    issuers={(issuers.data??[]).map(x=>({id:x.id,name:x.name}))}
+    proposals={additionalComplete?retentionProposals!.data??[]:[]}
+    holds={additionalComplete?legalHolds!.data??[]:[]}
+    documents={evidenceComplete?documents!.data??[]:[]}
+    drafts={(drafts.data??[]).map(d=>({id:d.id,supplier_invoice_number:d.supplier_invoice_number}))}
+    enabled={evidenceComplete&&additionalComplete}
+   />
+  </>}
  </main>;
 }
