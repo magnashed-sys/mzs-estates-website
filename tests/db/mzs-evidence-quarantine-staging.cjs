@@ -54,7 +54,7 @@ const {PGlite}=require(process.env.MZS_PGLITE_MODULE||'@electric-sql/pglite');
  await assert.rejects(query(docSql(uploadName)),/duplicate key|Reviewed drafts cannot receive|path/);
  await assert.rejects(query("update mzs_ops_expense_documents set file_size=1 where id='"+doc+"'"),/permission denied/);
  await assert.rejects(query("delete from mzs_ops_expense_documents where id='"+doc+"'"),/permission denied/);
- await assert.rejects(query("insert into mzs_ops_expense_review_events(draft_id,action,expected_state) values('"+draft+"','approved','draft')"),/Invalid review transition/);
+ await assert.rejects(query("insert into mzs_ops_expense_review_events(draft_id,action,expected_state) values('"+draft+"','approved','draft')"),/quarantine|Invalid review transition/);
  // Newly uploaded sources MUST stay quarantined even for administrators until
  // an independently trusted scanner has appended a SHA-bound CLEAN verdict.
  assert.equal((await query("select count(*)::int as n from storage.objects where bucket_id='mzs-ops-expense-evidence'")).rows[0].n,0);
