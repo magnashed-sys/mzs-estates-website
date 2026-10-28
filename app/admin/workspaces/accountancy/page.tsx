@@ -6,6 +6,7 @@ export default async function Workspace(){
  await requireEstateAdmin();
  return <><section className={styles.intro}><h1 className={styles.heading}>Accountancy</h1><p className={styles.lead}>Kosten, uitgegeven facturen en financiële exports per juridische entiteit. Selecteer het register dat je wilt controleren.</p></section>
  <section className={styles.grid} aria-label="Accountancy workflows">
+   <Link className={styles.card} href="/admin/workspaces/accountancy/invoices"><strong>Historische facturen</strong><p>Doorzoek Gripp-facturen en creditnota’s per jaar, klant en oorspronkelijke betaalstand.</p><span>Open factuurarchief →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/expenses"><strong>Kostenregister</strong><p>Inkoopconcepten, leveranciers en kostenverdeling per object en unit.</p><span>Open →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/history"><strong>Historische weekopgaven</strong><p>Medewerkersopgaven met bronverwijzingen en reeds extern gefactureerde kosten.</p><span>Open →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/reports"><strong>Kostenrapportage & accountants-export</strong><p>Kosten per maand, object en categorie. Exporteer uitgegeven facturen en geregistreerde ontvangsten per entiteit.</p><span>Open →</span></Link>
