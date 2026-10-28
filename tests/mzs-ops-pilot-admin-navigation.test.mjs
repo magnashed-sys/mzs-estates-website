@@ -7,7 +7,7 @@ test("Admin cockpit pilot navigation is gated by the exact server Production rel
  assert.match(source,/resolvePilotEnvironment\(/);
  assert.match(source,/VERCEL_GIT_COMMIT_SHA:process\.env\.VERCEL_GIT_COMMIT_SHA/);
  assert.match(source,/MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA:process\.env\.MZS_OPS_PRODUCTION_PILOT_RELEASE_SHA/);
- assert.match(source,/\}===\"production\";/);
+ assert.ok(source.includes('})==="production";'));
  assert.match(source,/\{isolatedPilotAvailable&&<Link className=\{styles\.card\} href=\"\/admin\/property-operations-pilot\"/);
 });
 test("Production pilot does not become a finance or generic staff portal",()=>{
