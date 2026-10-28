@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=require('@electric-sql/pglite');
+(async()=>{const db=new PGlite();await db.exec(`
+create role anon;create role authenticated;create role service_role;create schema mzs_private;
+create function public.is_admin() returns boolean language sql stable as $$select current_setting('test.admin',true)='yes'$$;
+create function mzs_private.ops_history_immutable() returns trigger language plpgsql as $$begin raise exception 'Immutable';end$$;
+create table public.mzs_invoice_archive(id uuid primary key,issued_on date,customer_name text);
+create table public.mzs_lease_relationships(id uuid primary key,name text);
+insert into public.mzs_invoice_archive values ('11111111-1111-4111-8111-111111111111','2026-01-01','Sample Customer'),('22222222-2222-4222-8222-222222222222','2025-01-01','Sample Customer');
+insert into public.mzs_lease_relationships values ('33333333-3333-4333-8333-333333333333','Sample Customer'),('44444444-4444-4444-8444-444444444444','Different Customer');
+`);await db.exec(fs.readFileSync('supabase/migrations/20261028213328_archive_customer_links.sql','utf8'));
+const insert=(invoice='11111111-1111-4111-8111-111111111111',customer='33333333-3333-4333-8333-333333333333')=>db.query(`insert into public.mzs_invoice_archive_customers(invoice_id,relationship_id,basis,authorization_reference) values($1,$2,'unique_exact_name','Owner requested customer associations') returning *`,[invoice,customer]);
+await assert.rejects(insert('22222222-2222-4222-8222-222222222222'),/2026/);
+await assert.rejects(insert(undefined,'44444444-4444-4444-8444-444444444444'),/names do not match/);
+await db.exec("insert into public.mzs_lease_relationships values('55555555-5555-4555-8555-555555555555',' sample customer ')");await assert.rejects(insert(),/ambiguous/);await db.exec("delete from public.mzs_lease_relationships where id='55555555-5555-4555-8555-555555555555'");
+const row=(await insert()).rows[0];assert.equal(row.source_name,'Sample Customer');assert.equal(row.relationship_name,'Sample Customer');await assert.rejects(insert(),/duplicate/);
+await assert.rejects(db.exec("update public.mzs_invoice_archive_customers set relationship_name='Altered'"),/Immutable/);await assert.rejects(db.exec('delete from public.mzs_invoice_archive_customers'),/Immutable/);
+await assert.rejects(db.exec("delete from public.mzs_lease_relationships where id='33333333-3333-4333-8333-333333333333'"),/foreign key/);
+await db.exec("set role authenticated;set test.admin='yes'");assert.equal((await db.query('select * from public.mzs_invoice_archive_customers')).rows.length,1);await assert.rejects(insert(),/permission denied/);
+await db.exec("set test.admin='no'");assert.equal((await db.query('select * from public.mzs_invoice_archive_customers')).rows.length,0);
+await db.exec('reset role;set role anon');await assert.rejects(db.query('select * from public.mzs_invoice_archive_customers'),/permission denied/);
+await db.close();console.log('Customer association guards, scope, immutability, FK and role checks passed');})().catch(e=>{console.error(e);process.exit(1)});
