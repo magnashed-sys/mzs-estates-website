@@ -107,6 +107,16 @@ begin
  then raise exception 'Active Group Administrator required' using errcode='42501';end if;
  perform 1 from public.mzs_ops_pilot_runs where id=new.run_id for update;
  if not found then raise exception 'Pilot run missing';end if;
+ -- Pilot phase one allows just ONE active client/partner for each run.
+ -- Existing run row lock serializes concurrent administrator grants.
+ if new.action='grant' and exists(
+  select 1 from public.mzs_ops_pilot_access_events x
+  where x.run_id=new.run_id and x.profile_id<>new.profile_id and x.action='grant'
+   and not exists(
+    select 1 from public.mzs_ops_pilot_access_events y
+    where y.run_id=x.run_id and y.profile_id=x.profile_id and y.sequence_no>x.sequence_no
+   )
+ ) then raise exception 'Only one current pilot worker per run';end if;
  if new.action='grant' and (
   not mzs_private.ops_pilot_run_active(new.run_id)
   or not exists(select 1 from public.profiles p
