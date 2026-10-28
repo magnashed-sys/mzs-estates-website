@@ -11,7 +11,13 @@ export type Issuer = {id:string;name:string;kind?:string|null;source_company_id?
 export type LeaseInvoice = {id:string;contract_id:string;issuer_id:string|null;total:number|string;due_date:string};
 export type AttributedPayment = LeasePayment & {invoice_id:string};
 export type FinancialEntity = {id:string;name:string;kind:string;contracts:number;source:'invoice_issuer'|'unassigned'};
+export type HistoricalInvoice = {
+ id:string;issuer_id:string;number:string;issued_on:string;
+ net_cents:number|string;gross_cents:number|string;source_paid_cents:number|string;source_open_cents:number|string;
+};
+export type HistoricalMonth = {month:string;count:number;netCents:number;grossCents:number;paidCents:number;openCents:number;credits:number};
 export type FinancialPhase2 = CockpitData & {
+  historical:{enabled:boolean;rows:HistoricalMonth[];totals:Omit<HistoricalMonth,'month'>};
   entityId:string;entities:FinancialEntity[];
   report:{expectedNet:number;recordedNet:number;outstandingRent:number;overdueRent:number;
     overdueLoanReceivables:number;overdueLoanPayables:number;unassignedContracts:number;
@@ -24,7 +30,7 @@ function cents(value:number|string):number{
 export function buildFinancialPhase2(args:{
   year:number;asOf:string;entityId:string;contracts:AttributedLease[];issuers:Issuer[];
   invoices:LeaseInvoice[];rentPayments:AttributedPayment[];deals:LoanDeal[];
-  instalments:LoanInstalment[];loanPayments:LoanPayment[];bookings:Booking[];loansAvailable:boolean;
+  instalments:LoanInstalment[];loanPayments:LoanPayment[];bookings:Booking[];loansAvailable:boolean;archiveInvoices?:HistoricalInvoice[];
 }):FinancialPhase2{
  const {year,asOf,entityId,contracts,issuers,invoices,rentPayments,deals,instalments,loanPayments,bookings,loansAvailable}=args;
  const registry=new Map(issuers.map(x=>[x.id,x]));
@@ -88,8 +94,9 @@ export function buildFinancialPhase2(args:{
   const due=Math.round(remaining*100);
   if(deal.direction==='provided')dueIncome+=due;else dueCost+=due;
  }
+ const historical=buildHistoricalInvoices(year,(args.archiveInvoices??[]).filter(x=>matches(x.issuer_id)));
  const total=(key:keyof CockpitData['rows'][number])=>base.rows.reduce((s,x)=>s+Number(x[key]),0);
- return {...base,entityId,entities,report:{
+ return {...base,entityId,entities,historical,report:{
   expectedNet:Math.round((total('rentForecast')+total('interestIn')-total('interestOut'))*100)/100,
   recordedNet:Math.round((total('rentReceived')+total('interestReceived')-total('interestPaid'))*100)/100,
   outstandingRent:outstanding/100,overdueRent:overdue/100,
@@ -98,4 +105,33 @@ export function buildFinancialPhase2(args:{
   loanAttributionPending:loansAvailable?deals.filter(x=>(x.status==='active'||x.status==='agreed')&&!x.entity_id).length:0,
   bookingAttributionPending:bookings.filter(x=>x.status==='confirmed'&&!x.is_test).length
  }};
+}
+
+/** Invoice-date reporting only: source settlements have no payment dates.
+ * These amounts must never be added to forecast or cash-receipt series. */
+export function buildHistoricalInvoices(year:number,invoices:HistoricalInvoice[]):FinancialPhase2['historical']{
+ const enabled=year===2026;
+ const empty=()=>({count:0,netCents:0,grossCents:0,paidCents:0,openCents:0,credits:0});
+ const rows=Array.from({length:12},(_,i)=>({month:year+'-'+String(i+1).padStart(2,'0'),...empty()}));
+ const totals=empty(),seen=new Set<string>(),numbers=new Set<string>();
+ const exact=(value:number|string)=>{
+  if((typeof value!=='number'&&typeof value!=='string')||! /^-?\d+$/.test(String(value)))throw new Error('Invalid historical invoice amount');
+  const n=Number(value);if(!Number.isSafeInteger(n))throw new Error('Invalid historical invoice amount');return n;
+ };
+ if(enabled)for(const invoice of invoices){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(invoice.issued_on)||new Date(invoice.issued_on+'T00:00:00Z').toISOString().slice(0,10)!==invoice.issued_on)throw new Error('Invalid historical invoice date');
+  if(Number(invoice.issued_on.slice(0,4))!==year)continue;
+  const key=invoice.issuer_id+':'+invoice.number.toUpperCase();
+  if(!invoice.id||!invoice.issuer_id||!invoice.number||seen.has(invoice.id)||numbers.has(key))throw new Error('Duplicate or incomplete historical invoice');
+  seen.add(invoice.id);numbers.add(key);
+  const row=rows.find(r=>r.month===invoice.issued_on.slice(0,7));if(!row)throw new Error('Invalid historical invoice month');
+  const netCents=exact(invoice.net_cents),grossCents=exact(invoice.gross_cents),paidCents=exact(invoice.source_paid_cents),openCents=exact(invoice.source_open_cents);
+  if(grossCents!==paidCents+openCents)throw new Error('Historical invoice balance mismatch');
+  const values={count:1,netCents,grossCents,paidCents,openCents,credits:grossCents<0?1:0};
+  for(const key of Object.keys(values) as (keyof typeof values)[]){
+   row[key]+=values[key];totals[key]+=values[key];
+   if(!Number.isSafeInteger(totals[key]))throw new Error('Historical invoice total exceeds safe range');
+  }
+ }
+ return {enabled,rows,totals};
 }

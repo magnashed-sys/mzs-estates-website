@@ -119,3 +119,35 @@ test('Loan interest is attributed only to its explicit person/company issuing en
  assert.equal(group.rows.find(r=>r.month==='2026-10').interestPaid,20);
  assert.equal(group.report.loanAttributionPending,0);
 });
+
+const archiveInvoice={id:'historic-1',issuer_id:'issuer-a',number:'7000',issued_on:'2026-10-01',net_cents:10000,gross_cents:12100,source_paid_cents:2100,source_open_cents:10000};
+test('2026 invoicing includes signed credits and source balances without changing forecasts or cash',()=>{
+ const original=buildFinancialPhase2(input());
+ const d=buildFinancialPhase2({...input(),archiveInvoices:[archiveInvoice,{...archiveInvoice,id:'credit',number:'7001',net_cents:-1000,gross_cents:-1210,source_paid_cents:-1210,source_open_cents:0},{...archiveInvoice,id:'zero',number:'7002',net_cents:0,gross_cents:0,source_paid_cents:0,source_open_cents:0}]});
+ assert.equal(d.historical.totals.count,3);assert.equal(d.historical.totals.netCents,9000);assert.equal(d.historical.totals.grossCents,10890);assert.equal(d.historical.totals.paidCents,890);assert.equal(d.historical.totals.openCents,10000);assert.equal(d.historical.totals.credits,1);
+ assert.equal(d.historical.rows.find(r=>r.month==='2026-10').grossCents,10890);
+ assert.deepEqual(d.rows,original.rows);assert.deepEqual(d.report,original.report);
+});
+test('Historical invoicing follows explicit issuer, invoice year and the owner-authorized 2026 scope',()=>{
+ const invoices=[archiveInvoice,{...archiveInvoice,id:'2025',number:'old',issued_on:'2025-10-01'}];
+ assert.equal(buildFinancialPhase2({...input('issuer-a'),archiveInvoices:invoices}).historical.totals.count,1);
+ assert.equal(buildFinancialPhase2({...input('issuer-b'),archiveInvoices:invoices}).historical.totals.count,0);
+ assert.equal(buildFinancialPhase2({...input('unassigned'),archiveInvoices:invoices}).historical.totals.count,0);
+ const old=buildFinancialPhase2({...input(),year:2025,archiveInvoices:invoices});assert.equal(old.historical.enabled,false);assert.equal(old.historical.totals.count,0);
+});
+test('Historical totals fail closed for duplicates, invalid cents and contradictory balances',()=>{
+ for(const invoices of [[archiveInvoice,archiveInvoice],[{...archiveInvoice,gross_cents:NaN}],[{...archiveInvoice,net_cents:'1.5'}],[{...archiveInvoice,source_paid_cents:0}],[{...archiveInvoice,issued_on:'2026-02-30'}]]){
+  assert.throws(()=>buildFinancialPhase2({...input(),archiveInvoices:invoices}));
+ }
+});
+
+test('Archive loader rejects partial pages, count changes and errors; 2025 never queries archive',async()=>{
+ const {readFinancialArchive}=load('lib/finance/archive-register.ts');
+ const fake=(pages)=>({from(){const chain={select(){return chain},gte(){return chain},lt(){return chain},order(){return chain},range(){return Promise.resolve(pages.shift())}};return chain}});
+ assert.equal((await readFinancialArchive(fake([]),2025)).length,0);
+ assert.equal((await readFinancialArchive(fake([{data:[archiveInvoice],count:1,error:null}]),2026)).length,1);
+ await assert.rejects(readFinancialArchive(fake([{data:[archiveInvoice],count:127,error:null}]),2026),/Incomplete/);
+ await assert.rejects(readFinancialArchive(fake([{data:null,count:null,error:{message:'denied'}}]),2026),/Incomplete/);
+ await assert.rejects(readFinancialArchive(fake([{data:Array(500).fill(archiveInvoice),count:501,error:null},{data:[archiveInvoice],count:502,error:null}]),2026),/changed/);
+ const full=await readFinancialArchive(fake([{data:Array(500).fill(archiveInvoice),count:501,error:null},{data:[archiveInvoice],count:501,error:null}]),2026);assert.equal(full.length,501);
+});
