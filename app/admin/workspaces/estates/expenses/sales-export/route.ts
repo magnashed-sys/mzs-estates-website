@@ -19,7 +19,7 @@ export async function GET(request:NextRequest){
  const year=Number(rawYear);
  try{
   const {data:source,error:sourceError}=await db.rpc("mzs_ops_accountant_source",{p_entity:entity});
-  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external))throw Error("Incomplete accountant snapshot");
+  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external)||!Array.isArray(source.external_receipts))throw Error("Incomplete accountant snapshot");
   const leases=source.leases as (IssuedInvoice&{contract_id:string})[],bookings=source.bookings as (IssuedInvoice&{booking_id:string})[];
   const issuer={data:source.issuer as {id:string;name:string}};
   const issued:IssuedInvoice[]=[
@@ -38,9 +38,11 @@ export async function GET(request:NextRequest){
   const leaseMap=new Map(leases.map(x=>[x.id,x])),
    bookingMap=new Map(bookings.map(x=>[x.booking_id,x]));
   if(bookingMap.size!==bookings.length)throw Error("Ambiguous booking");
+  const externalMap=new Map((source.external as IssuedInvoice[]).map(x=>[x.id,x]));
+  const externalReceipts=source.external_receipts as (RecordedReceipt&{invoice_id:string})[];
   const rentReceipts=source.rent_receipts as (RecordedReceipt&{invoice_id:string})[],guestReceipts=source.guest_receipts as (RecordedReceipt&{booking_id:string})[];
   const receiptIds=new Set<string>();
-  for(const row of [...rentReceipts,...guestReceipts]){if(!uuid.test(row.id)||receiptIds.has(row.id))throw Error("Duplicate receipt source");receiptIds.add(row.id);}
+  for(const row of [...rentReceipts,...guestReceipts,...externalReceipts]){if(!uuid.test(row.id)||receiptIds.has(row.id))throw Error("Duplicate receipt source");receiptIds.add(row.id);}
   const events:Record<string,unknown>[]=[],exceptions:Record<string,unknown>[]=[];
   function record(row:RecordedReceipt,invoice:IssuedInvoice){
    const normalized=receiptEvents(row,invoice.id,year);
@@ -49,6 +51,7 @@ export async function GET(request:NextRequest){
   }
   for(const r of rentReceipts){const i=leaseMap.get(r.invoice_id);if(!i)throw Error("Unmatched rent receipt");record({...r,source:"lease_payment"}, {...i,source:"rental_contract"});}
   for(const r of guestReceipts){const i=bookingMap.get(r.booking_id);if(!i)throw Error("Unmatched booking receipt");record({...r,source:"booking_receipt"}, {...i,source:"holiday_booking"});}
+  for(const r of externalReceipts){const i=externalMap.get(r.invoice_id);if(!i)throw Error("Unmatched standalone receipt");record({...r,source:"external_receipt"},{...i,source:"external_cost_invoice"});}
   events.sort((a,b)=>String(a.event_date).localeCompare(String(b.event_date))||String(a.receipt_id).localeCompare(String(b.receipt_id)));
   exceptions.sort((a,b)=>String(a.receipt_id).localeCompare(String(b.receipt_id)));
   const files:ArchiveFile[]=[],manifest:{name:string;sha256:string;bytes:number}[]=[];
@@ -65,7 +68,7 @@ export async function GET(request:NextRequest){
    "Receipts with unknown dates are listed as undated exceptions in every selected year; no receipt year is inferred.",
    "Uninvoiced bookings and unattributable payments are outside this partial report.",
    "Rental invoice VAT/net components are blank and require accountant verification.",
-   "External invoice amounts/VAT are copied from the issued document; no receipt, delivery or bank event is inferred.",
+   "External invoice amounts/VAT are copied from the issued document. Explicitly recorded standalone receipts and administrative reversals are included; no delivery or bank event is inferred.",
    "No source is changed, invoiced, paid or emailed."
   ].join("\n")+"\n");
   add("manifest.json",JSON.stringify({kind:"partial-sales-receipts",entity,year,

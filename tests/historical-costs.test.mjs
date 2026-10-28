@@ -35,7 +35,7 @@ test('history export guards access, duplicate input, incomplete data and limits 
  assert.equal((await route(historyRoute,{source:fixture(),lib:{...h,historyCsv:()=> 'x'.repeat(4*1024*1024+1)}}).get('year=2026')).status,413);
  const good=await route(historyRoute,{source:fixture()}).get('year=2026');assert.equal(good.status,200);assert.equal(good.headers.get('Cache-Control'),'private, no-store');assert.equal(good.headers.get('X-Content-Type-Options'),'nosniff');
 });
-function salesSource(){return {issuer:{id:id(4),name:'Synthetic issuer'},snapshot_at:'2026-10-28',leases:[],bookings:[],rent_receipts:[],guest_receipts:[],external:[{id:id(3),batch_id:id(1),issuer_id:id(4),number:'EXT-TEST-1',issued_on:'2026-10-28',net_total:75,vat_total:15.75,total:90.75,status:'externally_issued'}]};}
+function salesSource(){return {issuer:{id:id(4),name:'Synthetic issuer'},snapshot_at:'2026-10-28',leases:[],bookings:[],rent_receipts:[],guest_receipts:[],external_receipts:[],external:[{id:id(3),batch_id:id(1),issuer_id:id(4),number:'EXT-TEST-1',issued_on:'2026-10-28',net_total:75,vat_total:15.75,total:90.75,status:'externally_issued'}]};}
 function unzip(buffer){const files={};let o=0;while(buffer.readUInt32LE(o)===0x04034b50){const compressed=buffer.readUInt32LE(o+18),nameLen=buffer.readUInt16LE(o+26),extra=buffer.readUInt16LE(o+28),name=buffer.subarray(o+30,o+30+nameLen).toString(),data=o+30+nameLen+extra;files[name]=inflateRawSync(buffer.subarray(data,data+compressed)).toString();o=data+compressed;}return files;}
 test('accountant ZIP contains external invoices exactly once with known VAT and no invented receipts',async()=>{
  const r=await route('app/admin/workspaces/estates/expenses/sales-export/route.ts',{source:salesSource()}).get('entity='+id(4)+'&year=2026');assert.equal(r.status,200);
@@ -56,3 +56,9 @@ test('historical page checks active admin before data and paginates only detail 
  if(denied){await assert.rejects(render('1'),/denied/);assert.deepEqual(calls,['environment','admin']);}else{const tree=await render('3'),json=JSON.stringify(tree);assert.equal((json.match(/SYN-/g)??[]).length,11);assert.match(json,/61\.00/);await assert.rejects(render('999'),/redirect:.*page=3/);}}
 });
 test('historical imports and external invoices enforce real PostgreSQL lifecycle, access and duplicate controls',()=>{const r=spawnSync(process.execPath,['tests/db/historical-costs.cjs'],{encoding:'utf8',timeout:120000});assert.equal(r.status,0,r.stdout+'\n'+r.stderr);});
+
+test('accountant ZIP includes explicit standalone receipt and reversal events without inventing cash',async()=>{
+ const source=salesSource();source.external_receipts=[{id:id(20),invoice_id:id(3),amount:25.01,received_on:'2026-10-28',reference:'BANK-TEST',reversed_at:'2026-10-29T12:00:00Z'}];
+ const r=await route('app/admin/workspaces/estates/expenses/sales-export/route.ts',{source}).get('entity='+id(4)+'&year=2026');assert.equal(r.status,200);const files=unzip(Buffer.from(await r.arrayBuffer()));const manifest=JSON.parse(files['manifest.json']);assert.equal(manifest.receipt_events,2);assert.match(files['registered-receipt-events.csv'],/external_receipt/);assert.match(files['registered-receipt-events.csv'],/"25.01"/);assert.match(files['registered-receipt-events.csv'],/"'-25.01"/);
+ source.external_receipts[0].invoice_id=id(99);assert.equal((await route('app/admin/workspaces/estates/expenses/sales-export/route.ts',{source}).get('entity='+id(4)+'&year=2026')).status,503);
+});
