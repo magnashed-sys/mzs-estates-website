@@ -60,7 +60,7 @@ export async function POST(request:NextRequest){
  const detected=fileType(bytes);
  if(!detected||detected.mime!=="application/pdf")return fail("Alleen fictieve PDF-testbestanden zijn toegestaan.",400);
  const admission=checkSyntheticExpensePdf(bytes);
- if(!admission.ok)return fail(admission.reason,400);
+ if("reason" in admission)return fail(admission.reason,400);
  const path=draftId.toLowerCase()+"/"+randomUUID()+"."+detected.ext;
  const sha256=createHash("sha256").update(bytes).digest("hex");
  const {error:uploadError}=await db.storage.from(bucket).upload(path,bytes,{
