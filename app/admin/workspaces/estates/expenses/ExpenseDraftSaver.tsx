@@ -1,7 +1,8 @@
 "use client";
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 
 import {useActionState} from "react";
-import {savePropertyExpenseDraft,initialExpenseDraftState} from "./expense-draft-actions";
+import {savePropertyExpenseDraft} from "./expense-draft-actions";
 import styles from "./expenses.module.css";
 
 export type PayerLink={property_id:string;legal_entity_id:string;effective_from:string;effective_until:string|null};
@@ -14,7 +15,7 @@ export type DraftSelection={
 export default function ExpenseDraftSaver({
  selection,payerLinks,available,enabled
 }:{selection:DraftSelection|null;payerLinks:PayerLink[];available:boolean;enabled:boolean}){
- const [state,action,pending]=useActionState(savePropertyExpenseDraft,initialExpenseDraftState);
+ const [state,action,pending]=useActionState(savePropertyExpenseDraft,initialFormActionState);
  const linked=selection!==null && payerLinks.some(l=>
    l.property_id===selection.propertyId&&l.legal_entity_id===selection.entityId&&
    l.effective_from<=selection.invoiceDate&&
