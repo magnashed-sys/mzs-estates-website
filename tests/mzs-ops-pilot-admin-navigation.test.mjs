@@ -12,6 +12,7 @@ test("Admin cockpit pilot navigation is gated by the exact server Production rel
 });
 test("Production pilot does not become a finance or generic staff portal",()=>{
  assert.match(source,/Geen facturen, salarissen of leveranciersopdrachten/);
- assert.doesNotMatch(source,/href=\"\/staff\"|href=\"\/admin\/workspaces\/estates\/expenses\"/);
+ assert.doesNotMatch(source,/href=\"\/staff\"/);
+ assert.match(source,/entityLinksAvailable&&<Link className=\{styles\.card\} href=\"\/admin\/workspaces\/estates\/expenses\"/);
  assert.match(source,/href=\"\/admin\/bookings\"/);
 });
