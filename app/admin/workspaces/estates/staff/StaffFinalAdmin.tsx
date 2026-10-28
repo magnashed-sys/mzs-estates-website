@@ -1,7 +1,8 @@
+import {initialFormActionState} from "../../../../../lib/property-operations/form-state";
 "use client";
 import {useActionState,useState} from "react";
 import {
- decideStaffCorrection,createInternalWorkOrder,decideInternalWorkOrder,initialOpsAction
+ decideStaffCorrection,createInternalWorkOrder,decideInternalWorkOrder
 } from "./completion-actions";
 import s from "../../../../staff/staff.module.css";
 
@@ -24,7 +25,7 @@ const money=(x:FormDataEntryValue|null)=>{
  return String(Number(euros)*100+Number(cents.padEnd(2,"0")));
 };
 function CorrectionForm({correction,visit}:{correction:Correction;visit:Visit|undefined}){
- const [state,action,busy]=useActionState(decideStaffCorrection,initialOpsAction);
+ const [state,action,busy]=useActionState(decideStaffCorrection,initialFormActionState);
  return <form className={s.form} action={action}>
   <h2>Urenvoorstel beoordelen</h2>
   <p className={s.description}>Oorspronkelijk: {visit?.actual_minutes??"—"} minuten.
@@ -42,7 +43,7 @@ function CorrectionForm({correction,visit}:{correction:Correction;visit:Visit|un
 }
 function WorkOrderForm({tickets,events,issuers,suppliers,links}:{tickets:Ticket[];events:Event[];
  issuers:Issuer[];suppliers:Supplier[];links:Link[]}){
- const [state,action,busy]=useActionState(createInternalWorkOrder,initialOpsAction);
+ const [state,action,busy]=useActionState(createInternalWorkOrder,initialFormActionState);
  const [ticketId,setTicketId]=useState("");
  const [net,setNet]=useState("");
  const [vat,setVat]=useState("");
@@ -81,7 +82,7 @@ function WorkOrderForm({tickets,events,issuers,suppliers,links}:{tickets:Ticket[
  </form>;
 }
 function OrderDecisionForm({order}:{order:WorkOrder}){
- const [state,action,busy]=useActionState(decideInternalWorkOrder,initialOpsAction);
+ const [state,action,busy]=useActionState(decideInternalWorkOrder,initialFormActionState);
  return <form className={s.form} action={action}>
   <h2>Werkopdracht intern beoordelen</h2>
   <p className={s.description}>Offerte {order.quotation_reference}. Begroting:
