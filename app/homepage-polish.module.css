@@ -1,148 +1,87 @@
-
-/* MZS GROUP — HOMEPAGE POLISH
-   Balanced vertical spacing and responsive typography.
-   Existing background, header and navigation remain unchanged.
-*/
-
+/* Homepage positioning: retain the architectural image, palette and navigation. */
 .home:global(.mzs-home) {
   min-height: 100vh;
   min-height: 100svh;
-  padding:
-    clamp(16px, 2.45svh, 30px)
-    clamp(20px, 4.5vw, 82px)
-    clamp(10px, 1.8svh, 22px);
+  padding: clamp(16px, 2.45svh, 30px) clamp(20px, 4.5vw, 82px) clamp(10px, 1.8svh, 22px);
   display: flex;
   flex-direction: column;
 }
-
-.home :global(.mzs-home-header) {
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 16px;
-  z-index: 10;
-}
-
-/* HERO — balanced top and bottom spacing */
-
+.home :global(.mzs-home-header) {flex: 0 0 auto; align-items: center; gap: 16px; z-index: 10;}
 .home:global(.mzs-home-refined) :global(.mzs-hero) {
   width: 100%;
   max-width: 1200px;
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   margin: 0 auto;
-
-  padding:
-    clamp(120px, calc(19svh - 18px), 180px)
-    0
-    clamp(34px, calc(5svh - 4px), 54px);
+  padding: clamp(64px, 11svh, 120px) 0 clamp(40px, 7svh, 72px);
 }
-
-/* HERO HEADING */
-
-.home :global(.mzs-hero h1) {
-  font-size: clamp(48px, min(7.35vw, 11svh), 112px);
-  line-height: .87;
-  letter-spacing: -.05em;
+.home:global(.mzs-home-refined) :global(.mzs-hero h1) {
+  max-width: 1050px;
+  font-size: clamp(42px, 5.5vw, 78px);
+  line-height: 1.06;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
-
-/* SEPARATOR */
-
 .home :global(.mzs-separator) {
   width: 54px;
-  max-width: 100%;
   height: 1px;
   min-height: 1px;
   background: #ad976e;
-  margin: clamp(15px, 2.4svh, 27px) 0 0;
+  margin: clamp(22px, 3svh, 32px) 0 0;
 }
-
-/* INTRODUCTION */
-
 .home :global(.mzs-intro) {
-  max-width: 625px;
-  margin: clamp(12px, 2.1svh, 24px) 0 0;
-  font-size: clamp(12px, 1vw, 14px);
-  line-height: 1.65;
-  color: #b8b1a6;
+  max-width: 640px;
+  margin: 20px 0 0;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.75;
+  color: #ded7cc;
+  text-wrap: pretty;
 }
-
-/* SELECTIVE RELATIONSHIPS */
-
-.home :global(.mzs-selective) {
-  margin-top: clamp(12px, 1.9svh, 20px);
-  font-size: 11px;
-  line-height: 1.55;
-  color: #989083;
+.brandPromise {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 20px 0 0;
+  color: #c6b28e;
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: .045em;
 }
-
-/* MOBILE */
-
+.activities {display: flex; flex-wrap: wrap; gap: 6px 30px; margin-top: 24px;}
+.activities a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 0;
+  color: #e4cfaa;
+  border-bottom: 1px solid rgba(213, 192, 154, .38);
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: color .2s, border-color .2s;
+}
+.activities a svg {flex-shrink: 0;}
+.activities a:hover {color: #fff; border-color: #e4cfaa;}
+.activities a:focus-visible {outline: 2px solid #e4cfaa; outline-offset: 6px;}
 @media (max-width: 700px) {
-  .home:global(.mzs-home) {
-    padding: 18px 20px 14px;
+  .home:global(.mzs-home) {padding: 18px 20px 14px;}
+  .home:global(.mzs-home-refined) :global(.mzs-hero) {padding: clamp(54px, 9svh, 88px) 0 38px;}
+  .home:global(.mzs-home-refined) :global(.mzs-hero h1) {
+    font-size: clamp(34px, 10.5vw, 58px);
+    line-height: 1.09;
+    letter-spacing: -.03em;
   }
-
-  .home:global(.mzs-home-refined) :global(.mzs-hero) {
-    padding:
-      clamp(92px, calc(17svh - 16px), 136px)
-      0
-      clamp(24px, calc(4svh - 4px), 36px);
-  }
-
-  .home :global(.mzs-hero h1) {
-    font-size: clamp(42px, 12.6vw, 78px);
-    line-height: .91;
-  }
-
-  .home :global(.mzs-intro) {
-    max-width: 480px;
-    font-size: 13px;
-    line-height: 1.55;
-    margin-top: 14px;
-  }
-
-  .home :global(.mzs-selective) {
-    margin-top: 13px;
-    font-size: 11px;
-  }
+  .home :global(.mzs-intro) {margin-top: 18px; font-size: 15px; line-height: 1.65;}
+  .brandPromise {margin-top: 18px;}
+  .activities {gap: 6px 22px; margin-top: 22px;}
 }
-
-/* COMPACT SCREENS */
-
-@media (max-height: 620px) {
-  .home:global(.mzs-home) {
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
-  .home:global(.mzs-home-refined) :global(.mzs-hero) {
-    padding-top: clamp(64px, calc(16svh - 16px), 108px);
-    padding-bottom: 22px;
-  }
-
-  .home :global(.mzs-hero h1) {
-    font-size: clamp(38px, min(6vw, 10svh), 70px);
-  }
-
-  .home :global(.mzs-separator) {
-    margin-top: 10px;
-  }
-
-  .home :global(.mzs-intro) {
-    margin-top: 10px;
-  }
-
-  .home :global(.mzs-selective) {
-    margin-top: 10px;
-  }
+@media (max-height: 620px) and (min-width: 701px) {
+  .home:global(.mzs-home-refined) :global(.mzs-hero) {padding-top: 40px; padding-bottom: 30px;}
+  .home:global(.mzs-home-refined) :global(.mzs-hero h1) {font-size: clamp(38px, 5vw, 62px);}
 }
-
-/* Translated words are longer; retain three unclipped lines on phones. */
-@media (max-width: 700px) {
-  :global(html:not([lang="en"])) .home :global(.mzs-hero h1) {
-    font-size: clamp(26px, 9vw, 62px);
-    line-height: 1.04;
-  }
-}
+@media (prefers-reduced-motion: reduce) {.activities a {transition: none;}}

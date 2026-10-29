@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Independent advice, real estate projects and private capital in Europe and the United Arab Emirates. International experience and local market knowledge.",
+    "mzs_group_is_an_independent_international": "Bringing together consultancy, real estate and private capital to support your ambitions.",
     "sloganPrivate": "Private.",
     "sloganIndependent": "Independent.",
-    "sloganInternational": "International."
+    "sloganInternational": "International.",
+    "headline": "Tailor-made solutions for entrepreneurs and investors."
   },
   "Estates": {
     "ownership_management": "Ownership & Management",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / REAL ESTATE",
     "private_real_estate": "Private real estate.",
     "international_perspective": "International perspective.",
-    "an_independent_approach_to_selected_property": "An independent approach to selected property ownership, management, private rentals, sales and real estate development.",
+    "an_independent_approach_to_selected_property": "A personal approach to property ownership, rentals, acquisitions and development, shaped around the goals of entrepreneurs and investors.",
     "explore_real_estate": "Explore Real Estate",
     "our_perspective": "Our Perspective",
     "our_activities": "Our Activities",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / PRIVATE CAPITAL",
     "independent_capital": "Independent capital.",
     "private_opportunities": "Private opportunities.",
-    "a_discreet_and_relationshipdriven_perspective_on": "A discreet and relationship-driven perspective on private financing, investment opportunities and strategic partnerships.",
+    "a_discreet_and_relationshipdriven_perspective_on": "A personal, discreet approach to private financing, investment opportunities and strategic partnerships for entrepreneurs and investors.",
     "explore_private_capital": "Explore Private Capital",
     "our_perspective": "Our Perspective",
     "our_focus": "Our Focus",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Consultancy, real estate & private capital | MZS Group",
-    "homeDescription": "Independent advice, real estate projects and private capital in Europe and the United Arab Emirates. International experience and local market knowledge.",
+    "homeDescription": "MZS Group provides tailor-made solutions for entrepreneurs and investors through consultancy, real estate and private capital.",
     "estatesTitle": "Real estate ownership, rentals & development | MZS Estates",
     "estatesDescription": "Discover the independent international real estate activities of MZS Estates: property ownership, private rentals, sales and development.",
     "capitalTitle": "Private Capital | MZS Capital",
     "capitalDescription": "MZS Capital explores select private financing, investment and strategic partnership opportunities across real estate and businesses.",
     "aboutTitle": "About MZS | MZS Group",
-    "aboutDescription": "Our services focus on advisory, real estate projects and private capital. International connections. Local market knowledge.",
+    "aboutDescription": "MZS Group provides tailor-made solutions for entrepreneurs and investors through consultancy, real estate and private capital.",
     "consultancyTitle": "Real estate & financing consultancy | MZS Group",
     "consultancyDescription": "Advice on legal and tax structures, real estate projects and financing. MZS Group combines international experience with local market knowledge."
   },
@@ -1185,11 +1186,12 @@
     "caption": "An artistic impression of our journey: Amsterdam, Spain and Dubai.",
     "consultancy_intro": "Advice on legal and tax structures, real estate projects and financing needs.",
     "real_estate_intro": "Real estate projects and opportunities, combining international experience with local market knowledge.",
-    "private_capital_intro": "Capital solutions and investment opportunities for real estate and businesses."
+    "private_capital_intro": "Capital solutions and investment opportunities for real estate and businesses.",
+    "positioning": "MZS Group provides tailor-made solutions for entrepreneurs and investors. We bring together consultancy, real estate and private capital, combining international experience with local market knowledge."
   },
   "Consultancy": {
     "headline": "The next step, together.",
-    "lead": "A clear plan starts with the right questions. MZS Group combines international experience with local market knowledge to guide you through legal and tax structures, real estate projects and financing matters.",
+    "lead": "Tailor-made advice for entrepreneurs and investors on legal and tax structures, real estate projects and financing needs, in coordination with the specialists involved.",
     "legalTitle": "Legal & tax structures",
     "legalBody": "We help shape the legal and tax structure of your activities, participations and investments. From ownership arrangements to international considerations, we clarify your objectives and help coordinate decisions with the specialists involved.",
     "estateTitle": "Real estate projects",

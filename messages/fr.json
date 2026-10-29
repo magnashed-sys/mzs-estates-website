@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Conseil indépendant, projets immobiliers et capital privé en Europe et aux Émirats arabes unis. Expérience internationale et connaissance locale.",
+    "mzs_group_is_an_independent_international": "Nous réunissons conseil, immobilier et capitaux privés pour accompagner vos ambitions.",
     "sloganPrivate": "Privé.",
     "sloganIndependent": "Indépendant.",
-    "sloganInternational": "International."
+    "sloganInternational": "International.",
+    "headline": "Des solutions sur mesure pour les entrepreneurs et les investisseurs."
   },
   "Header": {
     "real_estate": "Immobilier",
@@ -48,13 +49,13 @@
   },
   "Metadata": {
     "homeTitle": "Conseil, immobilier et capital privé | MZS Group",
-    "homeDescription": "Conseil indépendant, projets immobiliers et capital privé en Europe et aux Émirats arabes unis. Expérience internationale et connaissance locale.",
+    "homeDescription": "MZS Group propose des solutions sur mesure aux entrepreneurs et investisseurs : conseil, immobilier et capitaux privés.",
     "estatesTitle": "Patrimoine, location et développement immobilier | MZS Estates",
     "estatesDescription": "Découvrez les activités immobilières internationales indépendantes de MZS Estates : propriété, locations privées, ventes et développement.",
     "capitalTitle": "Capital privé | MZS Capital",
     "capitalDescription": "MZS Capital explore des opportunités sélectionnées de financement privé, d’investissement et de partenariats stratégiques dans l’immobilier et les entreprises.",
     "aboutTitle": "À propos de MZS | MZS Group",
-    "aboutDescription": "Nos services portent sur le conseil, les projets immobiliers et le capital privé. Des contacts internationaux. Une connaissance locale.",
+    "aboutDescription": "MZS Group propose des solutions sur mesure aux entrepreneurs et investisseurs : conseil, immobilier et capitaux privés.",
     "consultancyTitle": "Conseil immobilier et financement | MZS Group",
     "consultancyDescription": "Conseil en structures juridiques et fiscales, projets immobiliers et financement. Expérience internationale et connaissance des marchés locaux."
   },
@@ -71,7 +72,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / IMMOBILIER",
     "private_real_estate": "Immobilier privé.",
     "international_perspective": "Perspective internationale.",
-    "an_independent_approach_to_selected_property": "Une approche indépendante de la propriété, de la gestion, de la location privée, de la vente et du développement de biens sélectionnés.",
+    "an_independent_approach_to_selected_property": "Une approche personnelle de la détention, de la location, de l’acquisition et du développement immobilier, adaptée aux objectifs des entrepreneurs et des investisseurs.",
     "explore_real_estate": "Découvrir l’immobilier",
     "our_perspective": "Notre perspective",
     "our_activities": "Nos activités",
@@ -108,7 +109,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / CAPITAL PRIVÉ",
     "independent_capital": "Capital indépendant.",
     "private_opportunities": "Opportunités privées.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Une vision discrète, centrée sur les relations, du financement privé, des opportunités d’investissement et des partenariats stratégiques.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Une approche personnelle et discrète du financement privé, des opportunités d’investissement et des partenariats stratégiques pour les entrepreneurs et les investisseurs.",
     "explore_private_capital": "Découvrir le capital privé",
     "our_perspective": "Notre perspective",
     "our_focus": "Nos priorités",
@@ -1185,11 +1186,12 @@
     "caption": "Une évocation artistique de notre parcours : Amsterdam, l’Espagne et Dubaï.",
     "consultancy_intro": "Conseil en structuration juridique et fiscale, projets immobiliers et besoins de financement.",
     "real_estate_intro": "Des projets et opportunités immobilières alliant expérience internationale et connaissance des marchés locaux.",
-    "private_capital_intro": "Des solutions de financement et des opportunités d’investissement pour l’immobilier et les entreprises."
+    "private_capital_intro": "Des solutions de financement et des opportunités d’investissement pour l’immobilier et les entreprises.",
+    "positioning": "MZS Group propose des solutions sur mesure aux entrepreneurs et aux investisseurs. Nous réunissons conseil, immobilier et capitaux privés, en associant expérience internationale et connaissance des marchés locaux."
   },
   "Consultancy": {
     "headline": "Avançons ensemble.",
-    "lead": "Un projet clair commence par les bonnes questions. MZS Group associe expérience internationale et connaissance locale pour vous accompagner dans les structures juridiques et fiscales, les projets immobiliers et le financement.",
+    "lead": "Des conseils sur mesure pour les entrepreneurs et les investisseurs en matière de structures juridiques et fiscales, de projets immobiliers et de financement, en lien avec les spécialistes concernés.",
     "legalTitle": "Structures juridiques & fiscales",
     "legalBody": "Nous vous accompagnons dans la structuration juridique et fiscale de vos activités, participations et investissements. Des modalités de détention aux enjeux internationaux, nous clarifions vos objectifs et facilitons la coordination avec les spécialistes concernés.",
     "estateTitle": "Projets immobiliers",

@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "feature/mzs-brand-positioning-preparation-20261029": false
+    }
+  },
   "crons": [
     {
       "path": "/api/account/notifications/dispatch",

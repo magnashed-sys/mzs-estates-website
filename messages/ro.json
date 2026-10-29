@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Consultanță independentă, proiecte imobiliare și capital privat în Europa și Emiratele Arabe Unite. Experiență internațională și cunoaștere locală.",
+    "mzs_group_is_an_independent_international": "Reunim consultanța, imobiliarele și capitalul privat pentru a vă susține ambițiile.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Independent.",
-    "sloganInternational": "Internațional."
+    "sloganInternational": "Internațional.",
+    "headline": "Soluții personalizate pentru antreprenori și investitori."
   },
   "Estates": {
     "ownership_management": "Proprietate și administrare",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / IMOBILIARE",
     "private_real_estate": "Proprietăți private.",
     "international_perspective": "Perspectivă internațională.",
-    "an_independent_approach_to_selected_property": "O abordare independenta a proprietatii selectate, management, inchirieri private, vanzari si dezvoltari imobiliare.",
+    "an_independent_approach_to_selected_property": "O abordare personală a deținerii, închirierii, achiziției și dezvoltării imobiliare, adaptată obiectivelor antreprenorilor și investitorilor.",
     "explore_real_estate": "Descoperiți proprietățile",
     "our_perspective": "Perspectiva noastră",
     "our_activities": "Activitățile noastre",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / CAPITAL PRIVAT",
     "independent_capital": "Capital independent.",
     "private_opportunities": "Oportunități private.",
-    "a_discreet_and_relationshipdriven_perspective_on": "O perspectivă discretă și bazată pe relații privind finanțarea privată, oportunitățile de investiții și parteneriatele strategice.",
+    "a_discreet_and_relationshipdriven_perspective_on": "O abordare personală și discretă a finanțării private, oportunităților de investiții și parteneriatelor strategice pentru antreprenori și investitori.",
     "explore_private_capital": "Descoperiți capitalul privat",
     "our_perspective": "Perspectiva noastră",
     "our_focus": "Domeniile noastre de interes",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Consultanță, imobiliare și capital privat | MZS Group",
-    "homeDescription": "Consultanță independentă, proiecte imobiliare și capital privat în Europa și Emiratele Arabe Unite. Experiență internațională și cunoaștere locală.",
+    "homeDescription": "MZS Group oferă soluții personalizate pentru antreprenori și investitori prin consultanță, imobiliare și capital privat.",
     "estatesTitle": "Proprietăți, închirieri și dezvoltare | MZS Estates",
     "estatesDescription": "Descoperiţi activităţile imobiliare internaţionale independente ale MZS Estates: proprietate proprietati, inchirieri private, vanzari si dezvoltare.",
     "capitalTitle": "Capital privat | MZS Capital",
     "capitalDescription": "MZS Capital explorează posibilităţile de finanţare privată, de investiţii şi de parteneriat strategic între imobiliare şi întreprinderi.",
     "aboutTitle": "Despre MZS | MZS Group",
-    "aboutDescription": "Serviciile noastre se concentrează pe consultanță, proiecte imobiliare și capital privat. Contacte internaționale. Cunoașterea piețelor locale.",
+    "aboutDescription": "MZS Group oferă soluții personalizate pentru antreprenori și investitori prin consultanță, imobiliare și capital privat.",
     "consultancyTitle": "Consultanță imobiliară și finanțare | MZS Group",
     "consultancyDescription": "Consultanță privind structuri juridice și fiscale, proiecte imobiliare și finanțare. Experiență internațională și cunoașterea piețelor locale."
   },
@@ -1185,11 +1186,12 @@
     "caption": "O interpretare artistică a parcursului nostru: Amsterdam, Spania și Dubai.",
     "consultancy_intro": "Consultanță privind structurile juridice și fiscale, proiectele imobiliare și nevoile de finanțare.",
     "real_estate_intro": "Proiecte și oportunități imobiliare care îmbină experiența internațională cu cunoașterea pieței locale.",
-    "private_capital_intro": "Soluții de capital și oportunități de investiții pentru imobiliare și afaceri."
+    "private_capital_intro": "Soluții de capital și oportunități de investiții pentru imobiliare și afaceri.",
+    "positioning": "MZS Group oferă soluții personalizate pentru antreprenori și investitori. Reunim consultanța, imobiliarele și capitalul privat, îmbinând experiența internațională cu cunoașterea piețelor locale."
   },
   "Consultancy": {
     "headline": "Următorul pas, împreună.",
-    "lead": "Un plan clar începe cu întrebările potrivite. MZS Group combină experiența internațională cu cunoașterea piețelor locale și vă îndrumă în structuri juridice și fiscale, proiecte imobiliare și finanțare.",
+    "lead": "Consultanță personalizată pentru antreprenori și investitori privind structurile juridice și fiscale, proiectele imobiliare și nevoile de finanțare, în colaborare cu specialiștii implicați.",
     "legalTitle": "Structuri juridice și fiscale",
     "legalBody": "Vă sprijinim în structurarea juridică și fiscală a activităților, participațiilor și investițiilor. De la proprietate la aspecte internaționale, clarificăm obiectivele și ajutăm la coordonarea deciziilor cu specialiștii implicați.",
     "estateTitle": "Proiecte imobiliare",

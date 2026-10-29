@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "在欧洲和阿拉伯联合酋长国提供独立咨询、房地产项目及私人资本服务，结合国际经验与本地市场知识。",
+    "mzs_group_is_an_independent_international": "我们汇聚咨询、房地产与私人资本服务，助力您的发展愿景。",
     "sloganPrivate": "私享。",
     "sloganIndependent": "独立。",
-    "sloganInternational": "国际。"
+    "sloganInternational": "国际。",
+    "headline": "为企业家和投资者量身定制解决方案。"
   },
   "Estates": {
     "ownership_management": "持有与管理",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / 房地产",
     "private_real_estate": "专属地产。",
     "international_perspective": "国际视野。",
-    "an_independent_approach_to_selected_property": "对选定的财产所有权、管理、私人租赁、销售和房地产开发采取独立办法。",
+    "an_independent_approach_to_selected_property": "围绕企业家和投资者的目标，以个性化方式开展房地产持有、租赁、收购与开发。",
     "explore_real_estate": "了解房地产",
     "our_perspective": "我们的视野",
     "our_activities": "我们的业务",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / 私人资本",
     "independent_capital": "独立资本。",
     "private_opportunities": "专属机遇。",
-    "a_discreet_and_relationshipdriven_perspective_on": "对私人融资、投资机会和战略伙伴关系采取谨慎和以关系为驱动的观点。",
+    "a_discreet_and_relationshipdriven_perspective_on": "面向企业家和投资者，以注重隐私的个性化方式探索私人融资、投资机会与战略合作。",
     "explore_private_capital": "了解私人资本",
     "our_perspective": "我们的视野",
     "our_focus": "我们的重点领域",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "咨询、房地产与私人资本 | MZS Group",
-    "homeDescription": "在欧洲和阿拉伯联合酋长国提供独立咨询、房地产项目及私人资本服务，结合国际经验与本地市场知识。",
+    "homeDescription": "MZS Group 通过咨询、房地产与私人资本服务，为企业家和投资者提供量身定制的解决方案。",
     "estatesTitle": "房地产持有、租赁与开发 | MZS Estates",
     "estatesDescription": "发现独立的国际房地产活动 MZS Estates:财产所有权、私人租赁、销售和发展。",
     "capitalTitle": "私人资本 | MZS Capital",
     "capitalDescription": "MZS Capital 在房地产和企业中探索选定的私人融资、投资和战略伙伴关系机会。",
     "aboutTitle": "关于 MZS | MZS Group",
-    "aboutDescription": "我们的服务涵盖咨询、房地产项目及私人资本。 国际人脉，本地市场洞察。",
+    "aboutDescription": "MZS Group 通过咨询、房地产与私人资本服务，为企业家和投资者提供量身定制的解决方案。",
     "consultancyTitle": "房地产与融资咨询 | MZS Group",
     "consultancyDescription": "提供法律与税务架构、房地产项目及融资方面的咨询，结合国际经验与本地市场知识。"
   },
@@ -1185,11 +1186,12 @@
     "caption": "我们的发展历程艺术示意图：阿姆斯特丹、西班牙和迪拜。",
     "consultancy_intro": "提供法律与税务架构、房地产项目及融资需求方面的咨询服务。",
     "real_estate_intro": "结合国际经验与本地市场知识，发掘房地产项目与机遇。",
-    "private_capital_intro": "为房地产及企业提供资本解决方案与投资机会。"
+    "private_capital_intro": "为房地产及企业提供资本解决方案与投资机会。",
+    "positioning": "MZS Group 为企业家和投资者提供量身定制的解决方案。我们汇聚咨询、房地产与私人资本服务，将国际经验与本地市场洞察相结合。"
   },
   "Consultancy": {
     "headline": "携手迈出下一步。",
-    "lead": "清晰的计划始于恰当的问题。MZS Group 将国际经验与本地市场知识相结合，为法律与税务架构、房地产项目及融资事宜提供咨询与支持。",
+    "lead": "面向企业家和投资者，提供法律与税务架构、房地产项目及融资需求方面的定制咨询，并与相关专业人士协调合作。",
     "legalTitle": "法律与税务架构",
     "legalBody": "我们协助梳理业务、股权参与及投资的法律与税务架构。从所有权安排到跨境因素，我们帮助明确目标，并与相关专业人士协调决策。",
     "estateTitle": "房地产项目",

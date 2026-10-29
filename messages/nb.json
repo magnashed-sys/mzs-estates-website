@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Uavhengig rådgivning, eiendomsprosjekter og privat kapital i Europa og De forente arabiske emirater. Internasjonal erfaring og lokal markedskunnskap.",
+    "mzs_group_is_an_independent_international": "Vi forener rådgivning, eiendom og privat kapital for å støtte dine ambisjoner.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Uavhengig.",
-    "sloganInternational": "Internasjonal."
+    "sloganInternational": "Internasjonal.",
+    "headline": "Skreddersydde løsninger for gründere og investorer."
   },
   "Estates": {
     "ownership_management": "Eierskap og forvaltning",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / EIENDOM",
     "private_real_estate": "Privat eiendom.",
     "international_perspective": "Internasjonalt perspektiv.",
-    "an_independent_approach_to_selected_property": "En uavhengig tilnærming til eierskap, forvaltning, privat utleie, salg og utvikling av utvalgte eiendommer.",
+    "an_independent_approach_to_selected_property": "En personlig tilnærming til eierskap, utleie, kjøp og utvikling av eiendom, tilpasset målene til gründere og investorer.",
     "explore_real_estate": "Utforsk eiendom",
     "our_perspective": "Vårt perspektiv",
     "our_activities": "Våre aktiviteter",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / PRIVAT KAPITAL",
     "independent_capital": "Uavhengig kapital.",
     "private_opportunities": "Private muligheter.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Et diskret og relasjonsbasert perspektiv på privat finansiering, investeringsmuligheter og strategiske partnerskap.",
+    "a_discreet_and_relationshipdriven_perspective_on": "En personlig og diskret tilnærming til privat finansiering, investeringsmuligheter og strategiske partnerskap for gründere og investorer.",
     "explore_private_capital": "Utforsk privat kapital",
     "our_perspective": "Vårt perspektiv",
     "our_focus": "Vårt fokus",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Rådgivning, eiendom og privat kapital | MZS Group",
-    "homeDescription": "Uavhengig rådgivning, eiendomsprosjekter og privat kapital i Europa og De forente arabiske emirater. Internasjonal erfaring og lokal markedskunnskap.",
+    "homeDescription": "MZS Group tilbyr skreddersydde løsninger for gründere og investorer gjennom rådgivning, eiendom og privat kapital.",
     "estatesTitle": "Eiendomsbesittelse, utleie og utvikling | MZS Estates",
     "estatesDescription": "Utforsk MZS Estates: uavhengig internasjonal virksomhet innen eierskap, forvaltning, privat utleie, salg og eiendomsutvikling.",
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforsker muligheter for privat finansiering, investering og strategisk partnerskap på tvers av fast eiendom og næringsliv.",
     "aboutTitle": "Om MZS | MZS Group",
-    "aboutDescription": "Tjenestene våre omfatter rådgivning, eiendomsprosjekter og privat kapital. Internasjonale kontakter. Lokal markedskunnskap.",
+    "aboutDescription": "MZS Group tilbyr skreddersydde løsninger for gründere og investorer gjennom rådgivning, eiendom og privat kapital.",
     "consultancyTitle": "Eiendoms- og finansieringsrådgivning | MZS Group",
     "consultancyDescription": "Rådgivning om juridiske og skattemessige strukturer, eiendomsprosjekter og finansiering. Internasjonal erfaring og lokal markedskunnskap."
   },
@@ -1185,11 +1186,12 @@
     "caption": "En kunstnerisk tolkning av reisen vår: Amsterdam, Spania og Dubai.",
     "consultancy_intro": "Rådgivning om juridiske og skattemessige strukturer, eiendomsprosjekter og finansieringsbehov.",
     "real_estate_intro": "Eiendomsprosjekter og muligheter med internasjonal erfaring og lokal markedskunnskap.",
-    "private_capital_intro": "Kapitalløsninger og investeringsmuligheter for eiendom og bedrifter."
+    "private_capital_intro": "Kapitalløsninger og investeringsmuligheter for eiendom og bedrifter.",
+    "positioning": "MZS Group tilbyr skreddersydde løsninger for gründere og investorer. Vi forener rådgivning, eiendom og privat kapital med internasjonal erfaring og lokal markedskunnskap."
   },
   "Consultancy": {
     "headline": "Det neste steget, sammen.",
-    "lead": "En tydelig plan begynner med de riktige spørsmålene. MZS Group kombinerer internasjonal erfaring med lokal markedskunnskap og veileder deg om juridiske og skattemessige strukturer, eiendomsprosjekter og finansiering.",
+    "lead": "Skreddersydd rådgivning for gründere og investorer om juridiske og skattemessige strukturer, eiendomsprosjekter og finansieringsbehov, i samarbeid med de involverte spesialistene.",
     "legalTitle": "Juridiske og skattemessige strukturer",
     "legalBody": "Vi bistår med struktureringen av virksomhet, eierandeler og investeringer. Fra eierskap til internasjonale forhold tydeliggjør vi målene dine og hjelper med å samordne beslutninger med de involverte spesialistene.",
     "estateTitle": "Eiendomsprosjekter",

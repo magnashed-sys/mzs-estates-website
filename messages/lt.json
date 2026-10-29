@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Nepriklausomos konsultacijos, NT projektai ir privatus kapitalas Europoje bei Jungtiniuose Arabų Emyratuose. Tarptautinė patirtis ir vietos rinkų išmanymas.",
+    "mzs_group_is_an_independent_international": "Sujungiame konsultacijas, nekilnojamąjį turtą ir privatų kapitalą, kad padėtume siekti jūsų tikslų.",
     "sloganPrivate": "Privatumas.",
     "sloganIndependent": "Nepriklausomybė.",
-    "sloganInternational": "Tarptautiškumas."
+    "sloganInternational": "Tarptautiškumas.",
+    "headline": "Individualūs sprendimai verslininkams ir investuotojams."
   },
   "Estates": {
     "ownership_management": "Nuosavybė ir valdymas",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / NEKILNOJAMASIS TURTAS",
     "private_real_estate": "Privatus nekilnojamasis turtas.",
     "international_perspective": "Tarptautinė perspektyva.",
-    "an_independent_approach_to_selected_property": "Nepriklausomas požiūris į atrinkto nekilnojamojo turto nuosavybę, valdymą, privačią nuomą, pardavimą ir plėtrą.",
+    "an_independent_approach_to_selected_property": "Individualus požiūris į nekilnojamojo turto valdymą, nuomą, įsigijimą ir plėtrą, atsižvelgiant į verslininkų ir investuotojų tikslus.",
     "explore_real_estate": "Susipažinkite su nekilnojamuoju turtu",
     "our_perspective": "Mūsų požiūris",
     "our_activities": "Mūsų veikla",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / PRIVATUS KAPITALAS",
     "independent_capital": "Nepriklausomas kapitalas.",
     "private_opportunities": "Privačios galimybės.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Diskretiškas, santykiais grindžiamas požiūris į privatų finansavimą, investavimo galimybes ir strategines partnerystes.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Individualus ir konfidencialus požiūris į privatų finansavimą, investavimo galimybes ir strategines partnerystes verslininkams bei investuotojams.",
     "explore_private_capital": "Susipažinkite su privačiu kapitalu",
     "our_perspective": "Mūsų požiūris",
     "our_focus": "Mūsų veiklos kryptys",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Konsultacijos, NT ir privatus kapitalas | MZS Group",
-    "homeDescription": "Nepriklausomos konsultacijos, NT projektai ir privatus kapitalas Europoje bei Jungtiniuose Arabų Emyratuose. Tarptautinė patirtis ir vietos rinkų išmanymas.",
+    "homeDescription": "MZS Group siūlo individualius konsultacijų, nekilnojamojo turto ir privataus kapitalo sprendimus verslininkams ir investuotojams.",
     "estatesTitle": "NT nuosavybė, nuoma ir plėtra | MZS Estates",
     "estatesDescription": "Susipažinkite su nepriklausoma tarptautine MZS Estates nekilnojamojo turto veikla: nuosavybe, privačia nuoma, pardavimu ir plėtra.",
     "capitalTitle": "Privatus kapitalas | MZS Capital",
     "capitalDescription": "MZS Capital nagrinėja atrinktas privataus finansavimo, investavimo ir strateginės partnerystės galimybes nekilnojamojo turto ir verslo srityse.",
     "aboutTitle": "Apie MZS | MZS Group",
-    "aboutDescription": "Mūsų paslaugos apima konsultavimą, nekilnojamojo turto projektus ir privatų kapitalą. Tarptautiniai ryšiai. Vietos rinkų išmanymas.",
+    "aboutDescription": "MZS Group siūlo individualius konsultacijų, nekilnojamojo turto ir privataus kapitalo sprendimus verslininkams ir investuotojams.",
     "consultancyTitle": "NT ir finansavimo konsultacijos | MZS Group",
     "consultancyDescription": "Konsultacijos teisinių ir mokestinių struktūrų, NT projektų bei finansavimo klausimais. Tarptautinė patirtis ir vietos rinkų išmanymas."
   },
@@ -1185,11 +1186,12 @@
     "caption": "Meninė mūsų kelio interpretacija: Amsterdamas, Ispanija ir Dubajus.",
     "consultancy_intro": "Konsultacijos teisinės ir mokestinės struktūros, nekilnojamojo turto projektų bei finansavimo klausimais.",
     "real_estate_intro": "Nekilnojamojo turto projektai ir galimybės, derinant tarptautinę patirtį su vietos rinkos išmanymu.",
-    "private_capital_intro": "Kapitalo sprendimai ir investavimo galimybės nekilnojamajam turtui bei verslui."
+    "private_capital_intro": "Kapitalo sprendimai ir investavimo galimybės nekilnojamajam turtui bei verslui.",
+    "positioning": "MZS Group siūlo individualius sprendimus verslininkams ir investuotojams. Sujungiame konsultacijas, nekilnojamąjį turtą ir privatų kapitalą, derindami tarptautinę patirtį su vietos rinkų išmanymu."
   },
   "Consultancy": {
     "headline": "Kitas žingsnis – kartu.",
-    "lead": "Aiškus planas prasideda nuo tinkamų klausimų. MZS Group derina tarptautinę patirtį su vietos rinkų išmanymu ir konsultuoja teisinių bei mokestinių struktūrų, nekilnojamojo turto projektų ir finansavimo klausimais.",
+    "lead": "Individualios konsultacijos verslininkams ir investuotojams dėl teisinių ir mokestinių struktūrų, nekilnojamojo turto projektų bei finansavimo poreikių, bendradarbiaujant su atitinkamais specialistais.",
     "legalTitle": "Teisinės ir mokestinės struktūros",
     "legalBody": "Padedame formuoti veiklos, akcijų paketų ir investicijų teisinę bei mokestinę struktūrą. Nuo nuosavybės iki tarptautinių aspektų – išgryniname tikslus ir padedame derinti sprendimus su dalyvaujančiais specialistais.",
     "estateTitle": "Nekilnojamojo turto projektai",
