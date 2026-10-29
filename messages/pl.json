@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Niezależne doradztwo, projekty nieruchomości i kapitał prywatny w Europie oraz Zjednoczonych Emiratach Arabskich. Międzynarodowe doświadczenie i lokalna wiedza.",
+    "mzs_group_is_an_independent_international": "Łączymy doradztwo, nieruchomości i kapitał prywatny, aby wspierać Twoje ambicje.",
     "sloganPrivate": "Prywatność.",
     "sloganIndependent": "Niezależność.",
-    "sloganInternational": "Międzynarodowy zasięg."
+    "sloganInternational": "Międzynarodowy zasięg.",
+    "headline": "Rozwiązania na miarę dla przedsiębiorców i inwestorów."
   },
   "Estates": {
     "ownership_management": "Własność i zarządzanie",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / NIERUCHOMOŚCI",
     "private_real_estate": "Prywatne nieruchomości.",
     "international_perspective": "Międzynarodowa perspektywa.",
-    "an_independent_approach_to_selected_property": "Niezależne podejście do wybranej własności, zarządzania, prywatnego wynajmu, sprzedaży i rozwoju nieruchomości.",
+    "an_independent_approach_to_selected_property": "Indywidualne podejście do posiadania, wynajmu, nabywania i rozwoju nieruchomości, dostosowane do celów przedsiębiorców i inwestorów.",
     "explore_real_estate": "Poznaj nieruchomości",
     "our_perspective": "Nasza perspektywa",
     "our_activities": "Nasza działalność",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / KAPITAŁ PRYWATNY",
     "independent_capital": "Niezależny kapitał.",
     "private_opportunities": "Prywatne możliwości.",
-    "a_discreet_and_relationshipdriven_perspective_on": "dyskretna i ukierunkowana na stosunki perspektywa prywatnego finansowania, możliwości inwestycyjne i partnerstwa strategiczne.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Indywidualne i dyskretne podejście do finansowania prywatnego, możliwości inwestycyjnych oraz partnerstw strategicznych dla przedsiębiorców i inwestorów.",
     "explore_private_capital": "Poznaj kapitał prywatny",
     "our_perspective": "Nasza perspektywa",
     "our_focus": "Nasze obszary działania",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Doradztwo, nieruchomości i kapitał prywatny | MZS Group",
-    "homeDescription": "Niezależne doradztwo, projekty nieruchomości i kapitał prywatny w Europie oraz Zjednoczonych Emiratach Arabskich. Międzynarodowe doświadczenie i lokalna wiedza.",
+    "homeDescription": "MZS Group oferuje przedsiębiorcom i inwestorom rozwiązania na miarę w zakresie doradztwa, nieruchomości i kapitału prywatnego.",
     "estatesTitle": "Nieruchomości: własność, wynajem i rozwój | MZS Estates",
     "estatesDescription": "Odkryj niezależną działalność międzynarodową nieruchomości MZS Estates: własność własności, prywatne wynajem, sprzedaż i rozwój.",
     "capitalTitle": "Kapitał prywatny | MZS Capital",
     "capitalDescription": "MZS Capital bada możliwości finansowania prywatnego, inwestycyjnego i strategicznego partnerstwa między nieruchomościami i przedsiębiorstwami.",
     "aboutTitle": "O MZS | MZS Group",
-    "aboutDescription": "Nasze usługi obejmują doradztwo, projekty nieruchomościowe i kapitał prywatny. Międzynarodowe kontakty. Znajomość lokalnych rynków.",
+    "aboutDescription": "MZS Group oferuje przedsiębiorcom i inwestorom rozwiązania na miarę w zakresie doradztwa, nieruchomości i kapitału prywatnego.",
     "consultancyTitle": "Doradztwo nieruchomościowe i finansowanie | MZS Group",
     "consultancyDescription": "Doradztwo w zakresie struktur prawnych i podatkowych, projektów nieruchomości i finansowania. Międzynarodowe doświadczenie i znajomość lokalnych rynków."
   },
@@ -1185,11 +1186,12 @@
     "caption": "Artystyczna wizja naszej drogi: Amsterdam, Hiszpania i Dubaj.",
     "consultancy_intro": "Doradztwo w zakresie struktur prawnych i podatkowych, projektów nieruchomościowych oraz potrzeb finansowych.",
     "real_estate_intro": "Projekty i możliwości na rynku nieruchomości łączące międzynarodowe doświadczenie ze znajomością lokalnych rynków.",
-    "private_capital_intro": "Rozwiązania kapitałowe i możliwości inwestycyjne dla nieruchomości i przedsiębiorstw."
+    "private_capital_intro": "Rozwiązania kapitałowe i możliwości inwestycyjne dla nieruchomości i przedsiębiorstw.",
+    "positioning": "MZS Group oferuje rozwiązania na miarę dla przedsiębiorców i inwestorów. Łączymy doradztwo, nieruchomości i kapitał prywatny z międzynarodowym doświadczeniem i znajomością lokalnych rynków."
   },
   "Consultancy": {
     "headline": "Kolejny krok, razem.",
-    "lead": "Jasny plan zaczyna się od właściwych pytań. MZS Group łączy międzynarodowe doświadczenie ze znajomością lokalnych rynków, wspierając w strukturach prawnych i podatkowych, projektach nieruchomościowych oraz finansowaniu.",
+    "lead": "Indywidualne doradztwo dla przedsiębiorców i inwestorów w zakresie struktur prawnych i podatkowych, projektów nieruchomościowych oraz finansowania, we współpracy z odpowiednimi specjalistami.",
     "legalTitle": "Struktury prawne i podatkowe",
     "legalBody": "Pomagamy kształtować strukturę prawną i podatkową działalności, udziałów i inwestycji. Od własności po kwestie międzynarodowe – określamy cele i wspieramy uzgadnianie decyzji z zaangażowanymi specjalistami.",
     "estateTitle": "Projekty nieruchomościowe",

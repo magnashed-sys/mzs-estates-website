@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Oberoende rådgivning, fastighetsprojekt och privat kapital i Europa och Förenade Arabemiraten. Internationell erfarenhet och lokal marknadskännedom.",
+    "mzs_group_is_an_independent_international": "Vi förenar rådgivning, fastigheter och privat kapital för att stödja dina ambitioner.",
     "sloganPrivate": "Privat.",
     "sloganIndependent": "Oberoende.",
-    "sloganInternational": "Internationell."
+    "sloganInternational": "Internationell.",
+    "headline": "Skräddarsydda lösningar för entreprenörer och investerare."
   },
   "Estates": {
     "ownership_management": "Ägande och förvaltning",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / FASTIGHETER",
     "private_real_estate": "Privata fastigheter.",
     "international_perspective": "Internationellt perspektiv.",
-    "an_independent_approach_to_selected_property": "Ett oberoende förhållningssätt till valt fastighetsägande, förvaltning, privata uthyrningar, försäljning och fastighetsutveckling.",
+    "an_independent_approach_to_selected_property": "Ett personligt förhållningssätt till fastighetsägande, uthyrning, förvärv och utveckling, anpassat efter entreprenörers och investerares mål.",
     "explore_real_estate": "Utforska fastigheter",
     "our_perspective": "Vårt perspektiv",
     "our_activities": "Vår verksamhet",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / PRIVAT KAPITAL",
     "independent_capital": "Oberoende kapital.",
     "private_opportunities": "Privata möjligheter.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Ett diskret och relationsinriktat perspektiv på privat finansiering, investeringsmöjligheter och strategiska partnerskap.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Ett personligt och diskret förhållningssätt till privat finansiering, investeringsmöjligheter och strategiska partnerskap för entreprenörer och investerare.",
     "explore_private_capital": "Utforska privat kapital",
     "our_perspective": "Vårt perspektiv",
     "our_focus": "Våra fokusområden",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Rådgivning, fastigheter och privat kapital | MZS Group",
-    "homeDescription": "Oberoende rådgivning, fastighetsprojekt och privat kapital i Europa och Förenade Arabemiraten. Internationell erfarenhet och lokal marknadskännedom.",
+    "homeDescription": "MZS Group erbjuder skräddarsydda lösningar för entreprenörer och investerare genom rådgivning, fastigheter och privat kapital.",
     "estatesTitle": "Fastighetsägande, uthyrning och utveckling | MZS Estates",
     "estatesDescription": "Upptäck den oberoende internationella fastighetsverksamheten i MZS Estates: fastighetsägande, privata uthyrningar, försäljning och utveckling.",
     "capitalTitle": "Privat kapital | MZS Capital",
     "capitalDescription": "MZS Capital utforskar utvalda privata finansierings-, investerings- och strategiska partnerskapsmöjligheter i fastigheter och företag.",
     "aboutTitle": "Om MZS | MZS Group",
-    "aboutDescription": "Våra tjänster omfattar rådgivning, fastighetsprojekt och privat kapital. Internationella kontakter. Lokal marknadskännedom.",
+    "aboutDescription": "MZS Group erbjuder skräddarsydda lösningar för entreprenörer och investerare genom rådgivning, fastigheter och privat kapital.",
     "consultancyTitle": "Fastighets- och finansieringsrådgivning | MZS Group",
     "consultancyDescription": "Rådgivning om juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering. Internationell erfarenhet och lokal marknadskännedom."
   },
@@ -1185,11 +1186,12 @@
     "caption": "En konstnärlig tolkning av vår resa: Amsterdam, Spanien och Dubai.",
     "consultancy_intro": "Rådgivning om juridiska och skattemässiga strukturer, fastighetsprojekt och finansieringsbehov.",
     "real_estate_intro": "Fastighetsprojekt och möjligheter med internationell erfarenhet och lokal marknadskännedom.",
-    "private_capital_intro": "Kapitallösningar och investeringsmöjligheter för fastigheter och företag."
+    "private_capital_intro": "Kapitallösningar och investeringsmöjligheter för fastigheter och företag.",
+    "positioning": "MZS Group erbjuder skräddarsydda lösningar för entreprenörer och investerare. Vi förenar rådgivning, fastigheter och privat kapital med internationell erfarenhet och lokal marknadskännedom."
   },
   "Consultancy": {
     "headline": "Nästa steg, tillsammans.",
-    "lead": "En tydlig plan börjar med rätt frågor. MZS Group förenar internationell erfarenhet med lokal marknadskännedom och vägleder dig inom juridiska och skattemässiga strukturer, fastighetsprojekt och finansiering.",
+    "lead": "Skräddarsydd rådgivning för entreprenörer och investerare om juridiska och skattemässiga strukturer, fastighetsprojekt och finansieringsbehov, i samarbete med berörda specialister.",
     "legalTitle": "Juridiska och skattemässiga strukturer",
     "legalBody": "Vi hjälper till att strukturera verksamhet, ägarandelar och investeringar. Från ägarförhållanden till internationella frågor tydliggör vi dina mål och hjälper till att samordna beslut med berörda specialister.",
     "estateTitle": "Fastighetsprojekt",

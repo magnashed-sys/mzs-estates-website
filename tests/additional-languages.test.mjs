@@ -12,11 +12,11 @@ const routing={};vm.runInNewContext(ts.transpileModule(read('i18n/public-routing
 function args(nodes,out=new Set()) {for(const n of nodes){if([1,2,3,4,5,6].includes(n.type))out.add(n.value);if(n.options)for(const o of Object.values(n.options))args(o.value,out);if(n.children)args(n.children,out);}return [...out].sort();}
 for(const locale of locales){
  const messages=JSON.parse(read(`messages/${locale}.json`));
- test(`${locale}: all 1158 messages preserve source structure and ICU arguments`,()=>{
+ test(`${locale}: all 1160 messages preserve source structure and ICU arguments`,()=>{
   let count=0;
   function check(a,b,path=''){assert.deepEqual(Object.keys(a).sort(),Object.keys(b).sort());for(const k of Object.keys(a)){
    if(typeof a[k]==='object')check(a[k],b[k],path+k+'.');else{count++;assert.equal(typeof b[k],'string');assert.ok(b[k].trim());assert.deepEqual(args(parse(a[k])),args(parse(b[k])),path+k);}
-  }}check(en,messages);assert.equal(count,1158);
+  }}check(en,messages);assert.equal(count,1160);
  });
  test(`${locale}: public routes roundtrip while private/API/token routes stay unprefixed`,()=>{
   assert.equal(routing.memberLocale(locale),locale);

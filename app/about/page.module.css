@@ -5,6 +5,7 @@
 .eyebrow {color:#d5c09a;font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 18px;line-height:1.8;}
 .eyebrow span {padding:0 14px;opacity:.5;}
 .intro h1 {font:400 clamp(30px,3.25vw,58px)/1.2 Georgia,'Times New Roman',serif;letter-spacing:-.035em;margin:0;text-wrap:pretty;}
+.positioning {max-width:850px;margin:24px 0 0;color:#c5beb3;font-size:clamp(15px,1.25vw,18px);line-height:1.8;text-wrap:pretty;}
 .figure {margin:0 var(--inset);}
 .panorama {position:relative;width:100%;aspect-ratio:2.9;background:#171b1c;border:1px solid #38372f;overflow:hidden;}
 .image {object-fit:cover;object-position:center 64%;}

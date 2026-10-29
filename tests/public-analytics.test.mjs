@@ -39,6 +39,7 @@ test('withdrawal disables collection and expired or malformed consent is rejecte
 });
 test('all consent languages present; form events occur only after confirmed API success',()=>{
  const {analyticsCopy}=load('lib/analytics/copy.ts');for(const l of routing.locales){assert.equal(analyticsCopy[l].length,6);assert.ok(analyticsCopy[l].every(Boolean));}
+ const {analyticsCompactCopy}=load('lib/analytics/compact-copy.ts');for(const l of routing.locales){assert.equal(analyticsCompactCopy[l].length,4);assert.ok(analyticsCompactCopy[l].every(Boolean));}
  const intro=read('app/private-capital/IntroCallForm.tsx');assert.ok(intro.indexOf('trackLead("intro_call")')>intro.indexOf('result.recorded !== true'));
  const account=read('app/request-access/page.tsx');assert.ok(account.indexOf('trackLead("account_request")')>account.indexOf('!response.ok || !result.ok'));
 });

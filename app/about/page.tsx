@@ -27,6 +27,7 @@ export default async function AboutPage() {
       <section className={styles.intro} aria-labelledby="about-title">
         <p className={styles.eyebrow}>{t('label')} <span aria-hidden="true">/</span> MZS GROUP</p>
         <h1 id="about-title">{t('headline')}</h1>
+        <p className={styles.positioning}>{t('positioning')}</p>
       </section>
       <figure className={styles.figure}>
         <div className={styles.panorama}>

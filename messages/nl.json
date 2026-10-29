@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Onafhankelijk advies, vastgoedprojecten en privaat kapitaal in Europa en de Verenigde Arabische Emiraten. Internationale ervaring en lokale marktkennis.",
+    "mzs_group_is_an_independent_international": "Wij verbinden consultancy, vastgoed en private capital om uw ambities te ondersteunen.",
     "sloganPrivate": "Privé.",
     "sloganIndependent": "Onafhankelijk.",
-    "sloganInternational": "Internationaal."
+    "sloganInternational": "Internationaal.",
+    "headline": "Maatwerkoplossingen voor ondernemers en investeerders."
   },
   "Estates": {
     "ownership_management": "Eigendom & beheer",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / VASTGOED",
     "private_real_estate": "Privaat vastgoed.",
     "international_perspective": "Internationaal perspectief.",
-    "an_independent_approach_to_selected_property": "Een onafhankelijke benadering van geselecteerd vastgoedbezit, beheer, private verhuur, verkoop en vastgoedontwikkeling.",
+    "an_independent_approach_to_selected_property": "Een persoonlijke aanpak voor vastgoedbezit, verhuur, aankoop en ontwikkeling, afgestemd op de doelen van ondernemers en investeerders.",
     "explore_real_estate": "Ontdek ons vastgoed",
     "our_perspective": "Onze visie",
     "our_activities": "Onze activiteiten",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / PRIVAAT KAPITAAL",
     "independent_capital": "Onafhankelijk kapitaal.",
     "private_opportunities": "Private mogelijkheden.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Een discrete, relatiegerichte benadering van private financiering, investeringsmogelijkheden en strategische samenwerkingen.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Een persoonlijke, discrete aanpak van private financiering, investeringsmogelijkheden en strategische samenwerkingen voor ondernemers en investeerders.",
     "explore_private_capital": "Ontdek privaat kapitaal",
     "our_perspective": "Onze visie",
     "our_focus": "Onze focus",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Consultancy, vastgoed & privaat kapitaal | MZS Group",
-    "homeDescription": "Onafhankelijk advies, vastgoedprojecten en privaat kapitaal in Europa en de Verenigde Arabische Emiraten. Internationale ervaring en lokale marktkennis.",
+    "homeDescription": "MZS Group biedt maatwerkoplossingen voor ondernemers en investeerders via consultancy, vastgoed en private capital.",
     "estatesTitle": "Vastgoedbezit, verhuur & ontwikkeling | MZS Estates",
     "estatesDescription": "Ontdek de onafhankelijke internationale vastgoedactiviteiten van MZS Estates: vastgoedbezit, private verhuur, verkoop en ontwikkeling.",
     "capitalTitle": "Privaat kapitaal | MZS Capital",
     "capitalDescription": "MZS Capital verkent geselecteerde mogelijkheden voor private financiering, investeringen en strategische samenwerkingen in vastgoed en ondernemingen.",
     "aboutTitle": "Over MZS | MZS Group",
-    "aboutDescription": "Onze diensten richten zich op advisering, vastgoedprojecten en private capital. Internationale contacten. Lokale marktkennis.",
+    "aboutDescription": "MZS Group biedt maatwerkoplossingen voor ondernemers en investeerders via consultancy, vastgoed en private capital.",
     "consultancyTitle": "Vastgoed- en financieringsadvies | MZS Group",
     "consultancyDescription": "Advies over juridische en fiscale structuren, vastgoedprojecten en financiering. MZS Group verbindt internationale ervaring met lokale marktkennis."
   },
@@ -1185,11 +1186,12 @@
     "caption": "Een artistieke impressie van onze route: Amsterdam, Spanje en Dubai.",
     "consultancy_intro": "Advies over juridische en fiscale structuren, vastgoedprojecten en financieringsvraagstukken.",
     "real_estate_intro": "Vastgoedprojecten en kansen, met internationale ervaring en lokale marktkennis.",
-    "private_capital_intro": "Kapitaaloplossingen en investeringsmogelijkheden voor vastgoed en ondernemingen."
+    "private_capital_intro": "Kapitaaloplossingen en investeringsmogelijkheden voor vastgoed en ondernemingen.",
+    "positioning": "MZS Group biedt maatwerkoplossingen voor ondernemers en investeerders. Wij verbinden consultancy, vastgoed en private capital met internationale ervaring en lokale marktkennis."
   },
   "Consultancy": {
     "headline": "Samen de volgende stap.",
-    "lead": "Een helder plan begint met de juiste vragen. MZS Group verbindt internationale ervaring met lokale marktkennis en begeleidt u bij juridische en fiscale structuren, vastgoedprojecten en financieringsvraagstukken.",
+    "lead": "Advies op maat voor ondernemers en investeerders over juridische en fiscale structuren, vastgoedprojecten en financieringsvragen, in afstemming met de betrokken specialisten.",
     "legalTitle": "Juridische & fiscale structuren",
     "legalBody": "We denken mee over de juridische en fiscale inrichting van uw activiteiten, deelnemingen en investeringen. Van eigendomsstructuur tot internationale samenhang: we brengen uw uitgangspunten in kaart en helpen keuzes af te stemmen met de betrokken specialisten.",
     "estateTitle": "Vastgoedprojecten",

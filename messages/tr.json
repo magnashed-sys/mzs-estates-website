@@ -1,9 +1,10 @@
 {
   "Home": {
-    "mzs_group_is_an_independent_international": "Avrupa ve Birleşik Arap Emirlikleri'nde bağımsız danışmanlık, gayrimenkul projeleri ve özel sermaye. Uluslararası deneyim ve yerel pazar bilgisi.",
+    "mzs_group_is_an_independent_international": "Hedeflerinizi desteklemek için danışmanlık, gayrimenkul ve özel sermayeyi bir araya getiriyoruz.",
     "sloganPrivate": "Özel.",
     "sloganIndependent": "Bağımsız.",
-    "sloganInternational": "Uluslararası."
+    "sloganInternational": "Uluslararası.",
+    "headline": "Girişimciler ve yatırımcılar için özel çözümler."
   },
   "Estates": {
     "ownership_management": "Mülkiyet ve Yönetim",
@@ -18,7 +19,7 @@
     "mzs_estates_real_estate": "MZS ESTATES / GAYRİMENKUL",
     "private_real_estate": "Özel gayrimenkul.",
     "international_perspective": "Uluslararası perspektif.",
-    "an_independent_approach_to_selected_property": "Seçkin gayrimenkullerin mülkiyetine, yönetimine, özel kiralamasına, satışına ve geliştirilmesine bağımsız bir yaklaşım.",
+    "an_independent_approach_to_selected_property": "Gayrimenkul sahipliği, kiralama, satın alma ve geliştirmede girişimcilerin ve yatırımcıların hedeflerine uygun kişisel bir yaklaşım.",
     "explore_real_estate": "Gayrimenkulü Keşfedin",
     "our_perspective": "Bakış Açımız",
     "our_activities": "Faaliyetlerimiz",
@@ -55,7 +56,7 @@
     "mzs_capital_private_capital": "MZS CAPITAL / ÖZEL SERMAYE",
     "independent_capital": "Bağımsız sermaye.",
     "private_opportunities": "Özel fırsatlar.",
-    "a_discreet_and_relationshipdriven_perspective_on": "Özel finansman, yatırım fırsatları ve stratejik ortaklıklara gizliliği ve ilişkileri temel alan bir yaklaşım.",
+    "a_discreet_and_relationshipdriven_perspective_on": "Girişimciler ve yatırımcılar için özel finansman, yatırım fırsatları ve stratejik ortaklıklara kişisel ve gizliliğe önem veren bir yaklaşım.",
     "explore_private_capital": "Özel Sermayeyi Keşfedin",
     "our_perspective": "Bakış Açımız",
     "our_focus": "Odak Alanlarımız",
@@ -184,13 +185,13 @@
   },
   "Metadata": {
     "homeTitle": "Danışmanlık, gayrimenkul ve özel sermaye | MZS Group",
-    "homeDescription": "Avrupa ve Birleşik Arap Emirlikleri'nde bağımsız danışmanlık, gayrimenkul projeleri ve özel sermaye. Uluslararası deneyim ve yerel pazar bilgisi.",
+    "homeDescription": "MZS Group, girişimciler ve yatırımcılara danışmanlık, gayrimenkul ve özel sermaye alanlarında özel çözümler sunar.",
     "estatesTitle": "Gayrimenkul sahipliği, kiralama ve geliştirme | MZS Estates",
     "estatesDescription": "MZS Estates'in bağımsız uluslararası gayrimenkul faaliyetlerini keşfedin: mülkiyet, özel kiralama, satış ve geliştirme.",
     "capitalTitle": "Özel Sermaye | MZS Capital",
     "capitalDescription": "MZS Capital, gayrimenkul ve işletmelerdeki seçilmiş özel finansman, yatırım ve stratejik ortaklık fırsatlarını değerlendirir.",
     "aboutTitle": "MZS Hakkında | MZS Group",
-    "aboutDescription": "Hizmetlerimiz danışmanlık, gayrimenkul projeleri ve özel sermaye alanlarına odaklanır. Uluslararası bağlantılar. Yerel pazar bilgisi.",
+    "aboutDescription": "MZS Group, girişimciler ve yatırımcılara danışmanlık, gayrimenkul ve özel sermaye alanlarında özel çözümler sunar.",
     "consultancyTitle": "Gayrimenkul ve finansman danışmanlığı | MZS Group",
     "consultancyDescription": "Hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında danışmanlık. Uluslararası deneyim ve yerel pazar bilgisi."
   },
@@ -1185,11 +1186,12 @@
     "caption": "Yolculuğumuzun sanatsal bir yorumu: Amsterdam, İspanya ve Dubai.",
     "consultancy_intro": "Hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman ihtiyaçları konusunda danışmanlık.",
     "real_estate_intro": "Uluslararası deneyim ve yerel pazar bilgisiyle gayrimenkul projeleri ve fırsatları.",
-    "private_capital_intro": "Gayrimenkul ve işletmeler için sermaye çözümleri ve yatırım fırsatları."
+    "private_capital_intro": "Gayrimenkul ve işletmeler için sermaye çözümleri ve yatırım fırsatları.",
+    "positioning": "MZS Group, girişimciler ve yatırımcılar için özel çözümler sunar. Danışmanlık, gayrimenkul ve özel sermayeyi uluslararası deneyim ve yerel pazar bilgisiyle bir araya getiriyoruz."
   },
   "Consultancy": {
     "headline": "Bir sonraki adım, birlikte.",
-    "lead": "Net bir plan doğru sorularla başlar. MZS Group, uluslararası deneyimi yerel pazar bilgisiyle birleştirerek hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman konularında size rehberlik eder.",
+    "lead": "Girişimcilere ve yatırımcılara hukuki ve vergisel yapılar, gayrimenkul projeleri ve finansman ihtiyaçları konusunda ilgili uzmanlarla koordineli, kişiye özel danışmanlık.",
     "legalTitle": "Hukuki ve vergisel yapılar",
     "legalBody": "Faaliyetlerinizin, ortaklıklarınızın ve yatırımlarınızın hukuki ve vergisel yapısına destek oluruz. Mülkiyetten uluslararası konulara kadar hedeflerinizi netleştirir, kararların ilgili uzmanlarla koordinasyonuna yardımcı oluruz.",
     "estateTitle": "Gayrimenkul projeleri",
