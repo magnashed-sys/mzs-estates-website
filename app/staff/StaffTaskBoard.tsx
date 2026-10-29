@@ -101,7 +101,7 @@ export default function StaffTaskBoard({tasks,properties,units,profileId,today}:
  const prop=new Map(properties.map(p=>[p.id,p.name]));
  const unit=new Map(units.map(u=>[u.id,u.address]));
  return <section className={s.staffTasks} aria-labelledby="staff-tasks-title">
-  <div className={s.mobileHead}><p className={s.kicker}>MY PROPERTY MANAGEMENT</p>
+  <div className={s.mobileHead}>
    <h2 id="staff-tasks-title">My tasks</h2>
    <p>See what needs attention and record progress directly from your phone.</p>
   </div>
