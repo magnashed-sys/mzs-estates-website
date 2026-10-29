@@ -8,6 +8,7 @@ import {requireEstateAdmin} from '../../../../../../lib/security/estate-properti
 import {allRows} from '../../../../../../lib/property-operations/staff-data';
 import {annualSource} from '../../../../../../lib/accountancy/administration-data';
 import {annualEvidenceReadiness,type EvidenceIssue} from '../../../../../../lib/accountancy/annual-evidence';
+import {supplierCostIntegrity} from '../../../../../../lib/accountancy/supplier-integrity';
 import {ADMINISTRATION_ROOT,uuid,costCategories,annualCategory,annualSummary} from '../../../../../../lib/accountancy/administration';
 import {YearForm,ProjectForm,CostForm,CostReviewForm} from '../Forms';
 import s from '../administration.module.css';
@@ -15,8 +16,8 @@ export const dynamic='force-dynamic';
 export default async function Administration({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<Record<string,string|string[]|undefined>>}){
  const {db}=await requireEstateAdmin(),{t,locale,language}=await getAdminI18n(),{id}=await params;if(!uuid.test(id))notFound();
  const exists=await db.from('mzs_accountancy_years').select('id').eq('id',id).maybeSingle();if(exists.error)throw Error('Administration unavailable');if(!exists.data)notFound();
- const [source,properties,suppliers,q]=await Promise.all([annualSource(db,id),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_estate_properties').select('id,name',{count:'exact'}).order('name').order('id').range(a,b)),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_lease_relationships').select('id,name',{count:'exact'}).order('name').order('id').range(a,b)),searchParams]);
- const y=source.administration,summary=annualSummary(source),evidence=annualEvidenceReadiness(source),root=ADMINISTRATION_ROOT+'/'+id,money=(c:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'EUR'}).format(c/100),reviews=new Map(source.reviews.map(r=>[r.draft_id,r]));
+ const [source,properties,suppliers,q]=await Promise.all([annualSource(db,id),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_estate_properties').select('id,name',{count:'exact'}).order('name').order('id').range(a,b)),allRows<{id:string;name:string;kind:string;company_details:unknown}>((a,b)=>db.from('mzs_lease_relationships').select('id,name,kind,company_details',{count:'exact'}).order('name').order('id').range(a,b)),searchParams]);
+ const y=source.administration,summary=annualSummary(source),evidence=annualEvidenceReadiness(source),supplierIntegrity=supplierCostIntegrity(source.costs,suppliers),root=ADMINISTRATION_ROOT+'/'+id,money=(c:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'EUR'}).format(c/100),reviews=new Map(source.reviews.map(r=>[r.draft_id,r]));
  const l=(en:string,es:string)=>language==='es'?es:en;
  const issueName:Record<EvidenceIssue,string>={missing_original:l('Original PDF missing','Falta el PDF original'),cost_pending_review:l('Cost awaiting review','Coste pendiente de revisión'),archive_pending_review:l('Archived PDF awaiting review','PDF archivado pendiente de revisión')};
  const sourceName={private_archive:l('Private archive','Archivo privado'),isolated_purchase_pdf:l('Isolated PDF intake','Recepción aislada de PDF'),not_retained:l('Not retained','No archivado')};
@@ -44,6 +45,28 @@ export default async function Administration({params,searchParams}:{params:Promi
     <td><Link href={attachmentHref('cost',row.draft_id)}>{l('Manage original PDFs','Gestionar PDF originales')}</Link>{' · '}<Link href={root+'#costs'}>{l('Review costs','Revisar costes')}</Link></td>
    </tr>)}{evidence.unresolved.length===0&&<tr><td colSpan={3}>{l('No unresolved evidence actions for registered supplier concepts. This does not confirm a complete financial year.','No hay incidencias documentales pendientes en los borradores registrados. Esto no confirma que el ejercicio esté completo.')}</td></tr>}</tbody>
   </table></div>
+ </section>
+
+ <section className={s.notice} aria-label={l('Supplier identity quality','Calidad de los datos del proveedor')}>
+  <h2>{l('Supplier master data checks','Comprobación de datos de proveedores')}</h2>
+  <p>{l('New suppliers are already created by the existing workflow. This review only detects possible duplicates or missing company tax IDs in existing Relationships; it never creates, combines, changes, or blocks a supplier.','Los proveedores nuevos ya se crean mediante el flujo existente. Esta revisión solo señala posibles duplicados o identificadores fiscales de empresas ausentes en las relaciones; nunca crea, fusiona, modifica ni bloquea proveedores.')}</p>
+  <div className={s.metrics}>
+   <p>{l('Suppliers referenced this year','Proveedores utilizados este ejercicio')}<strong>{supplierIntegrity.supplierCount}</strong></p>
+   <p>{l('Possible duplicate supplier records','Posibles proveedores duplicados')}<strong>{supplierIntegrity.possibleDuplicateSuppliers}</strong></p>
+   <p>{l('Company tax IDs to verify','Identificadores fiscales por verificar')}<strong>{supplierIntegrity.missingTaxIdSuppliers}</strong></p>
+  </div>
+  <p>{l('A missing tax ID is a check only where applicable. Exact normalized names are considered possible matches only when their recorded tax IDs do not conflict. All corrections require manual verification.','La ausencia de un número fiscal solo requiere comprobación cuando proceda. Los nombres normalizados coincidentes solo se consideran posibles duplicados si los identificadores fiscales no difieren. Cualquier corrección requiere comprobación manual.')}</p>
+  {[...new Map(supplierIntegrity.signals.filter(row=>row.possible_duplicate_records.length||row.missing_company_tax_id||row.missing_record).map(row=>[row.supplier_id,row])).values()].slice(0,25).map(row=>
+   <p key={row.draft_id}>
+    <strong>{row.supplier_name||l('Unresolved supplier reference','Referencia de proveedor no encontrada')}</strong>
+    {' · '}
+    {row.missing_record?l('Supplier record unavailable','Registro de proveedor no disponible'):row.missing_company_tax_id?l('Company tax ID not recorded','Falta el identificador fiscal de la empresa'):''}
+    {row.possible_duplicate_records.map(candidate=>
+     <span key={candidate.id}>{' · '}{l('Potential duplicate','Posible duplicado')}: {candidate.name} ({candidate.reason==='same_tax_id'?l('matching tax ID','mismo identificador fiscal'):l('matching normalized name','mismo nombre normalizado')})</span>
+    )}
+   </p>
+  )}
+  <p><Link href="/admin/relationships">{l('Review existing Relationships','Revisar relaciones existentes')}</Link></p>
  </section>
  <p className={s.notice}>{t('Cost totals use original gross amounts. They are collection totals, not final deductible expenses. The year package includes pending items and exceptions for the accountant to resolve.')}</p>
  {y.vat_treatment==='pending'&&<p role="status">{t('VAT treatment still needs an effective date and supporting confirmation. Historical VAT records remain unchanged.')}</p>}
