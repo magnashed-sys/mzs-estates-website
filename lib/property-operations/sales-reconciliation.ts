@@ -7,7 +7,7 @@ export type IssuedInvoice = {
   source:InvoiceSource;id:string;issuer_id:string;number:string;issued_on:string;
   total:unknown;net_total?:unknown;vat_total?:unknown;contract_id?:string;booking_id?:string;batch_id?:string;status?:string;
 };
-export type ReceiptSource = "lease_payment"|"booking_receipt"|"external_receipt";
+export type ReceiptSource = "lease_payment"|"booking_receipt"|"external_receipt"|"archive_receipt";
 export type RecordedReceipt = {
   source:ReceiptSource;id:string;amount:unknown;received_on:string|null;
   reversed_at:string|null;reference:string;receipt_type?:string|null;
@@ -56,7 +56,7 @@ export function normalizeIssuedInvoice(i:IssuedInvoice,legalEntity:string,year:n
   };
 }
 export function receiptEvents(r:RecordedReceipt,matchedInvoice:string,year:number){
-  if(!uuid.test(r.id)||!uuid.test(matchedInvoice)||!["lease_payment","booking_receipt","external_receipt"].includes(r.source))
+  if(!uuid.test(r.id)||!uuid.test(matchedInvoice)||!["lease_payment","booking_receipt","external_receipt","archive_receipt"].includes(r.source))
     throw Error("Unmatched receipt");
   const amount=euroCents(r.amount);
   if(amount<=0||typeof r.reference!=="string"||r.reference.length>500)throw Error("Invalid receipt");

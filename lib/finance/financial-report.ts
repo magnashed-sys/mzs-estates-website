@@ -17,6 +17,7 @@ export type HistoricalInvoice = {
 };
 export type HistoricalMonth = {month:string;count:number;netCents:number;grossCents:number;paidCents:number;openCents:number;credits:number};
 export type FinancialPhase2 = CockpitData & {
+  currentInvoices?:{count:number;gross:number;paid:number;outstanding:number;overdue:number;unknown:number;unknownGross:number;credits:number};
   historical:{enabled:boolean;rows:HistoricalMonth[];totals:Omit<HistoricalMonth,'month'>};
   entityId:string;entities:FinancialEntity[];
   report:{expectedNet:number;recordedNet:number;outstandingRent:number;overdueRent:number;

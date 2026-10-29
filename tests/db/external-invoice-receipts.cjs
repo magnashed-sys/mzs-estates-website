@@ -19,6 +19,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  create table mzs_booking_receipts(id uuid,booking_id uuid,amount numeric,received_on date,reference text,receipt_type text,reversed_at timestamptz);
  grant select on mzs_lease_issuers,mzs_lease_invoices,mzs_booking_invoices,mzs_lease_payments,mzs_booking_receipts to authenticated;`);
  const sql=fs.readFileSync('supabase/migrations/20261028225007_external_invoice_receipts.sql','utf8');await db.exec(sql);
+ await db.exec(`create table mzs_invoice_archive(id uuid primary key,issuer_id uuid,number text,issued_on date,gross_cents bigint,source_paid_cents bigint,source_open_cents bigint);create table mzs_invoice_archive_exclusions(invoice_id uuid);create table mzs_archive_invoice_receipts(id uuid,invoice_id uuid,amount_cents bigint,received_on date,reference text);create table mzs_archive_invoice_receipt_reversals(receipt_id uuid,created_at timestamptz);grant select on mzs_invoice_archive,mzs_invoice_archive_exclusions,mzs_archive_invoice_receipts,mzs_archive_invoice_receipt_reversals to authenticated;`);
+ await db.exec(fs.readFileSync('supabase/migrations/20261029072409_accountant_imported_receipts.sql','utf8'));
  const actor=async who=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${who}',false)`),q=s=>db.query(s);
  const add=(key=first,inv=invoice,amount=25000,ref='BANK-1',date="'2026-10-28'")=>q(`select mzs_record_external_invoice_receipt('${key}','${inv}',${amount},${date},'${ref}')`);
  const reverse=(key=first,inv=invoice,reason='Incorrect receipt registration')=>q(`select mzs_reverse_external_invoice_receipt('${key}','${inv}','${reason}')`);
@@ -44,7 +46,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  await add(id(10),invoice,25000,'BANK-1');
  let source=(await q(`select mzs_external_invoice_receipt_source(array['${invoice}'::uuid]) s`)).rows[0].s;
  assert.equal(source.count,3);assert.equal(source.rows.filter(x=>!x.reversed_at).reduce((n,r)=>n+r.amount_cents,0),78650);assert.equal(source.rows.find(x=>x.id===first).recorded_by,admin);assert.equal(source.rows.find(x=>x.id===first).reversal_reason,'Incorrect receipt registration');
- const exportSource=(await q(`select mzs_ops_accountant_source('${issuer}') s`)).rows[0].s;assert.equal(exportSource.external_receipts.length,3);assert.equal(Number(exportSource.external_receipts.find(x=>x.id===first).amount),250);assert.ok(exportSource.external_receipts.find(x=>x.id===first).reversed_at);
+ const exportSource=(await q(`select mzs_ops_accountant_source('${issuer}') s`)).rows[0].s;assert.equal(exportSource.imported.length,0);assert.equal(exportSource.imported_receipts.length,0);assert.equal(exportSource.external_receipts.length,3);assert.equal(Number(exportSource.external_receipts.find(x=>x.id===first).amount),250);assert.ok(exportSource.external_receipts.find(x=>x.id===first).reversed_at);
  assert.equal((await q(`select payment_status from mzs_ops_external_sales_invoices where id='${invoice}'`)).rows[0].payment_status,'not_recorded');
  await assert.rejects(q(`select mzs_external_invoice_receipt_source(array['${invoice}'::uuid,'${invoice}'::uuid])`),/Invalid/);
  await assert.rejects(q(`select mzs_external_invoice_receipt_source(null)`),/Invalid/);
