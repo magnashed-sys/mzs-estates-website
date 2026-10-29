@@ -1,3 +1,9 @@
+# Production release: assisted intake
+
+The production Purchase PDFs page guides users to supply originals through the agreed ChatGPT conversation and links the selected entity/year to the existing manual purchase concept and review forms. PDFs supplied in ChatGPT are not automatically attached to the website; preserve their original reference during review. Existing duplicate, amount and scope checks still apply. No new production database tables are needed for this mode.
+
+Direct website upload, scanning, source downloads and PDF confirmation endpoints remain staging-only and disabled without the approved scanner configuration. The staging migration below must NOT be applied to production as part of this assisted-intake release.
+
 # Purchase PDF intake — staging candidate
 
 Route: `/admin/workspaces/accountancy/purchases`. Active Group Admin only. The entire route family is restricted to Vercel preview with Supabase `senonkpxdtlhyhrubicg`. Production remains unavailable.

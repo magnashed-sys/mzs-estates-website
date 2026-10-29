@@ -5,6 +5,7 @@ export const MAX_PDF_BYTES=4*1024*1024;
 export type ExtractedPage={page:number;text:string};
 export type Proposal={supplierName:string;number:string;date:string;net:string;vat:string;gross:string;currency:string;warnings:string[]};
 export function pdfIntakeEnvironment(e:NodeJS.ProcessEnv=process.env){return e.VERCEL_ENV==='preview'&&e.NEXT_PUBLIC_SUPABASE_URL==='https://senonkpxdtlhyhrubicg.supabase.co';}
+export function purchaseWorkspaceEnvironment(e:NodeJS.ProcessEnv=process.env){return pdfIntakeEnvironment(e)||(e.VERCEL_ENV==='production'&&e.NEXT_PUBLIC_SUPABASE_URL==='https://ptrnjzmcehrhbsfxntgw.supabase.co');}
 export function suggestPurchase(pages:ExtractedPage[]):Proposal{
  const text=pages.map(p=>p.text).join('\n'),lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const warnings:string[]=[];

@@ -1,4 +1,4 @@
-import {pdfIntakeEnvironment,PDF_ROOT} from '../../../../lib/accountancy/pdf/model';
+import {purchaseWorkspaceEnvironment,PDF_ROOT} from '../../../../lib/accountancy/pdf/model';
 
 import {getAdminI18n} from '../../../../lib/admin/i18n-server';
 import Link from "next/link";
@@ -13,7 +13,7 @@ export default async function Workspace(){
  const years:number[]=!bookingError&&Array.isArray(bookingData?.years)?bookingData.years.filter((y:unknown)=>Number.isInteger(y)&&Number(y)>=1900&&Number(y)<=2199):[];
  return <><section className={styles.intro}><h1 className={styles.heading}>{adminT("Accountancy")}</h1><p className={styles.lead}>{adminT("Expenses, issued invoices and financial exports by legal entity. Select the register you want to review.")}</p></section>
  <section className={styles.grid} aria-label={adminT("Accountancy workflows")}>
-   {pdfIntakeEnvironment()&&<Link className={styles.card} href={PDF_ROOT}><strong>{language==='es'?'PDF de compras':'Purchase PDFs'}</strong><p>{language==='es'?'Cargar originales y revisar borradores de compra.':'Upload originals and review purchase concepts.'}</p></Link>}
+   {purchaseWorkspaceEnvironment()&&<Link className={styles.card} href={PDF_ROOT}><strong>{language==='es'?'PDF de compras':'Purchase PDFs'}</strong><p>{language==='es'?'Preparar y revisar compras a partir de facturas PDF.':'Prepare and review purchases from PDF invoices.'}</p></Link>}
    <Link className={styles.card} href="/admin/workspaces/accountancy/administrations"><strong>{adminT("Year administrations")}</strong><p>{adminT("Review costs, renovation projects, annual completeness checks and the consolidated accountant package by entity and year.")}</p><span>{adminT("Open year administrations →")}</span></Link>
    <Link className={styles.card} href="/admin/workspaces/accountancy/documents"><strong>{adminT("Document archive")}</strong><p>{adminT("Private annual accounts, tax returns and analysis reports by entity and financial year. Available in English and Spanish.")}</p><span>{adminT("Open document archive →")}</span></Link>
    <Link className={styles.card} href="/admin/workspaces/accountancy/sales"><strong>{adminT("Invoices")}</strong><p>{adminT("All issued invoices: standalone, rental contracts, bookings and imported invoices. Review recorded balances and payments to verify.")}</p><span>{adminT("Open invoice register →")}</span></Link>
