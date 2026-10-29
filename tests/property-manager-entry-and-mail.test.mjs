@@ -47,7 +47,8 @@ test('mobile staff has one intake for tasks and maintenance with both secured ex
  assert.match(board,/<option value="soon">\{t\('soon'\)\}<\/option>/);
  assert.match(board,/<option value="urgent">\{t\('urgent'\)\}<\/option>/);
  assert.match(board,/required=\{isMaintenance\}/);
- assert.match(board,/properties\.length>1/);
+ assert.match(board,/value=\{'property:'\+p\.id\}/);
+ assert.match(board,/value=\{'area:'\+area\.id\}/);
  assert.match(board,/name="assigned_profile_id" value=\{profileId\}/);
  assert.match(staffPage,/showMaintenanceForm=\{!taskEnabled\}/);
  assert.match(forms,/props\.showMaintenanceForm!==false&&<MaintenanceForm/);
