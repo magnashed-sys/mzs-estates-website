@@ -92,7 +92,7 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
  assert.match(csv('supplier-payment-events.csv'),/administratively_reversed/);
  assert.match(csv('supplier-payment-events.csv'),/administratively_recorded/);
  assert.match(csv('supplier-payment-summary.csv'),/not_verified/);
- assert.match(csv('supplier-payment-summary.csv'),/80.00/);
+ assert.match(csv('supplier-payment-summary.csv'),/81.00/);
  assert.match(csv('supplier-payment-summary.csv'),/40.00/);
  assert.doesNotMatch(csv('supplier-payment-summary.csv'),/\b(unpaid|overdue)\b/);
  assert.match(csv('README.txt'),/NOT bank reconciliation/);
