@@ -17,11 +17,11 @@ test('property manager landing shows MZS wordmark and Property Manager without c
 
 test('My tasks keeps its operational controls but drops the redundant upper label',()=>{
  const board=read('app/staff/StaffTaskBoard.tsx');
- assert.match(board,/<h2 id="staff-tasks-title">My tasks<\/h2>/);
+ assert.match(board,/<h2 id="staff-tasks-title">\{t\('tasks'\)\}<\/h2>/);
  assert.doesNotMatch(board,/MY PROPERTY MANAGEMENT/);
  assert.match(board,/taskOverview\(tasks,today\)/);
  assert.match(board,/NewWorkItem/);
- assert.match(board,/Log working time/);
+ assert.match(board,/t\('logTime'\)/);
 });
 
 test('brand header is mobile-friendly and not globally changing admin pages',()=>{
