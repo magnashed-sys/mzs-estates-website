@@ -90,6 +90,7 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
      {areas.map(area=><option key={area.id} value={'area:'+area.id}>{area.name}</option>)}
     </select>
    </label>
+   {(isArea||!units.some(u=>u.property_id===propertyId))&&<input type="hidden" name="unit_id" value=""/>}
    {!isArea&&units.some(u=>u.property_id===propertyId)&&<label>{t('unit')}
     <select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
      <option value="">{t('whole')}</option>
