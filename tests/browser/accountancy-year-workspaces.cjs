@@ -44,6 +44,7 @@ const server=http.createServer(async(req,res)=>{
   if(req.method==='PATCH'){for(const y of a)Object.assign(y,data,{revision:y.revision+1});return rows(a);}
   if(req.method==='POST')return send({code:'23505'},409);return rows(a);
  }
+ if(path==='/rest/v1/mzs_accountancy_projects'&&req.method==='POST'){projects.push({...data,id:crypto.randomUUID()});return send(null,201);}
  if(path==='/rest/v1/mzs_lease_relationships')return rows([{id:supplierId,name:'Synthetic supplier'}]);
  if(path==='/rest/v1/mzs_ops_expense_drafts'&&req.method==='POST'){
   if(costs.some(c=>c.supplier_invoice_number===data.supplier_invoice_number))return send({code:'23505'},409);
@@ -62,20 +63,22 @@ const server=http.createServer(async(req,res)=>{
   const annual='/admin/workspaces/accountancy/administrations',detail=annual+'/'+yearId,request=(p,auth=true)=>fetch('http://127.0.0.1:3090'+p,{headers:auth?{Cookie:cookie}:{},redirect:'manual'});
   const manifest=JSON.parse(fs.readFileSync('.next/server/server-reference-manifest.json','utf8'));
   async function action(name,fields){const id=Object.entries(manifest.node).find(([,v])=>v.exportedName===name)?.[0];assert.ok(id,name+' server action exists');const form=new FormData();for(const [k,v] of Object.entries(fields))form.set(k,String(v));const body=await require('next/dist/compiled/react-server-dom-webpack/client.node').encodeReply([form]);const r=await fetch('http://127.0.0.1:3090'+detail,{method:'POST',headers:{Cookie:cookie,Origin:'http://127.0.0.1:3090','Next-Action':id},body});const text=await r.text();assert.equal(r.status,200,text.slice(0,1000));return text;}
-  let r=await request(annual);assert.equal(r.status,200);assert.match(await r.text(),/Year administrations/);
+  let r=await request(detail+'/import');assert.equal(r.status,200);assert.match(await r.text(),/Prepare a cost import/);
+  r=await request(annual);assert.equal(r.status,200);assert.match(await r.text(),/Year administrations/);
   r=await request(detail);assert.equal(r.status,200);let html=await r.text();assert.match(html,/Synthetic Estates/);assert.match(html,/Record a supplier cost/);assert.match(html,/Professional advice/);fs.writeFileSync('/tmp/annual-render-en.html',html);
   let result=await action('saveYear',{id:yearId,revision:1,vat_treatment:'pending',vat_effective_from:'',vat_evidence:'',notes:'Synthetic saved notes',check_income:'on'});assert.match(result,/"ok":true/);assert.equal(years[0].revision,2);assert.equal(years[0].notes,'Synthetic saved notes');assert.equal(years[0].checks.income,true);
   result=await action('saveYear',{id:yearId,revision:1,vat_treatment:'pending',vat_effective_from:'',vat_evidence:'',notes:'Stale update'});assert.match(result,/"code":"stale"/);assert.equal(years[0].notes,'Synthetic saved notes');
+  result=await action('createProject',{year_id:yearId,name:'Synthetic renovation',kind:'renovation',property_id:'',source_reference:'TEST-ONLY'});assert.match(result,/"ok":true/);assert.equal(projects.length,1);
   const costFields={year_id:yearId,supplier_relationship_id:supplierId,supplier_invoice_number:'TEST-ONLY-1',invoice_date:'2026-04-10',property_id:'',category:'advice',description:'Synthetic advisory cost',net:'100.00',vat:'21.00'};
   result=await action('createCost',costFields);assert.match(result,/"ok":true/);assert.equal(costs.length,1);assert.equal(costs[0].cost_scope,'entity');assert.equal(costs[0].gross_cents,12100);
   result=await action('createCost',costFields);assert.match(result,/"code":"duplicate"/);assert.equal(costs.length,1);
-  result=await action('saveCostReview',{year_id:yearId,draft_id:costs[0].id,revision:0,category:'advice',project_id:'',review_status:'reviewed',evidence_reference:'Synthetic invoice reference',note:''});assert.match(result,/"ok":true/);assert.equal(reviews.length,1);
-  language='es';r=await request(detail);html=await r.text();assert.equal(r.status,200);assert.match(html,/<html[^>]+lang="es"/);assert.match(html,/Administraciones anuales/);assert.match(html,/Asesoramiento profesional/);assert.match(html,/Synthetic saved notes/);assert.match(html,/TEST-ONLY-1/);assert.match(html,/121,00/);fs.writeFileSync('/tmp/annual-render-es.html',html);
+  result=await action('saveCostReview',{year_id:yearId,draft_id:costs[0].id,revision:0,category:'advice',project_id:projects[0].id,review_status:'reviewed',evidence_reference:'Synthetic invoice reference',note:''});assert.match(result,/"ok":true/);assert.equal(reviews.length,1);
+  language='es';r=await request(detail+'/import');assert.equal(r.status,200);assert.match(await r.text(),/Preparar una importación de costes/);r=await request(detail);html=await r.text();assert.equal(r.status,200);assert.match(html,/<html[^>]+lang="es"/);assert.match(html,/Administraciones anuales/);assert.match(html,/Asesoramiento profesional/);assert.match(html,/Synthetic saved notes/);assert.match(html,/TEST-ONLY-1/);assert.match(html,/121,00/);fs.writeFileSync('/tmp/annual-render-es.html',html);
   r=await request(detail+'?status=excluded');assert.match(await r.text(),/Ningún coste de proveedor coincide/);
   r=await request(detail+'/export');assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);const zip=Buffer.from(await r.arrayBuffer());assert.equal(zip.readUInt32LE(0),0x04034b50);assert.ok(zip.length>1000);
   failed=true;r=await request(detail+'/export');assert.equal(r.status,503);failed=false;
-  role='client';assert.equal((await request(detail)).status,404);assert.equal((await request(detail+'/export')).status,404);
-  role='admin';assert.equal((await request(detail,false)).status,307);assert.equal((await request(detail+'/export',false)).status,307);
+  role='client';assert.equal((await request(detail+'/import')).status,404);assert.equal((await request(detail)).status,404);assert.equal((await request(detail+'/export')).status,404);
+  role='admin';assert.equal((await request(detail+'/import',false)).status,307);assert.equal((await request(detail,false)).status,307);assert.equal((await request(detail+'/export',false)).status,307);
   console.log('Annual administration HTTP integration passed: authenticated EN/ES screens; real Next save-year, stale-revision, create-cost, duplicate and review server actions; amounts and filters; real ZIP serialization; fail-closed export; client denial and anonymous redirects.');
  }finally{app.kill('SIGTERM');server.close();fs.closeSync(log);}
 })().catch(e=>{console.error(e);process.exitCode=1});
