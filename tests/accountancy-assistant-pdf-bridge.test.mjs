@@ -54,7 +54,7 @@ test('PDF bytes are bounded even without trusted content-length and checked for 
 });
 function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=false,duplicate=false,brokenStorage=false}={}){
  const events=[],documents=[],links=[],storage=new Map();
- const previous={id:'00000000-0000-4000-8000-000000000009',file_path:issuer+'/2026/00000000-0000-4000-8000-000000000009.pdf',
+ const previous={id:'00000000-0000-4000-8000-000000000009',issuer_id:issuer,fiscal_year:2026,file_path:issuer+'/2026/00000000-0000-4000-8000-000000000009.pdf',
   sha256:sha,file_size_bytes:original.length,review_status:'pending_review'};
  if(duplicate){documents.push(previous);storage.set(previous.file_path,Buffer.from(original));links.push({document_id:previous.id,draft_id:draft,id:'previous-link',is_active:true});}
  function from(table){
