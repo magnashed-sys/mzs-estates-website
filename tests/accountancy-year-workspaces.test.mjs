@@ -19,3 +19,20 @@ test('annual database rules enforce RLS, source immutability, duplicate preventi
 
 test('purchase PDF reference and checksum survive edits to the annual review note',()=>{const f=fixture();f.costs[0].source_document_status='retained_purchase_pdf';f.costs[0].source_pdf_id=id(99);f.costs[0].source_pdf_sha256='a'.repeat(64);f.reviews[0].evidence_reference='Changed manual note';const files=pkg.yearAccountantFiles(f,id(1));const csv=Buffer.from(files.find(x=>x.name==='supplier-costs.csv').bytes).toString();assert.ok(csv.includes(id(99)));assert.ok(csv.includes('a'.repeat(64)));assert.ok(csv.includes('Changed manual note'));});
 test('retained archive PDFs export each invoice association without inventing payments',()=>{const f=fixture();f.costs[0].source_document_status='retained_archive_pdf';f.costs[0].archive_documents=[{id:id(90),title:'Combined supplier original',sha256:'b'.repeat(64),review_status:'pending_review'}];f.costs[1].archive_documents=f.costs[0].archive_documents;const files=pkg.yearAccountantFiles(f,id(1)),text=n=>Buffer.from(files.find(x=>x.name===n).bytes).toString();assert.equal(text('supplier-document-links.csv').split(id(90)).length-1,2);assert.ok(text('supplier-document-links.csv').includes('b'.repeat(64)));assert.doesNotMatch(text('annual-review-exceptions.csv'),new RegExp(f.costs[0].id+',original_document_not_attached'));assert.match(text('supplier-costs.csv'),/false/);});
+
+test('annual accountant export includes one source-evidence row per supplier invoice, with actionable issues and no payment inference',()=>{
+ const f=fixture();
+ f.costs[0].archive_documents=[{id:id(96),title:'Retained original',sha256:'b'.repeat(64),review_status:'pending_review'}];
+ const files=pkg.yearAccountantFiles(f,id(1));
+ const csv=Buffer.from(files.find(file=>file.name==='supplier-evidence-actions.csv').bytes).toString();
+ const lines=csv.trim().split(/\r?\n/);
+ assert.equal(lines.length,4,'header plus three supplier costs');
+ assert.ok(csv.includes('supplier_invoice_number'));
+ assert.ok(csv.includes('issue_codes'));
+ assert.match(csv,/private_archive/);
+ assert.match(csv,/archive_pending_review/);
+ assert.match(csv,/missing_original/);
+ assert.match(csv,/not_assessed/);
+ assert.ok(files.some(file=>file.name==='source-coverage.csv'));
+ assert.equal(JSON.parse(Buffer.from(files.find(file=>file.name==='manifest.json').bytes).toString()).statutory_complete,false);
+});
