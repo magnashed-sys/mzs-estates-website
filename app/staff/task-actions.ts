@@ -1,5 +1,7 @@
 'use server';
 import {notFound} from 'next/navigation';
+import {after} from 'next/server';
+import {deliverPropertyStaffTaskNotice} from '../../lib/mzs/notifications';
 import {requirePropertyStaff} from '../../lib/security/property-staff';
 import {staffTaskEnvironment} from '../../lib/property-operations/property-tasks';
 import {taskInput,taskUpdateInput} from '../../lib/property-operations/task-input';
@@ -14,8 +16,13 @@ export async function createMyPropertyTask(_prior:Result,form:FormData):Promise<
   const payload=taskInput(form);
   if(!properties.some(p=>p.id===payload.property_id)||payload.assigned_profile_id!==user.id)
    return {status:'error',message:'Only your own assigned property and account can be used.'};
-  const {error}=await db.from('mzs_ops_property_tasks').insert(payload);
-  if(error)return {status:'error',message:'Task could not be created. Check the unit and access rights.'};
+  const {data:created,error}=await db.from('mzs_ops_property_tasks')
+    .insert(payload).select('id').single();
+  if(error||!created)return {status:'error',message:'Task could not be created. Check the unit and access rights.'};
+  // Database trigger queues one idempotent notification. Delivery happens
+  // after the response so a slow SMTP provider cannot block task creation;
+  // the existing mail cron handles retries.
+  after(async()=>{await deliverPropertyStaffTaskNotice(created.id);});
   refresh();return {status:'success',message:'Task created. It is also visible to the administrator.'};
  }catch{return {status:'error',message:'Check the title, property, dates and priority.'};}
 }
