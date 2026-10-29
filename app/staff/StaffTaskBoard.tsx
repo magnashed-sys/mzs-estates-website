@@ -6,6 +6,7 @@ import s from './staff.module.css';
 import {staffText,type StaffLanguage} from '../../lib/property-operations/staff-copy';
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
+type WorkArea={id:string;name:string};
 type Result={status:'idle'|'success'|'error';message:string};
 const initial:Result={status:'idle',message:''};
 function Message({state}:{state:Result}){return state.message&&<p role="status" className={state.status==='error'?s.error:s.confirm}>{state.message}</p>;}
@@ -25,7 +26,7 @@ function Progress({task,language}:{task:PropertyTask;language:StaffLanguage}){
  </form>;
 }
 type EntryKind='task'|'maintenance';
-function NewWorkItem({properties,units,profileId,language}:{properties:Property[];units:Unit[];profileId:string;language:StaffLanguage}){
+function NewWorkItem({properties,units,areas,profileId,language}:{properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;language:StaffLanguage}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
  const [maintenanceState,setMaintenanceState]=useState<Result>(initial);
@@ -54,9 +55,12 @@ function NewWorkItem({properties,units,profileId,language}:{properties:Property[
   }finally{setMaintenancePending(false);}
  }
  const [kind,setKind]=useState<EntryKind>('task');
- const [propertyId,setPropertyId]=useState(properties[0]?.id??'');
+ const [location,setLocation]=useState(properties[0]?'property:'+properties[0].id:'');
+ const isArea=location.startsWith('area:');
+ const propertyId=isArea?'':location.startsWith('property:')?location.slice(9):'';
+ const workAreaId=isArea?location.slice(5):'';
  const [unitId,setUnitId]=useState('');
- const isMaintenance=kind==='maintenance';
+ const isMaintenance=kind==='maintenance'&&!isArea;
  const result=isMaintenance?maintenanceState:taskState;
  const pending=isMaintenance?maintenancePending:taskPending;
  return <section id="work-create" className={s.taskCreate} aria-labelledby="work-create-title">
@@ -66,20 +70,27 @@ function NewWorkItem({properties,units,profileId,language}:{properties:Property[
    <label>{t('addType')}
     <select value={kind} onChange={e=>setKind(e.target.value as EntryKind)}>
      <option value="task">{t('task')}</option>
-     <option value="maintenance">{t('maintenance')}</option>
+     {!isArea&&<option value="maintenance">{t('maintenance')}</option>}
     </select>
    </label>
    <input type="hidden" name="property_id" value={propertyId}/>
+   <input type="hidden" name="work_area_id" value={workAreaId}/>
    {!isMaintenance&&<>
     <input type="hidden" name="assigned_profile_id" value={profileId}/>
     <input type="hidden" name="source_reference" value=""/>
    </>}
-   {properties.length>1?<label>{t('property')}
-    <select value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}} required>
-     {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+   <label>{t('property')}
+    <select value={location} onChange={event=>{
+      const selection=event.target.value;
+      setLocation(selection);setUnitId('');
+      if(selection.startsWith('area:'))setKind('task');
+    }} required>
+     {properties.filter(p=>p.name.includes('IJmuiden')).map(p=>
+      <option key={p.id} value={'property:'+p.id}>{p.name}</option>)}
+     {areas.map(area=><option key={area.id} value={'area:'+area.id}>{area.name}</option>)}
     </select>
-   </label>:<p className={s.taskMeta}>{t("property")}: {properties[0]?.name??'No assigned property'}</p>}
-   {units.some(u=>u.property_id===propertyId)&&<label>{t('unit')}
+   </label>
+   {!isArea&&units.some(u=>u.property_id===propertyId)&&<label>{t('unit')}
     <select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
      <option value="">{t('whole')}</option>
      {units.filter(u=>u.property_id===propertyId).map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
@@ -118,13 +129,13 @@ function NewWorkItem({properties,units,profileId,language}:{properties:Property[
     <p className={s.description}>{t('photoHint')}</p>
     <p className={s.description}>{t('photoWarning')}</p>
    </>}
-   <button disabled={pending||!propertyId} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
+   <button disabled={pending||(!propertyId&&!workAreaId)} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
    <Message state={result}/>
   </form>
  </section>;
 }
-export default function StaffTaskBoard({tasks,properties,units,profileId,today,language}:{
- tasks:PropertyTask[];properties:Property[];units:Unit[];profileId:string;today:string;language:StaffLanguage;
+export default function StaffTaskBoard({tasks,properties,units,areas,profileId,today,language}:{
+ tasks:PropertyTask[];properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;today:string;language:StaffLanguage;
 }){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [showAll,setShowAll]=useState(false);
@@ -132,6 +143,7 @@ export default function StaffTaskBoard({tasks,properties,units,profileId,today,l
  const summary=taskOverview(tasks,today);
  const list=taskOrder(tasks).filter(t=>showAll||!['done','cancelled'].includes(t.status));
  const prop=new Map(properties.map(p=>[p.id,p.name]));
+ const areaName=new Map(areas.map(area=>[area.id,area.name]));
  const unit=new Map(units.map(u=>[u.id,u.address]));
  return <section className={s.staffTasks} aria-labelledby="staff-tasks-title">
   <div className={s.mobileHead}>
@@ -149,14 +161,14 @@ export default function StaffTaskBoard({tasks,properties,units,profileId,today,l
     aria-controls="work-create" onClick={()=>setShowNew(x=>!x)}>{t('newEntry')}</button>
    <a className={s.taskSecondary} href="#hours">{t('logTime')}</a>
   </div>
-  {showNew&&<NewWorkItem properties={properties} units={units} profileId={profileId} language={language}/>} 
+  {showNew&&<NewWorkItem properties={properties} units={units} areas={areas} profileId={profileId} language={language}/>} 
   <div className={s.taskTabs} role="group" aria-label="Task status filter">
    <button type="button" className={!showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(false)} >{t('taskOpen')} ({summary.open})</button>
    <button type="button" className={showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(true)}>{t('allTasks')}</button>
   </div>
   <div className={s.taskCardList}>{list.map(task=><article className={s.taskCard} key={task.id}>
    <div className={s.taskCardTop}><strong>{task.title}</strong><span className={s.taskChip}>{t(task.status==='open'?'taskOpen':task.status==='in_progress'?'taskProgress':task.status==='blocked'?'taskBlocked':task.status==='done'?'taskDone':'taskCancelled')}</span></div>
-   <p className={s.taskMeta}>{prop.get(task.property_id)??'Property'}{task.unit_id?' · '+(unit.get(task.unit_id)??'Unit'):''}</p>
+   <p className={s.taskMeta}>{task.work_area_id?areaName.get(task.work_area_id)??'Work area':prop.get(task.property_id??'')??'Property'}{task.unit_id?' · '+(unit.get(task.unit_id)??'Unit'):''}</p>
    <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · Due '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
    {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
