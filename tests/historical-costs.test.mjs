@@ -4,6 +4,7 @@ const require=createRequire(import.meta.url),modules={};
 const compile=path=>ts.transpileModule(readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 for(const name of ['staff-work','finance','action-queues','weekly-import','sales-reconciliation','historical-costs','accountant-archive']){const exports={};vm.runInNewContext(compile('lib/property-operations/'+name+'.ts'),{exports,Date,Intl,URLSearchParams,Buffer,Uint8Array,TextEncoder,require:n=>n.startsWith('node:')?require(n):modules[n.replace('./','')]});modules[name]=exports;}
 const credit={};vm.runInNewContext(compile('lib/finance/credit-notes.ts'),{exports:credit,require:n=>n.includes('sales-reconciliation')?modules['sales-reconciliation']:{}});
+const salesPackage={};vm.runInNewContext(compile('lib/accountancy/sales-package.ts'),{exports:salesPackage,Set,Buffer,Uint8Array,TextEncoder,require:n=>n.includes('credit-notes')?credit:modules[n.split('/').pop()]});
 const h=modules['historical-costs'],id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0'),filters=()=>h.historyFilters({year:'2026'});
 function fixture(){return {year:2026,profile:null,snapshot_at:'2026-10-28T20:00:00Z',batches:[{id:id(1),profile_id:id(2),person_name:'Synthetic worker',reporting_year:2026,source_name:'Synthetic CSV',source_file_id:'libfile_synthetic',source_sha256:'a'.repeat(64),hash_basis:'extracted_csv_utf8_lf',expected_rows:3,expected_cost_cents:18750,created_at:'2026-10-28T20:00:00Z'}],invoices:[{id:id(3),batch_id:id(1),issuer_id:id(4),customer_id:id(5),property_id:id(6),issuer_name:'Synthetic entity',customer_name:'Synthetic customer',property_name:'Synthetic building',number:'EXT-TEST-1',issued_on:'2026-10-28',due_on:'2026-11-11',period_from:'2026-02-09',period_until:'2026-02-15',customer_reference:'Synthetic reference',net_cents:7500,vat_cents:1575,gross_cents:9075,vat_basis_points:2100,billed_hours:3,hourly_rate_cents:2500,currency:'EUR',status:'externally_issued',delivery_status:'not_recorded',payment_status:'not_recorded',source_file_id:'libfile_invoice',source_name:'Synthetic invoice.pdf'}],rows:[0,1,2].map((n)=>({id:id(10+n),batch_id:id(1),profile_id:id(2),reporting_year:2026,reference:'ROW-'+n,iso_week:7,period_from:'2026-02-09',period_until:'2026-02-15',original_location:n===2?'Other':'Zorg',category:'Cleaning',description:'Synthetic statement',cost_cents:[5000,1250,12500][n],recharge:n===2?'Te beoordelen':'Ja',source_reference:'#123',source_check:'Source check',source_billing_reference:n===2?'':'Historical invoice reference',invoice_id:n===2?null:id(3),billed_hours:n===2?null:[2,1][n],recharge_cents:n===2?null:[5000,2500][n]}))};}
 test('historical costs preserve source costs and billed hours without reconstructing visits, VAT on costs or payments',()=>{
@@ -24,6 +25,7 @@ test('historical CSV distinguishes billed hours from unknown actual minutes and 
 function route(path,{source,denied=false,environment=true,lib=modules['historical-costs']}={}){const exports={},calls=[];vm.runInNewContext(compile(path),{exports,Response,URL,Buffer,Uint8Array,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
  if(name.includes('property-staff'))return {staffEnvironmentAvailable:()=>environment};
  if(name.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('admin');if(denied)throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:null};}}};}};
+ if(name.includes('sales-package'))return salesPackage;
  if(name.includes('credit-notes'))return credit;
  if(name.includes('historical-costs'))return lib;
  if(name.includes('sales-reconciliation'))return modules['sales-reconciliation'];if(name.includes('accountant-archive'))return modules['accountant-archive'];if(name.endsWith('/finance'))return modules.finance;
@@ -53,6 +55,7 @@ test('historical page checks active admin before data and paginates only detail 
  if(name==='react/jsx-runtime')return require(name);if(name==='next/link')return {default:'a'};if(name==='next/navigation')return {redirect:href=>{throw Error('redirect:'+href);}};if(name.endsWith('.css'))return {default:{}};
  if(name.includes('property-staff'))return {requireStaffEnvironment:()=>calls.push('environment')};
  if(name.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('admin');if(denied)throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:null};}}};}};
+ if(name.includes('sales-package'))return salesPackage;
  if(name.includes('credit-notes'))return credit;
  if(name.includes('historical-costs'))return h;throw Error(name);
  }});
