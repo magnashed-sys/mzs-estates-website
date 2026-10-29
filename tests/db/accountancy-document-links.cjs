@@ -1,0 +1,36 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=require('@electric-sql/pglite');
+(async()=>{
+ const db=new PGlite(),id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0'),admin=id(1),client=id(2),entity=id(3),other=id(4),property=id(5),cost=id(6),doc=id(7);
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create schema mzs_private;create schema storage;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,storage to authenticated;
+ create table profiles(id uuid primary key,role text,is_active boolean);insert into profiles values('${admin}','admin',true),('${client}','client',true),('${id(20)}','admin',false);
+ create function public.is_admin() returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active)$$;
+ create table mzs_lease_issuers(id uuid primary key,name text);insert into mzs_lease_issuers values('${entity}','Entity'),('${other}','Other');
+ create table mzs_estate_properties(id uuid primary key);insert into mzs_estate_properties values('${property}'),('${id(10)}');
+ create table mzs_ops_expense_drafts(id uuid primary key,legal_entity_id uuid,invoice_date date);insert into mzs_ops_expense_drafts values('${cost}','${entity}','2024-08-13'),('${id(8)}','${entity}','2025-08-13'),('${id(9)}','${other}','2024-08-13'),('${id(11)}','${entity}','2024-08-14');
+ create table mzs_ops_property_entity_links(id uuid primary key,property_id uuid,legal_entity_id uuid,effective_from date,effective_until date);
+ insert into mzs_ops_property_entity_links values('${id(12)}','${property}','${entity}','2024-07-08',null);
+ grant select on mzs_lease_issuers,mzs_ops_expense_drafts,mzs_estate_properties,mzs_ops_property_entity_links to authenticated;
+ create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+ create table storage.objects(id uuid default gen_random_uuid() primary key,bucket_id text,name text,metadata jsonb,unique(bucket_id,name));alter table storage.objects enable row level security;grant select,insert,update,delete on storage.objects to authenticated;`);
+ for(const path of ['20261029092618_accountancy_document_archive.sql','20261029164826_accountancy_dossier_document_links.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+path,'utf8'));
+ const actor=who=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${who}',false)`);
+ await actor(admin);const path=`${entity}/2024/${doc}.pdf`;
+ await db.query(`insert into storage.objects(bucket_id,name,metadata) values('mzs-private-accountancy-documents',$1,'{"size":100,"mimetype":"application/pdf"}')`,[path]);
+ await db.query(`insert into mzs_accountancy_documents(id,issuer_id,fiscal_year,title,original_name,category,document_date,file_path,file_size_bytes,sha256) values($1,$2,2024,'Synthetic source','test.pdf','supplier_invoice','2024-07-08',$3,100,$4)`,[doc,entity,path,'a'.repeat(64)]);
+ const link=(c=cost,p=null)=>db.query('insert into mzs_accountancy_document_links(document_id,draft_id,property_id) values($1,$2,$3) returning *',[doc,c,p]);
+ const first=(await link()).rows[0];assert.equal(first.created_by,admin);assert.equal(first.is_active,true);
+ await link(id(11));await link(null,property);
+ await assert.rejects(link(),/unique/);await assert.rejects(link(id(8)),/entity and year/);await assert.rejects(link(id(9)),/entity and year/);await assert.rejects(link(null,id(10)),/association/);await assert.rejects(link(cost,property),/check constraint/);await assert.rejects(link(null,null),/check constraint/);
+ await assert.rejects(db.query('update mzs_accountancy_document_links set is_active=false where id=$1',[first.id]),/check constraint/);
+ await db.query("update mzs_accountancy_document_links set is_active=false,removal_reason='Wrong invoice selected' where id=$1",[first.id]);
+ await assert.rejects(db.query('update mzs_accountancy_document_links set is_active=true where id=$1',[first.id]),/only be removed/);
+ await assert.rejects(db.query('update mzs_accountancy_document_links set draft_id=$1 where id=$2',[id(11),first.id]),/permission denied/);
+ assert.equal((await db.query('select * from mzs_accountancy_document_link_events where link_id=$1 order by occurred_at',[first.id])).rows.length,2);
+ assert.equal((await db.query('select * from mzs_accountancy_documents')).rows.length,1);assert.equal((await db.query('select * from storage.objects')).rows.length,1);
+ await link();await db.query("update mzs_accountancy_documents set review_status='superseded' where id=$1",[doc]);await assert.rejects(link(),/Available retained/);
+ for(const who of [client,id(20)]){await actor(who);assert.equal((await db.query('select * from mzs_accountancy_document_links')).rows.length,0);assert.equal((await db.query('select * from mzs_accountancy_document_link_events')).rows.length,0);await assert.rejects(link(),/administrator|row-level security/);}
+ await actor(admin);await assert.rejects(db.query('delete from mzs_accountancy_document_links'),/permission denied/);await assert.rejects(db.query('delete from mzs_accountancy_document_link_events'),/permission denied/);
+ await db.exec('reset role;set role anon');await assert.rejects(db.query('select * from mzs_accountancy_document_links'),/permission denied/);
+ await db.close();console.log('Dossier links: entity/year boundaries, dated property attribution, multi-invoice originals, duplicates, corrections, retention, audit and role isolation passed');
+})().catch(e=>{console.error(e);process.exit(1)});
