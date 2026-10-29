@@ -14,7 +14,7 @@ test('booking date uses Madrid midnight in winter and summer',()=>{
 });
 async function bookings(dates,language='en'){
  const exports={},calls=[];const rows=dates.map((date,i)=>({id:String(i),category:'Guest booking',property:'Synthetic property',checkIn:date,checkOut:'2026-11-02',status:'confirmed',amount:100,paid:0,guestName:'Synthetic guest '+i,invoiceRecipient:'Synthetic customer',sourceRef:'SOURCE-'+i}));
- vm.runInNewContext(compile('app/admin/bookings/page.tsx'),{exports,Intl,Date,URLSearchParams,require(n){if(n.includes('/admin/i18n'))return adminI18nFixture(language);
+ vm.runInNewContext(compile('app/admin/bookings/page.tsx'),{exports,Intl,Date,URLSearchParams,require(n){if(n.includes('/accountancy/pdf/model'))return {purchaseWorkspaceEnvironment:()=>false};if(n.includes('/admin/i18n'))return adminI18nFixture(language);
   if(n==='react'||n==='react/jsx-runtime')return require(n);
   if(n==='next/link')return {default:'a'};
   if(n==='next/navigation')return {redirect:url=>{throw Error(url)}};
@@ -43,7 +43,7 @@ test('today marker remains accurate for filtered pages wholly before or after to
 });
 test('Accountancy authenticates before loading global years and keeps the existing booking export route',async()=>{
  const exports={},calls=[];
- vm.runInNewContext(compile('app/admin/workspaces/accountancy/page.tsx'),{exports,require(n){if(n.includes('/admin/i18n'))return adminI18nFixture();
+ vm.runInNewContext(compile('app/admin/workspaces/accountancy/page.tsx'),{exports,require(n){if(n.includes('/accountancy/pdf/model'))return {purchaseWorkspaceEnvironment:()=>false};if(n.includes('/admin/i18n'))return adminI18nFixture();
  if(n==='react/jsx-runtime')return require(n);if(n==='next/link')return {default:'a'};if(n.endsWith('.css'))return {default:{}};
  if(n.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('auth');return {db:{rpc:async(name,args)=>{calls.push({name,args});return {data:{years:[2025,2026]},error:null}}}}}};throw Error(n);
  }});
