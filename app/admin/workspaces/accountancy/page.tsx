@@ -8,6 +8,7 @@ export default async function Workspace(){
  const years:number[]=!bookingError&&Array.isArray(bookingData?.years)?bookingData.years.filter((y:unknown)=>Number.isInteger(y)&&Number(y)>=1900&&Number(y)<=2199):[];
  return <><section className={styles.intro}><h1 className={styles.heading}>Accountancy</h1><p className={styles.lead}>Expenses, issued invoices and financial exports by legal entity. Select the register you want to review.</p></section>
  <section className={styles.grid} aria-label="Accountancy workflows">
+   <Link className={styles.card} href="/admin/workspaces/accountancy/documents"><strong>Document archive</strong><p>Private annual accounts, tax returns and analysis reports by entity and financial year. Available in English and Spanish.</p><span>Open document archive →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/accountancy/sales"><strong>Invoices</strong><p>All issued invoices: standalone, rental contracts, bookings and imported invoices. Review recorded balances and payments to verify.</p><span>Open invoice register →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/accountancy/invoices"><strong>Historical invoices</strong><p>Search Gripp invoices and credit notes by year, customer and original payment balance.</p><span>Open invoice archive →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/expenses"><strong>Expense register</strong><p>Purchase drafts, suppliers and expense allocation by property and unit.</p><span>Open →</span></Link>

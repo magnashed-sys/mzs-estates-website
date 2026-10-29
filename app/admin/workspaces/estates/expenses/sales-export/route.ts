@@ -1,3 +1,4 @@
+import {creditExport,type CreditNote} from '../../../../../../lib/finance/credit-notes';
 import {NextRequest} from "next/server";
 import {requireEstateAdmin} from "../../../../../../lib/security/estate-properties";
 import {accountantCsv} from "../../../../../../lib/property-operations/finance";
@@ -19,7 +20,7 @@ export async function GET(request:NextRequest){
  const year=Number(rawYear);
  try{
   const {data:source,error:sourceError}=await db.rpc("mzs_ops_accountant_source",{p_entity:entity});
-  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external)||!Array.isArray(source.external_receipts)||!Array.isArray(source.imported)||!Array.isArray(source.imported_receipts)||!Array.isArray(source.services)||!Array.isArray(source.service_receipts))throw Error("Incomplete accountant snapshot");
+  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external)||!Array.isArray(source.external_receipts)||!Array.isArray(source.imported)||!Array.isArray(source.imported_receipts)||!Array.isArray(source.services)||!Array.isArray(source.service_receipts)||!Array.isArray(source.credit_notes))throw Error("Incomplete accountant snapshot");
   const leases=source.leases as (IssuedInvoice&{contract_id:string})[],bookings=source.bookings as (IssuedInvoice&{booking_id:string})[];
   const issuer={data:source.issuer as {id:string;name:string}};
   const issued:IssuedInvoice[]=[
@@ -28,11 +29,13 @@ export async function GET(request:NextRequest){
    ...bookings.map(x=>({...x,source:"holiday_booking" as const})),
    ...(source.external as IssuedInvoice[]).map(x=>({...x,source:"external_cost_invoice" as const}))
   ];
+  const credits=creditExport(source.credit_notes as CreditNote[],source.services,entity,year);
   const invoiceNumbers=new Set<string>();
   for(const x of issued){
    if(x.issuer_id!==entity||!x.number||invoiceNumbers.has(x.number))throw Error("Overlapping or missing issued number");
    invoiceNumbers.add(x.number);
   }
+  for(const c of source.credit_notes as CreditNote[]){if(invoiceNumbers.has(c.number))throw Error('Duplicate credit number');invoiceNumbers.add(c.number);}
   const invoices=issued.filter(x=>dateYear(x.issued_on)===year)
    .map(x=>normalizeIssuedInvoice(x,entity,year));
   invoices.sort((a,b)=>a.invoice_date.localeCompare(b.invoice_date)||a.invoice_id.localeCompare(b.invoice_id));
@@ -63,6 +66,7 @@ export async function GET(request:NextRequest){
   exceptions.sort((a,b)=>String(a.receipt_id).localeCompare(String(b.receipt_id)));
   const files:ArchiveFile[]=[],manifest:{name:string;sha256:string;bytes:number}[]=[];
   function add(name:string,contents:string){const bytes=exportBytes(contents);files.push({name,bytes});manifest.push({name,sha256:exportHash(bytes),bytes:bytes.length});}
+  add('issued-credit-notes.csv',accountantCsv(['credit_id','credit_number','issued_on','issuer_id','original_invoice_id','original_invoice_number','net_eur','vat_eur','gross_eur','allocated_eur','reason','currency'],credits));
   add("issued-sales-invoices.csv",accountantCsv(colsI,invoices));
   add("registered-receipt-events.csv",accountantCsv(colsR,events));
   add("receipt-exceptions.csv",accountantCsv(colsX,exceptions));
@@ -73,6 +77,7 @@ export async function GET(request:NextRequest){
    "Entity: "+issuer.data.name+" / "+entity,"Year: "+year,"Source snapshot: "+source.snapshot_at,
    "Includes platform standalone invoices, issued rental/booking invoices, externally issued historical-cost invoices and separately dated registered receipt events.",
    "Additional imported-invoice receipts and reversals are included by event date. Imported invoice references are historical context only; do not post them as new sales. Imported paid snapshots are not receipt events. Excluded source references remain labelled when needed to explain recorded events.",
+   "Credit notes are separate signed sales adjustments, selected by credit issue year and allocated to the original invoice. Do not treat credit allocations as bank receipts or refunds. Original invoice sales remain unchanged.",
    "A receipt may relate to an invoice issued in another year.",
    "Administrative reversal does not establish a bank refund.",
    "Receipts with unknown dates are listed as undated exceptions in every selected year; no receipt year is inferred.",
@@ -82,7 +87,7 @@ export async function GET(request:NextRequest){
    "No source is changed, invoiced, paid or emailed."
   ].join("\n")+"\n");
   add("manifest.json",JSON.stringify({kind:"partial-sales-receipts",entity,year,
-   invoice_rows:invoices.length,receipt_events:events.length,exceptions:exceptions.length,
+   invoice_rows:invoices.length,credit_rows:credits.length,receipt_events:events.length,exceptions:exceptions.length,
    statutory_complete:false,files:manifest},null,2)+"\n");
   const zip=buildAccountantZip(files);
   if(zip.length>4*1024*1024)throw Error("Export exceeds response limit");

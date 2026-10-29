@@ -1,59 +1,34 @@
-# MZS Group positioning — preparation only
+# MZS Group positioning and cookie consent — release record
 
-Owner instruction: prepare the approved positioning; **do not publish** while another release is in progress. Keep this branch and PR unmerged and in Draft. No automatic release after the other work finishes; publication requires a later owner instruction.
+The owner approved publication on 29 October 2026 after reviewing the smaller homepage headline and compact cookie bar on Staging. This supersedes the earlier preparation-only and Staging-only instructions. The owner explicitly requested coordination with another production release.
 
-## Proposed first impression
+## Approved presentation
 
-**Tailor-made solutions for entrepreneurs and investors.**
+- Homepage promise: **Tailor-made solutions for entrepreneurs and investors.**
+- Supporting introduction connects consultancy, real estate and private capital, with localized activity links.
+- **Private. Independent. International.** remains beneath the introduction.
+- The serif headline is approximately 18% smaller on desktop, with more generous line height and adjusted responsive sizes.
+- About, activity introductions and Home/About metadata align with the positioning in all 16 enabled languages.
+- A slim bottom cookie bar replaces the large card. Equal Accept/Reject controls and expandable information preserve the existing consent behavior. The homepage reserves the bar's measured height to keep the language footer visible. After a choice, a discreet Cookie settings link remains.
 
-Bringing together consultancy, real estate and private capital to support your ambitions.
+## Concurrent release preservation
 
-*Private. Independent. International.*
+The reviewed Staging head was `06e612df05f073e373a87468cb3af21864ddb3ec`. The publication candidate incorporates main through `d4963bb1d78a41efe1384184d4421b8a0d41b3bb`, including the credit-note release and private Accountancy document archive. The merge was conflict-free.
 
-Links: Consultancy → /consultancy; Real Estate → /real-estate; Private Capital → /private-capital. Each link retains the current language prefix; existing English paths stay unprefixed.
+No admin, accountancy, finance or database-migration files differ from that main baseline. This release does not apply migrations, send emails, change data or alter production environment variables. Recheck main and active production deployments immediately before merge; if main advances, include the newer changes and rerun relevant checks before release.
 
-Dutch headline: **Maatwerkoplossingen voor ondernemers en investeerders.**
+The exact feature branch remains excluded from automatic Git deployments in vercel.json. Main deployment behavior and cron schedules are unchanged. Production must be built from the integrated main commit using production configuration; do not promote the isolated Staging build.
 
-## Implementation
+## Verification
 
-- The homepage H1 now explains the audience and proposition. The original three-part slogan remains as supporting text.
-- Retains the architectural background, palette, header and footer. Responsive heading wraps naturally, with a fallback for long words. Activity links have visible keyboard focus and 44px minimum height.
-- About MZS gains an introductory positioning paragraph before the existing company story. History and activity cards remain intact.
-- Consultancy, Real Estate and Private Capital hero introductions address entrepreneurs and investors. Detailed service scope, forms and existing disclosures remain unchanged.
-- Home and About meta descriptions also feed existing Open Graph and Twitter metadata. Activity-specific titles, URLs, canonical tags and social images stay intact.
-- Copy prepared in all 16 enabled locales: English, Dutch, German, French, Spanish, Italian, Norwegian Bokmål, Swedish, Polish, Lithuanian, Romanian, Russian, Turkish, Simplified Chinese, Arabic and Brazilian Portuguese.
-- Existing locale catalogue-size expectations updated from 1,158 to 1,160 for the two new translated messages; all structure and ICU argument checks remain.
+- Combined automated suite: **396 passed; 0 failed**.
+- Staging browser checks: Dutch and English homepages; compact bar, expanded information, accepting, rejecting, reopening settings, language navigation, visible footer/flags. Google Analytics remains absent on Staging after acceptance.
+- Earlier content verification: English About visually; Dutch activity and About endpoints HTTP 200.
+- Complete build, TypeScript and GitHub checks on the reconciled candidate before merge; record final commit/deployment status in PR #177.
+- Mobile CSS and locale completeness were reviewed. No mobile browser or native-speaker editorial acceptance is claimed.
 
-## Isolation from the concurrent publication
+## Existing issue outside this release
 
-Started from main commit `294510a2d8c669a5812574069582c3da2a095d5f` (PR #175). Main subsequently advanced with the separate credit-note release, PR #176; this preparation does not include or modify that release.
+A React #418 warning previously observed on English About was reproduced on the existing production deployment `dpl_8ic3mkN1rW46Sttk1yfRXhgx1cbZ` before this publication. The page renders. This establishes a pre-existing issue, not a clean-console acceptance or a diagnosed cause. No unrelated contact-form changes are included.
 
-Branch: `feature/mzs-brand-positioning-preparation-20261029`.
-
-The branch's `vercel.json` disables automatic Git deployment **only for this exact branch**, using `git.deploymentEnabled`. Unspecified branches retain their existing behavior. There are no changes to Vercel project settings, environment variables, production aliases or schedules. The existing cron entries are untouched.
-
-Official reference: https://vercel.com/docs/project-configuration/git-configuration#git.deploymentenabled
-
-No production or hosted Preview deployment, merge, database action, invoice change or outbound message was requested or performed for this preparation.
-
-## Validation
-
-- Offline locked dependency installation completed without dependency changes.
-- Full automated suite: **380 passed; 0 failed**.
-- `npm run build`: exit 0; generated `.next/BUILD_ID`, prerender/routes manifests and required server files. Used the repository CI's deliberately nonfunctional build-only public key and Staging URL, without credentials for real data.
-- `npm run typecheck`: passed.
-- `git diff --check`: passed.
-- The existing all-locale tests confirm complete translation-key parity, valid ICU messages, public route localization and unchanged protected-route behavior.
-- React review: async server component; independent translation calls batched; no new client component or dependency; a labelled navigation landmark; decorative SVG arrows; stable link keys.
-
-## Remaining before publication
-
-The managed local preview launcher appends Vite-specific `--host` and `--strictPort` flags to `next dev`, which rejects `--host`. Therefore **no browser screenshot or desktop/mobile visual acceptance is claimed**. The working application and production hosting settings were not altered to work around the preview infrastructure.
-
-After separate owner authorization for the next step:
-
-1. Reconcile this branch with current main, particularly any concurrent public-page or catalogue changes.
-2. Arrange a permitted local/isolated visual review. For a hosted Preview, explicitly enable this branch's deployment first; do not merge it to main to obtain a preview.
-3. Check homepage and About on desktop and 320/390px phones; English, Dutch, long German/French text, Arabic RTL and Chinese wrapping. Check keyboard focus, all three localized activity links and the language switcher.
-4. Review translated editorial wording; automated checks establish completeness and syntax, not native-speaker approval.
-5. Repeat the required PR checks on the final merge candidate and obtain the owner's publication instruction.
+PR: https://github.com/magnashed-sys/mzs-estates-website/pull/177
