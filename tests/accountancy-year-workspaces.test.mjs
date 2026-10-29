@@ -107,6 +107,8 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
  assert.match(realCsv('supplier-payment-events.csv'),/real_transfer_attested/);
  assert.match(realCsv('supplier-payment-summary.csv'),/real_transfer_attested/);
  assert.match(realCsv('README.txt'),/manually entered records of prior transfers/);
+ assert.match(realCsv('supplier-invoice-control.csv'),/admin_attested_not_bank_reconciled/);
+ assert.match(csv('supplier-invoice-control.csv'),/synthetic_staging_not_bank_verified/);
  assert.doesNotMatch(realCsv('README.txt'),/SYNTHETIC TEST DATA/);
  assert.match(realCsv('supplier-payment-events.csv'),/"false","true"/);
  assert.match(realCsv('supplier-payment-summary.csv'),/"false","true"/);
