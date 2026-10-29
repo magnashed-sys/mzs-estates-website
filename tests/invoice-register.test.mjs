@@ -36,7 +36,7 @@ test('filters and export preserve selection, dates use Madrid, unknown balances 
  assert.equal(lib.invoiceFilters({},new Date('2026-12-31T23:30:00Z')).year,2027);
  for(const invalid of [{year:['2025','2026']},{source:'__proto__'},{status:'paid_or_unknown'},{page:'0'},{q:'x'.repeat(151)}])assert.throws(()=>lib.invoiceFilters(invalid));
  assert.equal(lib.invoiceHref(filters({q:'A & B',source:'external',status:'unknown'}),3),'/admin/workspaces/accountancy/sales?year=2026&q=A+%26+B&source=external&status=unknown&page=3');
- const x=fixture();x.external[0].customer_reference='=HYPERLINK("bad")';const csv=lib.invoiceRegisterCsv(lib.normalizeInvoiceRegister(x),today);assert.match(csv,/'=HYPERLINK/);assert.match(csv,/"78650","","","Payment unknown"/);assert.match(csv,/imported_snapshot/);
+ const x=fixture();x.external[0].customer_reference='=HYPERLINK("bad")';const csv=lib.invoiceRegisterCsv(lib.normalizeInvoiceRegister(x),today);assert.match(csv,/'=HYPERLINK/);assert.match(csv,/"78650","","","0","Payment unknown"/);assert.match(csv,/imported_snapshot/);
 });
 function database({count=1201,short=false,broken=false}={}){
  const calls=[];const x=fixture();const source={mzs_lease_issuers:x.issuers,mzs_lease_relationships:x.customers,mzs_lease_invoices:[],mzs_booking_invoices:[],mzs_ops_external_sales_invoices:x.external,mzs_invoice_archive_active:Array.from({length:count},(_,n)=>({...x.archive[0],id:id(n+100),number:'A-'+n}))};

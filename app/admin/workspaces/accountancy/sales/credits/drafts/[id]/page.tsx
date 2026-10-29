@@ -1,0 +1,9 @@
+import Link from 'next/link';import {notFound,redirect} from 'next/navigation';
+import {requireEstateAdmin} from '../../../../../../../../lib/security/estate-properties';
+import {IssueCreditForm} from '../../Forms';import s from '../../../sales.module.css';
+export const dynamic='force-dynamic';
+export default async function CreditPreview({params}:{params:Promise<{id:string}>}){
+ const {db}=await requireEstateAdmin(),{id}=await params;if(!/^[a-f0-9-]{36}$/i.test(id))notFound();
+ const [draft,issued]=await Promise.all([db.from('mzs_service_credit_drafts').select('*').eq('id',id).maybeSingle(),db.from('mzs_service_credit_notes').select('id').eq('id',id).maybeSingle()]);if(draft.error||issued.error)throw Error('Credit preview unavailable');if(issued.data)redirect('/admin/workspaces/accountancy/sales/credits/'+id);if(!draft.data)notFound();const p=draft.data.preview;
+ return <section className={s.page}><Link href={'/admin/workspaces/accountancy/sales/credits/new/'+draft.data.invoice_id}>← Create another preview</Link><header className={s.heading}><div><h1>Review credit note</h1><p>DRAFT · no number assigned · original invoice {p.original_number}</p></div></header><p>{p.payload.snapshot.issuer_name} → {p.payload.snapshot.tenant_name}</p><p>{p.reason}</p>{p.payload.lines.map((l:{description:string;net:number;tax:number;total:number},n:number)=><p key={n}>{l.description} · Net EUR {l.net.toFixed(2)} · VAT EUR {l.tax.toFixed(2)} · Total EUR {l.total.toFixed(2)}</p>)}<h2>Credit total: EUR {(p.gross_cents/100).toFixed(2)}</h2><p>The full credit is allocated to the original invoice. Any excess over its unpaid balance remains a customer credit requiring separate settlement. This does not register a payment or refund.</p><Link href={'/admin/workspaces/accountancy/sales/credits/documents/'+id+'?draft=1'} target="_blank" rel="noopener noreferrer">Open draft PDF ↗</Link><IssueCreditForm id={id}/></section>;
+}
