@@ -15,11 +15,11 @@ export function externalPaymentTotals(rows:ExternalReceipt[],invoiceId:string,gr
  // No active evidence (including after all reversals) restores the unknown state.
  return {paid:count?paid:null,balance:count?gross-paid:null,activeCount:count};
 }
-export async function loadExternalReceipts(db:SupabaseClient,invoiceIds:string[]):Promise<ExternalReceipt[]>{
+export async function loadExternalReceipts(db:SupabaseClient,invoiceIds:string[],source:'external'|'archive'='external'):Promise<ExternalReceipt[]>{
  if(new Set(invoiceIds).size!==invoiceIds.length||invoiceIds.some(id=>!uuid.test(id)))throw Error('Invalid invoice selection');
  const rows:ExternalReceipt[]=[];
  for(let start=0;start<invoiceIds.length;start+=100){
-  const ids=invoiceIds.slice(start,start+100),{data,error}=await db.rpc('mzs_external_invoice_receipt_source',{p_invoice_ids:ids});
+  const ids=invoiceIds.slice(start,start+100),{data,error}=await db.rpc(source==='archive'?'mzs_archive_invoice_receipt_source':'mzs_external_invoice_receipt_source',{p_invoice_ids:ids});
   if(error||!data||!Array.isArray(data.invoice_ids)||data.invoice_ids.length!==ids.length||new Set(data.invoice_ids).size!==ids.length||data.invoice_ids.some((id:unknown)=>typeof id!=='string'||!ids.includes(id))||!Array.isArray(data.rows)||!Number.isSafeInteger(data.count)||data.count<0||data.count>10000||data.rows.length!==data.count||new Set(data.rows.map((r:ExternalReceipt)=>r.id)).size!==data.count||data.rows.some((r:ExternalReceipt)=>!ids.includes(r.invoice_id)))throw Error('Complete standalone payment history unavailable');
   rows.push(...data.rows);
  }

@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=require('@electric-sql/pglite');
+(async()=>{
+ const db=new PGlite(),id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0'),admin=id(1),client=id(2),invoice=id(3),issuer=id(4),receipt=id(5);
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create schema mzs_private;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated;
+ create table profiles(id uuid primary key,role text,is_active boolean);insert into profiles values('${admin}','admin',true),('${client}','client',true);
+ create function public.is_admin() returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active)$$;
+ create table mzs_invoice_archive(id uuid primary key,issuer_id uuid,number text,gross_cents bigint,source_paid_cents bigint,source_open_cents bigint);
+ insert into mzs_invoice_archive values('${invoice}','${issuer}','SYNTHETIC',10000,4000,6000);
+ create table mzs_invoice_archive_exclusions(invoice_id uuid);
+ create table mzs_lease_invoices(id uuid,issuer_id uuid,number text);create table mzs_booking_invoices(id uuid,issuer_id uuid,number text);create table mzs_ops_external_sales_invoices(id uuid,issuer_id uuid,number text);
+ alter table mzs_invoice_archive enable row level security;create policy admin_read on mzs_invoice_archive for select to authenticated using(public.is_admin());grant select on mzs_invoice_archive to authenticated;`);
+ await db.exec(fs.readFileSync('supabase/migrations/20261029064736_archive_invoice_receipts.sql','utf8'));
+ const actor=async who=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${who}',false)`);
+ const add=(key=receipt,amount=2500,ref='BANK-1')=>db.query(`select mzs_record_archive_invoice_receipt('${key}','${invoice}',${amount},'2026-10-29','${ref}')`);
+ const rev=(reason='Wrong receipt registered')=>db.query(`select mzs_reverse_archive_invoice_receipt('${receipt}','${invoice}','${reason}')`);
+ await actor(admin);await add();await add();assert.equal((await db.query('select count(*)::int n from mzs_archive_invoice_receipts')).rows[0].n,1);
+ await assert.rejects(add(receipt,2501),/different/);await assert.rejects(add(id(6),1,'bank-1'),/already exists/);await assert.rejects(add(id(6),3501,'BANK-2'),/exceeds/);
+ await add(id(6),3500,'BANK-2');await assert.rejects(add(id(7),1,'BANK-3'),/exceeds/);await rev();await rev();await assert.rejects(rev('Another different reason'),/already reversed/);await add(id(7),2500,'BANK-1');
+ const source=(await db.query(`select mzs_archive_invoice_receipt_source(array['${invoice}'::uuid]) s`)).rows[0].s;assert.equal(source.count,3);assert.equal(source.rows.filter(x=>!x.reversed_at).reduce((n,r)=>n+r.amount_cents,0),6000);
+ assert.equal((await db.query('select source_paid_cents from mzs_invoice_archive')).rows[0].source_paid_cents,4000);
+ await assert.rejects(db.query('delete from mzs_archive_invoice_receipts'),/permission denied/);await assert.rejects(db.query('update mzs_archive_invoice_receipts set amount_cents=1'),/permission denied/);
+ await actor(client);assert.equal((await db.query('select count(*)::int n from mzs_archive_invoice_receipts')).rows[0].n,0);await assert.rejects(add(id(8)),/administrator/);await assert.rejects(rev(),/administrator/);
+ await db.exec('reset role;set role anon');await assert.rejects(add(id(8)),/permission denied/);await db.exec('reset role');await assert.rejects(db.query('delete from mzs_archive_invoice_receipts'),/immutable/);
+ await db.exec(`insert into mzs_invoice_archive_exclusions values('${invoice}')`);await actor(admin);await assert.rejects(add(id(8)),/Excluded/);
+ await db.exec(`reset role;delete from mzs_invoice_archive_exclusions;insert into mzs_lease_invoices values('${id(9)}','${issuer}','SYNTHETIC')`);await actor(admin);await assert.rejects(add(id(8)),/matching live/);
+ await db.close();console.log('Archive receipt integrity, baseline, idempotency, reversals, exclusions, canonical invoice and role tests passed');
+})().catch(e=>{console.error(e);process.exit(1)});
