@@ -74,7 +74,7 @@ test('staff task emails use immutable, trusted outbox snapshot without broad ser
  assert.match(sql,/recipient\.email\)='magdy@mzsgroup\.eu'/);
  assert.doesNotMatch(sql,/grant select on public\.(mzs_ops_property_tasks|mzs_estate_properties|mzs_estate_units) to service_role/i);
  const mail=file('lib/mzs/notifications.ts');
- const from=mail.indexOf('if (event.event_type === "property_staff_task_created")');
+ const from=mail.lastIndexOf('if (event.event_type === "property_staff_task_created")');
  const to=mail.indexOf('if (event.event_type === "capital_access_granted")',from);
  assert.ok(from>0 && to>from);
  const branch=mail.slice(from,to);
