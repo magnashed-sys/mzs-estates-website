@@ -29,3 +29,15 @@ export function expensePageTotals(rows:readonly {net_cents:number;vat_cents:numb
  if([net,vat,gross].some(x=>!Number.isSafeInteger(x)))throw new Error("Expense amounts out of range.");
  return {net,vat,gross};
 }
+
+/** The original draft flag is immutable. A verified active private-archive link is the current source of truth. */
+export type ExpenseOriginalStatus='archive'|'isolated'|'unarchived';
+export function expenseOriginalStatus(draft:{id:string;source_document_status:string},archivedCostIds:ReadonlySet<string>):ExpenseOriginalStatus {
+ if(archivedCostIds.has(draft.id))return 'archive';
+ if(draft.source_document_status==='retained_purchase_pdf')return 'isolated';
+ return 'unarchived';
+}
+export const expenseOriginalLabels={
+ en:{archive:'Original PDF in private archive',isolated:'Original in isolated PDF intake',unarchived:'Original PDF not yet archived',manage:'Manage original PDF',notice:'Drafts do not record payments or VAT deductions. Attach supporting PDFs in the private archive; a file mentioned in a chat is not automatically archived.'},
+ es:{archive:'PDF original en el archivo privado',isolated:'Original en la recepción aislada de PDF',unarchived:'PDF original aún no archivado',manage:'Gestionar PDF original',notice:'Los borradores no registran pagos ni deducciones de IVA. Adjunta los PDF justificativos al archivo privado; un archivo compartido en el chat no se archiva automáticamente.'}
+} as const;
