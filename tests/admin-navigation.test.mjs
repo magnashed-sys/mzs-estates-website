@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import ts from 'typescript';
 const require=createRequire(import.meta.url),React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
-function compile(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:n=>n.includes('/admin/i18n')?adminI18nFixture():n in mocks?mocks[n]:n.endsWith('.css')?{default:{}}:require(n)});return exports;}
+function compile(file,mocks){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:n=>n.includes('/accountancy/pdf/model')?{pdfIntakeEnvironment:()=>false}:n.includes('/admin/i18n')?adminI18nFixture():n in mocks?mocks[n]:n.endsWith('.css')?{default:{}}:require(n)});return exports;}
 const nav=()=>compile('app/admin/workspaces/WorkspaceNavigation.tsx',{'next/link':{default:({children,...p})=>React.createElement('a',p,children)},'next/navigation':{usePathname:()=>'/admin/workspaces/estates/time-report',useSearchParams:()=>new URLSearchParams()}});
 test('one ordered eight-tab navigation with one active Staff tab on the time report',()=>{
  const html=renderToStaticMarkup(React.createElement(nav().default));
