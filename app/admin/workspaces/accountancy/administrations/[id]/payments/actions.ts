@@ -40,6 +40,7 @@ export async function recordSupplierPayment(form:FormData):Promise<PaymentAction
  const {db}=await requireEstateAdmin();
  let requestId:string,draftId:string,yearId:string,paidOn:string,amount:number,reference:string;
  try{
+  if(form.get('confirmed_existing_transfer')!=='yes')throw Error('invalid');
   requestId=id(form,'request_id');draftId=id(form,'draft_id');yearId=id(form,'year_id');
   paidOn=dateValue(field(form,'paid_on',10));reference=field(form,'reference',200);
   amount=inputEuroCents(field(form,'amount_eur',20));
