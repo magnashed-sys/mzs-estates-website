@@ -116,7 +116,7 @@ create policy ops_task_updates_insert on public.mzs_ops_property_task_updates
  where t.id=task_id and t.assigned_profile_id=(select auth.uid()) and
  ((t.property_id is not null and mzs_private.ops_can_work_on_property(t.property_id))
   or (t.work_area_id is not null and mzs_private.ops_can_work_on_area(t.work_area_id))))
- );
+  ));
 
 create or replace function mzs_private.ops_property_task_guard()
 returns trigger language plpgsql security definer set search_path='' as $fn$
