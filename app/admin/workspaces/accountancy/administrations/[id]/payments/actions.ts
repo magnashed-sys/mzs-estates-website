@@ -2,7 +2,7 @@
 import {revalidatePath} from 'next/cache';
 import {notFound} from 'next/navigation';
 import {requireEstateAdmin} from '../../../../../../../lib/security/estate-properties';
-import {supplierPaymentEnvironment} from '../../../../../../../lib/accountancy/supplier-payments';
+import {supplierPaymentMode} from '../../../../../../../lib/accountancy/supplier-payments';
 import {uuid,dateValue,ADMINISTRATION_ROOT} from '../../../../../../../lib/accountancy/administration';
 import {inputEuroCents} from '../../../../../../../lib/property-operations/expense-preview';
 export type PaymentAction={ok:boolean;code?:'invalid'|'review_required'|'exceeds'|'duplicate'|'reversed'|'failed'};
@@ -36,11 +36,12 @@ async function assertYear(db:Awaited<ReturnType<typeof requireEstateAdmin>>['db'
   Number(draft.data.invoice_date.slice(0,4))!==year.data.fiscal_year)throw Error('invalid');
 }
 export async function recordSupplierPayment(form:FormData):Promise<PaymentAction>{
- if(!supplierPaymentEnvironment())notFound();
+ const mode=supplierPaymentMode();if(!mode)notFound();
  const {db}=await requireEstateAdmin();
  let requestId:string,draftId:string,yearId:string,paidOn:string,amount:number,reference:string;
  try{
-  if(form.get('confirmed_synthetic_staging_test')!=='yes')throw Error('invalid');
+  if(mode==='synthetic'&&form.get('confirmed_synthetic_staging_test')!=='yes')throw Error('invalid');
+  if(mode==='real'&&(form.get('confirmed_existing_transfer')!=='yes'||form.has('confirmed_synthetic_staging_test')))throw Error('invalid');
   requestId=id(form,'request_id');draftId=id(form,'draft_id');yearId=id(form,'year_id');
   paidOn=dateValue(field(form,'paid_on',10));reference=field(form,'reference',200);
   amount=inputEuroCents(field(form,'amount_eur',20));
@@ -56,7 +57,7 @@ export async function recordSupplierPayment(form:FormData):Promise<PaymentAction
  return {ok:true};
 }
 export async function reverseSupplierPayment(form:FormData):Promise<PaymentAction>{
- if(!supplierPaymentEnvironment())notFound();
+ if(!supplierPaymentMode())notFound();
  const {db}=await requireEstateAdmin();
  let paymentId:string,draftId:string,yearId:string,reason:string;
  try{

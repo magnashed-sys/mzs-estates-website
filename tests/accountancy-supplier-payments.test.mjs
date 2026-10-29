@@ -8,7 +8,7 @@ const exported={};
 vm.runInNewContext(ts.transpileModule(readFileSync('lib/accountancy/supplier-payments.ts','utf8'),{
  compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}
 }).outputText,{exports:exported,process:{env:{}}});
-const {supplierPaymentEnvironment,paymentOverview}=exported;
+const {supplierPaymentEnvironment,supplierPaymentMode,paymentOverview}=exported;
 const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 const cost={id:id(1),legal_entity_id:id(2),supplier_invoice_number:'SYNTH-2026-1',gross_cents:10000};
 const entry=(n,amount,reversed_at=null)=>({
@@ -23,6 +23,16 @@ test('supplier payment functions never activate on production or wrong preview e
  assert.equal(supplierPaymentEnvironment({...e,VERCEL_ENV:'production'}),false);
  assert.equal(supplierPaymentEnvironment({...e,NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co'}),false);
  assert.equal(supplierPaymentEnvironment({...e,MZS_SUPPLIER_PAYMENTS_ENABLED:'false'}),false);
+});
+test('separate real Production mode stays disabled without an explicit, correct project-scoped flag',()=>{
+ const base={VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co'};
+ assert.equal(supplierPaymentMode(base),null);
+ assert.equal(supplierPaymentEnvironment(base),false);
+ assert.equal(supplierPaymentMode({...base,MZS_SUPPLIER_PAYMENTS_REAL_ENABLED:'true'}),'real');
+ assert.equal(supplierPaymentMode({...base,MZS_SUPPLIER_PAYMENTS_REAL_ENABLED:'true',MZS_SUPPLIER_PAYMENTS_ENABLED:'true'}),null);
+ assert.equal(supplierPaymentMode({...base,NEXT_PUBLIC_SUPABASE_URL:'https://senonkpxdtlhyhrubicg.supabase.co',MZS_SUPPLIER_PAYMENTS_REAL_ENABLED:'true'}),null);
+ assert.equal(supplierPaymentMode({...base,VERCEL_ENV:'preview',MZS_SUPPLIER_PAYMENTS_REAL_ENABLED:'true'}),null);
+ assert.equal(supplierPaymentMode({...base,VERCEL_ENV:'preview',NEXT_PUBLIC_SUPABASE_URL:'https://senonkpxdtlhyhrubicg.supabase.co',MZS_SUPPLIER_PAYMENTS_ENABLED:'true'}),'synthetic');
 });
 test('payment status is an administrative entry, never bank-verified, even at full invoice amount',()=>{
  const a=paymentOverview([cost],[{draft_id:cost.id,review_status:'reviewed'}],[entry(3,10000)]);

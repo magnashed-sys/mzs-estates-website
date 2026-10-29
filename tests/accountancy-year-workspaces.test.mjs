@@ -86,7 +86,7 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
   {id:id(45),draft_id:draft.id,issuer_id:draft.legal_entity_id,amount_cents:4000,paid_on:'2026-10-20',reference:'SYNTH-RECEIPT-A',recorded_by:id(10),created_at:'2026-10-21T00:00:00Z',reversed_at:null,reversed_by:null,reversal_reason:null},
   {id:id(46),draft_id:draft.id,issuer_id:draft.legal_entity_id,amount_cents:2000,paid_on:'2026-10-20',reference:'SYNTH-RECEIPT-B',recorded_by:id(10),created_at:'2026-10-21T00:00:00Z',reversed_at:'2026-10-22T00:00:00Z',reversed_by:id(10),reversal_reason:'Invalid original registration'}
  ];
- const files=pkg.yearAccountantFiles(f,id(1),[],events);
+ const files=pkg.yearAccountantFiles(f,id(1),[],events,'synthetic');
  const csv=name=>Buffer.from(files.find(x=>x.name===name).bytes).toString();
  assert.equal(csv('supplier-payment-events.csv').trim().split(/\r?\n/).length,3);
  assert.match(csv('supplier-payment-events.csv'),/synthetic_staging_only/);
@@ -101,6 +101,18 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
  assert.doesNotMatch(csv('supplier-payment-summary.csv'),/\b(unpaid|overdue)\b/);
  assert.match(csv('README.txt'),/NOT actual bank or cash transactions/);
  assert.equal(JSON.parse(csv('manifest.json')).statutory_complete,false);
+
+ const realFiles=pkg.yearAccountantFiles(f,id(1),[],events,'real');
+ const realCsv=name=>Buffer.from(realFiles.find(x=>x.name===name).bytes).toString();
+ assert.match(realCsv('supplier-payment-events.csv'),/real_transfer_attested/);
+ assert.match(realCsv('supplier-payment-summary.csv'),/real_transfer_attested/);
+ assert.match(realCsv('README.txt'),/manually entered records of prior transfers/);
+ assert.match(realCsv('supplier-invoice-control.csv'),/admin_attested_not_bank_reconciled/);
+ assert.match(csv('supplier-invoice-control.csv'),/synthetic_staging_not_bank_verified/);
+ assert.doesNotMatch(realCsv('README.txt'),/SYNTHETIC TEST DATA/);
+ assert.match(realCsv('supplier-payment-events.csv'),/"false","true"/);
+ assert.match(realCsv('supplier-payment-summary.csv'),/"false","true"/);
+ assert.throws(()=>pkg.yearAccountantFiles(f,id(1),[],events),/Explicit supplier payment source mode required/);
  const noPilot=pkg.yearAccountantFiles(f,id(1));
  assert.equal(noPilot.some(x=>x.name==='supplier-payment-events.csv'),false);
 });
