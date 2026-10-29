@@ -1,6 +1,7 @@
 "use server";
 import {revalidateOperations} from '../../lib/property-operations/revalidate';
 import {requirePropertyStaff} from "../../lib/security/property-staff";
+import {staffTaskEnvironment,validateTaskPlacement} from "../../lib/property-operations/property-tasks";
 type StaffActionState={status:"idle"|"success"|"error";message:string};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const day=/^20\d\d-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])$/;
@@ -20,7 +21,14 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
  const {db,properties}=await requirePropertyStaff();
  const propertyId=String(form.get("property_id")??"");
  const on=String(form.get("worked_on")??"");
- const minutes=Number(String(form.get("actual_minutes")??""));
+ const hoursField=form.get("hours");
+ const minutesField=form.get("minutes");
+ const rawHours=typeof hoursField==='string'?Number(hoursField):null;
+ const rawMinutes=typeof minutesField==='string'?Number(minutesField):null;
+ const fromClock=hoursField!==null||minutesField!==null;
+ const minutes=fromClock&&Number.isSafeInteger(rawHours)&&Number.isSafeInteger(rawMinutes)&&
+   rawHours!>=0&&rawHours!<=16&&rawMinutes!>=0&&rawMinutes!<=59?
+   rawHours!*60+rawMinutes!:Number(String(form.get("actual_minutes")??""));
  const category=String(form.get("task_category")??"");
  const description=String(form.get("description")??"").trim();
  if(!uuid.test(propertyId)||!properties.some(p=>p.id===propertyId)||
@@ -31,10 +39,23 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
  }
  let unitId:string|null;
  try{unitId=nullableId(form);}catch{return {status:"error",message:"De gekozen unit is ongeldig."};}
- const {error}=await db.from("mzs_ops_staff_visits").insert({
-   property_id:propertyId,unit_id:unitId,worked_on:on,
-   actual_minutes:minutes,task_category:category,description
- });
+ let taskId:string|null=null;
+ if(staffTaskEnvironment()){
+  const raw=String(form.get('task_id')??'');
+  if(raw){
+   if(!uuid.test(raw))return {status:'error',message:'Invalid task selection.'};
+   const {data:task,error:taskError}=await db.from('mzs_ops_property_tasks')
+    .select('id,property_id,unit_id,assigned_profile_id').eq('id',raw).maybeSingle();
+   if(taskError||!task||task.assigned_profile_id!== (await db.auth.getUser()).data.user?.id||
+      !validateTaskPlacement(task,{property_id:propertyId,unit_id:unitId}))
+    return {status:'error',message:'Task must belong to your property and selected unit.'};
+   taskId=raw;
+  }
+ }else if(form.get('task_id'))return {status:'error',message:'Task linking not available.'};
+ const payload:Record<string,unknown>={property_id:propertyId,unit_id:unitId,worked_on:on,
+  actual_minutes:minutes,task_category:category,description};
+ if(taskId)payload.task_id=taskId;
+ const {error}=await db.from("mzs_ops_staff_visits").insert(payload);
  if(error)return {status:"error",message:"Werkbezoek niet geregistreerd. Controleer je objecttoegang, datum en unit."};
  revalidateOperations();
  return {status:"success",message:"Werkelijke bezoektijd vastgelegd. Dit is geen loonbetaling of cliëntfactuur."};
