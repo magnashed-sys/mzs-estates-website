@@ -79,3 +79,24 @@ test('accountant ZIP exports supplier invoice metadata controls with explicit pa
  assert.equal(manifest.statutory_complete,false);
  assert.ok(manifest.files.some(v=>v.name==='supplier-invoice-control.csv'));
 });
+
+test('pilot supplier payment export preserves partial, reversed, unreconciled events and statutory=false',()=>{
+ const f=fixture(),draft=f.costs[0];
+ const events=[
+  {id:id(45),draft_id:draft.id,issuer_id:draft.legal_entity_id,amount_cents:4000,paid_on:'2026-10-20',reference:'SYNTH-RECEIPT-A',recorded_by:id(10),created_at:'2026-10-21T00:00:00Z',reversed_at:null,reversed_by:null,reversal_reason:null},
+  {id:id(46),draft_id:draft.id,issuer_id:draft.legal_entity_id,amount_cents:2000,paid_on:'2026-10-20',reference:'SYNTH-RECEIPT-B',recorded_by:id(10),created_at:'2026-10-21T00:00:00Z',reversed_at:'2026-10-22T00:00:00Z',reversed_by:id(10),reversal_reason:'Invalid original registration'}
+ ];
+ const files=pkg.yearAccountantFiles(f,id(1),[],events);
+ const csv=name=>Buffer.from(files.find(x=>x.name===name).bytes).toString();
+ assert.equal(csv('supplier-payment-events.csv').trim().split(/\r?\n/).length,3);
+ assert.match(csv('supplier-payment-events.csv'),/administratively_reversed/);
+ assert.match(csv('supplier-payment-events.csv'),/administratively_recorded/);
+ assert.match(csv('supplier-payment-summary.csv'),/not_verified/);
+ assert.match(csv('supplier-payment-summary.csv'),/80.00/);
+ assert.match(csv('supplier-payment-summary.csv'),/40.00/);
+ assert.doesNotMatch(csv('supplier-payment-summary.csv'),/\b(unpaid|overdue)\b/);
+ assert.match(csv('README.txt'),/NOT bank reconciliation/);
+ assert.equal(JSON.parse(csv('manifest.json')).statutory_complete,false);
+ const noPilot=pkg.yearAccountantFiles(f,id(1));
+ assert.equal(noPilot.some(x=>x.name==='supplier-payment-events.csv'),false);
+});
