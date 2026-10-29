@@ -89,13 +89,17 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
  const files=pkg.yearAccountantFiles(f,id(1),[],events);
  const csv=name=>Buffer.from(files.find(x=>x.name===name).bytes).toString();
  assert.equal(csv('supplier-payment-events.csv').trim().split(/\r?\n/).length,3);
+ assert.match(csv('supplier-payment-events.csv'),/synthetic_staging_only/);
+ assert.match(csv('supplier-payment-summary.csv'),/synthetic_staging_only/);
+ assert.match(csv('supplier-payment-events.csv'),/true/);
+ assert.match(csv('README.txt'),/SYNTHETIC TEST DATA/);
  assert.match(csv('supplier-payment-events.csv'),/administratively_reversed/);
  assert.match(csv('supplier-payment-events.csv'),/administratively_recorded/);
  assert.match(csv('supplier-payment-summary.csv'),/not_verified/);
  assert.match(csv('supplier-payment-summary.csv'),/81.00/);
  assert.match(csv('supplier-payment-summary.csv'),/40.00/);
  assert.doesNotMatch(csv('supplier-payment-summary.csv'),/\b(unpaid|overdue)\b/);
- assert.match(csv('README.txt'),/NOT bank reconciliation/);
+ assert.match(csv('README.txt'),/NOT actual bank or cash transactions/);
  assert.equal(JSON.parse(csv('manifest.json')).statutory_complete,false);
  const noPilot=pkg.yearAccountantFiles(f,id(1));
  assert.equal(noPilot.some(x=>x.name==='supplier-payment-events.csv'),false);
