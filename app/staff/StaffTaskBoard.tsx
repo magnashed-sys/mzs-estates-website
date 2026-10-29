@@ -20,7 +20,7 @@ function Progress({task,language}:{task:PropertyTask;language:StaffLanguage}){
     <option value="in_progress">{t('taskProgress')}</option><option value="blocked">{t('taskBlocked')}</option><option value="done">{t('taskDone')}</option>
    </select>
   </label>
-  <label>{t('progressNote')} <textarea name="note" minLength={3} maxLength={1500} rows={2} required placeholder="What has been done, or what is still needed?"/></label>
+  <label>{t('progressNote')} <textarea name="note" minLength={3} maxLength={1500} rows={2} required placeholder={t('progressExample')}/></label>
   <button type="submit" disabled={pending}>{pending?t('saving'):t('saveProgress')}</button>
   <Message state={state}/>
  </form>;
@@ -98,12 +98,12 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
     </select>
    </label>}
    <label>{t(isMaintenance?'issueTitle':'taskTitle')}
-    <input name="title" minLength={5} maxLength={140} required placeholder={isMaintenance?'e.g. Leaking tap in kitchen':'e.g. Order towels for toilets'}/>
+    <input name="title" minLength={5} maxLength={140} required placeholder={t(isMaintenance?'issueExample':'taskExample')}/>
    </label>
    <label>{t(isMaintenance?'description':'details')}
     <textarea name="description" rows={3} minLength={isMaintenance?8:undefined}
      maxLength={2000} required={isMaintenance}
-     placeholder={isMaintenance?'What is wrong and where?':'Add any instructions or useful details'}/>
+     placeholder={t(isMaintenance?'issueDetailsExample':'taskDetailsExample')}/>
    </label>
    <label>{t(isMaintenance?'urgency':'priority')}
     <select key={kind} name="priority" defaultValue={isMaintenance?'routine':'normal'}>
@@ -112,9 +112,9 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
       <option value="soon">{t('soon')}</option>
       <option value="urgent">{t('urgent')}</option>
      </>:<>
-      <option value="normal">Normal</option>
+      <option value="normal">{t('normal')}</option>
       <option value="high">{t('high')}</option>
-      <option value="urgent">Urgent</option>
+      <option value="urgent">{t('urgent')}</option>
       <option value="low">{t('low')}</option>
      </>}
     </select>
@@ -170,7 +170,7 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
   <div className={s.taskCardList}>{list.map(task=><article className={s.taskCard} key={task.id}>
    <div className={s.taskCardTop}><strong>{task.title}</strong><span className={s.taskChip}>{t(task.status==='open'?'taskOpen':task.status==='in_progress'?'taskProgress':task.status==='blocked'?'taskBlocked':task.status==='done'?'taskDone':'taskCancelled')}</span></div>
    <p className={s.taskMeta}>{task.work_area_id?areaName.get(task.work_area_id)??'Work area':prop.get(task.property_id??'')??'Property'}{task.unit_id?' · '+(unit.get(task.unit_id)??'Unit'):''}</p>
-   <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · Due '+task.due_on:''}</p>
+   <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · '+t('dueShort')+' '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
    {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
    {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>{t('progress')}</summary><Progress task={task} language={language}/></details>}
