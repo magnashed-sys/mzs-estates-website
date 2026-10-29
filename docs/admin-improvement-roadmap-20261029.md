@@ -11,7 +11,7 @@ Owner authorized on 29 October 2026: prepare each improvement individually, test
 7. Data completeness queue — missing entity/customer/property/billing associations with direct correction links.
 8. Recurring property work — schedules, staff, deadlines and follow-up built on current maintenance/time workflows.
 
-Small improvements to schedule with related steps: retain filters, direct invoice deep links, saved selections, remaining Dutch admin labels. Steps 2–8 are pending, not deployed by step 1.
+Small improvements to schedule with related steps: retain filters, direct invoice deep links, saved selections, remaining Dutch admin labels. Step 2 draft/issue/PDF/payment flow was released in PR174; initial invoice email delivery remains pending. Step 3 is implemented in this release with the scope described in `receivables-follow-up-20261029.md`. Steps 4–8 remain pending.
 
 ## Step 1 release verification
 
