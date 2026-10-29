@@ -4,10 +4,10 @@ import {salesAccountantFiles} from './sales-package';
 import {validateYearSource,annualSummary,annualCategory,checkLabels,type YearSource} from './administration';
 import {annualEvidenceReadiness} from './annual-evidence';
 import {annualInvoiceControl} from './invoice-control';
-import {paymentOverview,type SupplierPaymentRecord} from './supplier-payments';
+import {paymentOverview,type SupplierPaymentRecord,type SupplierPaymentMode} from './supplier-payments';
 import {supplierCostIntegrity,type SupplierIdentity} from './supplier-integrity';
 /** A collection package, not an automatically posted annual ledger or tax computation. */
-export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:readonly SupplierIdentity[],supplierPayments?:readonly SupplierPaymentRecord[]):ArchiveFile[]{
+export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:readonly SupplierIdentity[],supplierPayments?:readonly SupplierPaymentRecord[],paymentMode?:SupplierPaymentMode):ArchiveFile[]{
  const s=validateYearSource(input,id),y=s.administration,summary=annualSummary(s),evidence=annualEvidenceReadiness(s),invoiceControl=annualInvoiceControl(s),reviews=new Map(s.reviews.map(r=>[r.draft_id,r]));
  const files=salesAccountantFiles(s.sales,y.issuer_id,y.fiscal_year).map(f=>({...f,name:'sales/'+f.name}));
  function csv(name:string,fields:string[],rows:Record<string,unknown>[]){files.push({name,bytes:exportBytes(accountantCsv(fields,rows))});}
@@ -67,18 +67,20 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
 
  // Optional pilot-only payment history. Never infer bank reconciliation from administrative entries.
  if(supplierPayments){
+  if(!paymentMode)throw Error('Explicit supplier payment source mode required');
+  const synthetic=paymentMode==='synthetic';
   const overview=paymentOverview(s.costs,s.reviews,supplierPayments);
   csv('supplier-payment-events.csv',
-   ['payment_id','draft_id','issuer_id','paid_on','amount_eur','reference','recorded_by','recorded_at','reversed_at','reversed_by','reversal_reason','bank_reconciled','payment_event_kind','synthetic_staging_only'],
+   ['payment_id','draft_id','issuer_id','paid_on','amount_eur','reference','recorded_by','recorded_at','reversed_at','reversed_by','reversal_reason','bank_reconciled','payment_event_kind','synthetic_staging_only','real_transfer_attested'],
    supplierPayments.map(p=>({
     payment_id:p.id,draft_id:p.draft_id,issuer_id:p.issuer_id,paid_on:p.paid_on,
     amount_eur:(p.amount_cents/100).toFixed(2),reference:p.reference,
     recorded_by:p.recorded_by,recorded_at:p.created_at,reversed_at:p.reversed_at??'',
     reversed_by:p.reversed_by??'',reversal_reason:p.reversal_reason??'',
-    bank_reconciled:false,payment_event_kind:p.reversed_at?'administratively_reversed':'administratively_recorded',synthetic_staging_only:true
+    bank_reconciled:false,payment_event_kind:p.reversed_at?'administratively_reversed':'administratively_recorded',synthetic_staging_only:synthetic,real_transfer_attested:!synthetic
    })));
   csv('supplier-payment-summary.csv',
-   ['draft_id','issuer_id','invoice_number','invoice_gross_eur','administratively_recorded_eur','not_matched_to_payment_entry_eur','reversed_eur','active_payment_count','reversal_count','cost_review_status','bank_reconciliation_status','statutory_posted','synthetic_staging_only'],
+   ['draft_id','issuer_id','invoice_number','invoice_gross_eur','administratively_recorded_eur','not_matched_to_payment_entry_eur','reversed_eur','active_payment_count','reversal_count','cost_review_status','bank_reconciliation_status','statutory_posted','synthetic_staging_only','real_transfer_attested'],
    overview.map(r=>({
     draft_id:r.draft_id,issuer_id:r.issuer_id,invoice_number:r.invoice_number,
     invoice_gross_eur:(r.gross_cents/100).toFixed(2),
@@ -87,7 +89,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
     reversed_eur:(r.reversed_cents/100).toFixed(2),
     active_payment_count:r.payment_count,reversal_count:r.reversal_count,
     cost_review_status:r.review_status,bank_reconciliation_status:'not_verified',
-    statutory_posted:false,synthetic_staging_only:true
+    statutory_posted:false,synthetic_staging_only:synthetic,real_transfer_attested:!synthetic
    })));
  }
 
@@ -111,7 +113,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   {source:'documents',scope:'entity and financial year; index and checksums',limitation:'original private PDF bytes are not included; request via the document archive'},
   {source:'supplier_evidence_actions',scope:'entity, supplier invoice year and original review',limitation:'source/action indicators only; not proof of bank payment, VAT recovery or statutory completion'},
   {source:'supplier_invoice_control',scope:'entity and supplier invoice year; header vs linked PDF metadata',limitation:'date and classification warnings are metadata-only, NOT PDF text validation; there is no supplier-payment ledger or bank match, never infer paid, unpaid or overdue'},
-  ...(supplierPayments?[{source:'supplier_payment_pilot',scope:'STAGING SYNTHETIC ONLY: fictitious payment entries, reversals and invoice test totals',limitation:'TEST DATA; not actual bank transfers, cash payments, credit allocations, tax posting or bank reconciliation'}]:[]),
+  ...(supplierPayments?[{source:'supplier_payment_records',scope:paymentMode==='synthetic'?'STAGING SYNTHETIC ONLY: fictitious payment entries and reversals':'ADMIN-ATTESTED REAL TRANSFER RECORDS: payment entries and reversals, scoped by invoice and legal entity',limitation:paymentMode==='synthetic'?'TEST DATA; no actual bank or cash transfers; never use as real accounts':'User-attested prior payment references only, NOT independently reconciled with bank; no automatic credit/advance allocation, VAT adjustment or statutory posting'}]:[]),
   {source:'capital',scope:'all current register references for entity, all periods',limitation:'context only; not annual balances, interest accruals, repayments or confirmations'},
   {source:'bank_assets_staff_and_tax_adjustments',scope:'manual collection checklist',limitation:'not a bank ledger or asset register; staff statements without verified entity attribution, unissued bookings, opening balances and fiscal adjustments are not added to annual amounts'}
  ]);
@@ -124,7 +126,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   'EN: Read source-coverage.csv, supplier-evidence-actions.csv, supplier-invoice-control.csv and both exception files first. Invoice control only compares archived PDF metadata; contents and bank payments must be independently verified. Reviewed, pending and excluded costs remain separate. Original net, VAT and gross amounts are retained. No VAT recovery, capitalisation or depreciation is calculated.',
   'ES: Revise primero source-coverage.csv, supplier-evidence-actions.csv, supplier-invoice-control.csv y los archivos de incidencias. El control de facturas solo compara los metadatos de los PDF archivados; hay que verificar el contenido y los pagos bancarios por separado. Los costes revisados, pendientes y excluidos están separados. Se conservan los importes netos, IVA e importes brutos originales. No se calcula deducción de IVA, capitalización ni amortización.',
   'EN: Historical invoice snapshots and capital references are context. Do not add them to issued sales or annual financing balances without reconciliation. Recorded receipt events can relate to invoices from a different year; reversal is not proof of a bank refund.',
-  ...(supplierPayments?['EN: Supplier payment files in this Staging-only pilot contain SYNTHETIC TEST DATA, NOT actual bank or cash transactions. Never present or export them as historical payments, paid/unpaid balances, VAT deductions or general-ledger entries.','ES: Los archivos de pagos de proveedores de este piloto de Staging contienen DATOS FICTICIOS DE PRUEBA, NO movimientos bancarios ni pagos reales. Nunca deben presentarse como pagos históricos, saldos abonados/pendientes, deducciones de IVA ni asientos contables.']:[]),
+  ...(supplierPayments?(paymentMode==='synthetic'?['EN: Supplier payment files in this Staging-only pilot contain SYNTHETIC TEST DATA, NOT actual bank or cash transactions. Never present or export them as historical payments, paid/unpaid balances, VAT deductions or general-ledger entries.','ES: Los archivos de pagos de proveedores de este piloto de Staging contienen DATOS FICTICIOS DE PRUEBA, NO movimientos bancarios ni pagos reales. Nunca deben presentarse como pagos históricos, saldos abonados/pendientes, deducciones de IVA ni asientos contables.']:['EN: Supplier payments are manually entered records of prior transfers attested by an administrator. They are NOT independently matched to bank statements. Not-recorded amounts are NOT proof an invoice remains unpaid or overdue. Reversals are administrative corrections, not bank refunds.','ES: Los pagos de proveedores son anotaciones manuales de transferencias previas confirmadas por un administrador. NO se han conciliado de forma independiente con los extractos bancarios. Los importes no anotados NO prueban impagos ni vencimientos. Las reversiones administrativas no son devoluciones bancarias.']):[]),
   'ES: Las facturas históricas y las referencias de financiación son contexto. No las sume a las ventas emitidas ni a los saldos anuales sin conciliación. Los cobros pueden corresponder a facturas de otro ejercicio; una anulación no acredita un reembolso bancario.',
   'EN: Checklist ticks record the last manual review. Recheck after source changes. No record is posted, paid, emailed or filed by this download.',
   'ES: Las casillas reflejan la última revisión manual. Revise de nuevo tras cambiar las fuentes. Esta descarga no contabiliza, paga, envía correos ni presenta declaraciones.',
