@@ -1,3 +1,5 @@
+
+import {getAdminI18n} from '../../../../../../../lib/admin/i18n-server';
 import Link from 'next/link';
 import {notFound,redirect} from 'next/navigation';
 import {randomUUID} from 'node:crypto';
@@ -8,8 +10,10 @@ import {PaymentForm,ReversalForm} from '../../standalone/PaymentForms';
 import s from '../../sales.module.css';
 export const dynamic='force-dynamic';
 const uuid=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
-const money=(n:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(n/100);
+const money=(n:number, adminLocale = 'en-GB')=>new Intl.NumberFormat(adminLocale,{style:'currency',currency:'EUR'}).format(n/100);
 export default async function ImportedInvoice({params}:{params:Promise<{id:string}>}){
+ const {t:adminT,locale:adminLocale}=await getAdminI18n();
+
  const {db}=await requireEstateAdmin();const {id}=await params;if(!uuid.test(id))notFound();
  const {data:i,error}=await db.from('mzs_invoice_archive_active').select('id,issuer_id,issuer_name,number,customer_name,subject,issued_on,due_on,gross_cents,source_paid_cents,source_open_cents').eq('id',id).maybeSingle();
  if(error)throw Error('Imported invoice unavailable');if(!i)notFound();
@@ -21,10 +25,10 @@ export default async function ImportedInvoice({params}:{params:Promise<{id:strin
  const receipts=await loadExternalReceipts(db,[id],'archive'),added=receipts.length?externalPaymentTotals(receipts,id,Math.max(1,i.source_open_cents)).paid??0:0;
  if(![i.gross_cents,i.source_paid_cents,i.source_open_cents].every(Number.isSafeInteger)||i.source_paid_cents+i.source_open_cents!==i.gross_cents||added>Math.max(0,i.source_open_cents))throw Error('Invalid imported invoice balance');
  const paid=i.source_paid_cents+added,balance=i.source_open_cents-added,today=operationsDay(),status=i.gross_cents<0?'Credit note':balance<0?'Credit balance':balance===0?'Paid':i.due_on<today?'Overdue':paid>0?'Partly paid':'Open';
- return <section className={s.page}><Link href="/admin/workspaces/accountancy/sales">← Invoices</Link><header className={s.heading}><div><p className={s.eyebrow}>IMPORTED INVOICE</p><h1>{i.number}</h1><p>{i.customer_name} · {i.issuer_name}</p></div><span className={s.badge}>{status}</span></header><p>{i.subject}</p><p>Issued: {i.issued_on} · Due: {i.due_on}</p>
- <div className={s.metrics}><div><span>Total incl. VAT</span><strong>{money(i.gross_cents)}</strong></div><div><span>Recorded paid</span><strong>{money(paid)}</strong><small>Imported: {money(i.source_paid_cents)} · new receipts: {money(added)}</small></div><div><span>Remaining balance</span><strong>{money(balance)}</strong></div></div>
- <p>The imported paid amount is an opening snapshot without payment dates. Only record additional receipts that are not already included in that amount. Reversing a new receipt restores the corresponding balance; it does not change the import.</p>
- {i.gross_cents>0&&i.source_paid_cents>=0?<PaymentForm invoiceId={id} requestId={randomUUID()} remaining={balance} today={today} source="archive"/>:<p>Credit notes and credit balances do not accept incoming payment registrations.</p>}
- <h2>New payment history</h2>{!receipts.length?<p>No additional receipts recorded yet.</p>:<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Received on</th><th>Amount</th><th>Reference</th><th>History</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount_cents)}</td><td>{r.reference}</td><td><p>Recorded {r.created_at.slice(0,19).replace('T',' ')} UTC</p><small>Account {r.recorded_by}</small>{r.reversed_at?<><strong>Reversed</strong><p>{r.reversal_reason}</p><small>{r.reversed_at.slice(0,19).replace('T',' ')} UTC · account {r.reversed_by}</small></>:<ReversalForm invoiceId={id} receiptId={r.id} source="archive"/>}</td></tr>)}</tbody></table></div>}
- <Link href={'/admin/workspaces/accountancy/invoices/'+id}>Original imported invoice and customer →</Link></section>;
+ return <section className={s.page}><Link href="/admin/workspaces/accountancy/sales">{adminT("← Invoices")}</Link><header className={s.heading}><div><p className={s.eyebrow}>{adminT("IMPORTED INVOICE")}</p><h1>{i.number}</h1><p>{i.customer_name} · {i.issuer_name}</p></div><span className={s.badge}>{adminT(status)}</span></header><p>{i.subject}</p><p>{adminT("Issued:")} {i.issued_on}  {adminT("· Due:")} {i.due_on}</p>
+ <div className={s.metrics}><div><span>{adminT("Total incl. VAT")}</span><strong>{money(i.gross_cents, adminLocale)}</strong></div><div><span>{adminT("Recorded paid")}</span><strong>{money(paid, adminLocale)}</strong><small>{adminT("Imported:")} {money(i.source_paid_cents, adminLocale)}  {adminT("· new receipts:")} {money(added, adminLocale)}</small></div><div><span>{adminT("Remaining balance")}</span><strong>{money(balance, adminLocale)}</strong></div></div>
+ <p>{adminT("The imported paid amount is an opening snapshot without payment dates. Only record additional receipts that are not already included in that amount. Reversing a new receipt restores the corresponding balance; it does not change the import.")}</p>
+ {i.gross_cents>0&&i.source_paid_cents>=0?<PaymentForm invoiceId={id} requestId={randomUUID()} remaining={balance} today={today} source="archive"/>:<p>{adminT("Credit notes and credit balances do not accept incoming payment registrations.")}</p>}
+ <h2>{adminT("New payment history")}</h2>{!receipts.length?<p>{adminT("No additional receipts recorded yet.")}</p>:<div className={s.tableWrap}><table className={s.table}><thead><tr><th>{adminT("Received on")}</th><th>{adminT("Amount")}</th><th>{adminT("Reference")}</th><th>{adminT("History")}</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount_cents, adminLocale)}</td><td>{r.reference}</td><td><p>{adminT("Recorded")} {r.created_at.slice(0,19).replace('T',' ')}  {adminT("UTC")}</p><small>{adminT("Account")} {r.recorded_by}</small>{r.reversed_at?<><strong>{adminT("Reversed")}</strong><p>{r.reversal_reason}</p><small>{r.reversed_at.slice(0,19).replace('T',' ')}  {adminT("UTC · account")} {r.reversed_by}</small></>:<ReversalForm invoiceId={id} receiptId={r.id} source="archive"/>}</td></tr>)}</tbody></table></div>}
+ <Link href={'/admin/workspaces/accountancy/invoices/'+id}>{adminT("Original imported invoice and customer →")}</Link></section>;
 }

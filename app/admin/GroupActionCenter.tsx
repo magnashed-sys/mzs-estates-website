@@ -1,10 +1,14 @@
 "use client";
+import {useAdminI18n} from '../../lib/admin/i18n';
+
 import {useEffect,useState} from "react";
 import Link from "next/link";
 import {createClient} from "../../lib/supabase/client";
 type Action={id:string;title:string;detail:string;href:string;category:string;date:string};
 const PANEL={background:"#151411",border:"1px solid #514839",padding:22,marginBottom:24} as const;
 export default function GroupActionCenter({refreshVersion}:{refreshVersion:number}){
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
  const [actions,setActions]=useState<Action[]>([]);
  const [unavailable,setUnavailable]=useState<string[]>([]);
  const [loading,setLoading]=useState(true);
@@ -38,19 +42,19 @@ export default function GroupActionCenter({refreshVersion}:{refreshVersion:numbe
   }
   void load();return()=>{active=false};
  },[refreshVersion]);
- return <section style={PANEL} aria-label="Group Action Center">
+ return <section style={PANEL} aria-label={adminT("Group Action Center")}>
   <div style={{display:"flex",justifyContent:"space-between",gap:15,flexWrap:"wrap"}}>
-   <div><p style={{color:"#d5c09a",letterSpacing:2,fontSize:11}}>MZS GROUP / WORKFLOW</p><h2 style={{fontFamily:"Georgia,serif",fontWeight:400,margin:"8px 0"}}>Central Action Center</h2>
-   <p style={{color:"#aaa398",margin:0}}>Open requests from across your existing management modules.</p></div>
-   <strong style={{color:"#d5c09a"}}>{loading?"…":actions.length+" visible"}</strong>
+   <div><p style={{color:"#d5c09a",letterSpacing:2,fontSize:11}}>{adminT("MZS GROUP / WORKFLOW")}</p><h2 style={{fontFamily:"Georgia,serif",fontWeight:400,margin:"8px 0"}}>{adminT("Central Action Center")}</h2>
+   <p style={{color:"#aaa398",margin:0}}>{adminT("Open requests from across your existing management modules.")}</p></div>
+   <strong style={{color:"#d5c09a"}}>{loading?"…":adminT("{p0} visible", {p0: actions.length})}</strong>
   </div>
-  {loading?<p role="status">Loading pending work…</p>:<>
-   {unavailable.length>0&&<p role="alert" style={{color:"#e3a995"}}>Some registers could not be loaded: {unavailable.join(", ")}. Counts may be incomplete.</p>}
-   {actions.length===0?<p style={{marginTop:18}}>No pending actions in the available registers.</p>:
+  {loading?<p role="status">{adminT("Loading pending work…")}</p>:<>
+   {unavailable.length>0&&<p role="alert" style={{color:"#e3a995"}}>{adminT("Some registers could not be loaded:")} {unavailable.join(", ")}{adminT(". Counts may be incomplete.")}</p>}
+   {actions.length===0?<p style={{marginTop:18}}>{adminT("No pending actions in the available registers.")}</p>:
    <div style={{display:"grid",gap:10,marginTop:20}}>
     {actions.map(a=><Link key={a.id} href={a.href} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:15,color:"#eeeae2",padding:14,border:"1px solid #403a30",textDecoration:"none"}}>
-      <span><small style={{color:"#d5c09a",letterSpacing:1}}>{a.category}</small><br/><strong>{a.title}</strong><br/><small style={{color:"#aaa398"}}>{a.detail}</small></span>
-      <span style={{color:"#d5c09a"}}>Review →</span>
+      <span><small style={{color:"#d5c09a",letterSpacing:1}}>{adminT(a.category)}</small><br/><strong>{adminT(a.title)}</strong><br/><small style={{color:"#aaa398"}}>{adminT(a.detail)}</small></span>
+      <span style={{color:"#d5c09a"}}>{adminT("Review →")}</span>
     </Link>)}
    </div>}
   </>}

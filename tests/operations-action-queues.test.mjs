@@ -1,3 +1,4 @@
+import {adminI18nFixture} from './helpers/admin-i18n.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -100,7 +101,7 @@ test('planning day uses Madrid midnight, including summer/winter DST; URL inputs
 test('action page checks environment and active administrator before reading queues',async()=>{
  for(const deny of ['environment','admin']){
   const exports={},calls=[];
-  vm.runInNewContext(compile('app/admin/workspaces/estates/actions/page.tsx'),{exports,require(name){
+  vm.runInNewContext(compile('app/admin/workspaces/estates/actions/page.tsx'),{exports,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
    if(name==='react/jsx-runtime')return require(name);
    if(name.includes('security/property-staff'))return {requireStaffEnvironment(){calls.push('environment');if(deny==='environment')throw Error('denied');}};
    if(name.includes('security/estate-properties'))return {async requireEstateAdmin(){calls.push('admin');throw Error('denied');}};

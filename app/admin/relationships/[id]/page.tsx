@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../lib/admin/i18n';
+
 import CountrySelect from "../../../components/CountrySelect";
 import PhoneInput from "../../../components/PhoneInput";
 
@@ -58,12 +60,14 @@ const relationshipNames: Record<string, string> = {
   authorized_representative: "Authorized representative",
   advisor: "Advisor", other: "Other",
 };
-const date = (value: string) => new Date(value).toLocaleDateString("en-GB", {
+const date = (value: string, adminLocale = 'en-GB') => new Date(value).toLocaleDateString(adminLocale, {
   timeZone: "Europe/Madrid", day: "2-digit", month: "short", year: "numeric",
 });
 const filled = (value: string | null | undefined) => value?.trim() || "Not supplied";
 
 export default function RelationshipDossierPage() {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -198,15 +202,15 @@ export default function RelationshipDossierPage() {
 
   if (state !== "ready" || !dossier) {
     return <main className="admin-page"><div className="admin-message">
-      <p className="eyebrow">MZS Relationships</p>
-      <h1>{state === "loading" ? "Preparing relationship." :
-        state === "denied" ? "Access restricted." : "Unable to load."}</h1>
+      <p className="eyebrow">{adminT("MZS Relationships")}</p>
+      <h1>{state === "loading" ? adminT("Preparing relationship.") :
+        state === "denied" ? adminT("Access restricted.") : adminT("Unable to load.")}</h1>
       <p role={state === "error" ? "alert" : "status"}>
-        {state === "loading" ? "Verifying administrator access and data permissions…" :
-          state === "denied" ? "Active administrator access is required." : error}
+        {state === "loading" ? adminT("Verifying administrator access and data permissions…") :
+          state === "denied" ? adminT("Active administrator access is required.") : adminT(error)}
       </p>
-      {state === "error" && <button className="admin-button" onClick={() => void load()}>Try again</button>}
-      <Link href="/admin?tab=relationships">← Relationships</Link>
+      {state === "error" && <button className="admin-button" onClick={() => void load()}>{adminT("Try again")}</button>}
+      <Link href="/admin?tab=relationships">{adminT("← Relationships")}</Link>
     </div></main>;
   }
 
@@ -239,77 +243,77 @@ export default function RelationshipDossierPage() {
 
   return <main className="admin-page">
     <header className="admin-header">
-      <Link className="admin-brand" href="/admin">MZS GROUP</Link>
+      <Link className="admin-brand" href="/admin">{adminT("MZS GROUP")}</Link>
       <div className="admin-header-actions">
-        <span>Private relationship management</span>
-        <Link className="admin-button" href="/admin?tab=relationships">← All relationships</Link>
+        <span>{adminT("Private relationship management")}</span>
+        <Link className="admin-button" href="/admin?tab=relationships">{adminT("← All relationships")}</Link>
       </div>
     </header>
     <section className="admin-content">
       <div className={styles.topline}>
         <div>
-          <p className="eyebrow">Relationship 360° · {person.role}</p>
-          <h1 className={styles.heading}>{person.full_name || "Unnamed relationship"}</h1>
+          <p className="eyebrow">{adminT("Relationship 360° ·")} {adminT(person.role)}</p>
+          <h1 className={styles.heading}>{person.full_name || adminT("Unnamed relationship")}</h1>
           <p className={styles.muted}>{person.email}</p>
         </div>
-        <span className={styles.status}>{person.is_active ? "Active account" : "Inactive account"}</span>
+        <span className={styles.status}>{person.is_active ? adminT("Active account") : adminT("Inactive account")}</span>
       </div>
       <div className={styles.metrics}>
-        <div><span>Declared companies</span><strong>{companies.length}</strong></div>
-        <div><span>Assigned projects</span><strong>{attached.length}</strong></div>
-        <div><span>Assigned opportunities</span><strong>{offeringCount}</strong></div>
+        <div><span>{adminT("Declared companies")}</span><strong>{companies.length}</strong></div>
+        <div><span>{adminT("Assigned projects")}</span><strong>{attached.length}</strong></div>
+        <div><span>{adminT("Assigned opportunities")}</span><strong>{offeringCount}</strong></div>
       </div>
 
       <div className={styles.twoColumns}>
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><h2>Personal details.</h2><button type="button" className="admin-button" onClick={() => editing ? setEditing(false) : startEditing()}>{editing ? "Cancel" : "Edit contact details"}</button></div>
+          <div className={styles.panelHeading}><h2>{adminT("Personal details.")}</h2><button type="button" className="admin-button" onClick={() => editing ? setEditing(false) : startEditing()}>{editing ? adminT("Cancel") : adminT("Edit contact details")}</button></div>
           {editing ? <form onSubmit={saveContact} style={{display:"grid",gap:12}}>
             {([["full_name","Full name"],["phone","Telephone"],["street_address","Street"],["house_number","House number"],["address_addition","Address addition"],["postal_code","Postal code"],["city","City"],["region","Region"],["country","Country"]] as const).map(([key,label]) => key==='phone'
-              ? <PhoneInput key={key} label={label} value={contactDraft.phone || ''} disabled={saving} onChange={value=>setContactDraft(d=>({...d,phone:value}))}/>
-              : <label key={key} style={{display:"grid",gap:6}}>{label}{key==='country'
+              ? <PhoneInput key={key} label={adminT(label)} value={contactDraft.phone || ''} disabled={saving} onChange={value=>setContactDraft(d=>({...d,phone:value}))}/>
+              : <label key={key} style={{display:"grid",gap:6}}>{adminT(label)}{key==='country'
                 ? <CountrySelect value={contactDraft.country || ''} disabled={saving} onChange={value=>setContactDraft(d=>({...d,country:value}))}/>
                 : <input className="admin-input" value={contactDraft[key] || ""} disabled={saving} maxLength={key === "full_name" || key === "street_address" ? 160 : key === "house_number" || key === "postal_code" ? 24 : key === "address_addition" ? 80 : 120} required={key === "full_name"} onChange={e => setContactDraft(d => ({...d,[key]:e.target.value}))} />}</label>)}
-            <button type="submit" className="admin-button" disabled={saving}>{saving ? "Saving..." : "Save contact details"}</button>
+            <button type="submit" className="admin-button" disabled={saving}>{saving ? adminT("Saving...") : adminT("Save contact details")}</button>
           </form> : <div className={styles.fieldGrid}>
-            <div><small>Full name</small><p>{filled(person.full_name)}</p></div>
-            <div><small>Email address</small><p>{filled(person.email)}</p></div>
-            <div><small>Telephone</small><p>{filled(contact?.phone)}</p></div>
-            <div><small>Account type</small><p>{person.role === "partner" ? "Partner" : "Private Client"}</p></div>
-            <div className={styles.wide}><small>Postal address</small><p>{address || "Not supplied"}</p></div>
-            <div><small>Member since</small><p>{date(person.created_at)}</p></div>
-            <div><small>Account status</small><p>{person.is_active ? "Active" : "Inactive"}</p></div>
+            <div><small>{adminT("Full name")}</small><p>{filled(person.full_name)}</p></div>
+            <div><small>{adminT("Email address")}</small><p>{filled(person.email)}</p></div>
+            <div><small>{adminT("Telephone")}</small><p>{filled(contact?.phone)}</p></div>
+            <div><small>{adminT("Account type")}</small><p>{person.role === "partner" ? adminT("Partner") : adminT("Private Client")}</p></div>
+            <div className={styles.wide}><small>{adminT("Postal address")}</small><p>{address || adminT("Not supplied")}</p></div>
+            <div><small>{adminT("Member since")}</small><p>{date(person.created_at, adminLocale)}</p></div>
+            <div><small>{adminT("Account status")}</small><p>{person.is_active ? adminT("Active") : adminT("Inactive")}</p></div>
           </div>}
           {saveNotice && <p role="status" className={styles.note}>{saveNotice}</p>}
-          <p className={styles.note}>Administrators can update contact details here. Email, account status and access permissions are managed separately.</p>
+          <p className={styles.note}>{adminT("Administrators can update contact details here. Email, account status and access permissions are managed separately.")}</p>
         </section>
 
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><h2>Companies.</h2><span>{companies.length} declared</span></div>
-          {companies.length === 0 ? <p className={styles.empty}>No companies have been declared yet.</p> :
+          <div className={styles.panelHeading}><h2>{adminT("Companies.")}</h2><span>{companies.length}  {adminT("declared")}</span></div>
+          {companies.length === 0 ? <p className={styles.empty}>{adminT("No companies have been declared yet.")}</p> :
             <div className={styles.stack}>
               {companies.map(company => <article key={company.id} className={styles.subcard}>
                 <h3>{company.legal_name}</h3>
                 {company.trading_name && <p>{company.trading_name}</p>}
                 <span className={styles.chip}>{relationshipNames[company.relationship_type] || company.relationship_type}</span>
-                <p>{[company.country, company.registration_number].filter(Boolean).join(" · ") || "No further details supplied"}</p>
+                <p>{[company.country, company.registration_number].filter(Boolean).join(" · ") || adminT("No further details supplied")}</p>
                 {company.relationship_notes && <p>{company.relationship_notes}</p>}
               </article>)}
             </div>}
-          <p className={styles.note}>Company affiliations are self-declared, not legally verified. They do not grant project access or visibility to other members.</p>
+          <p className={styles.note}>{adminT("Company affiliations are self-declared, not legally verified. They do not grant project access or visibility to other members.")}</p>
         </section>
       </div>
 
       <section className={styles.panel}>
-        <div className={styles.panelHeading}><h2>Relationship roles &amp; contracts.</h2></div>
-        <p className={styles.note}>Extend this relationship with a tenant, owner, investor or partner role. Companies and rental contracts reuse this same client account.</p>
-        <Link className="admin-button" href={`/admin/relationships?profile=${encodeURIComponent(person.id)}`}>Manage relationship details &amp; roles →</Link>{" "}
-        <Link className="admin-button" href={`/admin/group/estates/contracts?profile=${encodeURIComponent(person.id)}`}>View rental contracts →</Link>
+        <div className={styles.panelHeading}><h2>{adminT("Relationship roles & contracts.")}</h2></div>
+        <p className={styles.note}>{adminT("Extend this relationship with a tenant, owner, investor or partner role. Companies and rental contracts reuse this same client account.")}</p>
+        <Link className="admin-button" href={`/admin/relationships?profile=${encodeURIComponent(person.id)}`}>{adminT("Manage relationship details & roles →")}</Link>{" "}
+        <Link className="admin-button" href={`/admin/group/estates/contracts?profile=${encodeURIComponent(person.id)}`}>{adminT("View rental contracts →")}</Link>
         <p><DeleteRelationship kind="account" id={person.id} onDeleted={()=>router.replace("/admin/relationships")}/></p>
       </section>
 
       <section className={styles.panel}>
-        <div className={styles.panelHeading}><h2>Project access.</h2><span>{attached.length} projects</span></div>
-        {attached.length === 0 ? <p className={styles.empty}>No project access assigned to this relationship.</p> :
+        <div className={styles.panelHeading}><h2>{adminT("Project access.")}</h2><span>{attached.length}  {adminT("projects")}</span></div>
+        {attached.length === 0 ? <p className={styles.empty}>{adminT("No project access assigned to this relationship.")}</p> :
           <div className={styles.projectList}>
             {attached.map(project => {
               const grant = projectGrants.find(item => item.project_id === project.id);
@@ -317,35 +321,35 @@ export default function RelationshipDossierPage() {
                 offering.project_id === project.id && offeringGrantIds.has(offering.id));
               return <article key={project.id} className={styles.projectCard}>
                 <div>
-                  <span className={styles.kicker}>{project.status} · {date(grant?.granted_at || person.created_at)}</span>
+                  <span className={styles.kicker}>{adminT(project.status)} · {date(grant?.granted_at || person.created_at, adminLocale)}</span>
                   <h3>{project.title}</h3>
-                  <p>{project.location || "Private collection"}</p>
+                  <p>{project.location || adminT("Private collection")}</p>
                   <div className={styles.tags}>
                     {assigned.map(offering => <span className={styles.chip} key={offering.id}>
                       {offeringNames[offering.offering_type] || offering.offering_type}
                       {offering.status !== "active" ? " · " + offering.status : ""}
                     </span>)}
-                    {assigned.length === 0 && <span className={styles.note}>No offering access currently assigned.</span>}
+                    {assigned.length === 0 && <span className={styles.note}>{adminT("No offering access currently assigned.")}</span>}
                   </div>
                 </div>
                 <Link className="admin-button" href={
                   "/admin/project-access?user=" + encodeURIComponent(person.id) +
                   "&project=" + encodeURIComponent(project.id)
-                }>Manage access →</Link>
+                }>{adminT("Manage access →")}</Link>
               </article>;
             })}
           </div>}
-        <p className={styles.note}>Saved access differs from actual visibility: the account, project and offering must also be active. Access changes still use the existing verified permission workflow.</p>
+        <p className={styles.note}>{adminT("Saved access differs from actual visibility: the account, project and offering must also be active. Access changes still use the existing verified permission workflow.")}</p>
       </section>
 
       <div className={styles.twoColumns}>
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><h2>Account applications.</h2><span>{requests.length} linked</span></div>
-          {requests.length === 0 ? <p className={styles.empty}>No application is directly linked to this account.</p> :
+          <div className={styles.panelHeading}><h2>{adminT("Account applications.")}</h2><span>{requests.length}  {adminT("linked")}</span></div>
+          {requests.length === 0 ? <p className={styles.empty}>{adminT("No application is directly linked to this account.")}</p> :
             <div className={styles.stack}>
               {requests.map(request => <div className={styles.subcard} key={request.id}>
-                <span className={styles.kicker}>{date(request.created_at)} · {request.status}</span>
-                <p>{[request.company, request.country].filter(Boolean).join(" · ") || "Private access request"}</p>
+                <span className={styles.kicker}>{date(request.created_at, adminLocale)} · {adminT(request.status)}</span>
+                <p>{[request.company, request.country].filter(Boolean).join(" · ") || adminT("Private access request")}</p>
                 <div className={styles.tags}>{(request.interests || []).map(interest =>
                   <span className={styles.chip} key={interest}>{offeringNames[interest] || interest}</span>)}</div>
               </div>)}
@@ -353,16 +357,16 @@ export default function RelationshipDossierPage() {
         </section>
 
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><h2>Recorded milestones.</h2><span>{events.length} records</span></div>
+          <div className={styles.panelHeading}><h2>{adminT("Recorded milestones.")}</h2><span>{events.length}  {adminT("records")}</span></div>
           <div className={styles.timeline}>
             {events.slice(0, 12).map(event => <div key={event.key} className={styles.event}>
-              <span>{date(event.when)}</span><p>{event.label}</p>
+              <span>{date(event.when, adminLocale)}</span><p>{adminT(event.label)}</p>
             </div>)}
           </div>
-          <p className={styles.note}>Only recorded account, company and access milestones appear here. Logins, page views and communications are not yet tracked in this dossier.</p>
+          <p className={styles.note}>{adminT("Only recorded account, company and access milestones appear here. Logins, page views and communications are not yet tracked in this dossier.")}</p>
         </section>
       </div>
     </section>
-    <footer className="admin-footer">Private. Independent. International.</footer>
+    <footer className="admin-footer">{adminT("Private. Independent. International.")}</footer>
   </main>;
 }

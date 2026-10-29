@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../lib/admin/i18n';
+
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "../../../../lib/supabase/client";
@@ -12,6 +14,8 @@ const textOf = (block: TextBlock) => ({
 type Props = { projectId: string; blocks: TextBlock[]; onReload: () => Promise<void> };
 
 export default function ContentManager({ projectId, blocks, onReload }: Props) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [editing, setEditing] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -37,7 +41,7 @@ export default function ContentManager({ projectId, blocks, onReload }: Props) {
       setError("Use a heading of 3–140 characters, body of 10–6,000 characters and order 0–10,000.");
       return;
     }
-    if (selected?.is_visible && !window.confirm("This text block is currently published. Saving will update it for existing authorized clients immediately. Continue?")) return;
+    if (selected?.is_visible && !window.confirm(adminT("This text block is currently published. Saving will update it for existing authorized clients immediately. Continue?"))) return;
     setBusy(true); setError(""); setNotice("");
     const client = createClient();
     try {
@@ -66,8 +70,8 @@ export default function ContentManager({ projectId, blocks, onReload }: Props) {
     if (busy) return;
     const next = !block.is_visible;
     if (!window.confirm(next
-      ? "Publish this project text? It will appear on the private project presentation for authorized members."
-      : "Unpublish this project text? Members will no longer see it.")) return;
+      ? adminT("Publish this project text? It will appear on the private project presentation for authorized members.")
+      : adminT("Unpublish this project text? Members will no longer see it."))) return;
     setBusy(true); setError(""); setNotice("");
     try {
       const { data, error: failure } = await createClient().from("project_content")
@@ -84,7 +88,7 @@ export default function ContentManager({ projectId, blocks, onReload }: Props) {
 
   async function remove(block: TextBlock) {
     if (busy || block.is_visible) return;
-    if (!window.confirm("Permanently remove this UNPUBLISHED text block?")) return;
+    if (!window.confirm(adminT("Permanently remove this UNPUBLISHED text block?"))) return;
     setBusy(true); setError(""); setNotice("");
     try {
       const { data, error: failure } = await createClient().from("project_content")
@@ -100,43 +104,40 @@ export default function ContentManager({ projectId, blocks, onReload }: Props) {
   }
 
   return <div className={styles.stack}>
-    <p className={styles.note}>Add editorial text to the private presentation without editing website code. New blocks start as drafts. Published text appears after the existing project presentation; existing galleries and rental calendars remain unchanged.</p>
+    <p className={styles.note}>{adminT("Add editorial text to the private presentation without editing website code. New blocks start as drafts. Published text appears after the existing project presentation; existing galleries and rental calendars remain unchanged.")}</p>
     <section className={styles.panel}>
-      <div className={styles.panelTitle}><h2>Project text blocks.</h2><span>{blocks.filter(x=>x.is_visible).length} published / {blocks.length} total</span></div>
-      {blocks.length === 0 ? <p className={styles.empty}>No editable project text has been created yet.</p> :
+      <div className={styles.panelTitle}><h2>{adminT("Project text blocks.")}</h2><span>{blocks.filter(x=>x.is_visible).length}  {adminT("published /")} {blocks.length}  {adminT("total")}</span></div>
+      {blocks.length === 0 ? <p className={styles.empty}>{adminT("No editable project text has been created yet.")}</p> :
         <div className={styles.stack}>
           {blocks.map(block => <article className={styles.item} key={block.id}>
-            <div className={styles.itemHeading}><div><span className={styles.kicker}>Order {block.position}</span>
-              <h3>{textOf(block).heading || "Untitled text block"}</h3></div>
-              <span className={styles.pill}>{block.is_visible ? "Published" : "Draft"}</span>
+            <div className={styles.itemHeading}><div><span className={styles.kicker}>{adminT("Order")} {block.position}</span>
+              <h3>{textOf(block).heading || adminT("Untitled text block")}</h3></div>
+              <span className={styles.pill}>{block.is_visible ? adminT("Published") : adminT("Draft")}</span>
             </div>
             <p className={styles.preview}>{textOf(block).body}</p>
             <div className={styles.actions}>
-              <button type="button" className="admin-button" disabled={busy} onClick={()=>start(block)}>Edit</button>
-              <button type="button" className="admin-button" disabled={busy} onClick={()=>void changePublished(block)}>{block.is_visible ? "Unpublish" : "Publish"}</button>
-              {!block.is_visible && <button type="button" className="admin-button" disabled={busy} onClick={()=>void remove(block)}>Delete draft</button>}
+              <button type="button" className="admin-button" disabled={busy} onClick={()=>start(block)}>{adminT("Edit")}</button>
+              <button type="button" className="admin-button" disabled={busy} onClick={()=>void changePublished(block)}>{block.is_visible ? adminT("Unpublish") : adminT("Publish")}</button>
+              {!block.is_visible && <button type="button" className="admin-button" disabled={busy} onClick={()=>void remove(block)}>{adminT("Delete draft")}</button>}
             </div>
           </article>)}
         </div>}
     </section>
     <section className={styles.panel}>
-      <div className={styles.panelTitle}><h2>{selected ? "Edit project text." : "Add project text."}</h2>
-        {selected && <button type="button" className="admin-button" disabled={busy} onClick={()=>start()}>Cancel editing</button>}
+      <div className={styles.panelTitle}><h2>{selected ? adminT("Edit project text.") : adminT("Add project text.")}</h2>
+        {selected && <button type="button" className="admin-button" disabled={busy} onClick={()=>start()}>{adminT("Cancel editing")}</button>}
       </div>
       <form className={styles.form} onSubmit={save}>
-        <label>Heading
-          <input value={title} onChange={e=>setTitle(e.target.value)} maxLength={140} required disabled={busy} placeholder="A closer look at the opportunity" />
+        <label>{adminT("Heading")}<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={140} required disabled={busy} placeholder={adminT("A closer look at the opportunity")} />
         </label>
-        <label>Text (plain text, no HTML)
-          <textarea rows={7} value={body} onChange={e=>setBody(e.target.value)} maxLength={6000} required disabled={busy} placeholder="Describe the project, plans or current milestone…" />
+        <label>{adminT("Text (plain text, no HTML)")}<textarea rows={7} value={body} onChange={e=>setBody(e.target.value)} maxLength={6000} required disabled={busy} placeholder={adminT("Describe the project, plans or current milestone…")} />
         </label>
-        <label>Display order
-          <input type="number" min={0} max={10000} step={1} value={position} onChange={e=>setPosition(e.target.value)} disabled={busy} />
+        <label>{adminT("Display order")}<input type="number" min={0} max={10000} step={1} value={position} onChange={e=>setPosition(e.target.value)} disabled={busy} />
         </label>
-        <button type="submit" disabled={busy} className="admin-button admin-button-primary">{busy ? "Saving…" : selected ? "Save text changes" : "Save as draft"}</button>
+        <button type="submit" disabled={busy} className="admin-button admin-button-primary">{busy ? adminT("Saving…") : selected ? adminT("Save text changes") : adminT("Save as draft")}</button>
       </form>
     </section>
-    {notice && <p className={styles.success} role="status">{notice}</p>}
-    {error && <p className={styles.failure} role="alert">{error}</p>}
+    {notice && <p className={styles.success} role="status">{adminT(notice)}</p>}
+    {error && <p className={styles.failure} role="alert">{adminT(error)}</p>}
   </div>;
 }

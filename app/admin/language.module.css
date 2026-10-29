@@ -1,0 +1,5 @@
+.bar{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;padding:10px clamp(18px,4vw,60px);background:#11110f;color:#d5c09a;border-bottom:1px solid #403b31;font-size:13px}
+.bar select{min-height:40px;border:1px solid #75664e;background:#191815;color:#eee8dd;border-radius:4px;padding:7px 28px 7px 10px;font:inherit}
+.bar select:focus-visible{outline:2px solid #d5c09a;outline-offset:3px}
+.bar [role=alert]{color:#f0b39b}.bar select:disabled{opacity:.65}
+@media(max-width:480px){.bar{justify-content:center;padding:10px 16px}}

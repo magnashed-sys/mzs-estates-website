@@ -2,10 +2,12 @@ import {headers, cookies} from 'next/headers';
 import {getRequestConfig} from 'next-intl/server';
 import {createClient} from '../lib/supabase/server';
 import {isLocale, memberLocale} from './public-routing';
+import {getAdminLanguage} from '../lib/admin/language';
 export default getRequestConfig(async () => {
   // Middleware overwrites this header from an exact public-route allowlist.
   const requestHeaders = await headers();
   let requested = requestHeaders.get('x-mzs-locale');
+  if(requestHeaders.get('x-mzs-admin')==='true')requested=await getAdminLanguage();
   if (requestHeaders.get('x-mzs-client-overview') === 'true') {
     const cookie = (await cookies()).get('MZS_LOCALE')?.value;
     requested = memberLocale(cookie);

@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../lib/admin/i18n';
+
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createClient } from "../../lib/supabase/client";
@@ -29,8 +31,8 @@ const button: CSSProperties = {
 const labels: Record<string, string> = {
   rental: "Private Rental", sale: "Private Sale", investment: "Investment", financing: "Private Capital",
 };
-function offeringLabel(offering: Offering) {
-  return `${labels[offering.offering_type] ?? offering.offering_type}${offering.title ? ` — ${offering.title}` : ""}`;
+function offeringLabel(offering: Offering, t:(value:string)=>string) {
+  return `${t(labels[offering.offering_type] ?? offering.offering_type)}${offering.title ? ` — ${offering.title}` : ""}`;
 }
 function messageOf(error: unknown) {
   return error && typeof error === "object" && "message" in error && typeof error.message === "string"
@@ -48,6 +50,8 @@ export default function RequestProjectApproval(props: Props) {
 }
 
 function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: Props) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [role, setRole] = useState<Role>("client");
@@ -111,19 +115,19 @@ function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: P
   }, [unsavedEdits, busy]);
   function closeReview() {
     if (actionLock.current || busy) return;
-    if (unsavedEdits && !window.confirm("Discard the unsaved access selection?")) return;
+    if (unsavedEdits && !window.confirm(adminT("Discard the unsaved access selection?"))) return;
     onClose();
   }
   const unavailableSaved = selected.some(id => !selectable.some(o => o.id === id));
   const locked = busy || loading || Boolean(invitation) || uncertain || Boolean(error);
   const selectionText = () => selected.map(id => {
     const offering = selectable.find(o => o.id === id);
-    return `${projects.find(p => p.id === offering?.project_id)?.title ?? "Unavailable project"} — ${offering ? offeringLabel(offering) : "Opportunity"}`;
-  }).join("\n") || "No projects. The member will see an empty collection.";
+    return `${projects.find(p => p.id === offering?.project_id)?.title ?? adminT("Unavailable project")} — ${offering ? offeringLabel(offering,adminT) : adminT("Opportunity")}`;
+  }).join("\n") || adminT("No projects. The member will see an empty collection.");
 
   async function approveAndSave() {
     if (actionLock.current || locked || unavailableSaved) return;
-    if (!window.confirm(`Approve ${request.full_name} (${request.email}) as ${role.toUpperCase()} and save this access selection?\n\n${selectionText()}\n\nThis does not send an email. The selected rights are attached when the invitation account is created.`)) return;
+    if (!window.confirm(adminT("Approve {p0} ({p1}) as {p2} and save this access selection? {p3} This does not send an email. The selected rights are attached when the invitation account is created.", {p0: request.full_name, p1: request.email, p2: adminT(role), p3: selectionText()}))) return;
     actionLock.current = true; setBusy(true); setError(""); setNotice("");
     try {
       const { data, error: rpcError } = await createClient().rpc("approve_access_request_with_projects", {
@@ -143,7 +147,7 @@ function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: P
 
   async function sendInvitation() {
     if (actionLock.current || locked || dirty || !saved || unavailableSaved) return;
-    if (!window.confirm(`Send one ${role.toUpperCase()} invitation email to ${request.full_name} (${request.email})?\n\n${selectionText()}\n\nThis sends a real registration email, not a booking. Do not invite external testers before the pilot security checks are complete.`)) return;
+    if (!window.confirm(adminT("Send one {p0} invitation email to {p1} ({p2})? {p3} This sends a real registration email, not a booking. Do not invite external testers before the pilot security checks are complete.", {p0: adminT(role), p1: request.full_name, p2: request.email, p3: selectionText()}))) return;
     actionLock.current = true; setBusy(true); setError(""); setNotice("");
     let invoked = false;
     try {
@@ -178,44 +182,43 @@ function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: P
     } finally { actionLock.current = false; if (mounted.current) setBusy(false); }
   }
 
-  return <section aria-label={`Review access for ${request.full_name}`} style={{ marginTop: 28, padding: "clamp(18px,3vw,30px)", border: `1px solid ${edge}`, background: "#11110f", color: "#eeeae2" }}>
+  return <section aria-label={adminT("Review access for {p0}", {p0: request.full_name})} style={{ marginTop: 28, padding: "clamp(18px,3vw,30px)", border: `1px solid ${edge}`, background: "#11110f", color: "#eeeae2" }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
-      <h4 style={{ fontFamily: "Georgia,serif", fontSize: 26, fontWeight: 400, margin: 0 }}>Approval & project access</h4>
-      <button type="button" style={button} onClick={closeReview} disabled={busy}>Close</button>
+      <h4 style={{ fontFamily: "Georgia,serif", fontSize: 26, fontWeight: 400, margin: 0 }}>{adminT("Approval & project access")}</h4>
+      <button type="button" style={button} onClick={closeReview} disabled={busy}>{adminT("Close")}</button>
     </div>
-    <p style={{ color: muted, lineHeight: 1.7 }}>Select only the opportunities this member may see. Interests on the application do not grant access automatically.</p>
-    {loading && <p role="status">Loading approved access...</p>}
-    {error && <p role="alert" style={{ color: "#e3a995", lineHeight: 1.8 }}>{error}</p>}
-    {notice && <p role="status" style={{ color: gold, lineHeight: 1.8 }}>{notice}</p>}
+    <p style={{ color: muted, lineHeight: 1.7 }}>{adminT("Select only the opportunities this member may see. Interests on the application do not grant access automatically.")}</p>
+    {loading && <p role="status">{adminT("Loading approved access...")}</p>}
+    {error && <p role="alert" style={{ color: "#e3a995", lineHeight: 1.8 }}>{adminT(error)}</p>}
+    {notice && <p role="status" style={{ color: gold, lineHeight: 1.8 }}>{adminT(notice)}</p>}
     {!loading && <>
       <label style={{ display: "grid", gap: 10, maxWidth: 320, marginBottom: 26 }}>
-        Account type
-        <select value={role} disabled={locked} onChange={e => setRole(e.target.value as Role)} style={{ padding: 14, color: "#eeeae2", background: "#151411", border: `1px solid ${edge}`, fontSize: 15 }}>
-          <option value="client">Client</option><option value="partner">Partner</option>
+        {adminT("Account type")}<select value={role} disabled={locked} onChange={e => setRole(e.target.value as Role)} style={{ padding: 14, color: "#eeeae2", background: "#151411", border: `1px solid ${edge}`, fontSize: 15 }}>
+          <option value="client">{adminT("Client")}</option><option value="partner">{adminT("Partner")}</option>
         </select>
       </label>
       <fieldset disabled={locked} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-        <legend style={{ color: gold, fontSize: 12, letterSpacing: ".1em", marginBottom: 16 }}>PROJECTS & OPPORTUNITIES</legend>
+        <legend style={{ color: gold, fontSize: 12, letterSpacing: ".1em", marginBottom: 16 }}>{adminT("PROJECTS & OPPORTUNITIES")}</legend>
         {projects.filter(p => selectable.some(o => o.project_id === p.id)).map(project => <div key={project.id} style={{ padding: "20px 0", borderTop: `1px solid ${edge}` }}>
           <strong style={{ fontSize: 16 }}>{project.title}</strong>
           <p style={{ color: muted, margin: "6px 0 14px", fontSize: 13 }}>{project.location}</p>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {selectable.filter(o => o.project_id === project.id).map(offering => <label key={offering.id} style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 40 }}>
               <input type="checkbox" checked={selected.includes(offering.id)} onChange={e => setSelected(current => e.target.checked ? [...current, offering.id] : current.filter(id => id !== offering.id))} style={{ width: 18, height: 18, accentColor: gold }} />
-              {offeringLabel(offering)}
+              {adminT(offeringLabel(offering,adminT))}
             </label>)}
           </div>
         </div>)}
-        {!selectable.length && <p>No active opportunities are available.</p>}
+        {!selectable.length && <p>{adminT("No active opportunities are available.")}</p>}
       </fieldset>
-      {unavailableSaved && <p role="alert" style={{ color: "#e3a995" }}>A saved opportunity is no longer active. Review its status before changing this plan.</p>}
-      <p style={{ color: muted, lineHeight: 1.8 }}>{selected.length} selected opportunities. No selection means no project access. Future opportunities are not included automatically.</p>
-      {invitation ? <p style={{ color: gold, lineHeight: 1.8 }}>Invitation status: {invitation.status}. This initial selection is locked. Use Project Access Management for later changes.</p> : <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}>
-        <button type="button" style={{ ...button, background: gold, color: "#111", opacity: locked || unavailableSaved ? .5 : 1 }} disabled={locked || unavailableSaved} onClick={() => void approveAndSave()}>{busy ? "Processing..." : saved ? "Save approved selection" : "Approve & save selection"}</button>
-        <button type="button" style={{ ...button, opacity: locked || dirty || !saved || unavailableSaved ? .5 : 1 }} disabled={locked || dirty || !saved || unavailableSaved} onClick={() => void sendInvitation()}>Send invitation →</button>
+      {unavailableSaved && <p role="alert" style={{ color: "#e3a995" }}>{adminT("A saved opportunity is no longer active. Review its status before changing this plan.")}</p>}
+      <p style={{ color: muted, lineHeight: 1.8 }}>{selected.length}  {adminT("selected opportunities. No selection means no project access. Future opportunities are not included automatically.")}</p>
+      {invitation ? <p style={{ color: gold, lineHeight: 1.8 }}>{adminT("Invitation status:")} {adminT(invitation.status)}{adminT(". This initial selection is locked. Use Project Access Management for later changes.")}</p> : <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}>
+        <button type="button" style={{ ...button, background: gold, color: "#111", opacity: locked || unavailableSaved ? .5 : 1 }} disabled={locked || unavailableSaved} onClick={() => void approveAndSave()}>{busy ? adminT("Processing...") : saved ? adminT("Save approved selection") : adminT("Approve & save selection")}</button>
+        <button type="button" style={{ ...button, opacity: locked || dirty || !saved || unavailableSaved ? .5 : 1 }} disabled={locked || dirty || !saved || unavailableSaved} onClick={() => void sendInvitation()}>{adminT("Send invitation →")}</button>
       </div>}
-      {error && <button type="button" style={{ ...button, marginTop: 16 }} disabled={busy || loading} onClick={() => { if (!unsavedEdits || window.confirm("Discard unsaved edits and reload the recorded status?")) void load(); }}>Reload recorded status</button>}
-      <p style={{ color: muted, fontSize: 12, lineHeight: 1.8, marginTop: 22 }}>Saving approval does not send an email. Sending requires a second confirmation. Selecting access never creates or confirms a rental booking.</p>
+      {error && <button type="button" style={{ ...button, marginTop: 16 }} disabled={busy || loading} onClick={() => { if (!unsavedEdits || window.confirm(adminT("Discard unsaved edits and reload the recorded status?"))) void load(); }}>{adminT("Reload recorded status")}</button>}
+      <p style={{ color: muted, fontSize: 12, lineHeight: 1.8, marginTop: 22 }}>{adminT("Saving approval does not send an email. Sending requires a second confirmation. Selecting access never creates or confirms a rental booking.")}</p>
     </>}
   </section>;
 }

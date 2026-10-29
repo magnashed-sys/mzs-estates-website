@@ -1,3 +1,4 @@
+import {adminI18nFixture} from './helpers/admin-i18n.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -34,7 +35,7 @@ async function renderRegister(pageNumber,count=201){
   }};return builder;
  }};
  const e={};let authorized=false;
- vm.runInNewContext(compile('app/admin/workspaces/estates/expenses/page.tsx'),{exports:e,process:{env:{VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co'}},require(name){
+ vm.runInNewContext(compile('app/admin/workspaces/estates/expenses/page.tsx'),{exports:e,process:{env:{VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co'}},require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
   if(name==='react/jsx-runtime')return require(name);
   if(name==='next/navigation')return {notFound(){throw Error('not-found')},redirect(url){throw Error('redirect:'+url)}};
   if(name.includes('security/estate-properties'))return {requireEstateAdmin:async()=>{authorized=true;return {db}}};

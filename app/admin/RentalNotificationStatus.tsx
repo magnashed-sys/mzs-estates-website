@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../lib/admin/i18n';
+
 import { useCallback, useEffect, useState } from "react";
 
 type Item = { id: string; booking_id: string; kind: string; status: string; attempts: number;
@@ -10,6 +12,8 @@ const labels: Record<string, string> = {
 };
 
 export default function RentalNotificationStatus({ refreshKey }: { refreshKey: string }) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [items, setItems] = useState<Item[]>([]);
   const [capture, setCapture] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,29 +46,27 @@ export default function RentalNotificationStatus({ refreshKey }: { refreshKey: s
     void action({ action: "resolve", id: item.id, decision, reason, verified: true });
   }
   return <details style={{ marginTop: 30, border: "1px solid #514839", padding: 20 }}>
-    <summary style={{ cursor: "pointer", color: "#d5c09a" }}>Client notification status</summary>
-    <p style={{ color: "#cfc5b7", lineHeight: 1.7 }}>Relevant changes and cancellations are queued automatically.
-      Internal notes and cancellation reasons are never included. Mail-server acceptance does not confirm inbox delivery.
-      {capture && " Staging captures messages without sending email."}</p>
+    <summary style={{ cursor: "pointer", color: "#d5c09a" }}>{adminT("Client notification status")}</summary>
+    <p style={{ color: "#cfc5b7", lineHeight: 1.7 }}>{adminT("Relevant changes and cancellations are queued automatically. Internal notes and cancellation reasons are never included. Mail-server acceptance does not confirm inbox delivery.")}{capture && adminT(" Staging captures messages without sending email.")}</p>
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-      <button className="admin-button" disabled={busy} onClick={() => void refresh()}>Refresh notifications</button>
-      <button className="admin-button" disabled={busy} onClick={() => void action({ action: "dispatch" })}>Process next queued email</button>
+      <button className="admin-button" disabled={busy} onClick={() => void refresh()}>{adminT("Refresh notifications")}</button>
+      <button className="admin-button" disabled={busy} onClick={() => void action({ action: "dispatch" })}>{adminT("Process next queued email")}</button>
     </div>
-    {message && <p role="status">{message}</p>}
-    {!items.length && !message && <p>No change notifications yet.</p>}
+    {message && <p role="status">{adminT(message)}</p>}
+    {!items.length && !message && <p>{adminT("No change notifications yet.")}</p>}
     {items.map(item => <article key={item.id} style={{ padding: "18px 0", borderBottom: "1px solid #514839", overflowWrap: "anywhere" }}>
-      <strong>{item.kind === "cancelled" ? "Cancellation" : "Reservation update"} — {labels[item.status] || item.status}</strong>
-      <p>Booking {item.booking_id}<br />Recipient: {item.recipient_email || "Requires review"}<br />
-        {new Date(item.created_at).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })} · Attempts: {item.attempts}</p>
-      {item.last_error && <p>Check: {item.last_error.replaceAll("_", " ")}</p>}
+      <strong>{item.kind === "cancelled" ? adminT("Cancellation") : adminT("Reservation update")} — {labels[item.status] || adminT(item.status)}</strong>
+      <p>{adminT("Booking")} {item.booking_id}<br />{adminT("Recipient:")} {item.recipient_email || adminT("Requires review")}<br />
+        {new Date(item.created_at).toLocaleString(adminLocale, { timeZone: "Europe/Madrid" })}  {adminT("· Attempts:")} {item.attempts}</p>
+      {item.last_error && <p>{adminT("Check:")} {adminT(item.last_error.replaceAll("_", " "))}</p>}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {capture && <a href={`/api/rental/notifications?preview=${item.id}`} target="_blank" rel="noopener noreferrer">Preview email</a>}
+        {capture && <a href={`/api/rental/notifications?preview=${item.id}`} target="_blank" rel="noopener noreferrer">{adminT("Preview email")}</a>}
         {["failed", "uncertain"].includes(item.status) && <>
-          <button className="admin-button" disabled={busy} onClick={() => resolve(item, "accepted")}>Verified accepted</button>
-          <button className="admin-button" disabled={busy} onClick={() => resolve(item, "retry")}>Verified not sent — queue again</button>
+          <button className="admin-button" disabled={busy} onClick={() => resolve(item, "accepted")}>{adminT("Verified accepted")}</button>
+          <button className="admin-button" disabled={busy} onClick={() => resolve(item, "retry")}>{adminT("Verified not sent — queue again")}</button>
         </>}
       </div>
     </article>)}
-    <p style={{ color: "#cfc5b7", fontSize: 13 }}>Showing the latest 50 notifications. Uncertain deliveries require verification before another send.</p>
+    <p style={{ color: "#cfc5b7", fontSize: 13 }}>{adminT("Showing the latest 50 notifications. Uncertain deliveries require verification before another send.")}</p>
   </details>;
 }

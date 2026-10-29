@@ -1,4 +1,6 @@
 'use client';
+import {useAdminI18n} from '../../../../../lib/admin/i18n';
 export default function ErrorBoundary({reset}:{reset:()=>void}){
- return <section role="alert"><h2>Document archive unavailable / Archivo no disponible</h2><p>Please retry. / Vuelve a intentarlo.</p><button onClick={reset}>Try again / Reintentar</button></section>;
+ const {t}=useAdminI18n();
+ return <section role="alert"><h2>{t('Document archive unavailable')}</h2><p>{t('Please retry.')}</p><button onClick={reset}>{t('Try again')}</button></section>;
 }

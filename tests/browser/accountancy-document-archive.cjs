@@ -14,7 +14,7 @@ const server=http.createServer(async(req,res)=>{
  const url=new URL(req.url,'http://fixture'),path=url.pathname,one=req.headers.accept?.includes('application/vnd.pgrst.object+json');
  const send=(v,status=200)=>{res.statusCode=status;res.end(JSON.stringify(v))};const rows=v=>{res.setHeader('Content-Range',`0-${Math.max(0,v.length-1)}/${v.length}`);send(one?(v[0]??null):v)};
  if(path==='/auth/v1/user')return send(user);
- if(path==='/rest/v1/profiles')return send(one?{id:admin,role,is_active:true,full_name:'Synthetic Administrator'}:[{id:admin,full_name:'Synthetic Administrator'}]);
+ if(path==='/rest/v1/profiles')return send(one?{id:admin,role,is_active:true,full_name:'Synthetic Administrator'}:[{id:admin,role,is_active:true,full_name:'Synthetic Administrator'}]);
  if(path==='/rest/v1/mzs_admin_language_preferences'){if(req.method==='POST'){language=data.language;return send(null,201);}return rows([{language}]);}
  if(path==='/rest/v1/mzs_lease_issuers'){let a=[{id:entity,name:'Synthetic Estates',tax_id:'TEST-ONLY'},{id:other,name:'Other Synthetic Entity',tax_id:'TEST-OTHER'}];if(url.searchParams.has('id'))a=a.filter(e=>'eq.'+e.id===url.searchParams.get('id'));return rows(a);}
  if(path==='/rest/v1/mzs_accountancy_document_events')return rows(events.filter(e=>'eq.'+e.document_id===url.searchParams.get('document_id')));
@@ -50,13 +50,21 @@ const server=http.createServer(async(req,res)=>{
    r=await request(root+'?year=2022');assert.match(await r.text(),/No documents match these filters/);
    r=await request(root+'?entity='+other);assert.match(await r.text(),/No documents match these filters/);
    r=await request(root+'?year=bad');assert.match(await r.text(),/Invalid archive filters/);
-   language='es';r=await request(root);html=await r.text();assert.match(html,/Archivo documental/);assert.match(html,/Balance de situación/);fs.writeFileSync('/tmp/archive-render-es.html',html);
+   const manifest=JSON.parse(fs.readFileSync('.next/server/server-reference-manifest.json','utf8'));
+   const actionId=Object.entries(manifest.node).find(([,v])=>v.exportedName==='saveAdminLanguage')?.[0];assert.ok(actionId,'global language server action exists');
+   r=await fetch('http://127.0.0.1:3090'+root,{method:'POST',headers:{Cookie:cookie.name+'='+cookie.value,Origin:'http://127.0.0.1:3090','Next-Action':actionId,'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(['es'])});
+   assert.equal(r.status,200);await r.text();assert.equal(language,'es','real server action saved own preference');
+   r=await request(root);html=await r.text();assert.match(html,/Idioma de administración/);assert.match(html,/<html[^>]+lang="es"/);assert.match(html,/Synthetic balance 2023/);assert.match(html,/Archivo documental/);assert.match(html,/Balance de situación/);fs.writeFileSync('/tmp/archive-render-es.html',html);
+   for(const route of ['/admin/workspaces/staff','/admin/workspaces/accountancy','/admin/workspaces/estates','/admin/workspaces/capital','/admin/workspaces/relationships','/admin/system']){
+    r=await request(route);assert.equal(r.status,200,route);const page=await r.text();assert.match(page,/Idioma de administración/,route);assert.match(page,route==='/admin/system'?/Preparando tu espacio/:/Contabilidad/,route);
+   }
+   r=await fetch('http://127.0.0.1:3090/',{headers:{Cookie:cookie.name+'='+cookie.value,'x-mzs-admin':'true'},redirect:'manual'});assert.match(await r.text(),/<html[^>]+lang="en"/,'public locale cannot be forced by a forged admin header');
    r=await request(root+'/'+docid);assert.equal(r.status,200);assert.match(await r.text(),/Historial de cambios/);
    r=await request(root+'/'+docid+'/file');assert.equal(r.status,302);assert.match(r.headers.get('cache-control'),/no-store/);assert.match(r.headers.get('location'),/storage\/v1\/object\/sign/);
    r=await request(root+'/'+docid+'/file?download=1');assert.equal(r.status,302);
    role='client';assert.equal((await request(root)).status,404);assert.equal((await request(root+'/'+docid+'/file')).status,404);
    role='admin';assert.equal((await request(root+'/'+docid+'/file',false)).status,307);
-   console.log('Archive HTTP integration passed: authenticated EN/ES rendering, entity/year/invalid filters, detail page, private signed open/download, client denial and anonymous redirect.');return;
+   console.log('Admin HTTP integration passed: real language server action, persistence across six workspaces, public-header isolation, authenticated EN/ES rendering, entity/year/invalid filters, detail page, private signed open/download, client denial and anonymous redirect.');return;
   }
   browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport:{width:1440,height:1100}});await context.addCookies([cookie]);
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -64,7 +72,7 @@ const server=http.createServer(async(req,res)=>{
   assert.equal(await page.getByRole('link',{name:'Open PDF',exact:false}).getAttribute('target'),'_blank');
   await page.getByLabel('Financial year',{exact:true}).first().fill('2022');await page.getByRole('button',{name:'Apply filters'}).click();await page.getByText('No documents match these filters.').waitFor();
   await page.getByRole('link',{name:'Clear filters'}).click();await page.getByLabel('Entity',{exact:true}).first().selectOption(other);await page.getByRole('button',{name:'Apply filters'}).click();await page.getByText('No documents match these filters.').waitFor();
-  await page.getByRole('link',{name:'Clear filters'}).click();await page.getByLabel('Archive language').selectOption('es');await page.getByRole('button',{name:'Save language'}).click();await page.getByRole('heading',{name:'Archivo documental'}).waitFor();assert.equal(language,'es');
+  await page.getByRole('link',{name:'Clear filters'}).click();await page.getByLabel('Administration language').selectOption('es');await page.getByRole('heading',{name:'Archivo documental'}).waitFor();assert.equal(language,'es');
   await page.reload();await page.getByRole('heading',{name:'Archivo documental'}).waitFor();
   await page.getByText('Añadir documento',{exact:true}).click();const form=page.locator('details form');await form.getByLabel('Entidad',{exact:true}).selectOption(entity);await form.getByLabel('Ejercicio',{exact:true}).fill('2023');await form.getByLabel('Título',{exact:true}).fill('Synthetic new report');
   const otherPdf=Buffer.from(pdf.toString()+'%different fixture\n');await form.getByLabel('Archivo PDF',{exact:false}).setInputFiles({name:'synthetic-new.pdf',mimeType:'application/pdf',buffer:otherPdf});await form.getByRole('button',{name:'Archivar documento'}).click();await page.getByText('Documento guardado.',{exact:true}).waitFor();assert.equal(docs.length,2);assert.equal(docs[1].sha256,crypto.createHash('sha256').update(otherPdf).digest('hex'));
@@ -73,7 +81,7 @@ const server=http.createServer(async(req,res)=>{
   const response=await context.request.get('http://127.0.0.1:3090'+root+'/'+docs[1].id+'/file',{maxRedirects:0});assert.equal(response.status(),302);assert.match(response.headers()['location'],/\/storage\/v1\/object\/sign\//);assert.match(response.headers()['cache-control'],/no-store/);
   await page.goto('http://127.0.0.1:3090'+root+'?year=2023');await page.screenshot({path:'/tmp/archive-desktop.png',fullPage:true});await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/archive-mobile.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   role='client';assert.equal((await page.goto('http://127.0.0.1:3090'+root)).status(),404);assert.equal((await context.request.get('http://127.0.0.1:3090'+root+'/'+docid+'/file',{maxRedirects:0})).status(),404);
-  role='admin';failed=true;await page.goto('http://127.0.0.1:3090'+root);await page.getByRole('heading',{name:'Document archive unavailable / Archivo no disponible'}).waitFor();failed=false;
+  role='admin';failed=true;await page.goto('http://127.0.0.1:3090'+root);await page.getByRole('heading',{name:'Archivo de documentos no disponible'}).waitFor();failed=false;
   await context.clearCookies();const signedOut=await context.request.get('http://127.0.0.1:3090'+root+'/'+docid+'/file',{maxRedirects:0});assert.equal(signedOut.status(),307);assert.match(signedOut.headers()['location'],/login/);
   assert.equal(errors.filter(e=>!e.includes('Server Components render')).length,0,errors.join('\n'));console.log('Archive browser journey passed: filters, language persistence, upload/server hash, duplicate cleanup, review/history, private download, mobile, denied roles and outage state.');
  }finally{if(browser)await browser.close();app.kill();server.close();}

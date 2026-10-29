@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../lib/admin/i18n';
+
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { createClient } from "../../lib/supabase/client";
@@ -31,6 +33,8 @@ export default function RegisteredRequestApproval({
   onApproved: (id: string) => void;
   onClose: () => void;
 }) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [role, setRole] = useState<Role>("client");
@@ -85,9 +89,7 @@ export default function RegisteredRequestApproval({
       offerings.some(offering => offering.project_id === project.id &&
         selected.includes(offering.id))).map(project => project.title);
     if (!window.confirm(
-      "Approve and activate the verified account for " + request.full_name +
-      "?\n\nSelected projects: " + names.join(", ") +
-      "\n\nThe member will gain immediate private access. An activation email will be queued."
+      adminT("Approve and activate the verified account for {p0}? Selected projects: {p1} The member will gain immediate private access. An activation email will be queued.", {p0: request.full_name, p1: names.join(", ")})
     )) return;
     setSaving(true); setError(""); setNotice("");
     try {
@@ -130,33 +132,30 @@ export default function RegisteredRequestApproval({
     <section style={{ marginTop: 28, border: "1px solid #514839", background: "#11100e",
       color: "#f4f0e7", padding: "clamp(18px,3vw,30px)" }}>
       <h3 style={{ fontFamily: "Georgia,serif", fontWeight: 400, fontSize: 27, marginTop: 0 }}>
-        Verified account approval
-      </h3>
+        {adminT("Verified account approval")}</h3>
       <p style={{ color: "#c1b9a9", lineHeight: 1.8 }}>
         {request.full_name} · {request.email}
       </p>
       <p role="status" style={{ color: request.email_verified_at ? gold : "#e3a995" }}>
         {request.email_verified_at
-          ? "Email address verified · Account awaiting your approval"
-          : "Email confirmation pending. Approval will be available after verification."}
+          ? adminT("Email address verified · Account awaiting your approval")
+          : adminT("Email confirmation pending. Approval will be available after verification.")}
       </p>
-      {request.status !== "pending" && <p>Request already reviewed. Reload the dashboard.</p>}
-      {loading ? <p>Loading opportunities…</p> : (
+      {request.status !== "pending" && <p>{adminT("Request already reviewed. Reload the dashboard.")}</p>}
+      {loading ? <p>{adminT("Loading opportunities…")}</p> : (
         <>
           <label style={{ display: "grid", gap: 9, maxWidth: 330, marginBottom: 25 }}>
-            Account type
-            <select value={role} disabled={saving || completed || request.status !== "pending"}
+            {adminT("Account type")}<select value={role} disabled={saving || completed || request.status !== "pending"}
               onChange={event => setRole(event.target.value as Role)}
               style={{ background: "#171612", color: "#f4f0e7", border: "1px solid #514839", padding: 13 }}>
-              <option value="client">Client</option>
-              <option value="partner">Partner</option>
+              <option value="client">{adminT("Client")}</option>
+              <option value="partner">{adminT("Partner")}</option>
             </select>
           </label>
           <fieldset disabled={saving || completed || request.status !== "pending"}
             style={{ border: 0, padding: 0 }}>
             <legend style={{ color: gold, letterSpacing: ".1em", fontSize: 12, marginBottom: 15 }}>
-              ASSIGN PRIVATE PROJECTS
-            </legend>
+              {adminT("ASSIGN PRIVATE PROJECTS")}</legend>
             {projects.map(project => {
               const choices = offerings.filter(offering => offering.project_id === project.id);
               return choices.length ? (
@@ -177,23 +176,21 @@ export default function RegisteredRequestApproval({
           </fieldset>
         </>
       )}
-      {error && <p role="alert" style={{ color: "#e3a995" }}>{error}</p>}
-      {notice && <p role="status" style={{ color: gold }}>{notice}</p>}
+      {error && <p role="alert" style={{ color: "#e3a995" }}>{adminT(error)}</p>}
+      {notice && <p role="status" style={{ color: gold }}>{adminT(notice)}</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
         <button type="button" style={button}
           disabled={loading || saving || completed || !request.email_verified_at ||
             !request.auth_user_id || request.status !== "pending" ||
             selected.length === 0 || Boolean(error)}
           onClick={() => void approve()}>
-          {saving ? "Activating…" : completed ? "Account activated" : "Approve, Assign & Activate →"}
+          {saving ? adminT("Activating…") : completed ? adminT("Account activated") : adminT("Approve, Assign & Activate →")}
         </button>
         <button type="button" onClick={onClose} disabled={saving}
-          style={{ ...button, background: "transparent", color: gold }}>Close</button>
+          style={{ ...button, background: "transparent", color: gold }}>{adminT("Close")}</button>
       </div>
       <p style={{ color: "#a9a398", fontSize: 12, marginTop: 25 }}>
-        Account activation and project permissions are saved together.
-        Email delivery is tracked separately and may be retried safely.
-      </p>
+        {adminT("Account activation and project permissions are saved together. Email delivery is tracked separately and may be retried safely.")}</p>
     </section>
   );
 }

@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../lib/admin/i18n';
+
 import Link from "next/link";
 import {Suspense} from "react";
 import {usePathname,useSearchParams} from "next/navigation";
@@ -25,9 +27,13 @@ export function activeWorkspace(path:string,queue:string|null=null){
  return "Cockpit";
 }
 function Navigation({disabled=false}:{disabled?:boolean}){
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
  const active=activeWorkspace(usePathname(),useSearchParams().get("queue"));
- return <nav className={styles.nav} aria-label="Administration workspaces">{items.map(item=>
-  <Link key={item.href} href={item.href} onClick={event=>{if(disabled)event.preventDefault()}} aria-disabled={disabled} aria-current={active===item.label?"page":undefined}>{item.label}</Link>)}</nav>;
+ return <nav className={styles.nav} aria-label={adminT("Administration workspaces")}>{items.map(item=>
+  <Link key={item.href} href={item.href} onClick={event=>{if(disabled)event.preventDefault()}} aria-disabled={disabled} aria-current={active===item.label?"page":undefined}>{adminT(item.label)}</Link>)}</nav>;
 }
 
-export default function WorkspaceNavigation({disabled=false}:{disabled?:boolean}){return <Suspense fallback={<nav className={styles.nav} aria-label="Administration workspaces" aria-busy="true">Loading navigation…</nav>}><Navigation disabled={disabled}/></Suspense>;}
+export default function WorkspaceNavigation({disabled=false}:{disabled?:boolean}){
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+return <Suspense fallback={<nav className={styles.nav} aria-label={adminT("Administration workspaces")} aria-busy="true">{adminT("Loading navigation…")}</nav>}><Navigation disabled={disabled}/></Suspense>;}

@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../lib/admin/i18n';
+
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -14,6 +16,8 @@ type RequestRecord = {
 const stages = ["new", "in_review", "contacted", "closed"];
 
 export default function CapitalRequestsAdmin() {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [items, setItems] = useState<RequestRecord[]>([]);
   const [state, setState] = useState<"loading" | "denied" | "error" | "ready">("loading");
   const [busy, setBusy] = useState("");
@@ -57,29 +61,29 @@ export default function CapitalRequestsAdmin() {
   }
 
   return <main className={styles.page}>
-    <Link href="/admin/group/capital">← MZS Capital Cockpit</Link>
-    <p className={styles.kicker}>MZS CAPITAL / ADMINISTRATION</p>
-    <h1>Capital Requests</h1>
-    <p>Private financing enquiries and available investment capital.</p>
-    {state === "loading" && <p>Loading requests…</p>}
-    {state === "denied" && <p>Active Capital or Group Administrator access required.</p>}
-    {state === "error" && <p>Unable to load capital requests.</p>}
-    {notice && <p role="status">{notice}</p>}
-    {state === "ready" && (items.length === 0 ? <p>No capital requests received yet.</p> :
+    <Link href="/admin/group/capital">{adminT("← MZS Capital Cockpit")}</Link>
+    <p className={styles.kicker}>{adminT("MZS CAPITAL / ADMINISTRATION")}</p>
+    <h1>{adminT("Capital Requests")}</h1>
+    <p>{adminT("Private financing enquiries and available investment capital.")}</p>
+    {state === "loading" && <p>{adminT("Loading requests…")}</p>}
+    {state === "denied" && <p>{adminT("Active Capital or Group Administrator access required.")}</p>}
+    {state === "error" && <p>{adminT("Unable to load capital requests.")}</p>}
+    {notice && <p role="status">{adminT(notice)}</p>}
+    {state === "ready" && (items.length === 0 ? <p>{adminT("No capital requests received yet.")}</p> :
       <div className={styles.list}>{items.map(item => <article key={item.id} className={styles.card}>
         <div className={styles.top}>
-          <strong>{item.request_type === "capital" ? "Request Capital" : "Request Possibilities"}</strong>
-          <span>{new Date(item.created_at).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })}</span>
+          <strong>{item.request_type === "capital" ? adminT("Request Capital") : adminT("Request Possibilities")}</strong>
+          <span>{new Date(item.created_at).toLocaleString(adminLocale, { timeZone: "Europe/Madrid" })}</span>
         </div>
-        <h2>{new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(item.amount_eur)}</h2>
+        <h2>{new Intl.NumberFormat(adminLocale, { style: "currency", currency: "EUR" }).format(item.amount_eur)}</h2>
         <p>{[item.member_name || "Member", item.member_email].filter(Boolean).join(" · ")}</p>
         <p className={styles.explanation}>{item.explanation}</p>
-        <p>Admin email: {item.email_status}</p>
-        <label>Status <select aria-label={"Status for " + item.id} value={item.status}
+        <p>{adminT("Admin email:")} {adminT(item.email_status)}</p>
+        <label>{adminT("Status")} <select aria-label={adminT("Status for {p0}", {p0: item.id})} value={item.status}
           onChange={e => void update(item.id, e.target.value)} disabled={busy !== ""}>
-          {stages.map(s => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}
+          {stages.map(s => <option key={s} value={s}>{adminT(s.replaceAll("_", " "))}</option>)}
         </select></label>
-        <small>Reference: {item.id}</small>
+        <small>{adminT("Reference:")} {item.id}</small>
       </article>)}</div>)}
   </main>;
 }

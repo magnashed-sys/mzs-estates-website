@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../lib/admin/i18n';
+
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "../../../../lib/supabase/client";
@@ -17,6 +19,8 @@ const types: Offering["offering_type"][] = ["investment", "sale", "rental", "fin
 function OfferingEditor({ offering, grantCount, onReload }: {
   offering: Offering; grantCount: number; onReload: () => Promise<void>;
 }) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [title, setTitle] = useState(offering.title || "");
   const [summary, setSummary] = useState(offering.summary || "");
   const [busy, setBusy] = useState(false);
@@ -55,8 +59,8 @@ function OfferingEditor({ offering, grantCount, onReload }: {
     }
     const next = activating ? "active" : "draft";
     if (!window.confirm(activating
-      ? "Activate this offering? Existing assigned members can see it; other members get no automatic access."
-      : "Move this offering back to draft? It will no longer be visible to clients.")) return;
+      ? adminT("Activate this offering? Existing assigned members can see it; other members get no automatic access.")
+      : adminT("Move this offering back to draft? It will no longer be visible to clients."))) return;
     setBusy(true); setError(""); setNotice("");
     try {
       const { data, error: failure } = await createClient().from("offerings")
@@ -77,29 +81,29 @@ function OfferingEditor({ offering, grantCount, onReload }: {
     <div className={styles.itemHeading}>
       <div><span className={styles.kicker}>{offeringNames[offering.offering_type]}</span>
         <h3>{offering.title || offeringNames[offering.offering_type]}</h3></div>
-      <span className={styles.pill}>{offering.status}</span>
+      <span className={styles.pill}>{adminT(offering.status)}</span>
     </div>
-    <p className={styles.muted}>{grantCount} explicit offering grant{grantCount === 1 ? "" : "s"} · Does not auto-assign access</p>
+    <p className={styles.muted}>{grantCount}  {adminT("explicit offering grant")}{grantCount === 1 ? "" : adminT("s")}  {adminT("· Does not auto-assign access")}</p>
     <form onSubmit={save} className={styles.form}>
-      <label>Offering title
-        <input value={title} onChange={e => setTitle(e.target.value)} maxLength={150} required disabled={busy} />
+      <label>{adminT("Offering title")}<input value={title} onChange={e => setTitle(e.target.value)} maxLength={150} required disabled={busy} />
       </label>
-      <label>Summary
-        <textarea rows={3} value={summary} maxLength={2500} onChange={e => setSummary(e.target.value)} disabled={busy} />
+      <label>{adminT("Summary")}<textarea rows={3} value={summary} maxLength={2500} onChange={e => setSummary(e.target.value)} disabled={busy} />
       </label>
       <div className={styles.actions}>
-        <button className="admin-button admin-button-primary" disabled={busy} type="submit">{busy ? "Saving…" : "Save offering"}</button>
+        <button className="admin-button admin-button-primary" disabled={busy} type="submit">{busy ? adminT("Saving…") : adminT("Save offering")}</button>
         {offering.status !== "archived" && <button className="admin-button" disabled={busy || (offering.status === "active" && grantCount > 0)} type="button" onClick={()=>void changePublished()}>
-          {offering.status === "active" ? "Move to draft" : "Activate offering"}
+          {offering.status === "active" ? adminT("Move to draft") : adminT("Activate offering")}
         </button>}
       </div>
     </form>
-    {notice && <p className={styles.success} role="status">{notice}</p>}
-    {error && <p className={styles.failure} role="alert">{error}</p>}
+    {notice && <p className={styles.success} role="status">{adminT(notice)}</p>}
+    {error && <p className={styles.failure} role="alert">{adminT(error)}</p>}
   </article>;
 }
 
 export default function OfferingManager({ projectId, offerings, grantCounts, onReload }: Props) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const unused = types.filter(type => !offerings.some(o => o.offering_type === type));
   const [kind, setKind] = useState<Offering["offering_type"]>("investment");
   const [newTitle, setNewTitle] = useState("");
@@ -116,7 +120,7 @@ export default function OfferingManager({ projectId, offerings, grantCounts, onR
       setError("Select an unused offering type and provide a valid title and summary.");
       return;
     }
-    if (!window.confirm("Create a NEW DRAFT offering? No client access is granted, and it will not be published automatically.")) return;
+    if (!window.confirm(adminT("Create a NEW DRAFT offering? No client access is granted, and it will not be published automatically."))) return;
     setCreating(true); setError("");
     try {
       const { error: failure } = await createClient().from("offerings")
@@ -132,28 +136,25 @@ export default function OfferingManager({ projectId, offerings, grantCounts, onR
   }
 
   return <div className={styles.stack}>
-    <p className={styles.note}>Offerings are separate sale, rental, investment or financing opportunities. Saving content never changes existing project rights. New offerings start as private drafts.</p>
+    <p className={styles.note}>{adminT("Offerings are separate sale, rental, investment or financing opportunities. Saving content never changes existing project rights. New offerings start as private drafts.")}</p>
     {offerings.map(offering =>
       <OfferingEditor key={offering.id + offering.updated_at} offering={offering}
         grantCount={grantCounts[offering.id] || 0} onReload={onReload} />)}
     {unused.length > 0 && <section className={styles.panel}>
-      <h2>Create a draft offering.</h2>
+      <h2>{adminT("Create a draft offering.")}</h2>
       <form className={styles.form} onSubmit={create}>
-        <label>Type
-          <select value={unused.includes(kind) ? kind : unused[0]} onChange={e => setKind(e.target.value as Offering["offering_type"])} disabled={creating}>
+        <label>{adminT("Type")}<select value={unused.includes(kind) ? kind : unused[0]} onChange={e => setKind(e.target.value as Offering["offering_type"])} disabled={creating}>
             {unused.map(type => <option key={type} value={type}>{offeringNames[type]}</option>)}
           </select>
         </label>
-        <label>Offering title
-          <input value={newTitle} required maxLength={150} onChange={e=>setNewTitle(e.target.value)} disabled={creating} />
+        <label>{adminT("Offering title")}<input value={newTitle} required maxLength={150} onChange={e=>setNewTitle(e.target.value)} disabled={creating} />
         </label>
-        <label>Summary
-          <textarea rows={3} maxLength={2500} value={newSummary} onChange={e=>setNewSummary(e.target.value)} disabled={creating} />
+        <label>{adminT("Summary")}<textarea rows={3} maxLength={2500} value={newSummary} onChange={e=>setNewSummary(e.target.value)} disabled={creating} />
         </label>
-        <button className="admin-button admin-button-primary" type="submit" disabled={creating}>{creating ? "Creating…" : "Create draft offering"}</button>
-        {error && <p className={styles.failure} role="alert">{error}</p>}
+        <button className="admin-button admin-button-primary" type="submit" disabled={creating}>{creating ? adminT("Creating…") : adminT("Create draft offering")}</button>
+        {error && <p className={styles.failure} role="alert">{adminT(error)}</p>}
       </form>
     </section>}
-    {!unused.length && <p className={styles.note}>All four offering types are already represented for this project.</p>}
+    {!unused.length && <p className={styles.note}>{adminT("All four offering types are already represented for this project.")}</p>}
   </div>;
 }

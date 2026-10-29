@@ -1,3 +1,5 @@
+
+import {getAdminI18n} from '../../../../../../../lib/admin/i18n-server';
 import Link from 'next/link';
 import {loadCreditNotes} from '../../../../../../../lib/finance/credit-notes';
 import {notFound} from 'next/navigation';
@@ -9,8 +11,10 @@ import {PaymentForm,ReversalForm} from '../../standalone/PaymentForms';
 import s from '../../sales.module.css';
 export const dynamic='force-dynamic';
 const uuid=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
-const money=(n:number|null)=>n===null?'Not recorded':new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(n/100);
+const money=(n:number|null, adminLocale = 'en-GB')=>n===null?'Not recorded':new Intl.NumberFormat(adminLocale,{style:'currency',currency:'EUR'}).format(n/100);
 export default async function StandaloneInvoice({params}:{params:Promise<{id:string}>}){
+ const {t:adminT,locale:adminLocale}=await getAdminI18n();
+
  const {db}=await requireEstateAdmin();const {id}=await params;if(!uuid.test(id))notFound();
  const {data:invoice,error}=await db.from('mzs_service_invoices').select('*').eq('id',id).maybeSingle();
  if(error)throw Error('Standalone invoice unavailable');if(!invoice)notFound();
@@ -18,13 +22,13 @@ export default async function StandaloneInvoice({params}:{params:Promise<{id:str
  if(customer.error||issuer.error||!customer.data?.name||!issuer.data?.name||invoice.currency!=='EUR'||invoice.status!=='issued'||invoice.net_cents+invoice.vat_cents!==invoice.gross_cents)throw Error('Incomplete invoice details');
  const credits=(await loadCreditNotes(db)).filter(c=>c.invoice_id===id),credited=credits.reduce((a,c)=>a+c.gross_cents,0);
  const recorded=externalPaymentTotals(receipts,id,invoice.gross_cents),payment={paid:recorded.paid??0,balance:invoice.gross_cents-(recorded.paid??0)-credited},today=operationsDay(),status=payment.balance===null?'Payment unknown':payment.balance<0?'Credit balance':payment.balance===0?(credited?'Settled with credit':'Paid'):invoice.due_on<today?'Overdue':payment.paid>0?'Partly paid':'Open';
- return <section className={s.page}><Link href="/admin/workspaces/accountancy/sales">← Invoices</Link><header className={s.heading}><div><p className={s.eyebrow}>STANDALONE INVOICE</p><h1>{invoice.number}</h1><p>{customer.data.name} · {issuer.data.name}</p></div><span className={status==='Overdue'?s.overdue:s.badge}>{status}</span></header>
- <p>{invoice.payload.subject}</p><p>Issued: {invoice.issued_on} · Due: {invoice.due_on}</p>
- <div className={s.metrics}><div><span>Total incl. VAT</span><strong>{money(invoice.gross_cents)}</strong><small>{money(invoice.net_cents)} excl. VAT · {money(invoice.vat_cents)} VAT</small></div><div><span>Recorded paid</span><strong>{money(payment.paid)}</strong></div><div><span>Remaining balance</span><strong>{money(payment.balance)}</strong><small>Receipts and allocated credits</small></div></div>
- {payment.balance===null&&<p>No active payment is recorded. The balance is unknown until actual receipts are entered.</p>}
+ return <section className={s.page}><Link href="/admin/workspaces/accountancy/sales">{adminT("← Invoices")}</Link><header className={s.heading}><div><p className={s.eyebrow}>{adminT("STANDALONE INVOICE")}</p><h1>{invoice.number}</h1><p>{customer.data.name} · {issuer.data.name}</p></div><span className={status==='Overdue'?s.overdue:s.badge}>{adminT(status)}</span></header>
+ <p>{invoice.payload.subject}</p><p>{adminT("Issued:")} {invoice.issued_on}  {adminT("· Due:")} {invoice.due_on}</p>
+ <div className={s.metrics}><div><span>{adminT("Total incl. VAT")}</span><strong>{money(invoice.gross_cents, adminLocale)}</strong><small>{money(invoice.net_cents, adminLocale)}  {adminT("excl. VAT ·")} {money(invoice.vat_cents, adminLocale)}  {adminT("VAT")}</small></div><div><span>{adminT("Recorded paid")}</span><strong>{money(payment.paid, adminLocale)}</strong></div><div><span>{adminT("Remaining balance")}</span><strong>{money(payment.balance, adminLocale)}</strong><small>{adminT("Receipts and allocated credits")}</small></div></div>
+ {payment.balance===null&&<p>{adminT("No active payment is recorded. The balance is unknown until actual receipts are entered.")}</p>}
  <PaymentForm invoiceId={id} source="service" requestId={randomUUID()} remaining={payment.balance??invoice.gross_cents} today={today}/>
- <h2>Credit notes</h2><p>{money(credited)} credited. A negative remaining balance is a customer credit, not a recorded refund.</p>{credits.map(c=><p key={c.id}><Link href={'/admin/workspaces/accountancy/sales/credits/'+c.id}>{c.number} · {money(c.gross_cents)}</Link></p>)}{credited<invoice.gross_cents&&<Link className={s.button} href={'/admin/workspaces/accountancy/sales/credits/new/'+id}>Create credit note →</Link>}
- <h2>Payment history</h2>{!receipts.length?<p>No receipts recorded yet.</p>:<div className={s.tableWrap}><table className={s.table}><thead><tr><th>Received on</th><th>Amount</th><th>Reference</th><th>History</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount_cents)}</td><td>{r.reference}</td><td><p>Recorded {r.created_at.slice(0,19).replace('T',' ')} UTC</p><small>Recorded by account {r.recorded_by}</small>{r.reversed_at?<><strong>Reversed</strong><p>{r.reversal_reason}</p><small>{r.reversed_at.slice(0,19).replace('T',' ')} UTC · account {r.reversed_by}</small></>:<ReversalForm source="service" invoiceId={id} receiptId={r.id}/>}</td></tr>)}</tbody></table></div>}
- <p className={s.notes}>This invoice is issued and immutable. Payment corrections retain their history. No email was sent when issuing.</p><Link className={s.button} href={'/admin/workspaces/accountancy/sales/documents/'+id} target="_blank" rel="noopener noreferrer">Open invoice PDF ↗</Link>
+ <h2>{adminT("Credit notes")}</h2><p>{money(credited, adminLocale)}  {adminT("credited. A negative remaining balance is a customer credit, not a recorded refund.")}</p>{credits.map(c=><p key={c.id}><Link href={'/admin/workspaces/accountancy/sales/credits/'+c.id}>{c.number} · {money(c.gross_cents, adminLocale)}</Link></p>)}{credited<invoice.gross_cents&&<Link className={s.button} href={'/admin/workspaces/accountancy/sales/credits/new/'+id}>{adminT("Create credit note →")}</Link>}
+ <h2>{adminT("Payment history")}</h2>{!receipts.length?<p>{adminT("No receipts recorded yet.")}</p>:<div className={s.tableWrap}><table className={s.table}><thead><tr><th>{adminT("Received on")}</th><th>{adminT("Amount")}</th><th>{adminT("Reference")}</th><th>{adminT("History")}</th></tr></thead><tbody>{receipts.map(r=><tr key={r.id}><td>{r.received_on}</td><td>{money(r.amount_cents, adminLocale)}</td><td>{r.reference}</td><td><p>{adminT("Recorded")} {r.created_at.slice(0,19).replace('T',' ')}  {adminT("UTC")}</p><small>{adminT("Recorded by account")} {r.recorded_by}</small>{r.reversed_at?<><strong>{adminT("Reversed")}</strong><p>{r.reversal_reason}</p><small>{r.reversed_at.slice(0,19).replace('T',' ')}  {adminT("UTC · account")} {r.reversed_by}</small></>:<ReversalForm source="service" invoiceId={id} receiptId={r.id}/>}</td></tr>)}</tbody></table></div>}
+ <p className={s.notes}>{adminT("This invoice is issued and immutable. Payment corrections retain their history. No email was sent when issuing.")}</p><Link className={s.button} href={'/admin/workspaces/accountancy/sales/documents/'+id} target="_blank" rel="noopener noreferrer">{adminT("Open invoice PDF ↗")}</Link>
  </section>;
 }
