@@ -1,10 +1,23 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
 
 const STAGING='https://senonkpxdtlhyhrubicg.supabase.co';
+const PRODUCTION='https://ptrnjzmcehrhbsfxntgw.supabase.co';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Independent review modes: Staging UAT money is always fictitious.
+ * Real payment evidence can be entered only after a separate, explicit Production flag.
+ * The flag must NEVER be included in standard/default Vercel environments.
+ */
+export type SupplierPaymentMode='synthetic'|'real';
+export function supplierPaymentMode(env:NodeJS.ProcessEnv=process.env):SupplierPaymentMode|null{
+ if(env.VERCEL_ENV==='preview'&&env.NEXT_PUBLIC_SUPABASE_URL===STAGING&&
+  env.MZS_SUPPLIER_PAYMENTS_ENABLED==='true')return 'synthetic';
+ if(env.VERCEL_ENV==='production'&&env.NEXT_PUBLIC_SUPABASE_URL===PRODUCTION&&
+  env.MZS_SUPPLIER_PAYMENTS_REAL_ENABLED==='true'&&
+  env.MZS_SUPPLIER_PAYMENTS_ENABLED!=='true')return 'real';
+ return null;
+}
 export function supplierPaymentEnvironment(env:NodeJS.ProcessEnv=process.env){
- return env.VERCEL_ENV==='preview'&&env.NEXT_PUBLIC_SUPABASE_URL===STAGING&&
-  env.MZS_SUPPLIER_PAYMENTS_ENABLED==='true';
+ return supplierPaymentMode(env)!==null;
 }
 export type SupplierPaymentRecord={
  id:string;draft_id:string;issuer_id:string;amount_cents:number;paid_on:string;
