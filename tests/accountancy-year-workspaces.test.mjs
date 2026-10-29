@@ -36,3 +36,23 @@ test('annual accountant export includes one source-evidence row per supplier inv
  assert.ok(files.some(file=>file.name==='source-coverage.csv'));
  assert.equal(JSON.parse(Buffer.from(files.find(file=>file.name==='manifest.json').bytes).toString()).statutory_complete,false);
 });
+
+test('private year export includes master-data QA once per referenced existing supplier, without supplier writes',()=>{
+ const f=fixture(),master=[
+  {id:id(3),name:'=NotAFormula',kind:'company',company_details:{tax_id:'ESB12345678'}},
+  {id:id(97),name:'Secondary supplier spelling',kind:'company',company_details:{tax_id:'ES B12345678'}},
+  {id:id(98),name:'Unrelated company',kind:'company',company_details:{tax_id:'ESB98765432'}}
+ ];
+ const files=pkg.yearAccountantFiles(f,id(1),master),out=n=>Buffer.from(files.find(x=>x.name===n).bytes).toString();
+ const csv=out('supplier-masterdata-review.csv'),lines=csv.trim().split(/\r?\n/);
+ assert.equal(lines.length,2,'one header and one master-data row despite three invoice drafts');
+ assert.match(csv,/company_tax_id/);
+ assert.match(csv,/ESB12345678/);
+ assert.match(csv,/same_tax_id/);
+ assert.match(csv,new RegExp(id(97)));
+ assert.doesNotMatch(csv,/Unrelated company/);
+ assert.match(out('README.txt'),/Supplier master-data warnings/);
+ const manifest=JSON.parse(out('manifest.json'));
+ assert.ok(manifest.files.some(file=>file.name==='supplier-masterdata-review.csv'));
+ assert.equal(manifest.statutory_complete,false);
+});
