@@ -2,9 +2,9 @@
 
 ## Purpose
 
-MZS holds immutable supplier purchase draft amounts and separate annual cost reviews. Rental, booking and Capital receipt records are NOT purchase payment evidence. This pilot adds an append-only register of manually declared existing payments for reviewed supplier costs, with partial payments, idempotent retry and administrative reversals.
+MZS holds immutable supplier purchase draft amounts and separate annual cost reviews. Rental, booking and Capital receipt records are NOT purchase payment evidence. This pilot exercises an append-only register with **synthetic Staging-only payment entries** for a reviewed fictitious supplier cost, including partial amounts, idempotent retry and administrative reversals. It is NOT a production register of actual transactions.
 
-An administrator-recorded supplier payment is NOT a verified bank payment. An invoice balance that has no matching manual payment record is NOT proof that the invoice remains legally unpaid or overdue. A reversal corrects the internal register and does not imply a bank refund. Credits, advances, amounts above the invoice balance, cross-invoice splits and automated bank imports remain excluded. The accountant remains responsible for tax treatment and statutory accounting.
+A synthetic Staging payment entry is NOT a real or verified bank/cash payment. An invoice balance that has no matching manual payment record is NOT proof that the invoice remains legally unpaid or overdue. A reversal corrects the internal register and does not imply a bank refund. Credits, advances, amounts above the invoice balance, cross-invoice splits and automated bank imports remain excluded. The accountant remains responsible for tax treatment and statutory accounting.
 
 ## Data and authorization
 
@@ -14,9 +14,9 @@ Only public.mzs_record_supplier_payment and public.mzs_reverse_supplier_payment 
 
 ## Interface and accountant ZIP
 
-The year-administration pilot link appears only when Vercel Preview uses MZS Staging Supabase and has the explicit MZS_SUPPLIER_PAYMENTS_ENABLED=true flag. The pilot page lets a signed-in admin record real prior payments and reverse incorrect registrations, with unmistakable payment evidence pending bank reconciliation. No funds are transferred by the platform.
+The year-administration pilot link appears only when Vercel Preview uses MZS Staging Supabase and has the explicit MZS_SUPPLIER_PAYMENTS_ENABLED=true flag. The pilot page lets an authenticated administrator simulate fictitious partial payments and corrections against the existing synthetic invoice only. The form and server action require explicit **synthetic Staging test** acknowledgement; a claim that a real transfer happened is not acceptable. No real bank or cash transaction occurs.
 
-When enabled, accountant ZIP includes supplier-payment-events.csv and supplier-payment-summary.csv, alongside existing source files and SHA-256 manifest. Neither export nor UI claims that MZS has automatically reconciled the bank. No tax return, VAT recovery, general ledger or final closing entries are produced.
+When enabled, the accountant ZIP contains supplier-payment-events.csv and supplier-payment-summary.csv with a mandatory synthetic_staging_only flag and prominent EN/ES synthetic-data notice, alongside existing source files and the SHA-256 manifest. These Staging exports must NEVER be shared as records of real payments. Neither export nor UI claims bank reconciliation. No tax return, VAT recovery, general ledger or final closing entries are produced.
 
 ## Gates and rollout
 
