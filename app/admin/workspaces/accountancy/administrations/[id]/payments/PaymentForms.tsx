@@ -1,6 +1,7 @@
 'use client';
 import {useRef,useState,type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
+import Link from 'next/link';
 import {recordSupplierPayment,reverseSupplierPayment,type PaymentAction} from './actions';
 import type {CostPaymentOverview,SupplierPaymentRecord} from '../../../../../../../lib/accountancy/supplier-payments';
 import s from '../../administration.module.css';
@@ -35,11 +36,13 @@ function RecordForm({yearId,item,language}:{yearId:string;item:CostPaymentOvervi
   finally{lock.current=false;setBusy(false);}
  }
  return <details className={s.panel}><summary>{text(language,'Record a partial or full payment','Registrar pago parcial o total')}</summary>
-  {!permitted&&<p role="status">{text(language,item.review_status!=='reviewed'?'Cost review is required before payment registration.':'This invoice is fully covered by recorded entries.','Se requiere revisar el coste antes de registrar pagos.')}</p>}
+  {!permitted&&<p role="status">{item.review_status!=='reviewed'?text(language,'Cost review is required before payment registration.','Es necesario revisar el coste antes de registrar pagos.'):text(language,'The invoice is fully covered by recorded entries.','El importe de la factura ya está cubierto por las anotaciones registradas.')}</p>}
+  <p><Link href={'/admin/workspaces/accountancy/administrations/'+yearId+'#costs'}>{text(language,'Open cost review','Abrir revisión de costes')}</Link>{' · '}<Link href={'/admin/workspaces/accountancy/documents/links/cost/'+item.draft_id}>{text(language,'Check original invoice PDF','Revisar PDF original de la factura')}</Link></p>
   <form onSubmit={submit}><fieldset className={s.form} disabled={busy||!permitted}>
    <label>{text(language,'Amount (EUR)','Importe (EUR)')}<input name="amount_eur" inputMode="decimal" placeholder="0.00" maxLength={20} required/></label>
    <label>{text(language,'Actual payment date','Fecha real del pago')}<input name="paid_on" type="date" required/></label>
    <label className={s.wide}>{text(language,'Bank or cash reference','Referencia bancaria o de caja')}<input name="reference" minLength={3} maxLength={200} required autoComplete="off"/></label>
+   <label className={s.wide}><input type="checkbox" name="confirmed_existing_transfer" value="yes" required/>{text(language,'I confirm this transfer or cash payment already took place and that the amount, date and reference were checked. Recording this does not transfer money or verify the bank statement.','Confirmo que esta transferencia o pago en efectivo ya se realizó y que he comprobado su importe, fecha y referencia. Este registro no transfiere dinero ni verifica el extracto bancario.')}</label>
    <p className={s.wide}>{text(language,'This records an existing transfer only. It does not instruct a bank, establish tax deductibility or reconcile the bank statement.','Solo registra un movimiento existente. No ordena una transferencia, ni determina deducibilidad fiscal, ni concilia el extracto bancario.')}</p>
    <button className={s.button} disabled={busy||!permitted}>{busy?text(language,'Saving…','Guardando…'):text(language,'Record payment','Registrar pago')}</button>
   </fieldset></form>{notice&&<p role="status">{notice}</p>}
