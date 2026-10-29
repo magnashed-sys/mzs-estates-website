@@ -4,6 +4,8 @@ import {useRouter} from 'next/navigation';
 import {createClient} from '../../../../../lib/supabase/client';
 import {ARCHIVE_BUCKET,ARCHIVE_ROOT,MAX_PDF_BYTES,categories,categoryLabels,copy,documentPath,statuses,statusLabels,validatePdf,type ArchiveDocument,type Entity,type Language} from '../../../../../lib/accountancy/archive';
 import {registerDocument,updateDocument} from './actions';
+import {saveDocumentLink} from './links/actions';
+import type {LinkKind} from '../../../../../lib/accountancy/document-links';
 import s from './archive.module.css';
 function Fields({language,document}:{language:Language;document?:ArchiveDocument}){
  const t=copy[language];
@@ -15,7 +17,7 @@ function Fields({language,document}:{language:Language;document?:ArchiveDocument
  <label className={s.wide}>{t.notes}<textarea name="notes" maxLength={4000} rows={4} defaultValue={document?.notes}/></label></>;
 }
 const message=(language:Language,code?:string)=>{const t=copy[language];return code==='duplicate'?t.duplicate:code==='invalid'?t.invalid:code==='invalid_pdf'?t.invalid_pdf:code==='stale'?t.stale:t.failed;};
-export function UploadForm({entities,language,entity,year,fixedContext=false}:{entities:Entity[];language:Language;entity:string;year:number;fixedContext?:boolean}){
+export function UploadForm({entities,language,entity,year,fixedContext=false,attachTo}:{entities:Entity[];language:Language;entity:string;year:number;fixedContext?:boolean;attachTo?:{kind:LinkKind;id:string}}){
  const [busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[ok,setOk]=useState(false);const lock=useRef(false);const router=useRouter();const t=copy[language];
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(lock.current)return;lock.current=true;setBusy(true);setNotice('');setOk(false);
@@ -27,7 +29,15 @@ export function UploadForm({entities,language,entity,year,fixedContext=false}:{e
    const {error}=await db.storage.from(ARCHIVE_BUCKET).upload(path,file,{contentType:'application/pdf',cacheControl:'0',upsert:false});
    if(error)throw Error('failed');uploaded=true;f.delete('file');f.set('id',id);f.set('original_name',file.name);
    const result=await registerDocument(f);if(!result.ok)throw Error(result.code);
-   uploaded=false;setOk(true);setNotice(t.saved);form.reset();router.refresh();
+   // Once registered the original is immutable. A failed dossier link must never delete it.
+   uploaded=false;
+   if(attachTo){
+    const association=new FormData();association.set('kind',attachTo.kind);association.set('target_id',attachTo.id);association.set('document_id',id);
+    let confirmed=false;
+    try{confirmed=(await saveDocumentLink(association)).ok;}catch{/* network state can be ambiguous; refresh and verify the link */}
+    if(!confirmed){setNotice(t.savedButUnlinked);form.reset();router.refresh();return;}
+   }
+   setOk(true);setNotice(attachTo?t.savedAndLinked:t.saved);form.reset();router.refresh();
   }catch(error){
    // RLS forbids deleting an object once registered, including ambiguous network failures.
    if(uploaded&&path)await db.storage.from(ARCHIVE_BUCKET).remove([path]).catch(()=>undefined);
