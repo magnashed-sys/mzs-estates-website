@@ -1,1 +1,57 @@
-.panel{position:fixed;z-index:1000;inset-inline:16px;bottom:16px;max-width:620px;margin-inline:auto;background:#171b17;color:#eee8de;border:1px solid #b8a47e;padding:22px;box-shadow:0 8px 35px #0008;max-height:75svh;overflow:auto;font-size:14px;line-height:1.6}.panel h2{font-size:21px;margin:0 0 10px}.panel p{margin:0 0 15px}.actions{display:flex;gap:12px;flex-wrap:wrap}.actions button,.settings{font:inherit;cursor:pointer;border:1px solid #b8a47e;background:#171b17;color:#eee8de;padding:10px 16px}.actions button:focus-visible,.settings:focus-visible{outline:2px solid #fff;outline-offset:3px}.settings{position:fixed;bottom:8px;inset-inline-end:8px;z-index:90;font-size:12px;padding:6px 9px}.panel a{text-decoration:underline}.panel details{margin-bottom:16px}
+.panel {
+  position: fixed;
+  z-index: 1000;
+  left: 16px;
+  bottom: 16px;
+  width: min(400px, calc(100vw - 32px));
+  box-sizing: border-box;
+  background: #171b17;
+  color: #eee8de;
+  border: 1px solid #b8a47e;
+  padding: 22px;
+  box-shadow: 0 8px 35px #0008;
+  max-height: 75svh;
+  overflow: auto;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.panel h2 { font-size: 21px; margin: 0 0 10px; }
+.panel p { margin: 0 0 15px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.actions button,
+.settings {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #b8a47e;
+  background: #171b17;
+  color: #eee8de;
+  padding: 10px 16px;
+}
+
+.actions button:focus-visible,
+.settings:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.settings {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 90;
+  font-size: 12px;
+  padding: 6px 9px;
+}
+
+.panel a { text-decoration: underline; }
+.panel details { margin-bottom: 16px; }
+
+@media (min-width: 1200px) and (min-height: 700px) {
+  .panel,
+  .settings {
+    left: auto;
+    right: 24px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+}
