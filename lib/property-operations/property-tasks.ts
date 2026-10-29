@@ -5,7 +5,7 @@ export const taskStatuses=['open','in_progress','blocked','done','cancelled'] as
 export type TaskPriority=(typeof taskPriorities)[number];
 export type TaskStatus=(typeof taskStatuses)[number];
 export type PropertyTask={
- id:string;property_id:string;unit_id:string|null;assigned_profile_id:string|null;
+ id:string;property_id:string|null;work_area_id:string|null;unit_id:string|null;assigned_profile_id:string|null;
  title:string;description:string;priority:TaskPriority;due_on:string|null;source_reference:string;
  created_by:string;created_at:string;status:TaskStatus;latest_note:string|null;status_updated_at:string|null;
 };
