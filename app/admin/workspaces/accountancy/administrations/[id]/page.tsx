@@ -56,7 +56,7 @@ export default async function Administration({params,searchParams}:{params:Promi
    <p>{l('Company tax IDs to verify','Identificadores fiscales por verificar')}<strong>{supplierIntegrity.missingTaxIdSuppliers}</strong></p>
   </div>
   <p>{l('A missing tax ID is a check only where applicable. Exact normalized names are considered possible matches only when their recorded tax IDs do not conflict. All corrections require manual verification.','La ausencia de un número fiscal solo requiere comprobación cuando proceda. Los nombres normalizados coincidentes solo se consideran posibles duplicados si los identificadores fiscales no difieren. Cualquier corrección requiere comprobación manual.')}</p>
-  {supplierIntegrity.signals.filter(row=>row.possible_duplicate_records.length||row.missing_company_tax_id||row.missing_record).slice(0,25).map(row=>
+  {[...new Map(supplierIntegrity.signals.filter(row=>row.possible_duplicate_records.length||row.missing_company_tax_id||row.missing_record).map(row=>[row.supplier_id,row])).values()].slice(0,25).map(row=>
    <p key={row.draft_id}>
     <strong>{row.supplier_name||l('Unresolved supplier reference','Referencia de proveedor no encontrada')}</strong>
     {' · '}
