@@ -11,7 +11,7 @@ const moduleSource=ts.transpileModule(readFileSync(path,'utf8'),{
  compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}
 }).outputText;
 
-function harness({enabled=true,allowed=true,matchingYear=true,rpcError=null}={}){
+function harness({enabled=true,mode='synthetic',allowed=true,matchingYear=true,rpcError=null}={}){
  const calls=[],result={},auth=()=>{calls.push('auth');if(!allowed)throw Error('Access denied');return {db};};
  const db={
   from(table){
@@ -34,7 +34,7 @@ function harness({enabled=true,allowed=true,matchingYear=true,rpcError=null}={})
    if(name==='next/cache')return {revalidatePath:p=>calls.push(['refresh',p])};
    if(name==='next/navigation')return {notFound(){calls.push('notFound');throw Error('Not Found');}};
    if(name.includes('security/estate-properties'))return {requireEstateAdmin:auth};
-   if(name.includes('accountancy/supplier-payments'))return {supplierPaymentEnvironment:()=>enabled};
+   if(name.includes('accountancy/supplier-payments'))return {supplierPaymentMode:()=>enabled?mode:null};
    if(name.includes('accountancy/administration'))return {
     uuid:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     ADMINISTRATION_ROOT:'/admin/workspaces/accountancy/administrations',
@@ -80,6 +80,23 @@ test('old real-transfer checkbox cannot authorize synthetic staging events',asyn
  assert.equal(result.ok,false);
  assert.equal(result.code,'invalid');
  assert.equal(x.calls.some(c=>Array.isArray(c)&&c[0]==='rpc'),false);
+});
+test('real Production mode explicitly requires prior-payment confirmation, never a synthetic checkbox',async()=>{
+ const missing=harness({mode:'real'});
+ const bad=await missing.actions.recordSupplierPayment(request());
+ assert.equal(bad.ok,false);
+ assert.equal(bad.code,'invalid');
+ assert.equal(missing.calls.some(x=>Array.isArray(x)&&x[0]==='rpc'),false);
+ const real=harness({mode:'real'});
+ const yes=await real.actions.recordSupplierPayment(request({
+  confirmed_synthetic_staging_test:null,confirmed_existing_transfer:'yes'
+ }));
+ assert.equal(yes.ok,true);
+ assert.equal(real.calls.filter(x=>Array.isArray(x)&&x[0]==='rpc').length,1);
+ const forged=harness({mode:'real'});
+ const nope=await forged.actions.recordSupplierPayment(request({confirmed_existing_transfer:'yes'}));
+ assert.equal(nope.ok,false);
+ assert.equal(forged.calls.some(x=>Array.isArray(x)&&x[0]==='rpc'),false);
 });
 test('invalid amount and mismatched year or entity are rejected before RPC',async()=>{
  const bad=harness();
