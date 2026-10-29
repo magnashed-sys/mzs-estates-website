@@ -7,7 +7,7 @@ export type SupplierCostReference={id:string;supplier_relationship_id:string};
 export type SupplierSimilarity='same_tax_id'|'same_name';
 export type SupplierIdentityMatch={id:string;name:string;reason:SupplierSimilarity};
 export type SupplierCostSignal={
- draft_id:string;supplier_id:string;supplier_name:string;
+ draft_id:string;supplier_id:string;supplier_name:string;company_tax_id:string;
  missing_record:boolean;missing_company_tax_id:boolean;
  possible_duplicate_records:SupplierIdentityMatch[];
 };
@@ -33,10 +33,12 @@ export function supplierCostIntegrity(costs:readonly SupplierCostReference[],sup
  const signals:SupplierCostSignal[]=costs.map(c=>{
   const supplier=byId.get(c.supplier_relationship_id);
   if(!supplier)return {
-   draft_id:c.id,supplier_id:c.supplier_relationship_id,supplier_name:'',
+   draft_id:c.id,supplier_id:c.supplier_relationship_id,supplier_name:'',company_tax_id:'',
    missing_record:true,missing_company_tax_id:false,possible_duplicate_records:[]
   };
   const tax=taxId(supplier),name=normalizedName(supplier.name);
+  const rawTax=supplier.kind==='company'&&supplier.company_details&&typeof supplier.company_details==='object'&&!Array.isArray(supplier.company_details)?(supplier.company_details as Record<string,unknown>).tax_id:undefined;
+  const companyTaxId=typeof rawTax==='string'&&rawTax.length<=64?rawTax.trim():'';
   const dup:SupplierIdentityMatch[]=[];
   if(supplier.kind==='company'){
    for(const other of suppliers){
@@ -51,7 +53,7 @@ export function supplierCostIntegrity(costs:readonly SupplierCostReference[],sup
   }
   dup.sort((a,b)=>a.name.localeCompare(b.name)||a.id.localeCompare(b.id));
   return {
-   draft_id:c.id,supplier_id:supplier.id,supplier_name:supplier.name,
+   draft_id:c.id,supplier_id:supplier.id,supplier_name:supplier.name,company_tax_id:companyTaxId,
    missing_record:false,missing_company_tax_id:supplier.kind==='company'&&!tax,
    possible_duplicate_records:dup
   };
