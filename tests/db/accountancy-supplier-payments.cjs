@@ -26,7 +26,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
   'create policy admin_years on public.mzs_accountancy_years for select to authenticated using(public.is_admin());',
   'create policy admin_reviews on public.mzs_accountancy_cost_reviews for select to authenticated using(public.is_admin());'
  ].join('\n'));
- await db.exec(fs.readFileSync('supabase/migrations/20261029211000_supplier_payment_ledger_staging.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/20261029201806_supplier_payment_ledger_staging.sql','utf8'));
  const actor=async id=>db.exec("reset role;set role authenticated;select set_config('request.jwt.claim.sub','"+id+"',false);");
  const record=(id,amount,reference='BANK-REFERENCE-1')=>db.query(
   'select public.mzs_record_supplier_payment($1,$2,$3,$4,$5) v',[id,draft,amount,'2026-10-20',reference]);
