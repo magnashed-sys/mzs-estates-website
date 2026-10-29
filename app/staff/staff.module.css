@@ -83,3 +83,21 @@
  .form :is(button,input,select,textarea){min-height:48px;font-size:16px}
  .taskProgressForm :is(select,textarea){font-size:16px}
 }
+
+/* Self-contained Property Manager header; preserves the MZS public wordmark,
+   without reintroducing client navigation on the staff-only landing page. */
+.staffLanding{padding-top:32px}
+.managerBrandHeader{display:flex;align-items:center;gap:20px;padding:0 0 22px;margin:0 0 22px;border-bottom:1px solid #514330;min-width:0}
+.managerLogo{display:inline-flex;flex-direction:column;gap:6px;flex:0 0 auto;min-width:0}
+.managerMonogram{font:400 42px/.95 Georgia,"Times New Roman",serif;letter-spacing:.16em;color:#e4cfaa}
+.managerGroupLabel{font:400 10.5px/1.2 Arial,sans-serif;letter-spacing:.48em;color:#c1b9a9;padding-inline-start:2px}
+.managerBrandDivider{width:1px;height:47px;background:#61513c;flex:0 0 auto}
+.managerBrandTitle{font:400 clamp(20px,2.65vw,30px)/1.2 Georgia,"Times New Roman",serif;letter-spacing:.01em;color:#eadac0;margin:0;min-width:0}
+@media(max-width:600px){
+ .staffLanding{padding-top:20px}
+ .managerBrandHeader{gap:12px;padding-bottom:17px;margin-bottom:18px}
+ .managerBrandDivider{height:38px}
+ .managerMonogram{font-size:34px}
+ .managerGroupLabel{font-size:9px}
+ .managerBrandTitle{font-size:clamp(19px,5vw,24px)}
+}
