@@ -3,7 +3,9 @@ import {getAdminI18n} from '../../../../../lib/admin/i18n-server';
 import Link from "next/link";
 import {notFound,redirect} from "next/navigation";
 import WeeklyCostsImport from "./WeeklyCostsImport";
-import {expenseFilters,expenseRegisterHref,expensePageTotals,EXPENSE_PAGE_SIZE} from "../../../../../lib/property-operations/expense-register";
+import {expenseFilters,expenseRegisterHref,expensePageTotals,expenseOriginalStatus,expenseOriginalLabels,EXPENSE_PAGE_SIZE} from "../../../../../lib/property-operations/expense-register";
+import {documentLinks} from "../../../../../lib/accountancy/document-links-data";
+import {attachmentHref} from "../../../../../lib/accountancy/document-links";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
 import ExpenseCalculator from "./ExpenseCalculator";
 import styles from "./expenses.module.css";
@@ -11,7 +13,7 @@ export const dynamic="force-dynamic";
 
 /** Admin-only supplier expense concepts, never issued invoices or financial postings. */
 export default async function PropertyExpenseConceptsPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const {t:adminT,locale:adminLocale}=await getAdminI18n();
+ const {t:adminT,locale:adminLocale,language}=await getAdminI18n();
 
  // Fail closed before querying either database from the wrong deployment.
  const allowed=(process.env.VERCEL_ENV==="production" &&
@@ -53,6 +55,10 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
  if(filters.page>pageCount)redirect(expenseRegisterHref(filters,pageCount));
  if(drafts.data.length!==Math.min(EXPENSE_PAGE_SIZE,Math.max(0,drafts.count-offset)))throw new Error("The expense register was not fully loaded. Please retry.");
  const totals=expensePageTotals(drafts.data);
+ // A source-mentioned-in-chat draft is NOT an archived original. Only active, non-superseded private links count.
+ const invoiceLinks=await documentLinks(db,"cost",drafts.data.map(d=>d.id));
+ const archivedCostIds=new Set(invoiceLinks.filter(l=>l.is_active&&l.draft_id&&l.document.review_status!=="superseded").map(l=>l.draft_id!));
+ const originalLabels=expenseOriginalLabels[language];
  const issuerNames=new Map((issuers.data??[]).map(x=>[x.id,x.name]));
  const propertyNames=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const supplierNames=new Map((suppliers.data??[]).map(x=>[x.id,x.name]));
@@ -69,7 +75,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
   </header>
   <section className={styles.panel} aria-label={adminT("Belangrijke beperkingen")}>
    <h2>{adminT("Draft stage — no financial posting")}</h2>
-   <p>{adminT("This page does not yet record final supplier invoices, payments, VAT returns or recharges. A saved draft is immutable and receives an audit entry. Document delivery and verification will be connected in a later phase.")}</p>
+   <p>{originalLabels.notice}</p>
    {payerLinks.length===0&&<p role="status" className={styles.notice}>
     {adminT("No verified cost bearer is available yet. You can calculate amounts, but saving remains blocked until the correct legal entity is associated with the property.")} <Link href="/admin/workspaces/estates/entities">{adminT("Open legal property associations")}</Link>.
    </p>}
@@ -110,7 +116,8 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
        <td>{issuerNames.get(d.legal_entity_id)??adminT("Unknown entity")}</td>
        <td>{supplierNames.get(d.supplier_relationship_id)??adminT("Unknown relationship")}</td>
        <td>{d.supplier_invoice_number}</td><td>{formatCents(d.gross_cents)}</td>
-       <td>{d.status==="draft"?adminT("Concept"):adminT(d.status)} · {d.source_document_status==="missing"?adminT("source missing"):d.source_document_status}
+       <td>{d.status==="draft"?adminT("Concept"):adminT(d.status)} · {originalLabels[expenseOriginalStatus(d,archivedCostIds)]}
+        <p><Link href={attachmentHref("cost",d.id)}>{originalLabels.manage}</Link></p>
         <details><summary>{adminT("Details")}</summary><p className={styles.detailText}>{d.description}</p><p>{adminT("Category:")} {adminT(d.category)}</p><p>{adminT("Net")} {formatCents(d.net_cents)}  {adminT("· VAT")} {formatCents(d.vat_cents)}</p></details></td>
       </tr>)}</tbody>
      </table>
