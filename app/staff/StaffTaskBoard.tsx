@@ -1,6 +1,7 @@
 'use client';
 import {useActionState,useState} from 'react';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
+import {reportMaintenanceTicket} from './actions';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import s from './staff.module.css';
 type Property={id:string;name:string;address:string};
@@ -22,39 +23,79 @@ function Progress({task}:{task:PropertyTask}){
   <Message state={state}/>
  </form>;
 }
-function NewTask({properties,units,profileId}:{properties:Property[];units:Unit[];profileId:string}){
- const [state,action,pending]=useActionState(createMyPropertyTask,initial);
- const [propertyId,setPropertyId]=useState(properties[0]?.id??''),[unitId,setUnitId]=useState('');
- return <details id="task-create" className={s.taskCreate}>
-  <summary>+ Create a task</summary>
-  <form className={s.form} action={action}>
+type EntryKind='task'|'maintenance';
+function NewWorkItem({properties,units,profileId}:{properties:Property[];units:Unit[];profileId:string}){
+ const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
+ const [maintenanceState,maintenanceAction,maintenancePending]=useActionState(reportMaintenanceTicket,initial);
+ const [kind,setKind]=useState<EntryKind>('task');
+ const [propertyId,setPropertyId]=useState(properties[0]?.id??'');
+ const [unitId,setUnitId]=useState('');
+ const isMaintenance=kind==='maintenance';
+ const result=isMaintenance?maintenanceState:taskState;
+ const pending=isMaintenance?maintenancePending:taskPending;
+ return <section id="work-create" className={s.taskCreate} aria-labelledby="work-create-title">
+  <form key={kind} className={s.form} action={isMaintenance?maintenanceAction:taskAction}>
+   <h2 id="work-create-title">New task or report</h2>
+   <p className={s.description}>Choose what you need to record. Both options will be visible to your manager.</p>
+   <label>What would you like to add?
+    <select value={kind} onChange={e=>setKind(e.target.value as EntryKind)}>
+     <option value="task">Task / general work</option>
+     <option value="maintenance">Maintenance issue / repair request</option>
+    </select>
+   </label>
    <input type="hidden" name="property_id" value={propertyId}/>
-   <input type="hidden" name="assigned_profile_id" value={profileId}/>
-   <input type="hidden" name="source_reference" value=""/>
-   <h2>New task</h2>
-   <label>Property<select value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}} required>
-    {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-   </select></label>
-   <label>Unit<select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
-    <option value="">Whole property / general</option>
-    {units.filter(u=>u.property_id===propertyId).map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
-   </select></label>
-   <label>Task title<input name="title" minLength={5} maxLength={160} required placeholder="What needs to be done?"/></label>
-   <label>Details<textarea name="description" rows={3} maxLength={2000} placeholder="What and where?"/></label>
-   <div className={s.two}>
-    <label>Priority<select name="priority" defaultValue="normal">
-     {Object.entries(taskPriorityName).map(([k,v])=><option key={k} value={k}>{v}</option>)}
-    </select></label>
-    <label>Due date (optional)<input name="due_on" type="date"/></label>
-   </div>
-   <button disabled={pending} type="submit">{pending?'Saving…':'Create task'}</button><Message state={state}/>
+   {!isMaintenance&&<>
+    <input type="hidden" name="assigned_profile_id" value={profileId}/>
+    <input type="hidden" name="source_reference" value=""/>
+   </>}
+   {properties.length>1?<label>Property
+    <select value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}} required>
+     {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+    </select>
+   </label>:<p className={s.taskMeta}>Property: {properties[0]?.name??'No assigned property'}</p>}
+   {units.some(u=>u.property_id===propertyId)&&<label>Unit (optional)
+    <select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
+     <option value="">Whole property / common area</option>
+     {units.filter(u=>u.property_id===propertyId).map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
+    </select>
+   </label>}
+   <label>{isMaintenance?'What needs repairing?':'What needs to be done?'}
+    <input name="title" minLength={5} maxLength={140} required placeholder={isMaintenance?'e.g. Leaking tap in kitchen':'e.g. Order towels for toilets'}/>
+   </label>
+   <label>{isMaintenance?'Describe the issue':'Details (optional)'}
+    <textarea name="description" rows={3} minLength={isMaintenance?8:undefined}
+     maxLength={2000} required={isMaintenance}
+     placeholder={isMaintenance?'What is wrong and where?':'Add any instructions or useful details'}/>
+   </label>
+   <label>{isMaintenance?'Urgency':'Priority'}
+    <select key={kind} name="priority" defaultValue={isMaintenance?'routine':'normal'}>
+     {isMaintenance?<>
+      <option value="routine">Normal</option>
+      <option value="soon">Needs attention soon</option>
+      <option value="urgent">Urgent</option>
+     </>:<>
+      <option value="normal">Normal</option>
+      <option value="high">High</option>
+      <option value="urgent">Urgent</option>
+      <option value="low">Low</option>
+     </>}
+    </select>
+   </label>
+   {!isMaintenance&&<details className={s.taskOptional}>
+    <summary>Additional planning (optional)</summary>
+    <label>Due date <input name="due_on" type="date"/></label>
+   </details>}
+   {isMaintenance&&<p className={s.description}>This creates a maintenance report for review. It does not automatically authorize a supplier or create an invoice. For immediate danger, call the responsible manager.</p>}
+   <button disabled={pending||!propertyId} type="submit">{pending?'Saving…':isMaintenance?'Send maintenance report':'Create task'}</button>
+   <Message state={result}/>
   </form>
- </details>;
+ </section>;
 }
 export default function StaffTaskBoard({tasks,properties,units,profileId,today}:{
  tasks:PropertyTask[];properties:Property[];units:Unit[];profileId:string;today:string;
 }){
  const [showAll,setShowAll]=useState(false);
+ const [showNew,setShowNew]=useState(false);
  const summary=taskOverview(tasks,today);
  const list=taskOrder(tasks).filter(t=>showAll||!['done','cancelled'].includes(t.status));
  const prop=new Map(properties.map(p=>[p.id,p.name]));
@@ -71,10 +112,11 @@ export default function StaffTaskBoard({tasks,properties,units,profileId,today}:
    <div><small>Completed</small><strong>{summary.completed}</strong></div>
   </div>
   <div className={s.taskActions}>
-   <a className={s.taskPrimary} href="#hours">+ Log working time</a>
-   <a className={s.taskSecondary} href="#task-create">+ Add task</a>
+   <button type="button" className={s.taskPrimary} aria-expanded={showNew}
+    aria-controls="work-create" onClick={()=>setShowNew(x=>!x)}>+ New task / report</button>
+   <a className={s.taskSecondary} href="#hours">+ Log working time</a>
   </div>
-  <NewTask properties={properties} units={units} profileId={profileId}/>
+  {showNew&&<NewWorkItem properties={properties} units={units} profileId={profileId}/>} 
   <div className={s.taskTabs} role="group" aria-label="Task status filter">
    <button type="button" className={!showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(false)}>Open ({summary.open})</button>
    <button type="button" className={showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(true)}>All tasks</button>
@@ -87,7 +129,7 @@ export default function StaffTaskBoard({tasks,properties,units,profileId,today}:
    {task.latest_note&&<p className={s.taskMeta}>Last update: {task.latest_note}</p>}
    {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>Update progress</summary><Progress task={task}/></details>}
   </article>)}
-  {!list.length&&<p className={s.note}>No open tasks yet. Use “Add task” to create one, or wait for your manager to assign work.</p>}</div>
+  {!list.length&&<p className={s.note}>No open tasks yet. Use “New task / report” to add work, or wait for your manager to assign it.</p>}</div>
   <p className={s.taskDisclaimer}>Only your assigned properties and tasks are visible. Tasks and worked hours do not issue invoices or make payments.</p>
  </section>;
 }
