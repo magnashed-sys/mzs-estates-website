@@ -38,6 +38,11 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
       .select('id,ticket_id,created_at').in('ticket_id',maintenanceIds)
       .order('created_at',{ascending:false}).limit(300)
    :{data:[],error:null};
+  const photoIds=(maintenancePhotos??[]).map(p=>p.id);
+  const {data:heldPhotos,error:heldError}=photoIds.length
+   ?await db.from('mzs_ops_maintenance_photo_holds').select('photo_id').in('photo_id',photoIds)
+   :{data:[],error:null};
+  const heldIds=new Set((heldPhotos??[]).map(p=>p.photo_id));
   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const current=currentUnitContracts(contracts||[],id,today);
   return <>
@@ -68,10 +73,10 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
     </section>
     <section className={s.section}>
       <h2>Maintenance reports &amp; photos</h2>
-      {maintenanceError||photoError?<p role="alert">Maintenance records are temporarily unavailable.</p>:
+      {maintenanceError||photoError||heldError?<p role="alert">Maintenance records are temporarily unavailable.</p>:
        !maintenance?.length?<p className={s.note}>No maintenance reports are linked to this unit.</p>:
        <div>{maintenance.map(ticket=>{
-        const images=(maintenancePhotos??[]).filter(photo=>photo.ticket_id===ticket.id);
+        const images=(maintenancePhotos??[]).filter(photo=>photo.ticket_id===ticket.id&&!heldIds.has(photo.id));
         return <article key={ticket.id}>
           <p><strong>{ticket.title}</strong> · {ticket.created_at.slice(0,10)} · {ticket.status}</p>
           {images.length?<ul>{images.map((photo,index)=><li key={photo.id}>
