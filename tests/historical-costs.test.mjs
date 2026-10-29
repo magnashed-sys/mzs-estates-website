@@ -1,3 +1,4 @@
+import {adminI18nFixture} from './helpers/admin-i18n.mjs';
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {spawnSync} from 'node:child_process';import {createRequire} from 'node:module';import {inflateRawSync} from 'node:zlib';import vm from 'node:vm';import ts from 'typescript';
 const require=createRequire(import.meta.url),modules={};
 const compile=path=>ts.transpileModule(readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
@@ -20,7 +21,7 @@ test('history filters use Madrid reporting year and canonical admin-only URLs an
 test('historical CSV distinguishes billed hours from unknown actual minutes and neutralizes spreadsheet formulas',()=>{
  const s=fixture();s.rows[0].description='=SUM(1,2)';const csv=h.historyCsv(h.normalizeHistory(s,filters()));assert.equal(csv.charCodeAt(0),0xfeff);assert.match(csv,/"actual_minutes","time_note","payment_status"/);assert.match(csv,/'=SUM\(1,2\)/);assert.match(csv,/"5000","","Weekly cost statement; billed hours are not actual worked minutes","not_recorded"/);assert.match(csv,/libfile_synthetic/);assert.ok(!csv.includes('recorded_receipt'));
 });
-function route(path,{source,denied=false,environment=true,lib=modules['historical-costs']}={}){const exports={},calls=[];vm.runInNewContext(compile(path),{exports,Response,URL,Buffer,Uint8Array,require(name){
+function route(path,{source,denied=false,environment=true,lib=modules['historical-costs']}={}){const exports={},calls=[];vm.runInNewContext(compile(path),{exports,Response,URL,Buffer,Uint8Array,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
  if(name.includes('property-staff'))return {staffEnvironmentAvailable:()=>environment};
  if(name.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('admin');if(denied)throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:null};}}};}};
  if(name.includes('credit-notes'))return credit;
@@ -48,7 +49,7 @@ test('accountant export fails on duplicate invoice numbers across sources, unkno
 });
 test('historical page checks active admin before data and paginates only detail while retaining whole-register totals',async()=>{
  const source=fixture();source.invoices=[];source.rows=Array.from({length:61},(_,n)=>({...source.rows[2],id:id(100+n),reference:'SYN-'+n,cost_cents:100}));source.batches[0].expected_rows=61;source.batches[0].expected_cost_cents=6100;
- for(const denied of [true,false]){const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/history/page.tsx'),{exports,Intl,require(name){
+ for(const denied of [true,false]){const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/history/page.tsx'),{exports,Intl,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
  if(name==='react/jsx-runtime')return require(name);if(name==='next/link')return {default:'a'};if(name==='next/navigation')return {redirect:href=>{throw Error('redirect:'+href);}};if(name.endsWith('.css'))return {default:{}};
  if(name.includes('property-staff'))return {requireStaffEnvironment:()=>calls.push('environment')};
  if(name.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('admin');if(denied)throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:null};}}};}};

@@ -13,6 +13,6 @@ export function rentSummary(units: RentUnit[]) {
   };
 }
 
-export const euros = (value: number | string) => new Intl.NumberFormat('en-GB', {
+export const euros = (value: number | string, locale = 'en-GB') => new Intl.NumberFormat(locale, {
   style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
 }).format(Number(value));

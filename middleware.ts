@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
   const publicPage = publicRoute(pathname);
   forwardedHeaders.set("x-mzs-locale", publicPage?.locale || (isAccountPath(pathname) && isLocale(preference) ? preference : "en"));
   forwardedHeaders.set("x-mzs-client-overview", (pathname === "/private" || pathname.startsWith("/private/")) ? "true" : "false");
+  forwardedHeaders.set("x-mzs-admin", pathname === "/admin" || pathname.startsWith("/admin/") ? "true" : "false");
   const next = () => {
     const response = NextResponse.next({request: {headers: forwardedHeaders}});
     // A direct localized landing must carry its language to neutral account

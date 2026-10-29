@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../lib/admin/i18n';
+
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, } from "react";
 import Link from "next/link";
 import RentalSchedule from "./RentalSchedule";
@@ -79,21 +81,21 @@ function isCancellationEligible(booking: Booking): boolean {
     return ((booking.is_test === true && booking.status === "test_approved") ||
         (booking.is_test === false && booking.status === "confirmed"));
 }
-function formatDate(value: string): string {
+function formatDate(value: string, adminLocale = 'en-GB'): string {
     const date = new Date(`${value}T12:00:00Z`);
-    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString(adminLocale, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 }
-function formatTimestamp(value: string | null): string {
+function formatTimestamp(value: string | null, adminLocale = 'en-GB'): string {
     if (!value)
         return "Not yet reviewed";
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString(adminLocale, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 function formatTime(value: string | null): string { return value ? value.slice(0, 5) : "Not specified"; }
-function formatMoney(value: number | string | null): string {
+function formatMoney(value: number | string | null, adminLocale = 'en-GB'): string {
     if (value === null || !Number.isFinite(Number(value)))
         return "Price unavailable";
-    return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR" }).format(Number(value));
+    return new Intl.NumberFormat(adminLocale, { style: "currency", currency: "EUR" }).format(Number(value));
 }
 function statusLabel(value: string): string { return value.replace(/_/g, " ").toUpperCase(); }
 function actionErrorMessage(value: unknown): string {
@@ -139,7 +141,9 @@ function Detail({ label, children }: {
     label: string;
     children: ReactNode;
 }) {
-    return <div><p style={{ color: muted, fontSize: 13, margin: "0 0 8px" }}>{label}</p>
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
+    return <div><p style={{ color: muted, fontSize: 13, margin: "0 0 8px" }}>{adminT(label)}</p>
     <p style={{ margin: 0, lineHeight: 1.6, overflowWrap: "anywhere" }}>{children}</p></div>;
 }
 export default function BookingManagement({ mode = "full", initialSection = "bookings", initialScope = "live", onNavigate, onBusyChange }: {
@@ -149,6 +153,8 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     onNavigate?: (section: "bookings" | "cancellations") => void;
     onBusyChange?: (busy: boolean) => void;
 } = {}) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
     const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState<string | null>(null);
@@ -211,7 +217,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
             setSnapshot({ bookings: (bookingsResult.data ?? []) as Booking[], people: (peopleResult.data ?? []) as Person[],
                 properties: (propertiesResult.data ?? []) as Property[], cancellations: (requestsResult.data ?? []) as CancellationRequest[],
                 rentalPropertyIds: [...new Set((rentalsResult.data ?? []).map(row => row.project_id as string))] });
-            setUpdated(new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
+            setUpdated(new Date().toLocaleTimeString(adminLocale, { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }));
             return true;
         }
         catch (cause) {
@@ -309,7 +315,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         const person = snapshot?.people.find(item => item.id === booking.user_id);
         const effect = decision === "declined" ? "The booking request will be declined." : booking.is_test
             ? "This approves a TEST request. No dates will be reserved." : "This confirms a REAL booking and reserves the selected nights.";
-        if (!window.confirm(`${decision === "approved" ? "Approve" : "Decline"} booking request?\n\nProperty: ${property?.title ?? "Property unavailable"}\nClient: ${person?.email ?? "Account unavailable"}\nStay: ${formatDate(booking.check_in)} – ${formatDate(booking.check_out)}\n\n${effect}`))
+        if (!window.confirm(adminT("{p0} booking request? Property: {p1} Client: {p2} Stay: {p3} – {p4} {p5}", {p0: adminT(decision === "approved" ? "Approve" : "Decline"), p1: property?.title ?? "Property unavailable", p2: person?.email ?? "Account unavailable", p3: formatDate(booking.check_in, adminLocale), p4: formatDate(booking.check_out, adminLocale), p5: adminT(effect)})))
             return;
         const expected = decision === "declined" ? "declined" : booking.is_test ? "test_approved" : "confirmed";
         void runMutation({ key: `booking:${booking.id}`, functionName: "review_rental_booking",
@@ -328,11 +334,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
             setNotice({kind:"error",text:"Review dates, guest count and admin notes."});return;
         }
         const property=snapshot?.properties.find(p=>p.id===booking.project_id);
-        if (!window.confirm("Save changes to this LIVE booking?\\n\\nProperty: "+
-             (property?.title??"Property")+"\\nOriginal: "+formatDate(booking.check_in)+" – "+
-             formatDate(booking.check_out)+"\\nNew: "+formatDate(editDraft.check_in)+" – "+
-             formatDate(editDraft.check_out)+"\\nGuests: "+guests+
-             "\\n\\nThe original per-night rate is retained. Relevant changes to confirmed reservations queue a client email. Internal notes remain private. No refund is processed."))return;
+        if (!window.confirm(adminT("Save changes to this LIVE booking?\\n\\nProperty: {p0}\\nOriginal: {p1} – {p2}\\nNew: {p3} – {p4}\\nGuests: {p5}\\n\\nThe original per-night rate is retained. Relevant changes to confirmed reservations queue a client email. Internal notes remain private. No refund is processed.", {p0: (property?.title??"Property"), p1: formatDate(booking.check_in, adminLocale), p2: formatDate(booking.check_out, adminLocale), p3: formatDate(editDraft.check_in, adminLocale), p4: formatDate(editDraft.check_out, adminLocale), p5: guests})))return;
         void runMutation({key:"booking:"+booking.id,functionName:"admin_modify_live_rental_booking",
           args:{p_booking_id:booking.id,p_check_in:editDraft.check_in,p_check_out:editDraft.check_out,
             p_guest_count:guests,p_expected_check_in:booking.check_in,
@@ -346,10 +348,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
             setNotice({kind:"error",text:"A cancellation reason of at least 3 characters is required."});return;
         }
         const property=snapshot?.properties.find(p=>p.id===booking.project_id);
-        if (!window.confirm("CANCEL this confirmed LIVE booking?\\n\\nProperty: "+
-          (property?.title??"Property")+"\\nStay: "+formatDate(booking.check_in)+" – "+
-          formatDate(booking.check_out)+"\\nReason: "+reason+
-          "\\n\\nThe dates are released; a cancellation email is queued. No refund is processed."))return;
+        if (!window.confirm(adminT("CANCEL this confirmed LIVE booking?\\n\\nProperty: {p0}\\nStay: {p1} – {p2}\\nReason: {p3}\\n\\nThe dates are released; a cancellation email is queued. No refund is processed.", {p0: (property?.title??"Property"), p1: formatDate(booking.check_in, adminLocale), p2: formatDate(booking.check_out, adminLocale), p3: reason})))return;
         void runMutation({key:"booking:"+booking.id,functionName:"admin_cancel_live_rental_booking",
           args:{p_booking_id:booking.id,p_reason:reason},expected:"cancelled",
           success:"Reservation cancelled and dates released. A client notification is queued; handle refunds separately."});
@@ -358,7 +357,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         if (mutationInProgress.current || !booking.is_test || !["requested", "test_approved", "declined", "cancelled"].includes(booking.status))
             return;
         const property = snapshot?.properties.find(item => item.id === booking.project_id);
-        if (!window.confirm(`Permanently DELETE this TEST booking?\n\nProperty: ${property?.title ?? "Property unavailable"}\nStay: ${formatDate(booking.check_in)} – ${formatDate(booking.check_out)}\nReference: ${booking.id}\n\nThis also removes its test cancellation history and cannot be undone. Real bookings and availability blocks are not part of this action.`))
+        if (!window.confirm(adminT("Permanently DELETE this TEST booking? Property: {p0} Stay: {p1} – {p2} Reference: {p3} This also removes its test cancellation history and cannot be undone. Real bookings and availability blocks are not part of this action.", {p0: property?.title ?? "Property unavailable", p1: formatDate(booking.check_in, adminLocale), p2: formatDate(booking.check_out, adminLocale), p3: booking.id})))
             return;
         void runMutation({ key: `booking:${booking.id}`, functionName: "delete_test_rental_booking",
             args: { p_booking_id: booking.id }, expected: true, success: "Test booking and its linked test cancellation records permanently deleted." });
@@ -377,7 +376,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
             : decision === "approved"
                 ? "The REAL reservation will be cancelled. Its dates will be released, subject to other blocks. Booking history is retained. No refund or email is triggered here."
                 : "Only the cancellation request will be declined. The REAL reservation remains confirmed and its nights remain reserved.";
-        if (!window.confirm(`${decision === "approved" ? "APPROVE" : "DECLINE"} ${booking.is_test ? "TEST " : ""}cancellation request?\n\nClient: ${person?.full_name || person?.email || "Account unavailable"}\nProperty: ${property?.title ?? "Property unavailable"}\nStay: ${formatDate(booking.check_in)} – ${formatDate(booking.check_out)}\n\n${effect}`))
+        if (!window.confirm(adminT("{p0} {p1}cancellation request? Client: {p2} Property: {p3} Stay: {p4} – {p5} {p6}", {p0: adminT(decision === "approved" ? "Approve" : "Decline"), p1: booking.is_test ? "TEST " : "", p2: person?.full_name || person?.email || "Account unavailable", p3: property?.title ?? "Property unavailable", p4: formatDate(booking.check_in, adminLocale), p5: formatDate(booking.check_out, adminLocale), p6: adminT(effect)})))
             return;
         const success = booking.is_test
             ? decision === "approved" ? "Test cancellation approved. The test booking is cancelled. Real availability is unchanged."
@@ -410,53 +409,53 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     const locked = loading || busy !== null || Boolean(error);
     const arrivals = liveArrivals(bookings, todayInMadrid());
     if (mode === "summary") return <section className="admin-rental-summary">
-      <div className="admin-section-heading"><div><p className="eyebrow">Private rental</p><h2>Reservations at a glance.</h2></div><ActionButton disabled={locked} onClick={() => void reload()}>Refresh reservations</ActionButton></div>
-      {loading && <p role="status" className="admin-help">Loading reservations…</p>}
-      {error && <div className="admin-notice" role="alert">{error} <ActionButton onClick={() => void reload()} disabled={loading}>Try again</ActionButton></div>}
+      <div className="admin-section-heading"><div><p className="eyebrow">{adminT("Private rental")}</p><h2>{adminT("Reservations at a glance.")}</h2></div><ActionButton disabled={locked} onClick={() => void reload()}>{adminT("Refresh reservations")}</ActionButton></div>
+      {loading && <p role="status" className="admin-help">{adminT("Loading reservations…")}</p>}
+      {error && <div className="admin-notice" role="alert">{adminT(error)} <ActionButton onClick={() => void reload()} disabled={loading}>{adminT("Try again")}</ActionButton></div>}
       {!loading && !error && snapshot && <>
         <div className="admin-metrics">
-          <button onClick={() => onNavigate?.("bookings")}><span>Live booking requests</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>Review reservations →</small></button>
-          <button onClick={() => onNavigate?.("cancellations")}><span>Live cancellations</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>Review requests →</small></button>
-          <div><span>Upcoming arrivals</span><strong>{arrivals.length}</strong><small>Next 3 months, including today</small></div>
-          <div><span>Current stays</span><strong>{bookings.filter(b => !b.is_test && b.status === "confirmed" && b.check_in <= todayInMadrid() && todayInMadrid() < b.check_out).length}</strong><small>Confirmed live reservations</small></div>
+          <button onClick={() => onNavigate?.("bookings")}><span>{adminT("Live booking requests")}</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>{adminT("Review reservations →")}</small></button>
+          <button onClick={() => onNavigate?.("cancellations")}><span>{adminT("Live cancellations")}</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>{adminT("Review requests →")}</small></button>
+          <div><span>{adminT("Upcoming arrivals")}</span><strong>{arrivals.length}</strong><small>{adminT("Next 3 months, including today")}</small></div>
+          <div><span>{adminT("Current stays")}</span><strong>{bookings.filter(b => !b.is_test && b.status === "confirmed" && b.check_in <= todayInMadrid() && todayInMadrid() < b.check_out).length}</strong><small>{adminT("Confirmed live reservations")}</small></div>
         </div>
-        <p className="admin-help">Updated {updated} · Madrid time. Test bookings are excluded. {bookings.filter(b => b.is_test).length} test records are available under Bookings → Test.</p>
-        <div className="admin-panel"><h3 className="admin-subtitle">Next arrivals.</h3>
-          {!arrivals.length && <p className="admin-help">No confirmed arrivals in the next 3 months.</p>}
-          {arrivals.map(booking => <Link key={booking.id} className="admin-action-row" href={"/admin/bookings/"+booking.id} style={{textDecoration:"none",color:"inherit"}} onClick={event=>{if(locked)event.preventDefault()}}><span><strong>{properties.get(booking.project_id)?.title ?? "Property unavailable"}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || "Guest" : "Guest"}</small></span><span>{formatDate(booking.check_in)} · Open dossier →</span></Link>)}
+        <p className="admin-help">{adminT("Updated")} {updated}  {adminT("· Madrid time. Test bookings are excluded.")} {bookings.filter(b => b.is_test).length}  {adminT("test records are available under Bookings → Test.")}</p>
+        <div className="admin-panel"><h3 className="admin-subtitle">{adminT("Next arrivals.")}</h3>
+          {!arrivals.length && <p className="admin-help">{adminT("No confirmed arrivals in the next 3 months.")}</p>}
+          {arrivals.map(booking => <Link key={booking.id} className="admin-action-row" href={"/admin/bookings/"+booking.id} style={{textDecoration:"none",color:"inherit"}} onClick={event=>{if(locked)event.preventDefault()}}><span><strong>{properties.get(booking.project_id)?.title ?? adminT("Property unavailable")}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || adminT("Guest") : adminT("Guest")}</small></span><span>{formatDate(booking.check_in, adminLocale)}  {adminT("· Open dossier →")}</span></Link>)}
         </div>
       </>}
     </section>;
     return (<div className="admin-bookings" style={{ color: "#eeeae2" }}>
       <div style={{ ...rowStyle, justifyContent: "space-between", marginBottom: 24 }}>
-        <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? `${pendingBookings} pending bookings · ${pendingCancellations} pending cancellations · all live and test records` : "Booking administration"}</p>
-        <ActionButton disabled={loading || busy !== null} onClick={() => void reload()}>Refresh overview</ActionButton>
+        <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? adminT("{p0} pending bookings · {p1} pending cancellations · all live and test records", {p0: pendingBookings, p1: pendingCancellations}) : adminT("Booking administration")}</p>
+        <ActionButton disabled={loading || busy !== null} onClick={() => void reload()}>{adminT("Refresh overview")}</ActionButton>
       </div>
-      <p><a href="/admin/owner-stays" style={{color:"#d5c09a"}}>Property Partners, free owner stays & booking prices ↗</a></p>
-      <nav aria-label="Booking administration sections" style={{ ...rowStyle, paddingBottom: 24, borderBottom: `1px solid ${border}`, marginBottom: 28 }}>
-        <ActionButton primary={section === "bookings"} selected={section === "bookings"} disabled={busy !== null} onClick={() => setSection("bookings")}>Bookings</ActionButton>
+      <p><a href="/admin/owner-stays" style={{color:"#d5c09a"}}>{adminT("Property Partners, free owner stays & booking prices ↗")}</a></p>
+      <nav aria-label={adminT("Booking administration sections")} style={{ ...rowStyle, paddingBottom: 24, borderBottom: `1px solid ${border}`, marginBottom: 28 }}>
+        <ActionButton primary={section === "bookings"} selected={section === "bookings"} disabled={busy !== null} onClick={() => setSection("bookings")}>{adminT("Bookings")}</ActionButton>
         <ActionButton primary={section === "cancellations"} selected={section === "cancellations"} disabled={busy !== null} onClick={() => setSection("cancellations")}>
-          Cancellation Requests{snapshot ? ` (${pendingCancellations})` : ""}
+          {adminT("Cancellation Requests")}{snapshot ? adminT("({p0})", {p0: pendingCancellations}) : ""}
         </ActionButton>
-        <ActionButton primary={section === "calendar"} selected={section === "calendar"} disabled={busy !== null} onClick={() => setSection("calendar")}>Calendar</ActionButton>
+        <ActionButton primary={section === "calendar"} selected={section === "calendar"} disabled={busy !== null} onClick={() => setSection("calendar")}>{adminT("Calendar")}</ActionButton>
       </nav>
       {section !== "calendar" && <div className="admin-toolbar">
-        <label className="admin-field">Search<input type="search" disabled={locked} value={search} placeholder="Guest, property or reference" onChange={e => { setSearch(e.target.value); setVisibleLimit(12); }} /></label>
-        <label className="admin-field">Property<select disabled={locked} value={propertyFilter} onChange={e => { setPropertyFilter(e.target.value); setVisibleLimit(12); }}><option value="all">All properties</option>{[...properties.values()].map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
-        <label className="admin-field">Records<select disabled={locked} value={scope} onChange={e => { setScope(e.target.value as "live" | "test" | "all"); setVisibleLimit(12); }}><option value="live">Live</option><option value="test">Test</option><option value="all">Live & test</option></select></label>
+        <label className="admin-field">{adminT("Search")}<input type="search" disabled={locked} value={search} placeholder={adminT("Guest, property or reference")} onChange={e => { setSearch(e.target.value); setVisibleLimit(12); }} /></label>
+        <label className="admin-field">{adminT("Property")}<select disabled={locked} value={propertyFilter} onChange={e => { setPropertyFilter(e.target.value); setVisibleLimit(12); }}><option value="all">{adminT("All properties")}</option>{[...properties.values()].map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        <label className="admin-field">{adminT("Records")}<select disabled={locked} value={scope} onChange={e => { setScope(e.target.value as "live" | "test" | "all"); setVisibleLimit(12); }}><option value="live">{adminT("Live")}</option><option value="test">{adminT("Test")}</option><option value="all">{adminT("Live & test")}</option></select></label>
       </div>}
       {!loading && !error && snapshot && section === "calendar" && <RentalSchedule bookings={bookings} properties={snapshot.properties.filter(p => p.status === "active" && snapshot.rentalPropertyIds.includes(p.id))} />}
 
-      {notice && <p role={notice.kind === "error" ? "alert" : "status"} style={{ color: notice.kind === "error" ? warning : gold, lineHeight: 1.8 }}>{notice.text}</p>}
-      {loading && <p role="status" style={{ color: muted }}>Loading booking administration...</p>}
-      {error && <p role="alert" style={{ color: warning, lineHeight: 1.8 }}>{error}</p>}
+      {notice && <p role={notice.kind === "error" ? "alert" : "status"} style={{ color: notice.kind === "error" ? warning : gold, lineHeight: 1.8 }}>{adminT(notice.text)}</p>}
+      {loading && <p role="status" style={{ color: muted }}>{adminT("Loading booking administration...")}</p>}
+      {error && <p role="alert" style={{ color: warning, lineHeight: 1.8 }}>{adminT(error)}</p>}
 
       {!loading && !error && snapshot && section === "bookings" && (<>
           <div style={{ ...rowStyle, marginBottom: 24 }}>
-            {([["all", "All"], ["requested", "Pending"], ["confirmed", "Confirmed"], ["cancelled", "Cancelled"], ["declined", "Declined"], ["blocked", "Blocks"], ["test_approved", "Test approved"]] as const).map(([key, label]) => (<ActionButton key={key} primary={bookingFilter === key} selected={bookingFilter === key} onClick={() => { setBookingFilter(key); setVisibleLimit(12); }}>{label}</ActionButton>))}
+            {([["all", "All"], ["requested", "Pending"], ["confirmed", "Confirmed"], ["cancelled", "Cancelled"], ["declined", "Declined"], ["blocked", "Blocks"], ["test_approved", "Test approved"]] as const).map(([key, label]) => (<ActionButton key={key} primary={bookingFilter === key} selected={bookingFilter === key} onClick={() => { setBookingFilter(key); setVisibleLimit(12); }}>{adminT(label)}</ActionButton>))}
           </div>
-          <p style={{ color: muted, fontSize: 13 }}>{visibleBookings.length} matching records · {scope === "live" ? "Live only" : scope === "test" ? "Test only" : "Live and test"} · Updated {updated} Madrid time.</p>
-          {visibleBookings.length === 0 && <p style={{ color: muted }}>No bookings in this category.</p>}
+          <p style={{ color: muted, fontSize: 13 }}>{visibleBookings.length}  {adminT("matching records ·")} {scope === "live" ? adminT("Live only") : scope === "test" ? adminT("Test only") : adminT("Live and test")}  {adminT("· Updated")} {updated}  {adminT("Madrid time.")}</p>
+          {visibleBookings.length === 0 && <p style={{ color: muted }}>{adminT("No bookings in this category.")}</p>}
           <div style={{ display: "grid", gap: 20 }}>
             {visibleBookings.slice(0, visibleLimit).map(booking => {
                 const person = booking.user_id ? people.get(booking.user_id) : undefined;
@@ -469,82 +468,76 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 const canCancelLive = !booking.is_test && booking.status === "confirmed" && booking.user_id !== null && booking.check_out > todayInMadrid();
                 return (<article key={booking.id} style={cardStyle}>
                   <div style={{ ...rowStyle, alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div><h3 style={titleStyle}>{property?.title ?? "Property unavailable"}</h3>
-                      <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{isBlock ? "Availability block · no client reservation" : `${person?.full_name || "Unnamed client"} · ${person?.email || "Account unavailable"}`}</p>
+                    <div><h3 style={titleStyle}>{property?.title ?? adminT("Property unavailable")}</h3>
+                      <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{isBlock ? adminT("Availability block · no client reservation") : adminT("{p0} · {p1}", {p0: person?.full_name || "Unnamed client", p1: person?.email || "Account unavailable"})}</p>
                     </div>
-                    <span style={badgeStyle}>{booking.is_test ? "TEST · " : "LIVE · "}{statusLabel(booking.status)}</span>
+                    <span style={badgeStyle}>{booking.is_test ? adminT("TEST · ") : adminT("LIVE · ")}{adminT(statusLabel(booking.status))}</span>
                   </div>
                   <div style={gridStyle}>
-                    <Detail label="Check-in">{formatDate(booking.check_in)}</Detail>
-                    <Detail label="Check-out">{formatDate(booking.check_out)}</Detail>
-                    <Detail label="Guests">{booking.guest_count ?? "—"}</Detail>
-                    <Detail label="Quoted total">{formatMoney(booking.quoted_total_eur)}</Detail>
-                    <Detail label="Preferred arrival">{formatTime(booking.preferred_check_in)}</Detail>
-                    <Detail label="Preferred departure">{formatTime(booking.preferred_check_out)}</Detail>
-                    <Detail label="Pool heating">{booking.pool_heating_requested ? "Requested" : "No"}</Detail>
-                    <Detail label="Received">{formatTimestamp(booking.created_at)}</Detail>
+                    <Detail label={adminT("Check-in")}>{formatDate(booking.check_in, adminLocale)}</Detail>
+                    <Detail label={adminT("Check-out")}>{formatDate(booking.check_out, adminLocale)}</Detail>
+                    <Detail label={adminT("Guests")}>{booking.guest_count ?? "—"}</Detail>
+                    <Detail label={adminT("Quoted total")}>{formatMoney(booking.quoted_total_eur, adminLocale)}</Detail>
+                    <Detail label={adminT("Preferred arrival")}>{formatTime(booking.preferred_check_in)}</Detail>
+                    <Detail label={adminT("Preferred departure")}>{formatTime(booking.preferred_check_out)}</Detail>
+                    <Detail label={adminT("Pool heating")}>{booking.pool_heating_requested ? adminT("Requested") : adminT("No")}</Detail>
+                    <Detail label={adminT("Received")}>{formatTimestamp(booking.created_at, adminLocale)}</Detail>
                   </div>
-                  {booking.guest_notes && <p style={{ color: muted, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>Guest notes: {booking.guest_notes}</p>}
-                  {booking.admin_notes && <p style={{ color: muted, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>Admin notes: {booking.admin_notes}</p>}
+                  {booking.guest_notes && <p style={{ color: muted, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{adminT("Guest notes:")} {booking.guest_notes}</p>}
+                  {booking.admin_notes && <p style={{ color: muted, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{adminT("Admin notes:")} {booking.admin_notes}</p>}
                   {hasCancellation && <p style={{ color: gold, lineHeight: 1.8 }}>
-                    {booking.is_test ? "Test cancellation requested. Real availability is unchanged." : "Cancellation requested. The request itself has not released any dates."} Review it under Cancellation Requests.
-                  </p>}
+                    {booking.is_test ? adminT("Test cancellation requested. Real availability is unchanged.") : adminT("Cancellation requested. The request itself has not released any dates.")}  {adminT("Review it under Cancellation Requests.")}</p>}
                   <div style={{ ...rowStyle, marginTop: 24 }}>
                     {booking.status === "requested" && <>
-                      <ActionButton primary disabled={locked} onClick={() => reviewBooking(booking, "approved")}>{processing ? "Processing..." : booking.is_test ? "Approve test" : "Confirm booking"}</ActionButton>
-                      <ActionButton disabled={locked} onClick={() => reviewBooking(booking, "declined")}>Decline</ActionButton>
+                      <ActionButton primary disabled={locked} onClick={() => reviewBooking(booking, "approved")}>{processing ? adminT("Processing...") : booking.is_test ? adminT("Approve test") : adminT("Confirm booking")}</ActionButton>
+                      <ActionButton disabled={locked} onClick={() => reviewBooking(booking, "declined")}>{adminT("Decline")}</ActionButton>
                     </>}
-                    {canEditLive && <ActionButton disabled={locked} onClick={() => startEditingBooking(booking)}>Edit booking</ActionButton>}
-                    {canCancelLive && <ActionButton danger disabled={locked} onClick={() => {setEditingBookingId(null);setCancellingBookingId(booking.id);setCancellationReason("");setNotice(null);}}>Cancel reservation</ActionButton>}
-                    {canDelete && <ActionButton danger disabled={locked} onClick={() => removeTest(booking)}>Delete test booking</ActionButton>}
+                    {canEditLive && <ActionButton disabled={locked} onClick={() => startEditingBooking(booking)}>{adminT("Edit booking")}</ActionButton>}
+                    {canCancelLive && <ActionButton danger disabled={locked} onClick={() => {setEditingBookingId(null);setCancellingBookingId(booking.id);setCancellationReason("");setNotice(null);}}>{adminT("Cancel reservation")}</ActionButton>}
+                    {canDelete && <ActionButton danger disabled={locked} onClick={() => removeTest(booking)}>{adminT("Delete test booking")}</ActionButton>}
                   </div>
                   {editingBookingId === booking.id && <form onSubmit={e=>{e.preventDefault();saveBooking(booking);}}
                     style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
-                    <h4 style={{margin:0,color:gold}}>Edit live booking</h4>
-                    <p style={{color:muted,margin:0}}>Update dates, guest count or notes. The original nightly price is retained.</p>
-                    <label style={{display:"grid",gap:6}}>Check-in
-                      <input style={bookingInputStyle} type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
+                    <h4 style={{margin:0,color:gold}}>{adminT("Edit live booking")}</h4>
+                    <p style={{color:muted,margin:0}}>{adminT("Update dates, guest count or notes. The original nightly price is retained.")}</p>
+                    <label style={{display:"grid",gap:6}}>{adminT("Check-in")}<input style={bookingInputStyle} type="date" required min={todayInMadrid()} value={editDraft.check_in} onChange={e=>setEditDraft(d=>({...d,check_in:e.target.value}))}/>
                     </label>
-                    <label style={{display:"grid",gap:6}}>Check-out
-                      <input style={bookingInputStyle} type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
+                    <label style={{display:"grid",gap:6}}>{adminT("Check-out")}<input style={bookingInputStyle} type="date" required min={editDraft.check_in||todayInMadrid()} value={editDraft.check_out} onChange={e=>setEditDraft(d=>({...d,check_out:e.target.value}))}/>
                     </label>
-                    <label style={{display:"grid",gap:6}}>Guests
-                      <input style={bookingInputStyle} type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
+                    <label style={{display:"grid",gap:6}}>{adminT("Guests")}<input style={bookingInputStyle} type="number" min={1} required value={editDraft.guest_count} onChange={e=>setEditDraft(d=>({...d,guest_count:e.target.value}))}/>
                     </label>
-                    <label style={{display:"grid",gap:6}}>Internal admin notes
-                      <textarea style={bookingInputStyle} rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
+                    <label style={{display:"grid",gap:6}}>{adminT("Internal admin notes")}<textarea style={bookingInputStyle} rows={3} maxLength={2000} value={editDraft.admin_notes} onChange={e=>setEditDraft(d=>({...d,admin_notes:e.target.value}))}/>
                     </label>
                     <div style={rowStyle}>
-                      <button className="admin-button admin-button-primary" type="submit" disabled={locked}>Save changes</button>
-                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setEditingBookingId(null)}>Close</button>
+                      <button className="admin-button admin-button-primary" type="submit" disabled={locked}>{adminT("Save changes")}</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setEditingBookingId(null)}>{adminT("Close")}</button>
                     </div>
-                    <p style={{color:muted,margin:0}}>Relevant changes to confirmed reservations queue a client email. Internal notes stay private. No refund is processed.</p>
+                    <p style={{color:muted,margin:0}}>{adminT("Relevant changes to confirmed reservations queue a client email. Internal notes stay private. No refund is processed.")}</p>
                   </form>}
                   {cancellingBookingId === booking.id && <div style={{display:"grid",gap:14,marginTop:20,padding:18,border:"1px solid "+border}}>
-                    <h4 style={{margin:0,color:warning}}>Cancel confirmed reservation</h4>
-                    <label style={{display:"grid",gap:6}}>Cancellation reason
-                      <textarea style={bookingInputStyle} rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
+                    <h4 style={{margin:0,color:warning}}>{adminT("Cancel confirmed reservation")}</h4>
+                    <label style={{display:"grid",gap:6}}>{adminT("Cancellation reason")}<textarea style={bookingInputStyle} rows={3} minLength={3} maxLength={1000} required value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)}/>
                     </label>
                     <div style={rowStyle}>
-                      <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>Confirm cancellation</button>
-                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setCancellingBookingId(null)}>Keep reservation</button>
+                      <button className="admin-button" type="button" disabled={locked || cancellationReason.trim().length<3} onClick={()=>cancelLiveBooking(booking)}>{adminT("Confirm cancellation")}</button>
+                      <button className="admin-button" type="button" disabled={locked} onClick={()=>setCancellingBookingId(null)}>{adminT("Keep reservation")}</button>
                     </div>
-                    <p style={{color:muted,margin:0}}>This releases reserved dates and queues a cancellation email. The reason stays internal. Refunds are handled separately.</p>
+                    <p style={{color:muted,margin:0}}>{adminT("This releases reserved dates and queues a cancellation email. The reason stays internal. Refunds are handled separately.")}</p>
                   </div>}
                 </article>);
             })}
           </div>
-          {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more bookings</ActionButton>}
-          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. Relevant changes and cancellations queue client notifications. No automatic refund is processed. Only eligible test records can be permanently deleted.</p>
+          {visibleBookings.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>{adminT("Show more bookings")}</ActionButton>}
+          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>{adminT("Test approvals do not reserve dates. Live approvals confirm reservations. Administrators may amend or cancel live reservations, with the audit history retained. Relevant changes and cancellations queue client notifications. No automatic refund is processed. Only eligible test records can be permanently deleted.")}</p>
         </>)}
 
       {!loading && !error && snapshot && section === "cancellations" && (<>
-          <h3 style={titleStyle}>Cancellation requests.</h3>
-          <p style={{ color: muted, lineHeight: 1.8, maxWidth: 850 }}>Review cancellation requests submitted by clients. A pending request does not cancel the booking. For live reservations, dates remain reserved until approval. Test cancellations never affect real availability. Refund arrangements are handled separately.</p>
+          <h3 style={titleStyle}>{adminT("Cancellation requests.")}</h3>
+          <p style={{ color: muted, lineHeight: 1.8, maxWidth: 850 }}>{adminT("Review cancellation requests submitted by clients. A pending request does not cancel the booking. For live reservations, dates remain reserved until approval. Test cancellations never affect real availability. Refund arrangements are handled separately.")}</p>
           <div style={{ ...rowStyle, margin: "26px 0" }}>
-            {([["pending", "Pending"], ["approved", "Approved"], ["declined", "Declined"], ["all", "All"]] as const).map(([key, label]) => (<ActionButton key={key} primary={cancellationFilter === key} selected={cancellationFilter === key} onClick={() => { setCancellationFilter(key); setVisibleLimit(12); }}>{label}</ActionButton>))}
+            {([["pending", "Pending"], ["approved", "Approved"], ["declined", "Declined"], ["all", "All"]] as const).map(([key, label]) => (<ActionButton key={key} primary={cancellationFilter === key} selected={cancellationFilter === key} onClick={() => { setCancellationFilter(key); setVisibleLimit(12); }}>{adminT(label)}</ActionButton>))}
           </div>
-          {visibleCancellations.length === 0 && <div style={cardStyle}><p style={{ color: muted, margin: 0, lineHeight: 1.8 }}>{cancellationFilter === "pending" ? "No pending cancellation requests." : "No cancellation requests in this category."}</p></div>}
+          {visibleCancellations.length === 0 && <div style={cardStyle}><p style={{ color: muted, margin: 0, lineHeight: 1.8 }}>{cancellationFilter === "pending" ? adminT("No pending cancellation requests.") : adminT("No cancellation requests in this category.")}</p></div>}
           <div style={{ display: "grid", gap: 20 }}>
             {visibleCancellations.slice(0, visibleLimit).map(request => {
                 const booking = bookingMap.get(request.booking_id);
@@ -556,41 +549,41 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                 const typeLabel = !booking ? "BOOKING UNAVAILABLE" : booking.is_test ? "TEST" : "LIVE";
                 return (<article key={request.id} style={cardStyle}>
                   <div style={{ ...rowStyle, alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div><h3 style={titleStyle}>{property?.title ?? "Property unavailable"}</h3>
-                      <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{person?.full_name || "Unnamed client"} · {person?.email || "Account unavailable"}</p>
+                    <div><h3 style={titleStyle}>{property?.title ?? adminT("Property unavailable")}</h3>
+                      <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{person?.full_name || adminT("Unnamed client")} · {person?.email || adminT("Account unavailable")}</p>
                     </div>
-                    <span style={badgeStyle}>{typeLabel} · CANCELLATION · {statusLabel(request.status)}</span>
+                    <span style={badgeStyle}>{adminT(typeLabel)}  {adminT("· CANCELLATION ·")} {adminT(statusLabel(request.status))}</span>
                   </div>
                   <div style={gridStyle}>
-                    <Detail label="Check-in">{booking ? formatDate(booking.check_in) : "Unavailable"}</Detail>
-                    <Detail label="Check-out">{booking ? formatDate(booking.check_out) : "Unavailable"}</Detail>
-                    <Detail label="Quoted booking total">{booking ? formatMoney(booking.quoted_total_eur) : "Unavailable"}</Detail>
-                    <Detail label="Current booking status">{booking ? statusLabel(booking.status) : "Unavailable"}</Detail>
-                    <Detail label="Cancellation requested">{formatTimestamp(request.created_at)}</Detail>
-                    <Detail label="Reviewed">{formatTimestamp(request.reviewed_at)}</Detail>
+                    <Detail label={adminT("Check-in")}>{booking ? formatDate(booking.check_in, adminLocale) : adminT("Unavailable")}</Detail>
+                    <Detail label={adminT("Check-out")}>{booking ? formatDate(booking.check_out, adminLocale) : adminT("Unavailable")}</Detail>
+                    <Detail label={adminT("Quoted booking total")}>{booking ? formatMoney(booking.quoted_total_eur, adminLocale) : adminT("Unavailable")}</Detail>
+                    <Detail label={adminT("Current booking status")}>{booking ? adminT(statusLabel(booking.status)) : adminT("Unavailable")}</Detail>
+                    <Detail label={adminT("Cancellation requested")}>{formatTimestamp(request.created_at, adminLocale)}</Detail>
+                    <Detail label={adminT("Reviewed")}>{formatTimestamp(request.reviewed_at, adminLocale)}</Detail>
                   </div>
                   <div style={{ borderLeft: `2px solid ${gold}`, padding: "8px 0 8px 20px", margin: "30px 0" }}>
-                    <p style={{ color: gold, fontSize: 13, margin: "0 0 10px" }}>Client&apos;s reason</p>
+                    <p style={{ color: gold, fontSize: 13, margin: "0 0 10px" }}>{adminT("Client's reason")}</p>
                     <p style={{ color: "#eeeae2", lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0 }}>{request.reason}</p>
                   </div>
-                  {request.reviewed_by && <p style={{ color: muted, fontSize: 13 }}>Reviewed by: {reviewer?.full_name || reviewer?.email || "MZS administrator"}</p>}
-                  {booking?.is_test && <p style={{ color: gold, lineHeight: 1.8 }}>TEST ONLY — approving or declining this request never changes the real availability calendar. The booking remains marked as a test.</p>}
+                  {request.reviewed_by && <p style={{ color: muted, fontSize: 13 }}>{adminT("Reviewed by:")} {reviewer?.full_name || reviewer?.email || adminT("MZS administrator")}</p>}
+                  {booking?.is_test && <p style={{ color: gold, lineHeight: 1.8 }}>{adminT("TEST ONLY — approving or declining this request never changes the real availability calendar. The booking remains marked as a test.")}</p>}
                   {canReview && <>
                     <p style={{ color: muted, lineHeight: 1.8 }}>{booking?.is_test
-                            ? "Approving cancels only the test booking. Declining leaves it test-approved. Both outcomes are retained in the cancellation history."
-                            : "Approving cancels this reservation and releases its dates, subject to other blocks. Declining keeps the reservation confirmed. Approval queues a client cancellation email. Declining sends no email. Neither action processes a refund."}</p>
+                            ? adminT("Approving cancels only the test booking. Declining leaves it test-approved. Both outcomes are retained in the cancellation history.")
+                            : adminT("Approving cancels this reservation and releases its dates, subject to other blocks. Declining keeps the reservation confirmed. Approval queues a client cancellation email. Declining sends no email. Neither action processes a refund.")}</p>
                     <div style={{ ...rowStyle, marginTop: 24 }}>
-                      <ActionButton primary disabled={locked} onClick={() => reviewCancellation(request, "approved")}>{processing ? "Processing..." : booking?.is_test ? "Approve test cancellation" : "Approve cancellation"}</ActionButton>
-                      <ActionButton disabled={locked} onClick={() => reviewCancellation(request, "declined")}>{booking?.is_test ? "Decline test cancellation" : "Decline cancellation"}</ActionButton>
+                      <ActionButton primary disabled={locked} onClick={() => reviewCancellation(request, "approved")}>{processing ? adminT("Processing...") : booking?.is_test ? adminT("Approve test cancellation") : adminT("Approve cancellation")}</ActionButton>
+                      <ActionButton disabled={locked} onClick={() => reviewCancellation(request, "declined")}>{booking?.is_test ? adminT("Decline test cancellation") : adminT("Decline cancellation")}</ActionButton>
                     </div>
                   </>}
-                  {request.status === "pending" && !canReview && <p style={{ color: warning, lineHeight: 1.8 }}>This request cannot be reviewed in its current state. Refresh and check the linked booking. No action is enabled.</p>}
-                  {request.status !== "pending" && <p style={{ color: muted, lineHeight: 1.8 }}>This cancellation request has been reviewed and is retained in the history. No further decision is available for this request.</p>}
+                  {request.status === "pending" && !canReview && <p style={{ color: warning, lineHeight: 1.8 }}>{adminT("This request cannot be reviewed in its current state. Refresh and check the linked booking. No action is enabled.")}</p>}
+                  {request.status !== "pending" && <p style={{ color: muted, lineHeight: 1.8 }}>{adminT("This cancellation request has been reviewed and is retained in the history. No further decision is available for this request.")}</p>}
                 </article>);
             })}
           </div>
-          {visibleCancellations.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>Show more cancellation requests</ActionButton>}
-          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>Eligible bookings: confirmed live reservations and approved test bookings. Pending requests, rejected bookings, cancelled bookings and availability blocks cannot enter this cancellation workflow.</p>
+          {visibleCancellations.length > visibleLimit && <ActionButton disabled={locked} onClick={() => setVisibleLimit(v => v + 12)}>{adminT("Show more cancellation requests")}</ActionButton>}
+          <p style={{ color: muted, fontSize: 13, marginTop: 26, lineHeight: 1.8 }}>{adminT("Eligible bookings: confirmed live reservations and approved test bookings. Pending requests, rejected bookings, cancelled bookings and availability blocks cannot enter this cancellation workflow.")}</p>
         </>)}
       {!loading && !error && snapshot && <RentalNotificationStatus refreshKey={`${updated}:${busy ?? "idle"}`} />}
     </div>);

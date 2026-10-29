@@ -39,5 +39,5 @@ export async function setArchiveLanguage(form:FormData){
  const {db,user}=await requireEstateAdmin();const language=String(form.get('language'));
  if(!['en','es'].includes(language))return;
  const {error}=await db.from('mzs_admin_language_preferences').upsert({user_id:user.id,language});
- if(error)throw Error('Language preference could not be saved');revalidatePath(ARCHIVE_ROOT,'layout');
+ if(error)throw Error('Language preference could not be saved');revalidatePath('/admin','layout');
 }

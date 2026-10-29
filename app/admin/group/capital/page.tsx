@@ -1,18 +1,22 @@
+
+import {useAdminI18n} from '../../../../lib/admin/i18n';
 import Link from "next/link";
 import { capitalDealsEnabled } from "../../../../lib/security/capital-deals";
 
 export default function CapitalHome() {
-  return <><p className="mzsEyebrow">MZS CAPITAL / MANAGEMENT</p><h1>Investment Cockpit</h1>
-    <p className="mzsIntro">Private financing requests, managed with Capital-specific permissions and audited status updates.</p>
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
+  return <><p className="mzsEyebrow">{adminT("MZS CAPITAL / MANAGEMENT")}</p><h1>{adminT("Investment Cockpit")}</h1>
+    <p className="mzsIntro">{adminT("Private financing requests, managed with Capital-specific permissions and audited status updates.")}</p>
     <section className="mzsCards">
-      <Link href="/admin/intro-calls"><small>PUBLIC ENQUIRIES / FULL ADMINISTRATORS</small><h2>Introductory Calls</h2><p>First conversations requested without an account. Arrange a time and track follow-up.</p><span>Open introductory calls →</span></Link>
-      {capitalDealsEnabled() && <Link href="/admin/group/capital/deals"><small>PRIVATE DEALS / FULL ADMINISTRATORS</small><h2>Loans &amp; Agreements</h2><p>Loans provided and received, private agreements, payment schedules and confirmed cash flows.</p><span>Open private dossiers →</span></Link>}
-      <Link href="/admin/capital-requests"><small>SCOPED WORKFLOW / STAGING</small><h2>Capital Requests</h2>
-        <p>Review Request Capital and Request Possibilities enquiries without accessing MZS Estates administration.</p><span>Open Capital Requests →</span></Link>
-      <div className="mzsPlanned"><small>COMING IN PHASE 3</small><h2>Investment Opportunities</h2>
-        <p>Future dossiers for real estate, corporate finance, private debt, equity and external investment opportunities.</p>
-        <span>Under development</span></div>
+      <Link href="/admin/intro-calls"><small>{adminT("PUBLIC ENQUIRIES / FULL ADMINISTRATORS")}</small><h2>{adminT("Introductory Calls")}</h2><p>{adminT("First conversations requested without an account. Arrange a time and track follow-up.")}</p><span>{adminT("Open introductory calls →")}</span></Link>
+      {capitalDealsEnabled() && <Link href="/admin/group/capital/deals"><small>{adminT("PRIVATE DEALS / FULL ADMINISTRATORS")}</small><h2>{adminT("Loans & Agreements")}</h2><p>{adminT("Loans provided and received, private agreements, payment schedules and confirmed cash flows.")}</p><span>{adminT("Open private dossiers →")}</span></Link>}
+      <Link href="/admin/capital-requests"><small>{adminT("SCOPED WORKFLOW / STAGING")}</small><h2>{adminT("Capital Requests")}</h2>
+        <p>{adminT("Review Request Capital and Request Possibilities enquiries without accessing MZS Estates administration.")}</p><span>{adminT("Open Capital Requests →")}</span></Link>
+      <div className="mzsPlanned"><small>{adminT("COMING IN PHASE 3")}</small><h2>{adminT("Investment Opportunities")}</h2>
+        <p>{adminT("Future dossiers for real estate, corporate finance, private debt, equity and external investment opportunities.")}</p>
+        <span>{adminT("Under development")}</span></div>
     </section>
-    <p className="mzsFootnote">Access is limited to active Group Administrators or explicitly authorised Capital Administrators. Department-level access remains in Preview testing.</p>
+    <p className="mzsFootnote">{adminT("Access is limited to active Group Administrators or explicitly authorised Capital Administrators. Department-level access remains in Preview testing.")}</p>
   </>;
 }

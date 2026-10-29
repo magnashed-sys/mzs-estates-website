@@ -3,7 +3,6 @@ import {redirect} from 'next/navigation';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {archiveEntities,archiveLanguage,archiveRows} from '../../../../../lib/accountancy/archive-data';
 import {ARCHIVE_ROOT,PAGE_SIZE,archiveFilters,archiveHref,categories,categoryLabels,copy,statuses,statusLabels} from '../../../../../lib/accountancy/archive';
-import {setArchiveLanguage} from './actions';
 import {UploadForm} from './Forms';
 import s from './archive.module.css';
 export const dynamic='force-dynamic';
@@ -16,7 +15,6 @@ export default async function Documents({searchParams}:{searchParams:Promise<Rec
  return <section lang={language} className={s.page}>
   <Link href="/admin/workspaces/accountancy">← {t.back}</Link>
   <header className={s.heading}><div><h1>{t.title}</h1><p>{t.intro}</p></div>
-   <form action={setArchiveLanguage} className={s.language}><label>{t.language}<select name="language" defaultValue={language}><option value="en">English</option><option value="es">Español</option></select></label><button className={s.button}>{t.languageSave}</button></form>
   </header>
   <form method="get" className={s.filters}>
    <label>{t.entity}<select name="entity" defaultValue={f.entity}><option value="all">{t.all}</option>{entities.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>

@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../lib/admin/i18n';
+
 
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
@@ -21,6 +23,8 @@ function grantedIds(data: Data, user: string, project: string) {
 }
 
 export default function ProjectAccessPage() {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const router = useRouter();
   const [data, setData] = useState<Data | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "denied" | "error">("loading");
@@ -81,7 +85,7 @@ export default function ProjectAccessPage() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, saving]);
 
-  function canLeave() { return !saving && (!dirty || window.confirm("Discard the unsaved access selection?")); }
+  function canLeave() { return !saving && (!dirty || window.confirm(adminT("Discard the unsaved access selection?"))); }
   function guardLink(event: MouseEvent<HTMLAnchorElement>) { if (!canLeave()) event.preventDefault(); }
   function choose(user: string, project: string) {
     if (!data || !canLeave()) return;
@@ -100,7 +104,7 @@ export default function ProjectAccessPage() {
     const expected = [...selected];
     const userId = profile.id, projectId = project.id;
     const description = `Account: ${profile.email}\nProject: ${project.title}\n\nAdd: ${added.map(title).join(", ") || "None"}\nRemove: ${removed.map(title).join(", ") || "None"}${expected.length ? "" : "\n\nAll access to this project will be removed."}`;
-    if (!window.confirm(`Save these access changes?\n\n${description}`)) return;
+    if (!window.confirm(adminT("Save these access changes? {p0}", {p0: description}))) return;
     actionLock.current = true; setSaving(true); setNotice("");
     try {
       const supabase = createClient();
@@ -152,25 +156,25 @@ export default function ProjectAccessPage() {
     } finally { actionLock.current = false; if (mounted.current) setSaving(false); }
   }
 
-  if (state !== "ready" || !data) return <main className="admin-page"><div className="admin-message"><h1>{state === "denied" ? "Access restricted." : state === "error" ? "Unable to load." : "Preparing permissions."}</h1><p role={state === "error" ? "alert" : "status"}>{state === "error" ? error : state === "denied" ? "Active administrator access is required." : "Verifying administrator access…"}</p>{state === "error" && <button className="admin-button" onClick={() => void load(selectedUser, selectedProject)}>Try again</button>}<Link href="/admin?tab=projects">Return to Admin →</Link></div></main>;
+  if (state !== "ready" || !data) return <main className="admin-page"><div className="admin-message"><h1>{state === "denied" ? adminT("Access restricted.") : state === "error" ? adminT("Unable to load.") : adminT("Preparing permissions.")}</h1><p role={state === "error" ? "alert" : "status"}>{state === "error" ? adminT(error) : state === "denied" ? adminT("Active administrator access is required.") : adminT("Verifying administrator access…")}</p>{state === "error" && <button className="admin-button" onClick={() => void load(selectedUser, selectedProject)}>{adminT("Try again")}</button>}<Link href="/admin?tab=projects">{adminT("Return to Admin →")}</Link></div></main>;
 
-  return <main className="admin-page"><header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">MZS GROUP</Link><Link className="admin-button" href="/admin?tab=projects" onClick={guardLink}>← Admin dashboard</Link></header><section className="admin-content">
-    <div className="admin-heading-row"><div><p className="eyebrow">Selected relationships</p><h1>Project access.</h1><p className="admin-intro">Choose a relationship and review exactly which opportunities they can access.</p></div><button className="admin-button" disabled={saving} onClick={() => { if (canLeave()) void load(selectedUser, selectedProject); }}>Refresh permissions</button></div>
+  return <main className="admin-page"><header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">{adminT("MZS GROUP")}</Link><Link className="admin-button" href="/admin?tab=projects" onClick={guardLink}>{adminT("← Admin dashboard")}</Link></header><section className="admin-content">
+    <div className="admin-heading-row"><div><p className="eyebrow">{adminT("Selected relationships")}</p><h1>{adminT("Project access.")}</h1><p className="admin-intro">{adminT("Choose a relationship and review exactly which opportunities they can access.")}</p></div><button className="admin-button" disabled={saving} onClick={() => { if (canLeave()) void load(selectedUser, selectedProject); }}>{adminT("Refresh permissions")}</button></div>
     <div className="admin-access-layout">
-      <aside className="admin-panel"><h2 className="admin-subtitle">Select a relationship.</h2><label className="admin-field">Search<input type="search" disabled={saving || uncertain} value={search} placeholder="Name or email" onChange={e => setSearch(e.target.value)} /></label><label className="admin-field admin-space-top">Client or partner<select disabled={saving || uncertain} value={selectedUser} onChange={e => choose(e.target.value, selectedProject)}><option value="">Select relationship…</option>{data.profiles.filter(p => p.id === selectedUser || matchesSearch(search, p.full_name, p.email)).map(p => <option key={p.id} value={p.id}>{p.full_name || p.email} · {p.role}{p.is_active ? "" : " · Inactive"}</option>)}</select></label><label className="admin-field admin-space-top">Project<select disabled={saving || uncertain} value={selectedProject} onChange={e => choose(selectedUser, e.target.value)}><option value="">Select project…</option>{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
-        {profile && <div className="admin-space-top"><span className="admin-status">{profile.is_active ? "Active" : "Inactive"} · {profile.role}</span><p className="admin-help">{profile.email}</p>{!profile.is_active && <p className="admin-help">This account is inactive. Saving permissions does not activate it.</p>}<div className="admin-space-top"><Link className="admin-button" href={"/admin/relationships/" + encodeURIComponent(profile.id)} onClick={guardLink}>View relationship dossier →</Link></div></div>}
+      <aside className="admin-panel"><h2 className="admin-subtitle">{adminT("Select a relationship.")}</h2><label className="admin-field">{adminT("Search")}<input type="search" disabled={saving || uncertain} value={search} placeholder={adminT("Name or email")} onChange={e => setSearch(e.target.value)} /></label><label className="admin-field admin-space-top">{adminT("Client or partner")}<select disabled={saving || uncertain} value={selectedUser} onChange={e => choose(e.target.value, selectedProject)}><option value="">{adminT("Select relationship…")}</option>{data.profiles.filter(p => p.id === selectedUser || matchesSearch(search, p.full_name, p.email)).map(p => <option key={p.id} value={p.id}>{p.full_name || p.email} · {adminT(p.role)}{p.is_active ? "" : adminT(" · Inactive")}</option>)}</select></label><label className="admin-field admin-space-top">{adminT("Project")}<select disabled={saving || uncertain} value={selectedProject} onChange={e => choose(selectedUser, e.target.value)}><option value="">{adminT("Select project…")}</option>{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        {profile && <div className="admin-space-top"><span className="admin-status">{profile.is_active ? adminT("Active") : adminT("Inactive")} · {adminT(profile.role)}</span><p className="admin-help">{profile.email}</p>{!profile.is_active && <p className="admin-help">{adminT("This account is inactive. Saving permissions does not activate it.")}</p>}<div className="admin-space-top"><Link className="admin-button" href={"/admin/relationships/" + encodeURIComponent(profile.id)} onClick={guardLink}>{adminT("View relationship dossier →")}</Link></div></div>}
       </aside>
       <div className="admin-panel">{profile && project ? <>
-        <p className="eyebrow">Offering permissions</p><h2 className="admin-subtitle">{project.title}</h2><p className="admin-help">{project.location}</p><Link href={"/admin/projects/" + encodeURIComponent(project.id)} className="admin-button admin-space-top" onClick={guardLink}>Open Project Cockpit →</Link>
-        {!available.length && <p className="admin-empty">No active offerings are available.</p>}
-        <fieldset className="admin-permissions" disabled={saving || uncertain || inactiveGrants.length > 0}><legend className="admin-help">Accessible opportunities</legend>{available.map(offering => <label className="admin-permission" key={offering.id}><input type="checkbox" checked={selected.includes(offering.id)} onChange={() => setSelected(ids => ids.includes(offering.id) ? ids.filter(id => id !== offering.id) : [...ids, offering.id])} /><span>{title(offering)}</span></label>)}</fieldset>
-        {inactiveGrants.length > 0 && <p role="alert" className="admin-notice">This account has saved permissions for inactive offerings. Review those offering records before editing this selection; they will not be removed silently.</p>}
-        <p className="admin-help">Deselecting every offering removes access to this project. New opportunities are never assigned automatically.</p>
-        {dirty && <div className="admin-change-summary" role="status"><strong>Unsaved changes</strong><p>Add: {added.map(title).join(", ") || "None"}</p><p>Remove: {removed.map(title).join(", ") || "None"}</p></div>}
-        <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={saving || uncertain || !dirty || inactiveGrants.length > 0} onClick={() => void save()}>{saving ? "Saving…" : "Save access permissions"}</button>{dirty && <button className="admin-button" disabled={saving || uncertain} onClick={() => setSelected(initial)}>Undo selection changes</button>}</div>
-      </> : <p className="admin-empty">Select a relationship and project to review access.</p>}
-      {notice && <p className="admin-notice" role={uncertain ? "alert" : "status"}>{notice}</p>}</div>
+        <p className="eyebrow">{adminT("Offering permissions")}</p><h2 className="admin-subtitle">{project.title}</h2><p className="admin-help">{project.location}</p><Link href={"/admin/projects/" + encodeURIComponent(project.id)} className="admin-button admin-space-top" onClick={guardLink}>{adminT("Open Project Cockpit →")}</Link>
+        {!available.length && <p className="admin-empty">{adminT("No active offerings are available.")}</p>}
+        <fieldset className="admin-permissions" disabled={saving || uncertain || inactiveGrants.length > 0}><legend className="admin-help">{adminT("Accessible opportunities")}</legend>{available.map(offering => <label className="admin-permission" key={offering.id}><input type="checkbox" checked={selected.includes(offering.id)} onChange={() => setSelected(ids => ids.includes(offering.id) ? ids.filter(id => id !== offering.id) : [...ids, offering.id])} /><span>{title(offering)}</span></label>)}</fieldset>
+        {inactiveGrants.length > 0 && <p role="alert" className="admin-notice">{adminT("This account has saved permissions for inactive offerings. Review those offering records before editing this selection; they will not be removed silently.")}</p>}
+        <p className="admin-help">{adminT("Deselecting every offering removes access to this project. New opportunities are never assigned automatically.")}</p>
+        {dirty && <div className="admin-change-summary" role="status"><strong>{adminT("Unsaved changes")}</strong><p>{adminT("Add:")} {added.map(title).join(", ") || adminT("None")}</p><p>{adminT("Remove:")} {removed.map(title).join(", ") || adminT("None")}</p></div>}
+        <div className="admin-actions admin-space-top"><button className="admin-button admin-button-primary" disabled={saving || uncertain || !dirty || inactiveGrants.length > 0} onClick={() => void save()}>{saving ? adminT("Saving…") : adminT("Save access permissions")}</button>{dirty && <button className="admin-button" disabled={saving || uncertain} onClick={() => setSelected(initial)}>{adminT("Undo selection changes")}</button>}</div>
+      </> : <p className="admin-empty">{adminT("Select a relationship and project to review access.")}</p>}
+      {notice && <p className="admin-notice" role={uncertain ? "alert" : "status"}>{adminT(notice)}</p>}</div>
     </div>
-    {profile && <><div className="admin-section-heading"><div><p className="eyebrow">Saved permissions</p><h2>Current project access.</h2></div></div><div className="admin-project-grid">{data.projects.filter(p => grantedIds(data, profile.id, p.id).length > 0).map(p => <article className="admin-panel" key={p.id}><h3 className="admin-subtitle">{p.title}</h3><div className="admin-interests">{data.offerings.filter(o => grantedIds(data, profile.id, p.id).includes(o.id)).map(o => <span key={o.id}>{title(o)}{o.status === "active" ? "" : " · Inactive"}</span>)}</div><button className="admin-button admin-space-top" disabled={saving || uncertain} onClick={() => choose(profile.id, p.id)}>Review access →</button></article>)}</div><p className="admin-help">This overview shows saved permissions for active projects. An active account and active offering are also required for private access.</p></>}
-  </section><footer className="admin-footer">Private. Independent. International.</footer></main>;
+    {profile && <><div className="admin-section-heading"><div><p className="eyebrow">{adminT("Saved permissions")}</p><h2>{adminT("Current project access.")}</h2></div></div><div className="admin-project-grid">{data.projects.filter(p => grantedIds(data, profile.id, p.id).length > 0).map(p => <article className="admin-panel" key={p.id}><h3 className="admin-subtitle">{p.title}</h3><div className="admin-interests">{data.offerings.filter(o => grantedIds(data, profile.id, p.id).includes(o.id)).map(o => <span key={o.id}>{title(o)}{o.status === "active" ? "" : adminT(" · Inactive")}</span>)}</div><button className="admin-button admin-space-top" disabled={saving || uncertain} onClick={() => choose(profile.id, p.id)}>{adminT("Review access →")}</button></article>)}</div><p className="admin-help">{adminT("This overview shows saved permissions for active projects. An active account and active offering are also required for private access.")}</p></>}
+  </section><footer className="admin-footer">{adminT("Private. Independent. International.")}</footer></main>;
 }

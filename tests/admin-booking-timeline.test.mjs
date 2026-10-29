@@ -1,3 +1,4 @@
+import {adminI18nFixture} from './helpers/admin-i18n.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -11,9 +12,9 @@ const timeline={};vm.runInNewContext(compile('lib/estates/booking-timeline.ts'),
 test('booking date uses Madrid midnight in winter and summer',()=>{
  for(const [utc,day] of [['2026-01-01T22:59:59Z','2026-01-01'],['2026-01-01T23:00:00Z','2026-01-02'],['2026-07-01T21:59:59Z','2026-07-01'],['2026-07-01T22:00:00Z','2026-07-02'],['2026-03-29T01:00:00Z','2026-03-29'],['2026-10-25T01:00:00Z','2026-10-25']])assert.equal(timeline.bookingToday(new Date(utc)),day);
 });
-async function bookings(dates){
+async function bookings(dates,language='en'){
  const exports={},calls=[];const rows=dates.map((date,i)=>({id:String(i),category:'Guest booking',property:'Synthetic property',checkIn:date,checkOut:'2026-11-02',status:'confirmed',amount:100,paid:0,guestName:'Synthetic guest '+i,invoiceRecipient:'Synthetic customer',sourceRef:'SOURCE-'+i}));
- vm.runInNewContext(compile('app/admin/bookings/page.tsx'),{exports,Intl,Date,URLSearchParams,require(n){
+ vm.runInNewContext(compile('app/admin/bookings/page.tsx'),{exports,Intl,Date,URLSearchParams,require(n){if(n.includes('/admin/i18n'))return adminI18nFixture(language);
   if(n==='react'||n==='react/jsx-runtime')return require(n);
   if(n==='next/link')return {default:'a'};
   if(n==='next/navigation')return {redirect:url=>{throw Error(url)}};
@@ -42,11 +43,16 @@ test('today marker remains accurate for filtered pages wholly before or after to
 });
 test('Accountancy authenticates before loading global years and keeps the existing booking export route',async()=>{
  const exports={},calls=[];
- vm.runInNewContext(compile('app/admin/workspaces/accountancy/page.tsx'),{exports,require(n){
+ vm.runInNewContext(compile('app/admin/workspaces/accountancy/page.tsx'),{exports,require(n){if(n.includes('/admin/i18n'))return adminI18nFixture();
  if(n==='react/jsx-runtime')return require(n);if(n==='next/link')return {default:'a'};if(n.endsWith('.css'))return {default:{}};
  if(n.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('auth');return {db:{rpc:async(name,args)=>{calls.push({name,args});return {data:{years:[2025,2026]},error:null}}}}}};throw Error(n);
  }});
  const html=require('react-dom/server').renderToStaticMarkup(await exports.default());
  assert.equal(calls[0],'auth');assert.equal(calls[1].name,'mzs_admin_bookings_search_v2');assert.equal(calls[1].args.p_limit,1);
  assert.match(html,/id="accountant-export"/);assert.match(html,/action="\/admin\/bookings\/accountant-export"/);assert.match(html,/value="2025"/);assert.match(html,/value="2026"/);
+});
+
+test('Spanish bookings translate the register while preserving guest names, query values and timeline boundaries',async()=>{
+ const {html,calls}=await bookings(['2026-11-01','2026-10-28'],'es');
+ assert.match(html,/Reservas/);assert.match(html,/Synthetic guest 0/);assert.match(html,/Synthetic customer/);assert.equal(calls[1].args.p_query,'Synthetic');assert.equal((html.match(/data-today-boundary=/g)||[]).length,1);assert.doesNotMatch(html,/>Guest booking</);
 });

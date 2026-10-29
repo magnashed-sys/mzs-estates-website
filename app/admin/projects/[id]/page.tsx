@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../lib/admin/i18n';
+
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -21,11 +23,13 @@ const nav: [Tab, string][] = [
   ["documents", "Documents"],
   ["access", "Client access"],
 ];
-const date = (value: string) => new Date(value).toLocaleDateString("en-GB", {
+const date = (value: string, adminLocale = 'en-GB') => new Date(value).toLocaleDateString(adminLocale, {
   day: "2-digit", month: "short", year: "numeric", timeZone: "Europe/Madrid",
 });
 
 export default function ProjectCockpitPage() {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const projectId = params.id;
@@ -143,7 +147,7 @@ export default function ProjectCockpitPage() {
       (location.trim() || null) !== data.project.location ||
       (heroImage.trim() || null) !== data.project.hero_image_url;
     if (!changed) { setNotice("No changes to save."); return; }
-    if (!window.confirm("Update project metadata? For ACTIVE projects, title, subtitle, location and the private dashboard image may change immediately for authorized clients. The existing custom project presentation remains intact.")) return;
+    if (!window.confirm(adminT("Update project metadata? For ACTIVE projects, title, subtitle, location and the private dashboard image may change immediately for authorized clients. The existing custom project presentation remains intact."))) return;
     setSaving(true); setError(""); setNotice("");
     try {
       const { data: result, error: failure } = await createClient().from("projects")
@@ -162,12 +166,12 @@ export default function ProjectCockpitPage() {
 
   if (state !== "ready" || !data) {
     return <main className="admin-page"><div className="admin-message">
-      <p className="eyebrow">MZS Project Cockpit</p>
-      <h1>{state === "denied" ? "Access restricted." : state === "error" ? "Unable to load." : "Preparing project."}</h1>
-      <p role={state === "error" ? "alert" : "status"}>{state === "error" ? error :
-        state === "denied" ? "Active administrator access is required." : "Verifying project access…"}</p>
-      {state === "error" && <button type="button" className="admin-button" onClick={()=>void load()}>Try again</button>}
-      <Link href="/admin?tab=projects">← Back to projects</Link>
+      <p className="eyebrow">{adminT("MZS Project Cockpit")}</p>
+      <h1>{state === "denied" ? adminT("Access restricted.") : state === "error" ? adminT("Unable to load.") : adminT("Preparing project.")}</h1>
+      <p role={state === "error" ? "alert" : "status"}>{state === "error" ? adminT(error) :
+        state === "denied" ? adminT("Active administrator access is required.") : adminT("Verifying project access…")}</p>
+      {state === "error" && <button type="button" className="admin-button" onClick={()=>void load()}>{adminT("Try again")}</button>}
+      <Link href="/admin?tab=projects">{adminT("← Back to projects")}</Link>
     </div></main>;
   }
 
@@ -185,74 +189,70 @@ export default function ProjectCockpitPage() {
 
   return <main className="admin-page">
     <header className="admin-header">
-      <Link href="/admin" className="admin-brand">MZS GROUP</Link>
+      <Link href="/admin" className="admin-brand">{adminT("MZS GROUP")}</Link>
       <div className="admin-header-actions">
-        <span>Private Project Management</span>
-        <Link href="/admin?tab=projects" className="admin-button">← All projects</Link>
+        <span>{adminT("Private Project Management")}</span>
+        <Link href="/admin?tab=projects" className="admin-button">{adminT("← All projects")}</Link>
       </div>
     </header>
     <section className="admin-content">
       <div className={styles.hero}>
-        <div><p className="eyebrow">Project Cockpit · {project.status}</p>
+        <div><p className="eyebrow">{adminT("Project Cockpit ·")} {adminT(project.status)}</p>
           <h1>{project.title}</h1>
-          <p className={styles.muted}>{project.location || "Private collection"} · {project.slug}</p>
+          <p className={styles.muted}>{project.location || adminT("Private collection")} · {project.slug}</p>
         </div>
         <div className={styles.heroActions}>
-          <button className="admin-button" disabled={saving} onClick={()=>void load()}>Refresh project</button>
-          <Link href={"/admin/project-access?project=" + encodeURIComponent(project.id)} className="admin-button admin-button-primary">Manage client access →</Link>
+          <button className="admin-button" disabled={saving} onClick={()=>void load()}>{adminT("Refresh project")}</button>
+          <Link href={"/admin/project-access?project=" + encodeURIComponent(project.id)} className="admin-button admin-button-primary">{adminT("Manage client access →")}</Link>
         </div>
       </div>
       <div className={styles.metrics}>
-        <div><span>Offerings</span><strong>{offerings.length}</strong></div>
-        <div><span>Assigned members</span><strong>{membersAssigned.length}</strong></div>
-        <div><span>Published text</span><strong>{publishedTexts}</strong></div>
-        <div><span>Published documents</span><strong>{publishedDocs}</strong></div>
+        <div><span>{adminT("Offerings")}</span><strong>{offerings.length}</strong></div>
+        <div><span>{adminT("Assigned members")}</span><strong>{membersAssigned.length}</strong></div>
+        <div><span>{adminT("Published text")}</span><strong>{publishedTexts}</strong></div>
+        <div><span>{adminT("Published documents")}</span><strong>{publishedDocs}</strong></div>
       </div>
-      <nav className={styles.nav} aria-label="Project administration sections">
+      <nav className={styles.nav} aria-label={adminT("Project administration sections")}>
         {nav.map(([id,label])=><button key={id} type="button" disabled={saving}
-          aria-current={tab===id?"page":undefined} onClick={()=>{setTab(id);setNotice("");setError("");}}>{label}</button>)}
+          aria-current={tab===id?"page":undefined} onClick={()=>{setTab(id);setNotice("");setError("");}}>{adminT(label)}</button>)}
       </nav>
 
       {tab==="overview" && <div className={styles.stack}>
         <section className={styles.panel}>
-          <div className={styles.panelTitle}><h2>Project details.</h2><span>Private collection</span></div>
-          <p className={styles.note}>Update the catalog name, subtitle, location and client-dashboard image. Slugs, project status, rental calendars and bespoke presentation layouts are intentionally protected in this first release.</p>
+          <div className={styles.panelTitle}><h2>{adminT("Project details.")}</h2><span>{adminT("Private collection")}</span></div>
+          <p className={styles.note}>{adminT("Update the catalog name, subtitle, location and client-dashboard image. Slugs, project status, rental calendars and bespoke presentation layouts are intentionally protected in this first release.")}</p>
           <form className={styles.form} onSubmit={saveProject}>
-            <label>Project title
-              <input required value={projectTitle} maxLength={160} onChange={e=>setProjectTitle(e.target.value)} disabled={saving} />
+            <label>{adminT("Project title")}<input required value={projectTitle} maxLength={160} onChange={e=>setProjectTitle(e.target.value)} disabled={saving} />
             </label>
-            <label>Subtitle
-              <input value={subtitle} maxLength={250} onChange={e=>setSubtitle(e.target.value)} disabled={saving} />
+            <label>{adminT("Subtitle")}<input value={subtitle} maxLength={250} onChange={e=>setSubtitle(e.target.value)} disabled={saving} />
             </label>
-            <label>Location
-              <input value={location} maxLength={250} onChange={e=>setLocation(e.target.value)} disabled={saving} />
+            <label>{adminT("Location")}<input value={location} maxLength={250} onChange={e=>setLocation(e.target.value)} disabled={saving} />
             </label>
-            <label>Private dashboard hero image — site-local /properties/ path
-              <input value={heroImage} placeholder="/properties/example/hero.webp" onChange={e=>setHeroImage(e.target.value)} disabled={saving} />
+            <label>{adminT("Private dashboard hero image — site-local /properties/ path")}<input value={heroImage} placeholder={adminT("/properties/example/hero.webp")} onChange={e=>setHeroImage(e.target.value)} disabled={saving} />
             </label>
             <div className={styles.actions}>
-              <button type="submit" className="admin-button admin-button-primary" disabled={saving}>{saving ? "Saving…" : "Save project details"}</button>
-              <Link className="admin-button" href={"/admin/project-access?project=" + encodeURIComponent(project.id)}>Manage permissions →</Link>
+              <button type="submit" className="admin-button admin-button-primary" disabled={saving}>{saving ? adminT("Saving…") : adminT("Save project details")}</button>
+              <Link className="admin-button" href={"/admin/project-access?project=" + encodeURIComponent(project.id)}>{adminT("Manage permissions →")}</Link>
             </div>
           </form>
-          <p className={styles.note}>Project created {date(project.created_at)} · Status {project.status} · Changes to catalog details take effect immediately once saved.</p>
+          <p className={styles.note}>{adminT("Project created")} {date(project.created_at, adminLocale)}  {adminT("· Status")} {adminT(project.status)}  {adminT("· Changes to catalog details take effect immediately once saved.")}</p>
         </section>
         <div className={styles.summaryColumns}>
           <section className={styles.panel}>
-            <h2>Available offerings.</h2>
+            <h2>{adminT("Available offerings.")}</h2>
             {offerings.map(offering=><div key={offering.id} className={styles.summaryRow}>
-              <div><strong>{offeringNames[offering.offering_type]}</strong><small>{offering.title || "Untitled"}</small></div>
-              <span className={styles.pill}>{offering.status}</span>
+              <div><strong>{offeringNames[offering.offering_type]}</strong><small>{offering.title || adminT("Untitled")}</small></div>
+              <span className={styles.pill}>{adminT(offering.status)}</span>
             </div>)}
-            <button type="button" className="admin-button" onClick={()=>setTab("offerings")}>Manage offerings →</button>
+            <button type="button" className="admin-button" onClick={()=>setTab("offerings")}>{adminT("Manage offerings →")}</button>
           </section>
           <section className={styles.panel}>
-            <h2>Private materials.</h2>
-            <div className={styles.summaryRow}><span>Text blocks</span><strong>{blocks.length} total · {publishedTexts} published</strong></div>
-            <div className={styles.summaryRow}><span>Documents</span><strong>{documents.length} total · {publishedDocs} published</strong></div>
+            <h2>{adminT("Private materials.")}</h2>
+            <div className={styles.summaryRow}><span>{adminT("Text blocks")}</span><strong>{blocks.length}  {adminT("total ·")} {publishedTexts}  {adminT("published")}</strong></div>
+            <div className={styles.summaryRow}><span>{adminT("Documents")}</span><strong>{documents.length}  {adminT("total ·")} {publishedDocs}  {adminT("published")}</strong></div>
             <div className={styles.actions}>
-              <button type="button" className="admin-button" onClick={()=>setTab("content")}>Edit text →</button>
-              <button type="button" className="admin-button" onClick={()=>setTab("documents")}>Manage documents →</button>
+              <button type="button" className="admin-button" onClick={()=>setTab("content")}>{adminT("Edit text →")}</button>
+              <button type="button" className="admin-button" onClick={()=>setTab("documents")}>{adminT("Manage documents →")}</button>
             </div>
           </section>
         </div>
@@ -265,9 +265,9 @@ export default function ProjectCockpitPage() {
       {tab==="documents" && <DocumentManager projectId={project.id} offerings={offerings}
         documents={documents} onReload={load} />}
       {tab==="access" && <section className={styles.panel}>
-        <div className={styles.panelTitle}><h2>Assigned relationships.</h2><span>{membersAssigned.length} members</span></div>
-        <p className={styles.note}>Offering grants are never inherited from project access. Review each member's explicit permissions via the existing verified access editor. The Project Cockpit does not change account permissions automatically.</p>
-        {membersAssigned.length===0 ? <p className={styles.empty}>No clients or partners have been assigned to this project.</p> :
+        <div className={styles.panelTitle}><h2>{adminT("Assigned relationships.")}</h2><span>{membersAssigned.length}  {adminT("members")}</span></div>
+        <p className={styles.note}>{adminT("Offering grants are never inherited from project access. Review each member's explicit permissions via the existing verified access editor. The Project Cockpit does not change account permissions automatically.")}</p>
+        {membersAssigned.length===0 ? <p className={styles.empty}>{adminT("No clients or partners have been assigned to this project.")}</p> :
           <div className={styles.stack}>
             {membersAssigned.map(member=>{
               const ids = new Set(includedGrants.filter(g=>g.user_id===member.id).map(g=>g.offering_id));
@@ -275,25 +275,25 @@ export default function ProjectCockpitPage() {
               return <article key={member.id} className={styles.item}>
                 <div className={styles.itemHeading}>
                   <div><h3>{member.full_name || member.email}</h3><p className={styles.muted}>{member.email}</p></div>
-                  <span className={styles.pill}>{member.is_active ? "Active" : "Inactive"}</span>
+                  <span className={styles.pill}>{member.is_active ? adminT("Active") : adminT("Inactive")}</span>
                 </div>
                 <div className={styles.chips}>
                   {memberOffers.map(offering=><span className={styles.pill} key={offering.id}>
-                    {offeringNames[offering.offering_type]} · {offering.status}
+                    {offeringNames[offering.offering_type]} · {adminT(offering.status)}
                   </span>)}
-                  {!memberOffers.length && <span className={styles.note}>No offering grant.</span>}
+                  {!memberOffers.length && <span className={styles.note}>{adminT("No offering grant.")}</span>}
                 </div>
                 <div className={styles.actions}>
-                  <Link className="admin-button" href={"/admin/relationships/" + encodeURIComponent(member.id)}>Relationship dossier →</Link>
-                  <Link className="admin-button" href={"/admin/project-access?user=" + encodeURIComponent(member.id) + "&project=" + encodeURIComponent(project.id)}>Review access →</Link>
+                  <Link className="admin-button" href={"/admin/relationships/" + encodeURIComponent(member.id)}>{adminT("Relationship dossier →")}</Link>
+                  <Link className="admin-button" href={"/admin/project-access?user=" + encodeURIComponent(member.id) + "&project=" + encodeURIComponent(project.id)}>{adminT("Review access →")}</Link>
                 </div>
               </article>;
             })}
           </div>}
       </section>}
-      {notice && <p className={styles.success} role="status">{notice}</p>}
-      {error && <p className={styles.failure} role="alert">{error}</p>}
+      {notice && <p className={styles.success} role="status">{adminT(notice)}</p>}
+      {error && <p className={styles.failure} role="alert">{adminT(error)}</p>}
     </section>
-    <footer className="admin-footer">Private. Independent. International.</footer>
+    <footer className="admin-footer">{adminT("Private. Independent. International.")}</footer>
   </main>;
 }

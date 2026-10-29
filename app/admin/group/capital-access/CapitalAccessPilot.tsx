@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../lib/admin/i18n';
+
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
@@ -21,6 +23,8 @@ type Audit = {
 };
 
 export default function CapitalAccessPilot() {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [audits, setAudits] = useState<Audit[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -54,7 +58,7 @@ export default function CapitalAccessPilot() {
   async function changeScope(candidate: Candidate, enabled: boolean) {
     if (busy || !candidate.is_active) return;
     const action = enabled ? "GRANT" : "REVOKE";
-    if (!window.confirm(`${action} Capital access for the synthetic Staging identity ${candidate.email}?`)) return;
+    if (!window.confirm(adminT("{p0} Capital access for the synthetic Staging identity {p1}?", {p0: action, p1: candidate.email}))) return;
     setBusy(candidate.user_id);
     setMessage("");
     try {
@@ -75,37 +79,34 @@ export default function CapitalAccessPilot() {
   }
 
   return <section className={styles.panel}>
-    <h2>Trusted Staging test accounts</h2>
-    <p>Only active test identities provisioned by the Staging Auth Administrator,
-      marked with private application metadata and a dedicated test email,
-      may receive Capital rights through this pilot. Profile names alone
-      are not accepted.</p>
-    {state === "loading" && <p>Loading Staging test accounts…</p>}
-    {state === "error" && <p role="alert">Unable to verify Staging test accounts and permissions.</p>}
-    {message && <p role="status" className={styles.notice}>{message}</p>}
+    <h2>{adminT("Trusted Staging test accounts")}</h2>
+    <p>{adminT("Only active test identities provisioned by the Staging Auth Administrator, marked with private application metadata and a dedicated test email, may receive Capital rights through this pilot. Profile names alone are not accepted.")}</p>
+    {state === "loading" && <p>{adminT("Loading Staging test accounts…")}</p>}
+    {state === "error" && <p role="alert">{adminT("Unable to verify Staging test accounts and permissions.")}</p>}
+    {message && <p role="status" className={styles.notice}>{adminT(message)}</p>}
     {state === "ready" && candidates.length === 0 &&
-      <p>No trusted test identities are registered yet. No client accounts have been changed.</p>}
+      <p>{adminT("No trusted test identities are registered yet. No client accounts have been changed.")}</p>}
     {state === "ready" && candidates.map(person =>
       <div className={styles.account} key={person.user_id}>
         <div className={styles.identity}>
           <strong>{person.full_name}</strong>
           <small>{person.email}</small>
-          <span>{person.has_capital_scope ? "Capital scope active" : "No Capital scope"}</span>
+          <span>{person.has_capital_scope ? adminT("Capital scope active") : adminT("No Capital scope")}</span>
         </div>
         <button type="button"
           onClick={() => void changeScope(person, !person.has_capital_scope)}
           disabled={busy !== null || !person.is_active} className={styles.action}>
-          {busy === person.user_id ? "Updating…" :
-            person.has_capital_scope ? "Revoke access" : "Grant Capital access"}
+          {busy === person.user_id ? adminT("Updating…") :
+            person.has_capital_scope ? adminT("Revoke access") : adminT("Grant Capital access")}
         </button>
       </div>)}
-    <h2>Recent scope changes</h2>
-    {state === "ready" && audits.length === 0 && <p>No access changes recorded yet.</p>}
+    <h2>{adminT("Recent scope changes")}</h2>
+    {state === "ready" && audits.length === 0 && <p>{adminT("No access changes recorded yet.")}</p>}
     {state === "ready" && audits.map(event =>
       <p className={styles.audit} key={event.id}>
-        {event.new_active ? "Granted" : "Revoked"} · {
-          names.get(event.target_user_id) || "Staging account"
-        } · {new Date(event.changed_at).toLocaleString("en-GB", {
+        {event.new_active ? adminT("Granted") : adminT("Revoked")} · {
+          names.get(event.target_user_id) || adminT("Staging account")
+        } · {new Date(event.changed_at).toLocaleString(adminLocale, {
           timeZone: "Europe/Madrid"
         })}
       </p>)}

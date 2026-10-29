@@ -1,4 +1,6 @@
 "use client";
+import {useAdminI18n} from '../../../../../lib/admin/i18n';
+
 
 import {useMemo, useState} from "react";
 import {expenseAllocationPreview, inputEuroCents, type ExpenseAllocationMode} from "../../../../../lib/property-operations/expense-preview";
@@ -17,7 +19,7 @@ const categories = [
   ["insurance","Verzekering"],["taxes","Heffingen"],["maintenance","Maintenance"],
   ["materials","Materialen"],["management","Beheer"],["other","Other expenses"],
 ] as const;
-const formatCents = (value:number) => new Intl.NumberFormat("en-GB",{
+const formatCents = (value:number, adminLocale = 'en-GB') => new Intl.NumberFormat(adminLocale,{
   style:"currency",currency:"EUR"
 }).format(value / 100);
 
@@ -26,6 +28,8 @@ const formatCents = (value:number) => new Intl.NumberFormat("en-GB",{
  * Display calculations are not a legal entity/property verification.
  */
 export default function ExpenseCalculator({issuers,properties,units,suppliers,payerLinks,canSaveDraft}:Props) {
+ const {t:adminT,locale:adminLocale}=useAdminI18n();
+
   const [issuerId,setIssuerId] = useState("");
   const [supplierId,setSupplierId] = useState("");
   const [propertyId,setPropertyId] = useState("");
@@ -78,83 +82,83 @@ export default function ExpenseCalculator({issuers,properties,units,suppliers,pa
   return (
     <div className={styles.columns}>
       <section className={styles.panel} aria-labelledby="expense-entry">
-        <p className={styles.kicker}>01 / DETAILS</p>
-        <h2 id="expense-entry">Purchase expenses · draft calculation</h2>
+        <p className={styles.kicker}>{adminT("01 / DETAILS")}</p>
+        <h2 id="expense-entry">{adminT("Purchase expenses · draft calculation")}</h2>
         <div className={styles.fields}>
-          <label>Legal entity <select value={issuerId} onChange={e=>setIssuerId(e.target.value)}>
-            <option value="">Select an entity</option>
-            {issuers.map(x=><option key={x.id} value={x.id}>{x.name} ({x.kind==="person"?"privé":"organisatie"})</option>)}
+          <label>{adminT("Legal entity")} <select value={issuerId} onChange={e=>setIssuerId(e.target.value)}>
+            <option value="">{adminT("Select an entity")}</option>
+            {issuers.map(x=><option key={x.id} value={x.id}>{x.name} ({x.kind==="person"?adminT("privé"):adminT("organisatie")})</option>)}
           </select></label>
-          <label>Supplier / relationship <select value={supplierId} onChange={e=>setSupplierId(e.target.value)}>
-            <option value="">Select an existing relationship</option>
+          <label>{adminT("Supplier / relationship")} <select value={supplierId} onChange={e=>setSupplierId(e.target.value)}>
+            <option value="">{adminT("Select an existing relationship")}</option>
             {suppliers.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
           </select></label>
           <div className={styles.twoFields}>
-            <label>Supplier invoice number <input value={invoiceNumber} onChange={e=>setInvoiceNumber(e.target.value)} maxLength={100} placeholder="Bijvoorbeeld EL-2026-110"/></label>
-            <label>Invoice date <input type="date" value={invoiceDate} onChange={e=>setInvoiceDate(e.target.value)}/></label>
+            <label>{adminT("Supplier invoice number")} <input value={invoiceNumber} onChange={e=>setInvoiceNumber(e.target.value)} maxLength={100} placeholder={adminT("Bijvoorbeeld EL-2026-110")}/></label>
+            <label>{adminT("Invoice date")} <input type="date" value={invoiceDate} onChange={e=>setInvoiceDate(e.target.value)}/></label>
           </div>
-          <label>Property <select value={propertyId} onChange={e=>{
+          <label>{adminT("Property")} <select value={propertyId} onChange={e=>{
             setPropertyId(e.target.value);setUnitId("");setMode("property");
           }}>
-            <option value="">Select a property</option>
+            <option value="">{adminT("Select a property")}</option>
             {properties.map(x=><option key={x.id} value={x.id}>{x.name} · {x.address}</option>)}
           </select></label>
           <div className={styles.twoFields}>
-            <label>Expense category <select value={category} onChange={e=>setCategory(e.target.value)}>
-              {categories.map(([id,name])=><option key={id} value={id}>{name}</option>)}
+            <label>{adminT("Expense category")} <select value={category} onChange={e=>setCategory(e.target.value)}>
+              {categories.map(([id,name])=><option key={id} value={id}>{adminT(name)}</option>)}
             </select></label>
-            <label>Allocation <select value={mode} onChange={e=>{setMode(e.target.value as ExpenseAllocationMode);setUnitId("");}}>
-              <option value="property">Entire property</option>
-              <option value="unit" disabled={!propertyUnits.length}>One unit</option>
-              <option value="equal-units" disabled={!propertyUnits.length}>Equally across all units</option>
+            <label>{adminT("Allocation")} <select value={mode} onChange={e=>{setMode(e.target.value as ExpenseAllocationMode);setUnitId("");}}>
+              <option value="property">{adminT("Entire property")}</option>
+              <option value="unit" disabled={!propertyUnits.length}>{adminT("One unit")}</option>
+              <option value="equal-units" disabled={!propertyUnits.length}>{adminT("Equally across all units")}</option>
             </select></label>
           </div>
-          {mode==="unit" && <label>Unit <select value={unitId} onChange={e=>setUnitId(e.target.value)}>
-            <option value="">Select a unit</option>
+          {mode==="unit" && <label>{adminT("Unit")} <select value={unitId} onChange={e=>setUnitId(e.target.value)}>
+            <option value="">{adminT("Select a unit")}</option>
             {propertyUnits.map(x=><option key={x.id} value={x.id}>{x.address}</option>)}
           </select></label>}
-          <label>Description <input value={description} onChange={e=>setDescription(e.target.value)} maxLength={500} placeholder="Bijvoorbeeld elektriciteit oktober"/></label>
+          <label>{adminT("Description")} <input value={description} onChange={e=>setDescription(e.target.value)} maxLength={500} placeholder={adminT("Bijvoorbeeld elektriciteit oktober")}/></label>
           <div className={styles.twoFields}>
-            <label>Amount excl. VAT (€) <input inputMode="decimal" value={netInput} onChange={e=>setNetInput(e.target.value)} placeholder="100,00"/></label>
-            <label>VAT shown on invoice (€) <input inputMode="decimal" value={vatInput} onChange={e=>setVatInput(e.target.value)} placeholder="21,00"/></label>
+            <label>{adminT("Amount excl. VAT (€)")} <input inputMode="decimal" value={netInput} onChange={e=>setNetInput(e.target.value)} placeholder="100,00"/></label>
+            <label>{adminT("VAT shown on invoice (€)")} <input inputMode="decimal" value={vatInput} onChange={e=>setVatInput(e.target.value)} placeholder="21,00"/></label>
           </div>
         </div>
-        <p className={styles.hint}>VAT is taken from the supplier invoice as an amount, not chosen automatically by country. Enter zero if the invoice has no VAT.</p>
+        <p className={styles.hint}>{adminT("VAT is taken from the supplier invoice as an amount, not chosen automatically by country. Enter zero if the invoice has no VAT.")}</p>
       </section>
       <section className={styles.panel} aria-labelledby="expense-preview">
-        <p className={styles.kicker}>02 / REVIEW</p>
-        <h2 id="expense-preview">Expense allocation</h2>
-        {!ready && <div className={styles.placeholder}>Enter the entity, relationship, property, invoice number, date, description and amounts to preview the allocation.</div>}
-        {outcome && "error" in outcome && outcome.error && <p role="alert" className={styles.error}>{outcome.error}</p>}
+        <p className={styles.kicker}>{adminT("02 / REVIEW")}</p>
+        <h2 id="expense-preview">{adminT("Expense allocation")}</h2>
+        {!ready && <div className={styles.placeholder}>{adminT("Enter the entity, relationship, property, invoice number, date, description and amounts to preview the allocation.")}</div>}
+        {outcome && "error" in outcome && outcome.error && <p role="alert" className={styles.error}>{adminT(outcome.error)}</p>}
         {outcome && "allocation" in outcome && outcome.allocation && <div className={styles.result} aria-live="polite">
           <div className={styles.identity}>
             <strong>{selectedIssuer?.name}</strong>
-            <span>{payerLinks.some(l=>l.property_id===propertyId&&l.legal_entity_id===issuerId&&l.effective_from<=invoiceDate&&(l.effective_until===null||l.effective_until>=invoiceDate)) ? "Cost-bearing entity verified for this invoice date" : "Cost-bearing entity not yet verified for this invoice date"}</span>
+            <span>{payerLinks.some(l=>l.property_id===propertyId&&l.legal_entity_id===issuerId&&l.effective_from<=invoiceDate&&(l.effective_until===null||l.effective_until>=invoiceDate)) ? adminT("Cost-bearing entity verified for this invoice date") : adminT("Cost-bearing entity not yet verified for this invoice date")}</span>
             <strong>{selectedProperty?.name}</strong>
             <span>{selectedSupplier?.name} · {invoiceNumber.trim()}</span>
-            <span>{categories.find(x=>x[0]===category)?.[1]} · {invoiceDate}</span>
+            <span>{adminT(categories.find(x=>x[0]===category)?.[1])} · {invoiceDate}</span>
           </div>
           <div className={styles.totals}>
-            <div><span>Excluding VAT</span><strong>{formatCents(outcome.netCents)}</strong></div>
-            <div><span>VAT (entered)</span><strong>{formatCents(outcome.vatCents)}</strong></div>
-            <div className={styles.grandTotal}><span>Total</span><strong>{formatCents(outcome.grossCents)}</strong></div>
+            <div><span>{adminT("Excluding VAT")}</span><strong>{formatCents(outcome.netCents, adminLocale)}</strong></div>
+            <div><span>{adminT("VAT (entered)")}</span><strong>{formatCents(outcome.vatCents, adminLocale)}</strong></div>
+            <div className={styles.grandTotal}><span>{adminT("Total")}</span><strong>{formatCents(outcome.grossCents, adminLocale)}</strong></div>
           </div>
-          <h3>Expense allocation</h3>
+          <h3>{adminT("Expense allocation")}</h3>
           <div className={styles.tableScroll}><table>
-            <thead><tr><th>Property / unit</th><th>Excl. VAT</th><th>VAT</th><th>Incl. VAT</th></tr></thead>
+            <thead><tr><th>{adminT("Property / unit")}</th><th>{adminT("Excl. VAT")}</th><th>{adminT("VAT")}</th><th>{adminT("Incl. VAT")}</th></tr></thead>
             <tbody>{outcome.allocation.map(x=><tr key={x.targetId}>
               <td>{propertyUnits.find(u=>u.id===x.targetId)?.address || selectedProperty?.name}</td>
-              <td>{formatCents(x.netCents)}</td>
-              <td>{formatCents(x.vatCents)}</td>
-              <td>{formatCents(x.grossCents)}</td>
+              <td>{formatCents(x.netCents, adminLocale)}</td>
+              <td>{formatCents(x.vatCents, adminLocale)}</td>
+              <td>{formatCents(x.grossCents, adminLocale)}</td>
             </tr>)}</tbody>
           </table></div>
-          <p className={styles.hint}>Allocated in exact cents with no rounding difference. This calculation has not been saved or approved yet.</p>
+          <p className={styles.hint}>{adminT("Allocated in exact cents with no rounding difference. This calculation has not been saved or approved yet.")}</p>
         </div>}
         <ExpenseDraftSaver selection={draftSelection} payerLinks={payerLinks} available={canSaveDraft} enabled={canSaveDraft}/>
         <div className={styles.blocked}>
-          <strong>Approval, source documents and onward invoicing are still disabled.</strong>
-          <p>Expense drafts can only be recorded after a verified property-to-entity association. Uploads, payments and final invoices are developed and checked separately.</p>
+          <strong>{adminT("Approval, source documents and onward invoicing are still disabled.")}</strong>
+          <p>{adminT("Expense drafts can only be recorded after a verified property-to-entity association. Uploads, payments and final invoices are developed and checked separately.")}</p>
         </div>
       </section>
     </div>

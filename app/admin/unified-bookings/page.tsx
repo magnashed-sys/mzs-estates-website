@@ -1,3 +1,5 @@
+
+import {getAdminI18n} from '../../../lib/admin/i18n-server';
 import Link from "next/link";
 import BookingRegister from "./BookingRegister";
 import {requireEstateAdmin} from "../../../lib/security/estate-properties";
@@ -5,6 +7,8 @@ import {requireEstateAdmin} from "../../../lib/security/estate-properties";
 export const dynamic="force-dynamic";
 type Item={id:string;category:"Guest booking"|"Owner stay"|"Unavailable";property:string;checkIn:string;checkOut:string;status:string;amount:string;href:string;editable:boolean;total:number|null;guestCount:number|null;notes:string;guestName:string;invoiceRecipient:string;sourceRef:string};
 export default async function UnifiedBookings(){
+ const {t:adminT,locale:adminLocale}=await getAdminI18n();
+
  const {db}=await requireEstateAdmin();
  const [bookings,requests,properties]=await Promise.all([
   db.rpc("admin_list_rental_bookings").order("check_in",{ascending:false}).limit(250),
@@ -34,7 +38,7 @@ export default async function UnifiedBookings(){
   ...(bookings.data||[]).filter(b=>!ownerBookingIds.has(b.id)).map(b=>({
    id:b.id,category:(b.status==="blocked"?"Unavailable":"Guest booking") as Item["category"],
    property:names.get(b.project_id)||"Property",checkIn:b.check_in,checkOut:b.check_out,
-   status:b.status,amount:b.quoted_total_eur==null?"Not priced":new Intl.NumberFormat("en-GB",{style:"currency",currency:"EUR"}).format(Number(b.quoted_total_eur)),
+   status:b.status,amount:b.quoted_total_eur==null?"Not priced":new Intl.NumberFormat(adminLocale,{style:"currency",currency:"EUR"}).format(Number(b.quoted_total_eur)),
    href:"/admin?tab=bookings",editable:["confirmed","requested"].includes(b.status)&&!b.is_test,total:b.quoted_total_eur===null?null:Number(b.quoted_total_eur),guestCount:b.guest_count,notes:b.admin_notes||"",guestName:overridesByBooking.get(b.id)?.guest_name||historicByBooking.get(b.id)?.source_guest_name||(b.user_id?guestNamesById.get(b.user_id):null)||"No account / name",invoiceRecipient:overridesByBooking.get(b.id)?.invoice_recipient_name||historicByBooking.get(b.id)?.invoice_recipient_name||"",sourceRef:historicByBooking.get(b.id)?(`${historicByBooking.get(b.id)?.original_booking_number} · ${historicByBooking.get(b.id)?.source_key}`):""
   })),
   ...(requests.data||[]).map(r=>({
@@ -44,27 +48,27 @@ export default async function UnifiedBookings(){
  ].sort((a,b)=>b.checkIn.localeCompare(a.checkIn));
  const style={color:"#f0e9de",background:"#12110f",border:"1px solid #504534",padding:"14px"} as const;
  return <main style={{minHeight:"100vh",background:"#0d0d0c",color:"#eee8dd",padding:"40px clamp(20px,5vw,70px)"}}>
-  <Link href="/admin" style={{color:"#d5c09a"}}>← Group Administration</Link>
-  <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>MZS GROUP / BOOKINGS</p>
-  <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>Bookings.</h1>
-  <p style={{color:"#aaa398",maxWidth:850}}>Your central reservation register for current, historic and future bookings. Search by guest, company, reference, property or year, then open the full reservation dossier. Booking requests, calendars and complimentary owner stays retain their dedicated approval controls.</p>
+  <Link href="/admin" style={{color:"#d5c09a"}}>{adminT("← Group Administration")}</Link>
+  <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>{adminT("MZS GROUP / BOOKINGS")}</p>
+  <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>{adminT("Bookings.")}</h1>
+  <p style={{color:"#aaa398",maxWidth:850}}>{adminT("Your central reservation register for current, historic and future bookings. Search by guest, company, reference, property or year, then open the full reservation dossier. Booking requests, calendars and complimentary owner stays retain their dedicated approval controls.")}</p>
   <nav style={{display:"flex",flexWrap:"wrap",gap:12,margin:"25px 0"}}>
-   <Link href="/admin/bookings" style={{...style,borderColor:"#d5c09a",color:"#d5c09a"}}>All Bookings</Link>
-   <Link href="/admin?tab=bookings" style={style}>Requests, cancellations & calendar →</Link>
-   <Link href="/admin/owner-stays" style={style}>Owner stays →</Link>
-   <Link href="/admin/group/estates/contracts?view=invoices" style={style}>Contracts & invoices →</Link>
-   <Link href="/admin/group/estates/properties" style={style}>Properties →</Link>
+   <Link href="/admin/bookings" style={{...style,borderColor:"#d5c09a",color:"#d5c09a"}}>{adminT("All Bookings")}</Link>
+   <Link href="/admin?tab=bookings" style={style}>{adminT("Requests, cancellations & calendar →")}</Link>
+   <Link href="/admin/owner-stays" style={style}>{adminT("Owner stays →")}</Link>
+   <Link href="/admin/group/estates/contracts?view=invoices" style={style}>{adminT("Contracts & invoices →")}</Link>
+   <Link href="/admin/group/estates/properties" style={style}>{adminT("Properties →")}</Link>
   </nav>
-  {errors.length>0&&<p role="alert" style={{color:"#e3a995"}}>Incomplete registers: {errors.join(", ")}. Verify records in the source module.</p>}
-  <section style={{display:"flex",gap:12,flexWrap:"wrap",margin:"25px 0"}} aria-label="Loaded booking summary">
+  {errors.length>0&&<p role="alert" style={{color:"#e3a995"}}>{adminT("Incomplete registers:")} {errors.join(", ")}{adminT(". Verify records in the source module.")}</p>}
+  <section style={{display:"flex",gap:12,flexWrap:"wrap",margin:"25px 0"}} aria-label={adminT("Loaded booking summary")}>
    {[["Guest bookings",rows.filter(x=>x.category==="Guest booking").length],
       ["Awaiting review",rows.filter(x=>x.status==="requested").length],
       ["Owner stays",rows.filter(x=>x.category==="Owner stay").length],
       ["Blocked periods",rows.filter(x=>x.category==="Unavailable").length]].map(([label,total])=>
-      <div key={label} style={{...style,minWidth:160}}><small style={{color:"#d5c09a"}}>{label}</small><p style={{fontSize:26,margin:"8px 0"}}>{total}</p></div>)}
+      <div key={label} style={{...style,minWidth:160}}><small style={{color:"#d5c09a"}}>{adminT(label)}</small><p style={{fontSize:26,margin:"8px 0"}}>{total}</p></div>)}
   </section>
-  <p style={{color:"#a9a092",fontSize:12}}>Summary counts reflect the records loaded in this register, not financial receipts. Requests are approved in Requests &amp; Calendar. Historical corrections remain audit-logged.</p>
+  <p style={{color:"#a9a092",fontSize:12}}>{adminT("Summary counts reflect the records loaded in this register, not financial receipts. Requests are approved in Requests & Calendar. Historical corrections remain audit-logged.")}</p>
   <BookingRegister rows={rows.map(({id,category,property,checkIn,checkOut,status,amount,href,guestName,invoiceRecipient,sourceRef})=>({id,category,property,checkIn,checkOut,status,amount,href,guestName,invoiceRecipient,sourceRef}))}/>
-  {!rows.length&&<p>No records available in the current reporting scope.</p>}
+  {!rows.length&&<p>{adminT("No records available in the current reporting scope.")}</p>}
  </main>;
 }

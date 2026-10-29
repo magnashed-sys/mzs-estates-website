@@ -1,3 +1,4 @@
+import {adminI18nFixture} from './helpers/admin-i18n.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -48,7 +49,7 @@ test('CSV contains exact original/current/approved minutes, provenance and safel
  assert.equal(approved.snapshot_at,source.generated_at);assert.equal(approved.period_from,source.from);assert.equal(approved.property,"'=1+1");assert.equal(records.find(v=>v.visit_id===id(1)).description,'\'@SUM(1,2)\n"note"');assert.ok(!header.some(h=>/rate|wage|billable|amount/.test(h)));
 });
 function route({environment=true,denied=false,source=fixture(),csv,queryFailure=false}={}){
- const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/time-report/export/route.ts'),{exports,Response,URL,Buffer,require(name){
+ const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/time-report/export/route.ts'),{exports,Response,URL,Buffer,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
   if(name.includes('property-staff'))return {staffEnvironmentAvailable:()=>{calls.push('environment');return environment;}};
   if(name.includes('estate-properties'))return {requireEstateAdmin:async()=>{calls.push('admin');if(denied)throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:queryFailure?{message:'unavailable'}:null};}}};}};
   if(name.includes('time-report'))return {...lib,...(csv?{timeReportCsv:()=>csv}:{})};throw Error('unexpected import '+name);
@@ -66,7 +67,7 @@ test('export errors reject duplicate filters, unavailable or incomplete sources 
  const large=await route({csv:'x'.repeat(4*1024*1024+1)}).get();assert.equal(large.status,413);assert.ok(!large.headers.has('Content-Disposition'));
 });
 function page({denied,source=fixture()}={}){
- const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/time-report/page.tsx'),{exports,Date,Intl,require(name){
+ const exports={},calls=[];vm.runInNewContext(compile('app/admin/workspaces/estates/time-report/page.tsx'),{exports,Date,Intl,require(name){if(name.includes('/admin/i18n'))return adminI18nFixture();
   if(name==='react/jsx-runtime')return require(name);if(name==='next/link')return {default:'a'};if(name==='next/navigation')return {redirect:href=>{throw Error('redirect:'+href);}};
   if(name.includes('property-staff'))return {requireStaffEnvironment(){calls.push('environment');if(denied==='environment')throw Error('denied');}};
   if(name.includes('estate-properties'))return {async requireEstateAdmin(){calls.push('admin');if(denied==='admin')throw Error('denied');return {db:{rpc:async()=>{calls.push('query');return {data:source,error:null};}}};}};
@@ -80,7 +81,7 @@ test('report pagination retains complete totals while showing only the chosen 25
  const source=fixture();source.visits=Array.from({length:61},(_,i)=>row(i+1));source.record_count=61;
  const p=page({source}),tree=await p.render({page:'3'}),elements=[];function walk(x){if(!x||typeof x!=='object')return;if(Array.isArray(x))return x.forEach(walk);elements.push(x);walk(x.props?.children);}walk(tree);
  assert.equal(elements.filter(e=>e.props?.href?.includes('/staff?visit=')).length,11);
- const serialized=JSON.stringify(tree);assert.match(serialized,/45:45/);assert.match(serialized,/totals above cover all /);
+ const serialized=JSON.stringify(tree);assert.match(serialized,/45:45/);assert.match(serialized,/totals above cover all/);
  await assert.rejects(p.render({page:'999'}),/redirect:.*from=2026-09-01&until=2026-10-31&page=3/);
 });
 test('time snapshot RPC enforces real PostgreSQL access, revisions, filters and capacity limits',()=>{

@@ -1,3 +1,5 @@
+
+import {getAdminI18n} from '../../../../../lib/admin/i18n-server';
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireEstateAdmin} from "../../../../../lib/security/estate-properties";
@@ -8,6 +10,8 @@ export const dynamic="force-dynamic";
 const prod="https://ptrnjzmcehrhbsfxntgw.supabase.co";
 const stage="https://senonkpxdtlhyhrubicg.supabase.co";
 export default async function PropertyEntityAttributionPage(){
+ const {t:adminT,locale:adminLocale}=await getAdminI18n();
+
  // Never read Production data through a Vercel Preview or local build.
  const allowed=(process.env.VERCEL_ENV==="production"&&process.env.NEXT_PUBLIC_SUPABASE_URL===prod)||
   (process.env.VERCEL_ENV==="preview"&&process.env.NEXT_PUBLIC_SUPABASE_URL===stage);
@@ -29,26 +33,26 @@ export default async function PropertyEntityAttributionPage(){
  const relationshipLabels:Record<string,string>={
   owner:"Legal owner",payer:"Cost bearer / payer",manager:"Manager"
  };
- const date=(value:string)=>new Date(value+"T12:00:00Z").toLocaleDateString("en-GB",{timeZone:"Europe/Madrid"});
+ const date=(value:string)=>new Date(value+"T12:00:00Z").toLocaleDateString(adminLocale,{timeZone:"Europe/Madrid"});
  return <main className={styles.main}>
-  <Link href="/admin/workspaces/estates" className={styles.back}>Back to Estates</Link>
+  <Link href="/admin/workspaces/estates" className={styles.back}>{adminT("Back to Estates")}</Link>
   <header className={styles.header}>
-   <p className={styles.kicker}>MZS GROUP / ESTATES / INTERNAL CONTROL</p>
-   <h1>Properties &amp; legal entities</h1>
-   <p>Record which legal entity owns, bears the costs of or manages a physical property. Each association has an effective date and verified supporting evidence.</p>
-   <p className={styles.emphasis}>This is an administrative allocation, not a new invoice, payment, tax determination or automatic transfer of ownership.</p>
+   <p className={styles.kicker}>{adminT("MZS GROUP / ESTATES / INTERNAL CONTROL")}</p>
+   <h1>{adminT("Properties & legal entities")}</h1>
+   <p>{adminT("Record which legal entity owns, bears the costs of or manages a physical property. Each association has an effective date and verified supporting evidence.")}</p>
+   <p className={styles.emphasis}>{adminT("This is an administrative allocation, not a new invoice, payment, tax determination or automatic transfer of ownership.")}</p>
   </header>
   <section className={styles.panel}>
-   <h2>Verified associations ({links.count})</h2>
-   {existing.length===0?<p>No legal property associations have been recorded yet. Select an entity below only after checking the supporting evidence.</p>:
-    <div className={styles.scroll} role="region" tabIndex={0} aria-label="Legal property associations">
+   <h2>{adminT("Verified associations (")}{links.count})</h2>
+   {existing.length===0?<p>{adminT("No legal property associations have been recorded yet. Select an entity below only after checking the supporting evidence.")}</p>:
+    <div className={styles.scroll} role="region" tabIndex={0} aria-label={adminT("Legal property associations")}>
      <table>
-      <thead><tr><th>Property</th><th>Legal entity</th><th>Relationship</th><th>Valid from</th>
-       <th>Valid until</th><th>Evidence reference</th></tr></thead>
+      <thead><tr><th>{adminT("Property")}</th><th>{adminT("Legal entity")}</th><th>{adminT("Relationship")}</th><th>{adminT("Valid from")}</th>
+       <th>{adminT("Valid until")}</th><th>{adminT("Evidence reference")}</th></tr></thead>
       <tbody>{existing.map(link=><tr key={link.id}>
-       <td>{propertyName.get(link.property_id)??"Unknown property"}</td>
-       <td>{entityName.get(link.legal_entity_id)??"Unknown entity"}</td>
-       <td>{relationshipLabels[link.relationship_type]??"Unknown relationship"}</td>
+       <td>{propertyName.get(link.property_id)??adminT("Unknown property")}</td>
+       <td>{entityName.get(link.legal_entity_id)??adminT("Unknown entity")}</td>
+       <td>{relationshipLabels[link.relationship_type]??adminT("Unknown relationship")}</td>
        <td>{date(link.effective_from)}</td>
        <td>{link.effective_until?date(link.effective_until):"—"}</td>
        <td>{link.evidence_reference}</td>
