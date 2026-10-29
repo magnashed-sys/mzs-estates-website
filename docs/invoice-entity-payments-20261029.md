@@ -1,0 +1,11 @@
+# Invoice entity filters and imported payment registrations
+
+Invoices supports issuing-entity selection, unpaid and partly-paid filters, combined status/search/year/source filters, full-selection totals and matching CSV downloads. Outstanding rows link explicitly to payment processing; rental and booking invoices retain their existing billing/payment workflows.
+
+Imported Gripp invoices receive a separate immutable receipt/reversal ledger. The current balance is the original imported open amount minus active new receipts; recorded paid includes the imported paid snapshot. Corrections restore that snapshot without altering it. The original archive and its exports remain historical source snapshots; current balances are in Invoices and its CSV. Additional receipts have no automated bank synchronization, customer messages or refund effect.
+
+Active-admin-only private write RPCs serialize against the original invoice row, reject overpayment, duplicate references, altered idempotency retries, excluded records and invoices already represented by live invoices. Credit notes and already settled imports cannot receive new incoming payments. Public wrappers use SECURITY INVOKER; ledgers have RLS and no direct DML grants. The administrator must confirm the receipt is not already included in the imported paid amount.
+
+Validation: 368 tests passed, including real PostgreSQL-engine migration fixtures for baseline arithmetic, full settlement, reversal, idempotency, duplicate references, canonical-source guards, exclusions, RLS and immutability. Typecheck passed. Migration rehearsed with rollback on both remote environments, then applied to staging with no real receipt records. Authenticated interactive browser acceptance remains a user check.
+
+Release procedure: successful build, exact-head CI and staging preview; apply additive production schema before releasing app; update pilot SHA and rebuild exact merged commit. Prior production deployment dpl_3cfGWvhyDHi2gdPsQdP6A1sToGMB at 3cc77083bbf9a57fead318d732813ae73d9cdee5. Retain receipt/reversal data on any UI rollback; the previous UI does not reflect these new imported receipts. No original invoice values or actual payments are modified during rollout.

@@ -11,6 +11,7 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
  const {db}=await requireEstateAdmin();
  let filters;try{filters=invoiceFilters(await searchParams);}catch{return <section className={s.page}><h1>Invalid invoice filters</h1><Link href="/admin/workspaces/accountancy/sales">Clear filters</Link></section>;}
  const today=operationsDay(),all=await loadInvoiceRegister(db,filters.year),{rows,totals}=selectInvoices(all,filters,today);
+ const entities=Array.from(new Map(all.map(i=>[i.issuerId,i.issuer])).entries()).sort((a,b)=>a[1].localeCompare(b[1]));
  const pages=Math.max(1,Math.ceil(rows.length/25));if(filters.page>pages)redirect(invoiceHref(filters,pages));
  const pageRows=rows.slice((filters.page-1)*25,filters.page*25);
  return <section className={s.page}>
@@ -19,6 +20,7 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
   <form method="get" className={s.filters}>
    <label>Search<input name="q" maxLength={150} defaultValue={filters.q} placeholder="Customer, number or description"/></label>
    <label>Invoice year<select name="year" defaultValue={filters.year??'all'}><option value="all">All years</option>{Array.from({length:Math.max(Number(today.slice(0,4))+2,filters.year??0)-1999},(_,i)=>Math.max(Number(today.slice(0,4))+2,filters.year??0)-i).map(y=><option key={y} value={y}>{y}</option>)}</select></label>
+   <label>Entity<select name="entity" defaultValue={filters.entity}><option value="all">All entities</option>{!entities.some(([id])=>id===filters.entity)&&filters.entity!=='all'&&<option value={filters.entity}>Selected entity (no invoices)</option>}{entities.map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
    <label>Source<select name="source" defaultValue={filters.source}><option value="all">All sources</option>{Object.entries(invoiceSources).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
    <label>Payment status<select name="status" defaultValue={filters.status}>{Object.entries(invoiceStatuses).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
    <button className={s.button}>Apply filters</button><Link href="/admin/workspaces/accountancy/sales">Reset</Link>
@@ -34,8 +36,8 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
     <td><strong>{i.number}</strong><br/>{i.customer}<small>{i.issuer}</small><small>{i.subject}</small></td>
     <td>{invoiceSources[i.source]}{i.alsoImported&&<small>Imported copy matched</small>}</td><td className={s.nowrap}>{date(i.issuedOn)}</td><td className={s.nowrap}>{date(i.dueOn)}</td>
     <td className={s.amount}>{money(i.gross)}</td><td className={s.amount}>{money(i.paid)}</td><td className={s.amount}>{money(i.balance)}</td>
-    <td><span className={invoiceStatus(i,today)==='Overdue'?s.overdue:s.badge}>{invoiceStatus(i,today)}</span><small>{i.paymentBasis==='imported_snapshot'?'Imported balance snapshot':i.paymentBasis==='not_recorded'?'Payment not yet recorded':'Recorded receipts'}</small></td>
-    <td><Link href={i.href}>{i.source==='rental'?'Billing →':'Details →'}</Link></td>
+    <td><span className={invoiceStatus(i,today)==='Overdue'?s.overdue:s.badge}>{invoiceStatus(i,today)}</span><small>{i.paymentBasis==='imported_snapshot'?'Imported balance snapshot':i.paymentBasis==='imported_plus_receipts'?'Imported balance + new receipts':i.paymentBasis==='not_recorded'?'Payment not yet recorded':'Recorded receipts'}</small></td>
+    <td><Link href={i.href}>{i.gross>0&&(i.balance===null||i.balance>0)?'Record payment →':'Details / payments →'}</Link></td>
    </tr>)}
   </tbody></table></div>
   {!pageRows.length&&<p className={s.empty}>No issued invoices match these filters.</p>}
