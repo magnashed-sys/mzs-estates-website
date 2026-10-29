@@ -120,7 +120,7 @@ function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=
    if(name==='next/cache')return {revalidatePath:path=>events.push(['revalidate',path])};
    if(name.endsWith('accountancy/archive'))return {ARCHIVE_BUCKET:'mzs-private-accountancy-documents',
     documentPath:(e,y,id)=>e+'/'+y+'/'+id+'.pdf'};
-   if(name.endsWith('accountancy/assistant-bridge'))return helper;
+   if(name.endsWith('accountancy/assistant-bridge'))return {...helper,isAssistantBridgeStaging:()=>helper.isAssistantBridgeStaging(env)};
    if(name.endsWith('accountancy/pdf/server'))return {scannerOptions:()=>({environment:env.VERCEL_ENV,supabaseUrl:env.NEXT_PUBLIC_SUPABASE_URL,enabled:'true',processorApproved:'true',apiKey:'synthetic-fake-key-1234567890'})};
    if(name.endsWith('cloudmersive-advanced'))return {
     scannerIsExplicitlyEnabled:()=>true,
