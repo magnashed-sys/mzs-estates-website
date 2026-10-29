@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const compile=path=>ts.transpileModule(readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const lib={};vm.runInNewContext(compile('lib/property-operations/expense-register.ts'),{exports:lib,URLSearchParams});
-const {expenseFilters,expenseRegisterHref,expensePageTotals}=lib;
+const {expenseFilters,expenseRegisterHref,expensePageTotals,expenseOriginalStatus,expenseOriginalLabels}=lib;
 test('expense filters validate identity and dates, strip query syntax and preserve paging filters',()=>{
  assert.throws(()=>expenseFilters({property:'not-an-id'}),/filter/);
  assert.throws(()=>expenseFilters({from:'2026-02-30'}),/date/);
@@ -23,6 +23,15 @@ test('page totals reconcile exact cents and reject malformed amounts',()=>{
  assert.equal(x.net,200);assert.equal(x.vat,21);assert.equal(x.gross,221);
  assert.throws(()=>expensePageTotals([{net_cents:101,vat_cents:21,gross_cents:121}]),/reliably/);
  assert.throws(()=>expensePageTotals([{net_cents:'101',vat_cents:21,gross_cents:122}]),/reliably/);
+});
+test('an active archive original outranks the legacy missing flag; chat references do not count as archived',()=>{
+ const draft={id:'draft-one',source_document_status:'missing'},active=new Set(['draft-one']);
+ assert.equal(expenseOriginalStatus(draft,new Set()),'unarchived');
+ assert.equal(expenseOriginalStatus(draft,active),'archive');
+ assert.equal(expenseOriginalStatus({...draft,source_document_status:'retained_purchase_pdf'},new Set()),'isolated');
+ assert.equal(expenseOriginalStatus({...draft,source_document_status:'retained_purchase_pdf'},active),'archive');
+ assert.match(expenseOriginalLabels.en.unarchived,/not yet archived/);
+ assert.match(expenseOriginalLabels.es.archive,/archivo privado/);
 });
 async function renderRegister(pageNumber,count=201){
  const calls=[];const selections=[];
@@ -39,6 +48,8 @@ async function renderRegister(pageNumber,count=201){
   if(name==='react/jsx-runtime')return require(name);
   if(name==='next/navigation')return {notFound(){throw Error('not-found')},redirect(url){throw Error('redirect:'+url)}};
   if(name.includes('security/estate-properties'))return {requireEstateAdmin:async()=>{authorized=true;return {db}}};
+  if(name.includes('/accountancy/document-links-data'))return {documentLinks:async(_db,kind,ids)=>{calls.push(['documentLinks',kind,ids.length]);return []}};
+  if(name.includes('/accountancy/document-links'))return {attachmentHref:(kind,id)=>'/attachments/'+kind+'/'+id};
   if(name.includes('expense-register'))return lib;
   return {default:()=>null};
  }});
@@ -50,6 +61,7 @@ test('server register renders beyond the old 200-row ceiling using bounded, stab
  assert.equal(x.authorized,true);
  assert.ok(x.calls.some(c=>c[0]==='range'&&c[1]===200&&c[2]===224));
  assert.ok(x.calls.some(c=>c[0]==='order'&&c[1]==='mzs_ops_expense_drafts'&&c[2]==='id'));
+ assert.ok(x.calls.some(c=>c[0]==='documentLinks'&&c[1]==='cost'&&c[2]===1));
  assert.ok(x.result);
 });
 test('PostgREST 416 without count recovers the final page instead of losing register access',async()=>{
