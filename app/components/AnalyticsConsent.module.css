@@ -1,6 +1,6 @@
 .reserve { height: var(--mzs-consent-height, 0px); }
 
-:global(body):has(.reserve) :global(.mzs-home) {
+:global(body):has(.reserve) :global(.mzs-home.mzs-home-image.mzs-home-refined) {
   min-height: calc(100vh - var(--mzs-consent-height, 0px));
   min-height: calc(100svh - var(--mzs-consent-height, 0px));
 }
