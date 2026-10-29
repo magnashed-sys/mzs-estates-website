@@ -4,7 +4,7 @@
  */
 export const ASSISTANT_MAX_PDF_BYTES=4*1024*1024;
 const STAGING='https://senonkpxdtlhyhrubicg.supabase.co';
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SHA=/^[a-f0-9]{64}$/;
 export type BridgeHeaders={draftId:string;filename:string;sha256:string;token:string};
 export function isAssistantBridgeStaging(env:NodeJS.ProcessEnv=process.env):boolean {
