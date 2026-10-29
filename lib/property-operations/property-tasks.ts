@@ -1,5 +1,5 @@
 /** A staged, scoped, non-financial property manager workflow. */
-export const taskUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const taskUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const taskPriorities=['low','normal','high','urgent'] as const;
 export const taskStatuses=['open','in_progress','blocked','done','cancelled'] as const;
 export type TaskPriority=(typeof taskPriorities)[number];
