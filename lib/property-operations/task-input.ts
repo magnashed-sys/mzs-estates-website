@@ -17,15 +17,19 @@ export function optionalUuid(value:string):string|null{
  return value;
 }
 export function taskInput(form:FormData){
- const property_id=field(form,'property_id',36);
- if(!taskUuid.test(property_id))throw Error('Invalid property');
+ const property_id=optionalUuid(String(form.get('property_id')??''));
+ const work_area_id=String(form.get('work_area_id')??'').trim()||null;
+ if((property_id===null)===(work_area_id===null)||
+    (work_area_id!==null&&!['maintenance-beverwijk','private-magdy'].includes(work_area_id)))
+  throw Error('Invalid task location');
  const unit_id=optionalUuid(field(form,'unit_id',36));
+ if(work_area_id&&unit_id)throw Error('Area tasks cannot have a rental unit');
  const assigned_profile_id=optionalUuid(field(form,'assigned_profile_id',36));
  const title=field(form,'title',160),description=field(form,'description',2000);
  const priority=field(form,'priority',10),due_on=field(form,'due_on',10);
  const source_reference=field(form,'source_reference',250);
  if(title.length<5||!taskPriorities.includes(priority as any)||due_on&&!dateInput(due_on))throw Error('Invalid task fields');
- return {property_id,unit_id,assigned_profile_id,title,description,priority,
+ return {property_id,work_area_id,unit_id,assigned_profile_id,title,description,priority,
   due_on:due_on||null,source_reference};
 }
 export function taskUpdateInput(form:FormData){
