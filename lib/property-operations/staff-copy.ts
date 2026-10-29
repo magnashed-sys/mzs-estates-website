@@ -27,6 +27,7 @@ const copy={
   hoursInfo:'Actual working time only; no salary or invoice is created.',
   taskSaved:'Task created and visible in Group Admin.',reportSaved:'Maintenance report saved.',
   uploadPartial:'Report saved, but not all photos could be uploaded. Open the report to add them.',
+  taskExample:'e.g. Order towels for toilets',issueExample:'e.g. Leaking tap in kitchen',taskDetailsExample:'Add instructions or useful details',issueDetailsExample:'Describe the issue and its location',progressExample:'What has been done, or what is still needed?',dueShort:'Due',
   selectLocation:'Choose a location'
  },
  nl:{
@@ -52,6 +53,7 @@ const copy={
   hoursInfo:'Alleen daadwerkelijke uren; er wordt geen loon of factuur aangemaakt.',
   taskSaved:'Taak aangemaakt en zichtbaar in de admin.',reportSaved:'Onderhoudsmelding opgeslagen.',
   uploadPartial:'Melding opgeslagen, maar niet alle foto’s konden worden verwerkt. Voeg ze via het dossier toe.',
+  taskExample:'Bijv. handdoeken voor het toilet bestellen',issueExample:'Bijv. lekkende kraan in de keuken',taskDetailsExample:'Eventuele instructies of bijzonderheden',issueDetailsExample:'Wat is er aan de hand en waar precies?',progressExample:'Wat is gedaan of wat moet nog gebeuren?',dueShort:'Voor',
   selectLocation:'Kies een locatie'
  },
  es:{
@@ -77,6 +79,7 @@ const copy={
   hoursInfo:'Solo tiempo realmente trabajado; no crea salarios ni facturas.',
   taskSaved:'Tarea creada y visible en administración.',reportSaved:'Incidencia guardada.',
   uploadPartial:'Incidencia guardada, pero no todas las fotos se pudieron subir. Añádelas desde el expediente.',
+  taskExample:'Ej. pedir toallas para los baños',issueExample:'Ej. grifo con fuga en la cocina',taskDetailsExample:'Instrucciones o detalles útiles',issueDetailsExample:'¿Qué ocurre y dónde?',progressExample:'¿Qué se ha hecho o qué queda pendiente?',dueShort:'Límite',
   selectLocation:'Selecciona una ubicación'
  }
 } as const;
