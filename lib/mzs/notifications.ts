@@ -300,6 +300,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
   const event = (Array.isArray(claimed) ? claimed[0] : undefined) as EventRow | undefined;
   if (!event) return { status: "none" };
 
+  let deliveryStage = "load recipient";
   try {
     const { data: profile, error: profileError } = await admin.from("profiles")
       .select("full_name,email,is_active,role").eq("id", event.user_id).single();
@@ -330,38 +331,25 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Introductory call mail requires production");
       if (profile.role !== "admin") throw new Error("Recipient is no longer an administrator");
     }
+    deliveryStage = "validate event";
     if (event.event_type === "property_staff_task_created") {
-      // The recipient is fixed by the durable database trigger. Revalidate it
-      // before sending; an event payload cannot alter the destination.
+      // These values are captured inside the trusted database INSERT trigger.
+      // The mailer's service account deliberately has no SELECT on the
+      // protected task, property or unit tables.
       if (process.env.VERCEL_ENV !== "production" ||
           process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co")
         throw new Error("Property task email requires production");
       if (profile.email.toLowerCase() !== "magdy@mzsgroup.eu")
         throw new Error("Unexpected property task notification recipient");
-      const {data:task,error:taskError} = await admin.from("mzs_ops_property_tasks")
-        .select("id,title,priority,due_on,property_id,unit_id,created_by,assigned_profile_id")
-        .eq("id",str(event.payload.task_id)).maybeSingle();
-      if(taskError||!task||task.created_by===null)
-        throw new Error("Property task unavailable");
-      const [{data:creator,error:creatorError},{data:property,error:propertyError}] = await Promise.all([
-        admin.from("profiles").select("full_name,role").eq("id",task.created_by).maybeSingle(),
-        admin.from("mzs_estate_properties").select("name").eq("id",task.property_id).maybeSingle(),
-      ]);
-      if(creatorError||!creator||!["client","partner"].includes(creator.role)||propertyError||!property)
-        throw new Error("Task ownership could not be verified");
-      let unitName = "";
-      if(task.unit_id){
-        const {data:unit,error:unitError} = await admin.from("mzs_estate_units")
-          .select("address,property_id").eq("id",task.unit_id).maybeSingle();
-        if(unitError||!unit||unit.property_id!==task.property_id)
-          throw new Error("Task unit could not be verified");
-        unitName=unit.address;
-      }
-      event.payload={
-        task_id:task.id,title:task.title,property:property.name,
-        creator:creator.full_name||"Property manager",
-        unit:unitName,priority:task.priority,due_on:task.due_on||"",
-      };
+      const payload=event.payload;
+      const id=str(payload.task_id),title=str(payload.title),property=str(payload.property),
+        creator=str(payload.creator),priority=str(payload.priority);
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
+          !title.trim() || !property.trim() || !creator.trim() ||
+          !["low","normal","high","urgent"].includes(priority) ||
+          (payload.unit!==undefined && typeof payload.unit!=="string") ||
+          (payload.due_on!==undefined && typeof payload.due_on!=="string"))
+        throw new Error("Property task email snapshot is incomplete");
     }
     if (event.event_type === "capital_access_granted") {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Capital mail requires production");
@@ -384,6 +372,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
         if (!error) locale = data.user?.user_metadata?.preferred_language;
       } catch { /* Preserve English delivery if the optional lookup is unavailable. */ }
     }
+    deliveryStage = "render email";
     const message = isLocalizedAccountLocale(locale)
       ? localizedAccountMail(event, profile.full_name || "", locale, siteForNotification())
       : template(event, profile.full_name || "Member");
@@ -395,6 +384,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       connectionTimeout: 8000, greetingTimeout: 6000, socketTimeout: 10000,
     });
     try {
+      deliveryStage = "smtp acceptance";
       const receipt = await mailer.sendMail({
         from: config.from, to: profile.email,
         subject: message.subject, html: message.html, text: message.text,
@@ -403,6 +393,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
         throw new Error("Recipient not accepted");
       }
     } finally { mailer.close(); }
+    deliveryStage = "record sent status";
     const { error: savedError } = await admin.from("mzs_mail_outbox")
       .update({ status: "sent", sent_at: new Date().toISOString(), last_error: null })
       .eq("id", event.id).eq("status", "sending");
@@ -418,6 +409,7 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
     }).eq("id", event.id).eq("status", "sending");
     console.error("[MZS mail] Delivery unsuccessful", {
       event: event.event_type,
+      stage: deliveryStage,
       class: error instanceof Error ? error.name : "unknown",
     });
     return { status: "failed", id: event.id };
