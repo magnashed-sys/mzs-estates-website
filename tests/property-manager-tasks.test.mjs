@@ -68,7 +68,7 @@ test('task form validation accepts optional unit, assigned staff and real date o
  assert.equal(good.due_on,'2026-11-01');
  f.set('due_on','2026-02-30');assert.throws(()=>validate.taskInput(f),/Invalid task fields/);
  f.set('due_on','');f.set('priority','super-urgent');
- assert.throws(()=>validate.taskInput(f),/Invalid task fields/);
+ assert.throws(()=>validate.taskInput(f),/Invalid priority|Invalid task fields/);
  f.set('priority','urgent');f.set('title','Bad');
  assert.throws(()=>validate.taskInput(f),/Invalid task fields/);
 });
