@@ -3,6 +3,7 @@ import {getAdminI18n} from '../../../../../lib/admin/i18n-server';
 import Link from 'next/link';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {requireStaffEnvironment} from '../../../../../lib/security/property-staff';
+import {staffTaskEnvironment} from '../../../../../lib/property-operations/property-tasks';
 import {loadRegisters,allRows,type Params} from '../../../../../lib/property-operations/staff-data';
 import type {Property,Member} from '../../../../../lib/property-operations/staff-work';
 import {queueKey,queueHref} from '../../../../../lib/property-operations/action-queues';
@@ -15,7 +16,7 @@ import WorkRegisters from '../../../../staff/WorkRegisters';
 import s from '../../../../staff/staff.module.css';
 export const dynamic='force-dynamic';
 export default async function StaffAdmin({searchParams}:{searchParams:Promise<Params>}){
- const {t:adminT,locale:adminLocale}=await getAdminI18n();
+ const {t:adminT,locale:adminLocale,language}=await getAdminI18n();
 
  requireStaffEnvironment();const {db}=await requireEstateAdmin();const params=await searchParams;
  const reportReturn=timeReturnHref(params);
@@ -38,7 +39,7 @@ export default async function StaffAdmin({searchParams}:{searchParams:Promise<Pa
  const today=new Date().toISOString().slice(0,10);
  const assignedMembers=data.ticket?members.filter(m=>m.role==='admin'||scopes.some(x=>x.profile_id===m.id&&x.property_id===data.ticket!.property_id)):members;
  // Keep all names in the register but restrict the assignee selector separately.
- return <main className={s.adminPage}><Link href="/admin/workspaces/staff">{adminT("← Staff")}</Link>{inbox&&<p><Link href={queueHref(inbox,inboxPage)} prefetch={false}>{adminT("← Back to action list")}</Link></p>}{reportReturn&&<p><Link href={reportReturn} prefetch={false}>{adminT("← Back to time report")}</Link></p>}<h1>{adminT("Staff & maintenance")}</h1><p><Link href="/admin/workspaces/estates/time-report">{adminT("Time report by period →")}</Link></p><p>{adminT("Review actual hours, decide on corrections and follow up on maintenance. Staff access is assigned by property here.")}</p>
+ return <main className={s.adminPage}><Link href="/admin/workspaces/staff">{adminT("← Staff")}</Link>{inbox&&<p><Link href={queueHref(inbox,inboxPage)} prefetch={false}>{adminT("← Back to action list")}</Link></p>}{reportReturn&&<p><Link href={reportReturn} prefetch={false}>{adminT("← Back to time report")}</Link></p>}<h1>{adminT("Staff & maintenance")}</h1><p><Link href="/admin/workspaces/estates/time-report">{adminT("Time report by period →")}</Link>{staffTaskEnvironment()&&<> · <Link href="/admin/workspaces/estates/staff/tasks">{language==='es'?'Tareas de inmuebles →':'Property manager tasks →'}</Link></>}</p><p>{adminT("Review actual hours, decide on corrections and follow up on maintenance. Staff access is assigned by property here.")}</p>
  <section className={s.panel}><h2>{adminT("Overview by property · all records")}</h2><div className={s.tableWrap}><table className={s.table}><thead><tr><th>{adminT("Property")}</th><th>{adminT("Open maintenance")}</th><th>{adminT("Time entries to review")}</th><th>{adminT("Approved hours")}</th><th>{adminT("Expense drafts incl. VAT")}</th></tr></thead><tbody>{summary.map(p=><tr key={p.property_id}><td><Link href={'?property='+p.property_id}>{p.name}</Link></td><td>{p.open_tickets}</td><td>{p.pending_visits}  {adminT("visits")}</td><td>{(Number(p.approved_minutes)/60).toLocaleString(adminLocale,{maximumFractionDigits:2})}</td><td>{(Number(p.expense_draft_cents)/100).toLocaleString(adminLocale,{style:'currency',currency:'EUR'})}</td></tr>)}</tbody></table></div><p>{adminT("Expense drafts are not paid expenses. Hours have no monetary value here. An open correction counts towards visits awaiting review.")}</p></section>
  <WorkRegisters data={data} params={params} properties={properties} members={members} assignees={assignedMembers} admin/>
  {data.ticket&&<WorkOrders ticket={data.ticket} orders={orders} issuers={issuers} suppliers={suppliers} payerIds={payers.filter(p=>p.effective_from<=today&&(!p.effective_until||p.effective_until>=today)).map(p=>p.legal_entity_id)} history={orderHistory}/>}
