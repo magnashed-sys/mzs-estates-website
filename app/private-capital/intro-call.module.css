@@ -1,5 +1,5 @@
 .section {
-  padding: clamp(76px, 8vw, 120px) max(var(--mzs-public-inset), calc((100vw - var(--mzs-public-content)) / 2)) 44px;
+  padding: clamp(76px, 8vw, 120px) max(var(--mzs-public-inset, clamp(20px, 4.5vw, 82px)), calc((100vw - var(--mzs-public-content, 1200px)) / 2)) 44px;
   scroll-margin-top: 24px;
   background: radial-gradient(ellipse at 8% 25%, rgba(213,192,154,.045), transparent 60%), #0b0b0a;
 }
