@@ -60,7 +60,7 @@ async function scenario({linkOk=true,attachTo={kind:'cost',id:'00000000-0000-400
    if(name.endsWith('/links/actions')||name==='./links/actions')return {
     async saveDocumentLink(f){calls.push(['link',f.get('kind'),f.get('target_id'),f.get('document_id')]);return {ok:linkOk};}
    };
-   if(name.endsWith('.module.css'))return {};
+   if(name.endsWith('.module.css'))return {default:{}};
    throw Error('Unexpected import '+name);
   }
  });
