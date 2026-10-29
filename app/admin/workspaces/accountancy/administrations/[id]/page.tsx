@@ -8,6 +8,7 @@ import {requireEstateAdmin} from '../../../../../../lib/security/estate-properti
 import {allRows} from '../../../../../../lib/property-operations/staff-data';
 import {annualSource} from '../../../../../../lib/accountancy/administration-data';
 import {annualEvidenceReadiness,type EvidenceIssue} from '../../../../../../lib/accountancy/annual-evidence';
+import {annualInvoiceControl,type InvoiceIssue} from '../../../../../../lib/accountancy/invoice-control';
 import {supplierCostIntegrity} from '../../../../../../lib/accountancy/supplier-integrity';
 import {ADMINISTRATION_ROOT,uuid,costCategories,annualCategory,annualSummary} from '../../../../../../lib/accountancy/administration';
 import {YearForm,ProjectForm,CostForm,CostReviewForm} from '../Forms';
@@ -17,10 +18,11 @@ export default async function Administration({params,searchParams}:{params:Promi
  const {db}=await requireEstateAdmin(),{t,locale,language}=await getAdminI18n(),{id}=await params;if(!uuid.test(id))notFound();
  const exists=await db.from('mzs_accountancy_years').select('id').eq('id',id).maybeSingle();if(exists.error)throw Error('Administration unavailable');if(!exists.data)notFound();
  const [source,properties,suppliers,q]=await Promise.all([annualSource(db,id),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_estate_properties').select('id,name',{count:'exact'}).order('name').order('id').range(a,b)),allRows<{id:string;name:string;kind:string;company_details:unknown}>((a,b)=>db.from('mzs_lease_relationships').select('id,name,kind,company_details',{count:'exact'}).order('name').order('id').range(a,b)),searchParams]);
- const y=source.administration,summary=annualSummary(source),evidence=annualEvidenceReadiness(source),supplierIntegrity=supplierCostIntegrity(source.costs,suppliers),root=ADMINISTRATION_ROOT+'/'+id,money=(c:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'EUR'}).format(c/100),reviews=new Map(source.reviews.map(r=>[r.draft_id,r]));
+ const y=source.administration,summary=annualSummary(source),evidence=annualEvidenceReadiness(source),invoiceControl=annualInvoiceControl(source),supplierIntegrity=supplierCostIntegrity(source.costs,suppliers),root=ADMINISTRATION_ROOT+'/'+id,money=(c:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'EUR'}).format(c/100),reviews=new Map(source.reviews.map(r=>[r.draft_id,r]));
  const l=(en:string,es:string)=>language==='es'?es:en;
  const issueName:Record<EvidenceIssue,string>={missing_original:l('Original PDF missing','Falta el PDF original'),cost_pending_review:l('Cost awaiting review','Coste pendiente de revisión'),archive_pending_review:l('Archived PDF awaiting review','PDF archivado pendiente de revisión')};
  const sourceName={private_archive:l('Private archive','Archivo privado'),isolated_purchase_pdf:l('Isolated PDF intake','Recepción aislada de PDF'),not_retained:l('Not retained','No archivado')};
+ const invoiceIssueName:Record<InvoiceIssue,string>={archive_not_supplier_invoice:l('Linked original is not classified as a supplier invoice','El original vinculado no está clasificado como factura de proveedor'),archive_date_differs:l('Archived invoice date differs from draft date','La fecha del PDF archivado difiere de la del borrador'),possible_double_entry:l('Possible duplicate across different supplier records — verify manually','Posible duplicado entre diferentes proveedores: comprobar manualmente')};
  const status=typeof q.status==='string'&&['pending','reviewed','excluded'].includes(q.status)?q.status:'all',category=typeof q.category==='string'&&q.category in costCategories?q.category:'all';
  const costs=source.costs.filter(c=>(status==='all'||(reviews.get(c.id)?.review_status??'pending')===status)&&(category==='all'||(reviews.get(c.id)?.category??annualCategory(c.category))===category));
  const pages=Math.max(1,Math.ceil(costs.length/25)),page=Math.min(pages,typeof q.page==='string'&&/^[1-9]\d{0,5}$/.test(q.page)?Number(q.page):1),href=(n:number)=>root+'?'+new URLSearchParams({status,category,page:String(n)})+'#costs';
@@ -44,6 +46,28 @@ export default async function Administration({params,searchParams}:{params:Promi
     <td>{sourceName[row.source]}<small>{row.issues.map(key=>issueName[key]).join(' · ')}</small></td>
     <td><Link href={attachmentHref('cost',row.draft_id)}>{l('Manage original PDFs','Gestionar PDF originales')}</Link>{' · '}<Link href={root+'#costs'}>{l('Review costs','Revisar costes')}</Link></td>
    </tr>)}{evidence.unresolved.length===0&&<tr><td colSpan={3}>{l('No unresolved evidence actions for registered supplier concepts. This does not confirm a complete financial year.','No hay incidencias documentales pendientes en los borradores registrados. Esto no confirma que el ejercicio esté completo.')}</td></tr>}</tbody>
+  </table></div>
+ </section>
+
+
+ <section className={s.notice} aria-label={l('Purchase invoice and payment checks','Control de facturas y pagos de proveedores')}>
+  <h2>{l('Invoice comparison and payment-readiness','Contraste de facturas y preparación de pagos')}</h2>
+  <p>{l('We compare stored draft headers with the metadata of linked, active supplier invoice PDFs. This does not read invoice contents or verify amounts against the original document. All invoice contents still require human review.','Se comparan los datos de los borradores con los metadatos de los PDF de facturas de proveedor archivados y vinculados. No se lee el contenido del PDF ni se comprueban los importes contra el original. El contenido requiere revisión humana.')}</p>
+  <div className={s.metrics}>
+   <p>{l('Originals with a different recorded date','Originales con fecha diferente')}<strong>{invoiceControl.datedOriginalMismatches}</strong></p>
+   <p>{l('Document classification to verify','Clasificación documental por comprobar')}<strong>{invoiceControl.classificationWarnings}</strong></p>
+   <p>{l('Possible double-entry references','Posibles referencias duplicadas')}<strong>{invoiceControl.possibleDoubleEntries}</strong></p>
+   <p>{l('Supplier payments verified','Pagos a proveedores verificados')}<strong>{l('Not available','No disponible')}</strong></p>
+  </div>
+  <p>{l('MZS does not yet have a verified supplier-payment register for these purchase concepts. A missing payment match does NOT mean an invoice is unpaid or overdue. Bank statements and payments must be checked separately before any amount is marked paid.','MZS todavía no dispone de un registro de pagos a proveedores verificado para estos borradores. La ausencia de conciliación NO significa que la factura esté pendiente o vencida. Los extractos y pagos deben comprobarse por separado antes de marcar importes como pagados.')}</p>
+  <p>{l('The accountant ZIP includes supplier-invoice-control.csv for every purchase draft, including those without warnings.','El ZIP para el asesor incluye supplier-invoice-control.csv para todos los borradores de compra, incluidos los que no presentan avisos.')}</p>
+  <div className={s.tableWrap}><table className={s.table}>
+   <thead><tr><th>{l('Invoice','Factura')}</th><th>{l('Metadata warning','Advertencia de metadatos')}</th><th>{l('Review','Revisar')}</th></tr></thead>
+   <tbody>{invoiceControl.exceptions.slice(0,25).map(row=><tr key={row.draft_id}>
+    <td>{row.invoice_number}<small>{row.supplier_name} · {row.invoice_date} · {money(row.gross_cents)}</small></td>
+    <td>{row.issues.map(issue=>invoiceIssueName[issue]).join(' · ')}</td>
+    <td><Link href={attachmentHref('cost',row.draft_id)}>{l('Check the original PDF','Revisar el PDF original')}</Link></td>
+   </tr>)}{invoiceControl.exceptions.length===0&&<tr><td colSpan={3}>{l('No metadata inconsistencies detected in the registered purchase drafts. PDF contents and bank payments are NOT verified.','No se detectaron discrepancias en los metadatos de los borradores registrados. El contenido de los PDF y los pagos bancarios NO están verificados.')}</td></tr>}</tbody>
   </table></div>
  </section>
 
