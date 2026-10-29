@@ -39,7 +39,7 @@ test('machine upload contract rejects API keys, missing checksum, path traversal
  assert.equal(helper.bridgeHeaders(request().headers).draftId,draft);
  for(const bad of [
   {authorization:'Bearer sb_publishable_test'},
-  {'x-mzs-file-sha256':'0'.repeat(64)},
+  {'x-mzs-file-sha256':'z'.repeat(64)},
   {'x-mzs-file-name':'../bad.pdf'},
   {'x-mzs-file-name':'ftp%2Fsecret.pdf'},
   {'x-mzs-cost-draft-id':'somebody-else'}
