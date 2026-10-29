@@ -86,7 +86,7 @@ test('a failed or ambiguous link never removes a registered original or claims i
  assert.ok(!updates.includes('Archived and linked'));
 });
 test('uploading in the general archive creates no dossier association',async()=>{
- const {calls,updates}=await scenario({attachTo:undefined});
+ const {calls,updates}=await scenario({attachTo:null});
  assert.ok(calls.some(x=>x[0]==='register'));
  assert.ok(!calls.some(x=>x[0]==='link'));
  assert.ok(updates.includes('Saved'));
