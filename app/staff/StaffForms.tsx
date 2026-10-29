@@ -74,6 +74,11 @@ function MaintenanceForm({properties,units}:{properties:Property[];units:Unit[]}
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }
-export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string}){
- return <div className={s.forms}><ActualVisitForm {...props}/><MaintenanceForm {...props}/></div>;
+export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean}){
+ // The task-enabled mobile cockpit provides one unified entry point.
+ // Keep the legacy maintenance form only where the task feature is disabled.
+ return <div className={s.forms}>
+  <ActualVisitForm {...props}/>
+  {props.showMaintenanceForm!==false&&<MaintenanceForm {...props}/>}
+ </div>;
 }
