@@ -42,7 +42,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   possible_cross_supplier_double_entry:row.issues.includes('possible_double_entry'),
   review_issue_codes:row.issues.join(';'),
   invoice_content_verification:row.content_verification,
-  supplier_payment_evidence_status:row.payment_evidence_status,
+  supplier_payment_evidence_status:supplierPayments?(paymentMode==='synthetic'?'synthetic_staging_not_bank_verified':'admin_attested_not_bank_reconciled'):row.payment_evidence_status,
   bank_payment_verified:'not_assessed',
   payment_amount_eur:'',payment_date:''
  })));
@@ -112,7 +112,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   {source:'historical_invoices',scope:'entity; original issue year; reference snapshots',limitation:'may overlap issued sales; original paid amounts are not bank events; exclusions retained'},
   {source:'documents',scope:'entity and financial year; index and checksums',limitation:'original private PDF bytes are not included; request via the document archive'},
   {source:'supplier_evidence_actions',scope:'entity, supplier invoice year and original review',limitation:'source/action indicators only; not proof of bank payment, VAT recovery or statutory completion'},
-  {source:'supplier_invoice_control',scope:'entity and supplier invoice year; header vs linked PDF metadata',limitation:'date and classification warnings are metadata-only, NOT PDF text validation; there is no supplier-payment ledger or bank match, never infer paid, unpaid or overdue'},
+  {source:'supplier_invoice_control',scope:'entity and supplier invoice year; header vs linked PDF metadata',limitation:'date and classification warnings are metadata-only, NOT PDF text validation; purchase payment status depends on separately scoped ledger events when available, NOT independently bank-reconciled; never infer overdue'},
   ...(supplierPayments?[{source:'supplier_payment_records',scope:paymentMode==='synthetic'?'STAGING SYNTHETIC ONLY: fictitious payment entries and reversals':'ADMIN-ATTESTED REAL TRANSFER RECORDS: payment entries and reversals, scoped by invoice and legal entity',limitation:paymentMode==='synthetic'?'TEST DATA; no actual bank or cash transfers; never use as real accounts':'User-attested prior payment references only, NOT independently reconciled with bank; no automatic credit/advance allocation, VAT adjustment or statutory posting'}]:[]),
   {source:'capital',scope:'all current register references for entity, all periods',limitation:'context only; not annual balances, interest accruals, repayments or confirmations'},
   {source:'bank_assets_staff_and_tax_adjustments',scope:'manual collection checklist',limitation:'not a bank ledger or asset register; staff statements without verified entity attribution, unissued bookings, opening balances and fiscal adjustments are not added to annual amounts'}
