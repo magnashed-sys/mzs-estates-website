@@ -3,8 +3,9 @@ import {exportBytes,exportHash,type ArchiveFile} from '../property-operations/ac
 import {salesAccountantFiles} from './sales-package';
 import {validateYearSource,annualSummary,annualCategory,checkLabels,type YearSource} from './administration';
 import {annualEvidenceReadiness} from './annual-evidence';
+import {supplierCostIntegrity,type SupplierIdentity} from './supplier-integrity';
 /** A collection package, not an automatically posted annual ledger or tax computation. */
-export function yearAccountantFiles(input:YearSource,id:string):ArchiveFile[]{
+export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:readonly SupplierIdentity[]):ArchiveFile[]{
  const s=validateYearSource(input,id),y=s.administration,summary=annualSummary(s),evidence=annualEvidenceReadiness(s),reviews=new Map(s.reviews.map(r=>[r.draft_id,r]));
  const files=salesAccountantFiles(s.sales,y.issuer_id,y.fiscal_year).map(f=>({...f,name:'sales/'+f.name}));
  function csv(name:string,fields:string[],rows:Record<string,unknown>[]){files.push({name,bytes:exportBytes(accountantCsv(fields,rows))});}
@@ -24,6 +25,24 @@ export function yearAccountantFiles(input:YearSource,id:string):ArchiveFile[]{
   issue_codes:row.issues.join(';'),accounting_posted:false,payment_verified:'not_assessed'
  })));
  csv('cost-category-summary.csv',['category','reviewed_gross_eur','pending_gross_eur','excluded_gross_eur','record_count'],summary.categories.map(c=>({category:c.key,reviewed_gross_eur:(c.reviewedGross/100).toFixed(2),pending_gross_eur:(c.pendingGross/100).toFixed(2),excluded_gross_eur:(c.excludedGross/100).toFixed(2),record_count:c.count})));
+
+ // A checked, read-only register of supplier master-data quality; never an instruction to merge two legal identities.
+ if(supplierMaster){
+  const identity=supplierCostIntegrity(s.costs,supplierMaster);
+  const unique=[...new Map(identity.signals.map(row=>[row.supplier_id,row])).values()];
+  csv('supplier-masterdata-review.csv',
+   ['supplier_relationship_id','supplier_name','company_tax_id_recorded','company_tax_id','missing_record','company_tax_id_to_check','possible_duplicate_supplier_ids','possible_duplicate_supplier_names','match_reasons','manual_review_only'],
+   unique.map(row=>({
+    supplier_relationship_id:row.supplier_id,supplier_name:row.supplier_name,
+    company_tax_id_recorded:!!row.company_tax_id,company_tax_id:row.company_tax_id,
+    missing_record:row.missing_record,company_tax_id_to_check:row.missing_company_tax_id,
+    possible_duplicate_supplier_ids:row.possible_duplicate_records.map(p=>p.id).join(';'),
+    possible_duplicate_supplier_names:row.possible_duplicate_records.map(p=>p.name).join(';'),
+    match_reasons:row.possible_duplicate_records.map(p=>p.reason).join(';'),
+    manual_review_only:true
+   })));
+ }
+
  csv('projects.csv',['id','year_id','name','kind','property_id','source_reference'],s.projects);
  csv('source-document-index.csv',['id','issuer_id','fiscal_year','title','original_name','category','review_status','sha256','notes','updated_at'],s.documents);
  const imported=s.sales.imported as Record<string,any>[];
@@ -58,6 +77,8 @@ export function yearAccountantFiles(input:YearSource,id:string):ArchiveFile[]{
   'ES: Las facturas históricas y las referencias de financiación son contexto. No las sume a las ventas emitidas ni a los saldos anuales sin conciliación. Los cobros pueden corresponder a facturas de otro ejercicio; una anulación no acredita un reembolso bancario.',
   'EN: Checklist ticks record the last manual review. Recheck after source changes. No record is posted, paid, emailed or filed by this download.',
   'ES: Las casillas reflejan la última revisión manual. Revise de nuevo tras cambiar las fuentes. Esta descarga no contabiliza, paga, envía correos ni presenta declaraciones.',
+  'EN: Supplier master-data warnings compare existing company Relationships only, and never create, merge, block or modify any supplier or payment instructions. Missing company tax IDs are review hints only where applicable.',
+  'ES: Los avisos de proveedores comparan únicamente las relaciones de empresas existentes; nunca crean, fusionan, bloquean ni modifican proveedores ni instrucciones de pago. Los identificadores fiscales ausentes son avisos para revisar cuando corresponda.',
   'Machine column identifiers are stable English. Original names and descriptions are preserved. / Los identificadores de columnas son estables en inglés; se conservan los nombres y descripciones originales.'
  ].join('\n')+'\n')});
  files.push({name:'manifest.json',bytes:exportBytes(JSON.stringify({kind:'annual-administration-collection',entity:y.issuer_id,year:y.fiscal_year,snapshot_at:s.snapshot_at,statutory_complete:false,purchase_costs:s.costs.length,review_exceptions:exceptions.length,files:files.map(f=>({name:f.name,bytes:f.bytes.length,sha256:exportHash(f.bytes)}))},null,2)+'\n')});
