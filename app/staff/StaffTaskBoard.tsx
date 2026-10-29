@@ -1,7 +1,6 @@
 'use client';
 import {useActionState,useState} from 'react';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
-import {reportMaintenanceTicket} from './actions';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import s from './staff.module.css';
 import {staffText,type StaffLanguage} from '../../lib/property-operations/staff-copy';
@@ -29,7 +28,31 @@ type EntryKind='task'|'maintenance';
 function NewWorkItem({properties,units,profileId,language}:{properties:Property[];units:Unit[];profileId:string;language:StaffLanguage}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
- const [maintenanceState,maintenanceAction,maintenancePending]=useActionState(reportMaintenanceTicket,initial);
+ const [maintenanceState,setMaintenanceState]=useState<Result>(initial);
+ const [maintenancePending,setMaintenancePending]=useState(false);
+ async function submitMaintenance(event:React.FormEvent<HTMLFormElement>){
+  event.preventDefault();
+  if(maintenancePending)return;
+  const form=event.currentTarget;
+  setMaintenancePending(true);setMaintenanceState(initial);
+  try{
+   const response=await fetch('/api/staff/report-with-photos',{
+    method:'POST',body:new FormData(form),credentials:'same-origin'
+   });
+   const payload:unknown=await response.json();
+   const message=payload&&typeof payload==='object'&&'message' in payload&&
+    typeof payload.message==='string'?payload.message:'Maintenance report could not be saved.';
+   const ticketId=payload&&typeof payload==='object'&&'ticketId' in payload&&
+    typeof payload.ticketId==='string'?payload.ticketId:null;
+   if(response.ok){
+    setMaintenanceState({status:'success',message:message+
+      (ticketId?' View: /staff?ticket='+encodeURIComponent(ticketId)+'#ticket':'')});
+    form.reset();
+   }else setMaintenanceState({status:'error',message});
+  }catch{
+   setMaintenanceState({status:'error',message:'Could not confirm submission. Check the maintenance register before trying again.'});
+  }finally{setMaintenancePending(false);}
+ }
  const [kind,setKind]=useState<EntryKind>('task');
  const [propertyId,setPropertyId]=useState(properties[0]?.id??'');
  const [unitId,setUnitId]=useState('');
@@ -37,7 +60,7 @@ function NewWorkItem({properties,units,profileId,language}:{properties:Property[
  const result=isMaintenance?maintenanceState:taskState;
  const pending=isMaintenance?maintenancePending:taskPending;
  return <section id="work-create" className={s.taskCreate} aria-labelledby="work-create-title">
-  <form key={kind} className={s.form} action={isMaintenance?maintenanceAction:taskAction}>
+  <form key={kind} className={s.form} action={isMaintenance?undefined:taskAction} onSubmit={isMaintenance?submitMaintenance:undefined}>
    <h2 id="work-create-title">{t('createHeading')}</h2>
    
    <label>{t('addType')}
@@ -88,7 +111,13 @@ function NewWorkItem({properties,units,profileId,language}:{properties:Property[
     <summary>{t('planning')}</summary>
     <label>{t('dueDate')} <input name="due_on" type="date"/></label>
    </details>}
-   {isMaintenance&&<p className={s.description}>{t('photoWarning')}</p>}
+   {isMaintenance&&<>
+    <label>{t('photos')}
+     <input type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp"/>
+    </label>
+    <p className={s.description}>{t('photoHint')}</p>
+    <p className={s.description}>{t('photoWarning')}</p>
+   </>}
    <button disabled={pending||!propertyId} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
    <Message state={result}/>
   </form>
