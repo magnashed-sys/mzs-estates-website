@@ -31,7 +31,7 @@ test('Beverwijk/private locations are separated from rental ownership with RLS a
  const sql=file('supabase/migrations/20261030024500_property_manager_operational_areas.sql');
  assert.match(sql,/create table public\.mzs_ops_staff_work_areas/);
  assert.match(sql,/'maintenance-beverwijk','Onderhoud Beverwijk'/);
- assert.match(sql,/'private-magdy','Privé Magdy'/);
+ assert.match(sql,/'private-magdy','Prive Magdy'/);
  assert.match(sql,/alter table public\.mzs_ops_staff_work_areas enable row level security/);
  assert.match(sql,/create policy ops_work_area_read/);
  assert.match(sql,/alter table public\.mzs_ops_property_tasks add column work_area_id/);
