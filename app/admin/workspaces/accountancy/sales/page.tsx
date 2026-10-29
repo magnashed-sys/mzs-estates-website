@@ -36,7 +36,7 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
    {pageRows.map(i=><tr key={i.source+':'+i.id}>
     <td><strong>{i.number}</strong><br/>{i.customer}<small>{i.issuer}</small><small>{i.subject}</small></td>
     <td>{invoiceSources[i.source]}{i.alsoImported&&<small>Imported copy matched</small>}</td><td className={s.nowrap}>{date(i.issuedOn)}</td><td className={s.nowrap}>{date(i.dueOn)}</td>
-    <td className={s.amount}>{money(i.gross)}</td><td className={s.amount}>{money(i.paid)}</td><td className={s.amount}>{money(i.balance)}</td>
+    <td className={s.amount}>{money(i.gross)}</td><td className={s.amount}>{money(i.paid)}</td><td className={s.amount}>{money(i.balance)}{!!i.credited&&<small>{money(i.credited)} credit allocated</small>}</td>
     <td><span className={invoiceStatus(i,today)==='Overdue'?s.overdue:s.badge}>{invoiceStatus(i,today)}</span><small>{i.paymentBasis==='imported_snapshot'?'Imported balance snapshot':i.paymentBasis==='imported_plus_receipts'?'Imported balance + new receipts':i.paymentBasis==='not_recorded'?'Payment not yet recorded':'Recorded receipts'}</small></td>
     <td><Link href={i.href}>{i.gross>0&&(i.balance===null||i.balance>0)?'Record payment →':'Details / payments →'}</Link></td>
    </tr>)}
