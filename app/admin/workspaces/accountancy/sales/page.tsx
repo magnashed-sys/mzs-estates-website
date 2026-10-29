@@ -17,6 +17,7 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
  return <section className={s.page}>
   <Link href="/admin/workspaces/accountancy" className={s.back}>← Accountancy</Link>
   <header className={s.heading}><div><p className={s.eyebrow}>SALES / ISSUED INVOICES</p><h1>Invoices</h1><p>Standalone, rental contract, booking and imported invoices in one place.</p></div><Link className={s.button} href={invoiceHref(filters,1,true)} prefetch={false}>Download CSV</Link></header>
+  <p><Link className={s.button} href="/admin/workspaces/accountancy/sales/new">Create invoice / review drafts →</Link></p>
   <form method="get" className={s.filters}>
    <label>Search<input name="q" maxLength={150} defaultValue={filters.q} placeholder="Customer, number or description"/></label>
    <label>Invoice year<select name="year" defaultValue={filters.year??'all'}><option value="all">All years</option>{Array.from({length:Math.max(Number(today.slice(0,4))+2,filters.year??0)-1999},(_,i)=>Math.max(Number(today.slice(0,4))+2,filters.year??0)-i).map(y=><option key={y} value={y}>{y}</option>)}</select></label>

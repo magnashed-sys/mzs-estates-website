@@ -19,10 +19,11 @@ export async function GET(request:NextRequest){
  const year=Number(rawYear);
  try{
   const {data:source,error:sourceError}=await db.rpc("mzs_ops_accountant_source",{p_entity:entity});
-  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external)||!Array.isArray(source.external_receipts)||!Array.isArray(source.imported)||!Array.isArray(source.imported_receipts))throw Error("Incomplete accountant snapshot");
+  if(sourceError||!source||source.issuer?.id!==entity||!Array.isArray(source.leases)||!Array.isArray(source.bookings)||!Array.isArray(source.rent_receipts)||!Array.isArray(source.guest_receipts)||!Array.isArray(source.external)||!Array.isArray(source.external_receipts)||!Array.isArray(source.imported)||!Array.isArray(source.imported_receipts)||!Array.isArray(source.services)||!Array.isArray(source.service_receipts))throw Error("Incomplete accountant snapshot");
   const leases=source.leases as (IssuedInvoice&{contract_id:string})[],bookings=source.bookings as (IssuedInvoice&{booking_id:string})[];
   const issuer={data:source.issuer as {id:string;name:string}};
   const issued:IssuedInvoice[]=[
+   ...(source.services as IssuedInvoice[]).map(x=>({...x,source:"standalone_invoice" as const})),
    ...leases.map(x=>({...x,source:"rental_contract" as const})),
    ...bookings.map(x=>({...x,source:"holiday_booking" as const})),
    ...(source.external as IssuedInvoice[]).map(x=>({...x,source:"external_cost_invoice" as const}))
@@ -44,8 +45,9 @@ export async function GET(request:NextRequest){
   const imported=source.imported as {id:string;issuer_id:string;number:string;issued_on:string;gross_cents:number;source_paid_cents:number;source_open_cents:number;excluded:boolean}[];
   const importedMap=new Map(imported.map(i=>[i.id,i]));if(importedMap.size!==imported.length||imported.some(i=>!uuid.test(i.id)||i.issuer_id!==entity||![i.gross_cents,i.source_paid_cents,i.source_open_cents].every(Number.isSafeInteger)||i.source_paid_cents+i.source_open_cents!==i.gross_cents))throw Error('Invalid imported references');
   const importedReceipts=source.imported_receipts as (RecordedReceipt&{invoice_id:string})[];
+  const serviceMap=new Map((source.services as IssuedInvoice[]).map(i=>[i.id,i]));const serviceReceipts=source.service_receipts as (RecordedReceipt&{invoice_id:string})[];
   const receiptIds=new Set<string>();
-  for(const row of [...rentReceipts,...guestReceipts,...externalReceipts,...importedReceipts]){if(!uuid.test(row.id)||receiptIds.has(row.id))throw Error("Duplicate receipt source");receiptIds.add(row.id);}
+  for(const row of [...rentReceipts,...guestReceipts,...externalReceipts,...importedReceipts,...serviceReceipts]){if(!uuid.test(row.id)||receiptIds.has(row.id))throw Error("Duplicate receipt source");receiptIds.add(row.id);}
   const events:Record<string,unknown>[]=[],exceptions:Record<string,unknown>[]=[];
   function record(row:RecordedReceipt,invoice:IssuedInvoice){
    const normalized=receiptEvents(row,invoice.id,year);
@@ -56,6 +58,7 @@ export async function GET(request:NextRequest){
   for(const r of guestReceipts){const i=bookingMap.get(r.booking_id);if(!i)throw Error("Unmatched booking receipt");record({...r,source:"booking_receipt"}, {...i,source:"holiday_booking"});}
   for(const r of externalReceipts){const i=externalMap.get(r.invoice_id);if(!i)throw Error("Unmatched standalone receipt");record({...r,source:"external_receipt"},{...i,source:"external_cost_invoice"});}
   for(const r of importedReceipts){if(!importedMap.has(r.invoice_id))throw Error('Unmatched imported receipt');const normalized=receiptEvents({...r,source:'archive_receipt'},r.invoice_id,year);events.push(...normalized.events);if(normalized.exception)exceptions.push(normalized.exception);}
+  for(const r of serviceReceipts){const i=serviceMap.get(r.invoice_id);if(!i)throw Error('Unmatched platform invoice receipt');record({...r,source:'service_receipt'},{...i,source:'standalone_invoice'});}
   events.sort((a,b)=>String(a.event_date).localeCompare(String(b.event_date))||String(a.receipt_id).localeCompare(String(b.receipt_id)));
   exceptions.sort((a,b)=>String(a.receipt_id).localeCompare(String(b.receipt_id)));
   const files:ArchiveFile[]=[],manifest:{name:string;sha256:string;bytes:number}[]=[];
@@ -68,7 +71,7 @@ export async function GET(request:NextRequest){
   add("README.txt",[
    "MZS ISSUED SALES AND REGISTERED RECEIPTS — PARTIAL ACCOUNTANT EXPORT",
    "Entity: "+issuer.data.name+" / "+entity,"Year: "+year,"Source snapshot: "+source.snapshot_at,
-   "Includes issued rental/booking invoices, externally issued historical-cost invoices and separately dated registered receipt events.",
+   "Includes platform standalone invoices, issued rental/booking invoices, externally issued historical-cost invoices and separately dated registered receipt events.",
    "Additional imported-invoice receipts and reversals are included by event date. Imported invoice references are historical context only; do not post them as new sales. Imported paid snapshots are not receipt events. Excluded source references remain labelled when needed to explain recorded events.",
    "A receipt may relate to an invoice issued in another year.",
    "Administrative reversal does not establish a bank refund.",

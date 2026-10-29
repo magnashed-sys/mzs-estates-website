@@ -5,7 +5,7 @@ import {euroCents,dateYear} from '../property-operations/sales-reconciliation';
 import {operationsDay} from '../property-operations/action-queues';
 import {accountantCsv} from '../property-operations/finance';
 
-export const invoiceSources={external:'Standalone',rental:'Rental contract',booking:'Booking',archive:'Imported'} as const;
+export const invoiceSources={service:'Platform invoice',external:'Standalone (external)',rental:'Rental contract',booking:'Booking',archive:'Imported'} as const;
 export const invoiceStatuses={all:'All invoices',open:'Open / payment unknown',overdue:'Overdue',paid:'Paid',partial:'Partly paid',unpaid:'Unpaid',unknown:'Payment unknown',credit:'Credit notes / credit balances'} as const;
 export type InvoiceSource=keyof typeof invoiceSources;
 export type InvoiceFilters={year:number|null;q:string;entity:string;source:InvoiceSource|'all';status:keyof typeof invoiceStatuses;page:number};
@@ -16,7 +16,7 @@ export type BookingRow=Common&{booking_id:string;total:unknown;customer:string};
 export type ExternalRow=Common&{customer_id:string;customer_reference:string;due_on:string;gross_cents:number;net_cents:number;vat_cents:number;status:string;payment_status:string;currency:string};
 export type ArchiveRow=Common&{customer_name:string;subject:string;due_on:string;gross_cents:number;source_paid_cents:number;source_open_cents:number};
 export type Receipt={id:string;invoice_id?:string;booking_id?:string;amount:unknown;reversed_at:string|null};
-export type InvoiceInputs={issuers:{id:string;name:string}[];customers:{id:string;name:string}[];rentals:RentalRow[];bookings:BookingRow[];external:ExternalRow[];archive:ArchiveRow[];rentReceipts:Receipt[];bookingReceipts:Receipt[];externalReceipts:ExternalReceipt[];archiveReceipts:ExternalReceipt[]};
+export type InvoiceInputs={issuers:{id:string;name:string}[];customers:{id:string;name:string}[];rentals:RentalRow[];bookings:BookingRow[];external:ExternalRow[];archive:ArchiveRow[];rentReceipts:Receipt[];bookingReceipts:Receipt[];externalReceipts:ExternalReceipt[];archiveReceipts:ExternalReceipt[];services:(Common&{due_on:string;gross_cents:number;customer:string;subject:string})[];serviceReceipts:ExternalReceipt[]};
 const idPattern=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const fail=():never=>{throw Error('The complete invoice register could not be verified. No partial totals are shown.');};
 const cents=(n:unknown):n is number=>Number.isSafeInteger(n)&&Math.abs(Number(n))<=100000000000;
@@ -52,6 +52,8 @@ export function normalizeInvoiceRegister(input:InvoiceInputs):InvoiceRow[]{
   }
   const row={id:i.id,source,issuerId:i.issuer_id,issuer:issuers.get(i.issuer_id)!,number:i.number,issuedOn:i.issued_on,alsoImported:false,...rest};byNumber.set(key,row);result.push(row);
  }
+ if(!Array.isArray(input.services)||!Array.isArray(input.serviceReceipts)||input.serviceReceipts.some(r=>!input.services.some(i=>i.id===r.invoice_id)))fail();
+ for(const i of input.services){const paid=externalPaymentTotals(input.serviceReceipts,i.id,i.gross_cents).paid??0;add('service',i,{customer:i.customer,subject:i.subject,dueOn:i.due_on,gross:i.gross_cents,paid,balance:i.gross_cents-paid,href:'/admin/workspaces/accountancy/sales/issued/'+i.id,paymentBasis:'receipt_register'});}
  for(const i of input.rentals){const gross=euroCents(i.total),paid=rentPaid.get(i.id)??0;add('rental',i,{customer:i.customer,subject:i.subject??'',dueOn:i.due_date,gross,paid,balance:gross-paid,href:'/admin/group/estates/contracts?view=billing',paymentBasis:'receipt_register'});}
  for(const i of input.bookings){if(!idPattern.test(i.booking_id))fail();const gross=euroCents(i.total),paid=bookingPaid.get(i.booking_id)??0;add('booking',i,{customer:i.customer,subject:'Booking invoice',dueOn:null,gross,paid,balance:gross-paid,href:'/admin/bookings/'+i.booking_id,paymentBasis:'receipt_register'});}
  if(!Array.isArray(input.externalReceipts)||input.externalReceipts.some(r=>!input.external.some(i=>i.id===r.invoice_id)))fail();
@@ -71,15 +73,16 @@ export function selectInvoices(all:InvoiceRow[],f:InvoiceFilters,today:string){
 /** Exact-count pagination prevents the Data API row cap from becoming a financial total. */
 export async function loadInvoiceRegister(db:SupabaseClient,year:number|null):Promise<InvoiceRow[]>{
  const read=<T,>(table:string,columns:string,dated=false)=>allRows<T>((a,b)=>{let q=db.from(table).select(columns,{count:'exact'});if(dated&&year!==null)q=q.gte('issued_on',year+'-01-01').lt('issued_on',(year+1)+'-01-01');return q.order('id').range(a,b) as unknown as PromiseLike<{data:T[]|null;error:unknown;count:number|null}>;});
- const [issuers,customers,rentals,bookings,external,archive]=await Promise.all([
+ const [issuers,customers,rentals,bookings,external,archive,services]=await Promise.all([
   read<InvoiceInputs['issuers'][number]>('mzs_lease_issuers','id,name'),read<InvoiceInputs['customers'][number]>('mzs_lease_relationships','id,name'),
   read<RentalRow>('mzs_lease_invoices','id,issuer_id,number,issued_on,due_date,total,customer:payload->snapshot->>tenant_name,subject:payload->>subject',true),
   read<BookingRow>('mzs_booking_invoices','id,issuer_id,number,issued_on,booking_id,total,customer:payload->>recipient_name',true),
   read<ExternalRow>('mzs_ops_external_sales_invoices','id,issuer_id,number,issued_on,customer_id,customer_reference,due_on,net_cents,vat_cents,gross_cents,currency,status,payment_status',true),
-  read<ArchiveRow>('mzs_invoice_archive_active','id,issuer_id,number,issued_on,customer_name,subject,due_on,gross_cents,source_paid_cents,source_open_cents',true)
+  read<ArchiveRow>('mzs_invoice_archive_active','id,issuer_id,number,issued_on,customer_name,subject,due_on,gross_cents,source_paid_cents,source_open_cents',true),
+  read<InvoiceInputs['services'][number]>('mzs_service_invoices','id,issuer_id,number,issued_on,due_on,gross_cents,customer:payload->snapshot->>tenant_name,subject:payload->>subject',true)
  ]);
  async function receipts(table:string,key:'invoice_id'|'booking_id',ids:string[]){const rows:Receipt[]=[];for(let start=0;start<ids.length;start+=100){const group=ids.slice(start,start+100);rows.push(...await allRows<Receipt>((a,b)=>db.from(table).select('id,'+key+',amount,reversed_at',{count:'exact'}).in(key,group).order('id').range(a,b) as unknown as PromiseLike<{data:Receipt[]|null;error:unknown;count:number|null}>));}return rows;}
- const [rentReceipts,bookingReceipts,externalReceipts,archiveReceipts]=await Promise.all([receipts('mzs_lease_payments','invoice_id',rentals.map(i=>i.id)),receipts('mzs_booking_receipts','booking_id',bookings.map(i=>i.booking_id)),loadExternalReceipts(db,external.map(i=>i.id)),loadExternalReceipts(db,archive.map(i=>i.id),'archive')]);
- return normalizeInvoiceRegister({issuers,customers,rentals,bookings,external,archive,rentReceipts,bookingReceipts,externalReceipts,archiveReceipts});
+ const [rentReceipts,bookingReceipts,externalReceipts,archiveReceipts,serviceReceipts]=await Promise.all([receipts('mzs_lease_payments','invoice_id',rentals.map(i=>i.id)),receipts('mzs_booking_receipts','booking_id',bookings.map(i=>i.booking_id)),loadExternalReceipts(db,external.map(i=>i.id)),loadExternalReceipts(db,archive.map(i=>i.id),'archive'),loadExternalReceipts(db,services.map(i=>i.id),'service')]);
+ return normalizeInvoiceRegister({issuers,customers,rentals,bookings,external,archive,rentReceipts,bookingReceipts,externalReceipts,archiveReceipts,services,serviceReceipts});
 }
 export function invoiceRegisterCsv(rows:InvoiceRow[],today:string){return accountantCsv(['source','invoice_number','issuer','customer','subject','issued_on','due_on','gross_cents','recorded_paid_cents','balance_cents','status','payment_basis','also_imported','currency'],rows.map(i=>({source:i.source,invoice_number:i.number,issuer:i.issuer,customer:i.customer,subject:i.subject,issued_on:i.issuedOn,due_on:i.dueOn??'',gross_cents:i.gross,recorded_paid_cents:i.paid??'',balance_cents:i.balance??'',status:invoiceStatus(i,today),payment_basis:i.paymentBasis,also_imported:i.alsoImported,currency:'EUR'})));}
