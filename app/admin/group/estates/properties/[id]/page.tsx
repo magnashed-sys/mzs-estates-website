@@ -1,3 +1,7 @@
+import {documentLinks} from '../../../../../../lib/accountancy/document-links-data';
+import {attachmentHref,attachmentCopy} from '../../../../../../lib/accountancy/document-links';
+import {archiveLanguage} from '../../../../../../lib/accountancy/archive-data';
+import {ARCHIVE_ROOT} from '../../../../../../lib/accountancy/archive';
 
 import {getAdminI18n} from '../../../../../../lib/admin/i18n-server';
 import ArrowUpRightIcon from "../../../../../components/ArrowUpRightIcon";
@@ -14,7 +18,7 @@ const unitTypes: Record<string, string> = { studio: 'Studio', room: 'Room', apar
 export default async function EstateProperty({ params }: { params: Promise<{ id: string }> }) {
  const {t:adminT,locale:adminLocale}=await getAdminI18n();
 
-  const { db } = await requireEstateAdmin();
+  const { db,user } = await requireEstateAdmin();
   const { id } = await params;
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) notFound();
   const { data: property, error } = await db.from('mzs_estate_properties')
@@ -30,6 +34,8 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
     db.from('mzs_estate_images').select('id,caption,image_base64,sort_order')
       .eq('property_id', id).order('sort_order').limit(20),
   ]);
+  const [documentAttachments,documentLanguage]=await Promise.all([documentLinks(db,'property',[id]),archiveLanguage(db,user.id)]);
+  const dt=attachmentCopy[documentLanguage];
   const units = unitsResult.data || [];
   const totals = rentSummary(units);
   return <>
@@ -80,6 +86,10 @@ export default async function EstateProperty({ params }: { params: Promise<{ id:
         </div>}
         {units.some(unit => unit.rent_included) && <p className={s.note}>{adminT("* Rent is included in another unit’s rent. No separate rent is added to the totals.")}</p>}
       </>}
+    </section>
+    <section className={s.section} lang={documentLanguage}><h2>{dt.title}</h2>
+      {documentAttachments.filter(l=>l.is_active).map(l=><p key={l.id}><a href={ARCHIVE_ROOT+'/'+l.document_id+'/file'} target="_blank" rel="noopener noreferrer">{l.document.title} ↗</a>{l.document.review_status==='superseded'&&<span> · {dt.superseded}</span>}</p>)}
+      {!documentAttachments.some(l=>l.is_active)&&<p>{dt.empty}</p>}<Link href={attachmentHref('property',id)}>{dt.title} →</Link>
     </section>
     <section className={s.section} aria-labelledby="source-heading">
       <h2 id="source-heading">{adminT("Source & history")}</h2>
