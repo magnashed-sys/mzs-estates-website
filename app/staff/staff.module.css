@@ -27,3 +27,52 @@
 .page{max-width:1200px;margin:0 auto;padding:100px 24px 64px;color:#e7e8ed}.adminPage{max-width:1400px;margin:auto;padding:16px 0 64px}.panel{margin:28px 0;padding:24px;background:#151411;border:1px solid #524634;border-radius:12px;color:#e7e8ed}.tableWrap{overflow-x:auto}.table{width:100%;border-collapse:collapse;text-align:left}.table th,.table td{padding:14px 12px;border-bottom:1px solid #524634;vertical-align:top}.table a,.pagination a{color:#e5c783}.history{display:block;margin-top:12px;padding:12px 0;border-bottom:1px solid #524634;overflow-wrap:anywhere}.pagination{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:20px}.filter{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin:32px 0}.filter label{display:grid;gap:6px}.filter input,.filter select,.filter button{padding:10px;border:1px solid #526079;border-radius:5px;background:#26221b;color:#fff} .panel summary{cursor:pointer;font-weight:600}.panel h3{margin-top:24px}.panel p{line-height:1.6}.panel input,.panel textarea,.panel select{max-width:100%}@media(max-width:600px){.page{padding:80px 14px 40px}.panel{padding:14px}.table th,.table td{padding:10px 8px}}
 
 .photoPanel{margin-top:24px;border-top:1px solid #524634;padding-top:12px}.photoPanel li{margin-bottom:14px}.photoPanel a{color:#e5c783}
+
+
+/* Phone-first manager task and time cockpit. The existing admin tables remain intact. */
+.staffTasks{margin:0 0 32px}.staffHours{scroll-margin-top:28px;margin:28px 0}
+.mobileHead{padding:8px 0 12px}.mobileHead h1,.mobileHead h2{font:400 clamp(30px,5vw,45px)/1.15 Georgia,serif;margin:8px 0 12px;color:#eadac0}
+.mobileHead p:last-child{max-width:720px;color:#bbb1a0;line-height:1.6;font-size:14px}
+.mobileStats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:22px 0}
+.mobileStats>div{border:1px solid #554b3a;background:#1b1914;border-radius:10px;padding:16px;min-width:0}
+.mobileStats small{display:block;font:12px/1.35 Arial,sans-serif;color:#bfb39f;min-height:30px}
+.mobileStats strong{display:block;font:400 29px/1.1 Georgia,serif;color:#ecdbc0;margin:9px 0 0}
+.taskActions{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
+.taskPrimary,.taskSecondary{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:12px 16px;box-sizing:border-box;border:1px solid #ba9a6b;border-radius:6px;text-decoration:none;font:600 13px Arial,sans-serif}
+.taskPrimary{background:#d2b68b;color:#14110d!important}.taskSecondary{color:#e8d2b2!important;background:#231d17}
+.taskCreate{border:1px solid #63513b;border-radius:9px;padding:18px;background:#1b1814;scroll-margin-top:30px}
+.taskCreate>summary{font:600 15px Arial,sans-serif;color:#d9bd8b;cursor:pointer;min-height:28px}
+.taskCreate .form{border:0;padding:16px 0 0;background:transparent}
+.taskTabs{display:flex;gap:9px;margin:20px 0 14px;flex-wrap:wrap}
+.taskTab,.taskTabActive{background:#28241c;border:1px solid #67543b;color:#e0d0b7;border-radius:6px;padding:11px 17px;min-height:44px;cursor:pointer;font:600 13px Arial,sans-serif}
+.taskTabActive{background:#d4ba8d;color:#18130e;border-color:#d4ba8d}
+.taskCardList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.taskCard{background:#191712;border:1px solid #61513c;border-radius:10px;padding:19px;min-width:0;overflow-wrap:anywhere}
+.taskCard p{font:13px/1.55 Arial,sans-serif;color:#ded5c8}
+.taskCardTop{display:flex;align-items:start;justify-content:space-between;gap:10px}
+.taskCardTop strong{font:400 21px/1.28 Georgia,serif;color:#f0ddbd}
+.taskChip{display:inline-block;color:#d9caa9;background:#332b21;border:1px solid #76644b;border-radius:20px;padding:6px 9px;font:11px Arial,sans-serif;white-space:nowrap}
+.taskMeta{font-size:12px!important;color:#bcb09d!important}
+.taskDetails{border-top:1px solid #514330;margin-top:12px;padding-top:12px}
+.taskDetails>summary,.taskDetails details>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:#ddc59f;font-weight:600}
+.taskDetails>details{border-top:1px solid #43382c}
+.taskProgressForm{display:flex;flex-direction:column;gap:13px;margin:12px 0}
+.taskProgressForm label{display:grid;gap:7px;color:#e8d4b7;font-size:12px}
+.taskProgressForm :is(select,textarea){width:100%;box-sizing:border-box;min-height:48px;padding:12px;background:#29241d;color:#fff;border:1px solid #7d6a4b;border-radius:6px;font:14px Arial,sans-serif}
+.taskProgressForm button{min-height:48px;background:#d2b68b;color:#1c1710;border:0;border-radius:6px;font-weight:600}
+.taskDisclaimer{font:12px/1.6 Arial,sans-serif;color:#a9a08e;margin:14px 0}
+.taskCard .form{padding:15px 0 0;border:0;background:transparent}
+.taskCard .form h3{font:400 20px Georgia,serif;margin:0;color:#ead8b8}
+.staffHistory{border-top:1px solid #594b37;margin:26px 0;padding:14px 0}
+.staffHistory>summary{min-height:48px;cursor:pointer;color:#e1c99d;font:600 14px/48px Arial,sans-serif}
+.staffTasks :is(a,button,input,select,textarea,summary):focus-visible{outline:2px solid #edd095;outline-offset:3px}
+@media(max-width:900px){.taskCardList{grid-template-columns:1fr}.mobileStats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ .page{padding:76px 14px 38px}.mobileHead h1,.mobileHead h2{font-size:31px}
+ .mobileStats{gap:8px}.mobileStats>div{padding:12px}.mobileStats strong{font-size:26px}
+ .taskActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.taskPrimary,.taskSecondary{padding:12px 8px;font-size:12px}
+ .taskCard{padding:15px}.taskCardTop strong{font-size:19px}
+ .taskCreate{padding:15px}.staffHours .form{padding:18px 15px}
+ .form :is(button,input,select,textarea){min-height:48px;font-size:16px}
+ .taskProgressForm :is(select,textarea){font-size:16px}
+}
