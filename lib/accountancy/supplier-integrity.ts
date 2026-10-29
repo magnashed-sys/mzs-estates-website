@@ -12,7 +12,7 @@ export type SupplierCostSignal={
  possible_duplicate_records:SupplierIdentityMatch[];
 };
 const normalizedName=(value:string)=>value.normalize('NFKC').trim()
- .toLocaleLowerCase('en').replace(/[\p{P}\p{S}]/gu,' ').replace(/\s+/g,' ');
+ .toLocaleLowerCase('en').replace(/[\p{P}\p{S}]/gu,' ').replace(/\s+/g,' ').trim();
 const normalizedTax=(raw:unknown)=>{
  if(typeof raw!=='string')return '';
  const result=raw.normalize('NFKC').toLocaleUpperCase('en').replace(/[^A-Z0-9]/g,'');
