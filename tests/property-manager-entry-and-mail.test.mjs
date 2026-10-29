@@ -40,12 +40,12 @@ test('mobile staff has one intake for tasks and maintenance with both secured ex
  const forms=file('app/staff/StaffForms.tsx');
  assert.match(board,/function NewWorkItem/);
  assert.match(board,/useActionState\(createMyPropertyTask,initial\)/);
- assert.match(board,/useActionState\(reportMaintenanceTicket,initial\)/);
- assert.match(board,/action=\{isMaintenance\?maintenanceAction:taskAction\}/);
- assert.match(board,/Maintenance issue \/ repair request/);
+ assert.match(board,/\/api\/staff\/report-with-photos/);
+ assert.match(board,/action=\{isMaintenance\?undefined:taskAction\}/);
+ assert.match(board,/t\('maintenance'\)/);
  assert.match(board,/name="priority" defaultValue=\{isMaintenance\?'routine':'normal'\}/);
- assert.match(board,/<option value="soon">Needs attention soon<\/option>/);
- assert.match(board,/<option value="urgent">Urgent<\/option>/);
+ assert.match(board,/<option value="soon">\{t\('soon'\)\}<\/option>/);
+ assert.match(board,/<option value="urgent">\{t\('urgent'\)\}<\/option>/);
  assert.match(board,/required=\{isMaintenance\}/);
  assert.match(board,/properties\.length>1/);
  assert.match(board,/name="assigned_profile_id" value=\{profileId\}/);
