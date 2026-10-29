@@ -1,0 +1,20 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {createRequire} from 'node:module';import vm from 'node:vm';import ts from 'typescript';import {createHash} from 'node:crypto';
+const require=createRequire(import.meta.url),id='00000000-0000-4000-8000-000000000001';
+function compile(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>n in mocks?mocks[n]:require(n),Uint8Array,TextDecoder,URLSearchParams,Error});return exports;}
+const model=compile('lib/accountancy/archive.ts');
+function fixture({denied=false,bytes='%PDF-1.4\n%%EOF',insertError=null,prior=null,stale=false}={}){
+ const calls=[],revalidated=[];
+ const db={storage:{from:b=>({download:async p=>{calls.push(['download',b,p]);return {data:new Blob([bytes]),error:null};}})},
+  from:table=>({insert:async value=>{calls.push(['insert',table,value]);return {error:insertError};},select:()=>({eq:()=>({maybeSingle:async()=>({data:prior,error:null})})}),
+   update:value=>({eq:(_,key)=>({eq:(_,revision)=>({select:()=>({maybeSingle:async()=>{calls.push(['update',table,value,key,revision]);return {data:stale?null:{id},error:null};}})})})}),
+   upsert:async value=>{calls.push(['upsert',table,value]);return {error:null};}})};
+ const actions=compile('app/admin/workspaces/accountancy/documents/actions.ts',{'next/cache':{revalidatePath:p=>revalidated.push(p)},'../../../../../lib/security/estate-properties':{requireEstateAdmin:async()=>{if(denied)throw Error('denied');return {db,user:{id}};}},'../../../../../lib/accountancy/archive':model});
+ const form=()=>{const f=new FormData();for(const[k,v]of Object.entries({id,issuer_id:id,fiscal_year:'2023',original_name:'test.pdf',title:'Test document',category:'analysis',period_label:'2023',document_date:'',review_status:'pending_review',notes:'Test only',revision:'2',sha256:'forged value'}))f.set(k,v);return f;};
+ return {actions,form,calls,revalidated};
+}
+test('archive actions check active admin before reading a file or mutating data',async()=>{const f=fixture({denied:true});for(const action of ['registerDocument','updateDocument','setArchiveLanguage'])await assert.rejects(f.actions[action](f.form()),/denied/);assert.equal(f.calls.length,0);});
+test('registration hashes downloaded original bytes and ignores client-supplied fingerprint',async()=>{const f=fixture();assert.equal((await f.actions.registerDocument(f.form())).ok,true);const row=f.calls.find(c=>c[0]==='insert')[2];assert.equal(row.sha256,createHash('sha256').update('%PDF-1.4\n%%EOF').digest('hex'));assert.equal(row.file_size_bytes,14);assert.equal(row.file_path,`${id}/2023/${id}.pdf`);assert.equal(f.revalidated.length,1);});
+test('wrong file type cannot be registered and duplicate is an actionable result',async()=>{const bad=fixture({bytes:'<html>bad</html>'});assert.equal((await bad.actions.registerDocument(bad.form())).code,'invalid_pdf');assert.equal(bad.calls.some(c=>c[0]==='insert'),false);const dup=fixture({insertError:{code:'23505'}});assert.equal((await dup.actions.registerDocument(dup.form())).code,'duplicate');});
+test('registration safely recognizes an already completed request after a lost acknowledgement',async()=>{const sha256=createHash('sha256').update('%PDF-1.4\n%%EOF').digest('hex'),f=fixture({insertError:{code:'23505'},prior:{id,sha256}});assert.equal((await f.actions.registerDocument(f.form())).ok,true);});
+test('review updates bind document id and expected revision; stale writes are not reported as saved',async()=>{const f=fixture({stale:true});assert.equal((await f.actions.updateDocument(f.form())).code,'stale');assert.equal(f.calls[0][3],id);assert.equal(f.calls[0][4],2);assert.equal(f.revalidated.length,0);});
+test('language preference always belongs to the verified administrator',async()=>{const f=fixture(),form=f.form();form.set('user_id','attacker');form.set('language','es');await f.actions.setArchiveLanguage(form);assert.equal(f.calls[0][2].user_id,id);assert.equal(f.calls[0][2].language,'es');});
