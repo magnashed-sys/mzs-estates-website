@@ -56,3 +56,26 @@ test('private year export includes master-data QA once per referenced existing s
  assert.ok(manifest.files.some(file=>file.name==='supplier-masterdata-review.csv'));
  assert.equal(manifest.statutory_complete,false);
 });
+
+test('accountant ZIP exports supplier invoice metadata controls with explicit payment verification unavailable',()=>{
+ const f=fixture();
+ f.costs[0].archive_documents=[{id:id(70),title:'Supplier PDF',sha256:'e'.repeat(64),
+  category:'supplier_invoice',document_date:'2026-04-11',review_status:'reviewed'}];
+ f.costs[1].archive_documents=[{id:id(71),title:'Bank evidence',sha256:'f'.repeat(64),
+  category:'other',document_date:null,review_status:'reviewed'}];
+ const files=pkg.yearAccountantFiles(f,id(1));
+ const csv=Buffer.from(files.find(v=>v.name==='supplier-invoice-control.csv').bytes).toString();
+ assert.equal(csv.trim().split(/\r?\n/).length,4,'one header and three purchase invoices, including excluded one');
+ assert.match(csv,/archive_date_differs/);
+ assert.match(csv,/archive_not_supplier_invoice/);
+ assert.match(csv,/not_reconciled_no_supplier_payment_ledger/);
+ assert.match(csv,/manual_comparison_required/);
+ assert.match(csv,/not_assessed/);
+ assert.doesNotMatch(csv,/\b(unpaid|overdue|paid)\b/i);
+ const readme=Buffer.from(files.find(v=>v.name==='README.txt').bytes).toString();
+ assert.match(readme,/supplier-invoice-control.csv/);
+ assert.match(readme,/bank payments must be independently verified/);
+ const manifest=JSON.parse(Buffer.from(files.find(v=>v.name==='manifest.json').bytes).toString());
+ assert.equal(manifest.statutory_complete,false);
+ assert.ok(manifest.files.some(v=>v.name==='supplier-invoice-control.csv'));
+});
