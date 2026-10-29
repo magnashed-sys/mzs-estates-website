@@ -1,6 +1,7 @@
 import {NextRequest} from 'next/server';
 import {requireContractAdmin} from '../../../../lib/security/estate-contracts';
 import {capitalDealsEnabled} from '../../../../lib/security/capital-deals';
+import {loadInvoiceRegister,invoiceFilters,selectInvoices} from '../../../../lib/finance/invoice-register';
 import {readFinancialArchive} from '../../../../lib/finance/archive-register';
 import {readRegister} from '../../../../lib/estates/read-register';
 import {type Booking,type LoanDeal,type LoanInstalment,type LoanPayment} from '../../../../lib/finance/financial-cockpit';
@@ -38,7 +39,7 @@ export async function GET(request:NextRequest){
   const entityId=request.nextUrl.searchParams.get('entity')||'all';
   if(entityId!=='all'&&entityId!=='unassigned'&&!/^[a-f0-9-]{36}$/i.test(entityId))
    return Response.json({error:'Invalid entity filter'},{status:400,headers});
-  const [contracts,rentPayments,bookings,deals,instalments,loanPayments,issuers,invoices,archiveInvoices]=await Promise.all([
+  const [contracts,rentPayments,bookings,deals,instalments,loanPayments,issuers,invoices,archiveInvoices,currentInvoices]=await Promise.all([
    readRegister(db,'mzs_lease_contracts'),
    readRegister(db,'mzs_lease_payments'),
    listBookings(db),
@@ -47,7 +48,8 @@ export async function GET(request:NextRequest){
    capitalOn?readRegister(db,'mzs_capital_payments'):Promise.resolve([]),
    readRegister(db,'mzs_lease_issuers'),
    readRegister(db,'mzs_lease_invoices'),
-   readFinancialArchive(db,year)
+   readFinancialArchive(db,year),
+   loadInvoiceRegister(db,year)
   ]);
   const result=buildFinancialPhase2({
    year,asOf:today,entityId,
@@ -56,7 +58,8 @@ export async function GET(request:NextRequest){
    loanPayments:loanPayments as LoanPayment[],loansAvailable:capitalOn,
    issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[],archiveInvoices
   });
-  return Response.json(result,{headers});
+  const filters=invoiceFilters({year:String(year)});const chosen=entityId==='unassigned'?[]:currentInvoices.filter(i=>(year===2026||i.source!=='archive')&&(entityId==='all'||i.issuerId===entityId));
+  return Response.json({...result,currentInvoices:selectInvoices(chosen,filters,today).totals},{headers});
  }catch{
   // Do not leak which private financial register exists or failed.
   return Response.json({error:'Financial overview is currently unavailable; no partial totals are shown.'},{status:503,headers});

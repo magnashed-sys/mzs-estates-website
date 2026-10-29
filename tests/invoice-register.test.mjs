@@ -74,3 +74,11 @@ test('imported balances add only new active receipts and restore the snapshot af
  let row=lib.normalizeInvoiceRegister(x).find(r=>r.source==='archive');assert.equal(row.paid,1600);assert.equal(row.balance,400);assert.equal(row.paymentBasis,'imported_plus_receipts');assert.match(row.href,/sales\/imported/);
  x.archiveReceipts[0].reversed_at=today+'T13:00:00Z';x.archiveReceipts[0].reversed_by=id(2);x.archiveReceipts[0].reversal_reason='Incorrect bank receipt';row=lib.normalizeInvoiceRegister(x).find(r=>r.source==='archive');assert.equal(row.paid,1000);assert.equal(row.balance,1000);
 });
+test('Cockpit current balances reuse invoice selection without mixing unknown balances or excluded archive years',async()=>{
+ const exports={},calls=[],x=fixture(),rows=lib.normalizeInvoiceRegister(x);vm.runInNewContext(compile('app/api/admin/financial-cockpit/route.ts'),{exports,Response,Intl,Date,require(n){
+ if(n.includes('estate-contracts'))return {requireContractAdmin:async()=>{calls.push('auth');return {db:{rpc:()=>({order:()=>({range:async()=>({data:[],error:null})})})}}}};
+ if(n.includes('capital-deals'))return {capitalDealsEnabled:()=>false};if(n.includes('archive-register'))return {readFinancialArchive:async()=>[]};if(n.includes('read-register'))return {readRegister:async()=>[]};if(n.includes('invoice-register'))return {...lib,loadInvoiceRegister:async()=>rows};if(n.includes('financial-report'))return {buildFinancialPhase2:()=>({historical:{unchanged:true}})};throw Error(n);
+ }});
+ let response=await exports.GET({nextUrl:new URL('https://fixture.invalid/?year=2026&entity='+id(1))}),data=await response.json();assert.equal(response.status,200);assert.equal(calls[0],'auth');assert.equal(data.currentInvoices.outstanding,8500);assert.equal(data.currentInvoices.unknown,1);assert.equal(data.historical.unchanged,true);
+ response=await exports.GET({nextUrl:new URL('https://fixture.invalid/?year=2026&entity=unassigned')});data=await response.json();assert.equal(data.currentInvoices.count,0);
+});
