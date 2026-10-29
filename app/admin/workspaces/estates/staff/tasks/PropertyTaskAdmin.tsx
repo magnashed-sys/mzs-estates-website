@@ -61,8 +61,8 @@ function Progress({task,language}:{task:PropertyTask;language:'en'|'es'}){
   <Message data={data}/>
  </form>;
 }
-export default function PropertyTaskAdmin({properties,units,members,scopes,tasks,language}:{
- properties:Property[];units:Unit[];members:Member[];scopes:Scope[];tasks:PropertyTask[];language:'en'|'es';
+export default function PropertyTaskAdmin({properties,units,members,scopes,tasks,language,timeTotals}:{
+ properties:Property[];units:Unit[];members:Member[];scopes:Scope[];tasks:PropertyTask[];language:'en'|'es';timeTotals:{task_id:string;minutes:number;visits:number}[];
 }){
  const tr=(en:string,es:string)=>language==='es'?es:en;
  const [filter,setFilter]=useState<'active'|'all'|'done'>('active');
@@ -80,6 +80,7 @@ export default function PropertyTaskAdmin({properties,units,members,scopes,tasks
     <div className={s.taskCardTop}><strong>{t.title}</strong><span className={s.taskChip}>{taskStatusName[t.status]}</span></div>
     <p className={s.taskMeta}>{props.get(t.property_id)?.name??tr('Property','Inmueble')}{t.unit_id?' · '+(units.find(u=>u.id===t.unit_id)?.address??tr('Unit','Unidad')):''}</p>
     <p className={s.taskMeta}>{tr('Assigned to','Asignado a')}: {people.get(t.assigned_profile_id??'')?.full_name??tr('Unassigned','Sin asignar')} · {taskPriorityName[t.priority]}{t.due_on?' · '+t.due_on:''}</p>
+    <p className={s.taskMeta}>{tr('Working time registered','Gastos de tiempo registrados')}: {((timeTotals.find(x=>x.task_id===t.id)?.minutes??0)/60).toFixed(2)} h · {timeTotals.find(x=>x.task_id===t.id)?.visits??0} {tr('visits','visitas')} ({tr('not yet billable','todavía no facturable')})</p>
     {t.description&&<p>{t.description}</p>}
     {t.latest_note&&<p className={s.taskMeta}>{tr('Latest','Última actualización')}: {t.latest_note}</p>}
     <div className={s.taskDetails}>
