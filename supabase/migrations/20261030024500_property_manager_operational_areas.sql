@@ -10,7 +10,7 @@ create table public.mzs_ops_staff_work_areas(
 );
 insert into public.mzs_ops_staff_work_areas(id,name) values
  ('maintenance-beverwijk','Onderhoud Beverwijk'),
- ('private-magdy','Privé Magdy');
+ ('private-magdy','Prive Magdy');
 alter table public.mzs_ops_staff_work_areas enable row level security;
 revoke all on public.mzs_ops_staff_work_areas from public,anon,authenticated,service_role;
 grant select on public.mzs_ops_staff_work_areas to authenticated;
@@ -68,7 +68,7 @@ from public.profiles p
 cross join public.mzs_ops_staff_work_areas a
 cross join lateral (select id from public.profiles
  where role::text='admin' and is_active order by id limit 1) admin
-where lower(p.email) in ('info@mzsestates.es','ledders2@hotmail.com','info@mzsvastgoed.nl')
+where lower(p.email) in ('info@mzsestates.es','ledders2@hotmail.com')
  and p.is_active and p.role::text in ('client','partner');
 
 alter table public.mzs_ops_property_tasks add column work_area_id text
