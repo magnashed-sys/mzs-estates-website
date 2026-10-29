@@ -63,3 +63,22 @@ test('backend guards still separate maintenance reports from tasks and invoices'
  assert.match(taskActions,/from\('mzs_ops_property_tasks'\)/);
  assert.match(actions,/This is no payroll|geen werkopdracht|nog geen werkopdracht/i);
 });
+
+test('staff task emails use immutable, trusted outbox snapshot without broad service-role grants',()=>{
+ const sql=file('supabase/migrations/20261030002000_property_task_mail_snapshot.sql');
+ assert.match(sql,/create or replace function mzs_private\.queue_property_staff_task_notice/);
+ assert.match(sql,/jsonb_build_object\(\s*'task_id',new\.id/);
+ assert.match(sql,/'property',v_property/);
+ assert.match(sql,/o\.status='pending'/);
+ assert.match(sql,/not o\.payload \? 'title'/);
+ assert.match(sql,/recipient\.email\)='magdy@mzsgroup\.eu'/);
+ assert.doesNotMatch(sql,/grant select on public\.(mzs_ops_property_tasks|mzs_estate_properties|mzs_estate_units) to service_role/i);
+ const mail=file('lib/mzs/notifications.ts');
+ const from=mail.lastIndexOf('if (event.event_type === "property_staff_task_created")');
+ const to=mail.indexOf('if (event.event_type === "capital_access_granted")',from);
+ assert.ok(from>0 && to>from);
+ const branch=mail.slice(from,to);
+ assert.match(branch,/snapshot is incomplete/);
+ assert.doesNotMatch(branch,/from\("mzs_ops_property_tasks"\)|from\("mzs_estate_properties"\)|from\("mzs_estate_units"\)/);
+ assert.match(mail,/stage: deliveryStage/);
+});
