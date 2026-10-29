@@ -22,16 +22,16 @@ export default async function SupplierPayments({params}:{params:Promise<{id:stri
  return <section className={s.page}>
   <Link href={ADMINISTRATION_ROOT+'/'+id}>← {l('Year administration','Administración anual')}</Link>
   <p><a href={ADMINISTRATION_ROOT+'/'+id+'/export'}>{l('Download accountant ZIP including supplier payment audit','Descargar ZIP para el asesor con auditoría de pagos a proveedores')}</a></p>
-  <header className={s.heading}><div><h1>{l('Supplier payment register','Registro de pagos a proveedores')}</h1>
+  <header className={s.heading}><div><h1>{l('Supplier payment register — SYNTHETIC STAGING TEST','Registro de pagos a proveedores — PRUEBA FICTICIA EN STAGING')}</h1>
    <p>{source.sales.issuer.name} · {source.administration.fiscal_year}</p></div></header>
-  <p className={s.notice}>{l('This is a manual administrative payment record, not a bank feed. Recorded transfers are NOT bank-reconciled, and an unrecorded amount is NOT proof that an invoice is unpaid. No money is transferred from this screen.','Este es un registro manual de pagos, no una conexión bancaria. Los importes registrados NO están conciliados con el banco, y la diferencia sin registrar NO demuestra que la factura esté impagada. Esta pantalla no realiza transferencias.')}</p>
+  <p className={s.notice}>{l('STAGING TEST ONLY. All entries here must be fictitious. No real bank transfers or cash payments should be recorded. A test record never proves that a supplier invoice is paid or unpaid. Production remains disabled.','SOLO PRUEBAS EN STAGING. Todas las anotaciones deben ser ficticias. No registre transferencias bancarias ni pagos reales. Una prueba no demuestra si una factura está pagada o impagada. Production sigue desactivado.')}</p>
   <div className={s.metrics}>
    <p>{l('Supplier invoice concept totals','Total de borradores de proveedores')}<strong>{euro(gross)}</strong></p>
-   <p>{l('Payments manually recorded','Pagos registrados manualmente')}<strong>{euro(recorded)}</strong></p>
-   <p>{l('Not matched to a payment entry','Sin anotación de pago')}<strong>{euro(remaining)}</strong></p>
+   <p>{l('Synthetic payment entries','Anotaciones ficticias de pago')}<strong>{euro(recorded)}</strong></p>
+   <p>{l('Not covered by synthetic entries','Sin cobertura por anotaciones ficticias')}<strong>{euro(remaining)}</strong></p>
    <p>{l('Bank reconciliation','Conciliación bancaria')}<strong>{l('Not verified','No verificado')}</strong></p>
   </div>
-  <p>{l('An administrator can record a partial supplier payment only after reviewing the cost, using an actual payment date and a bank/cash reference. New payment entries cannot exceed the invoice amount; use an explicit correction if a prior registration was incorrect. Excess/advance payments require a separately reviewed workflow.','Un administrador puede registrar pagos parciales después de revisar el coste, con fecha y referencia bancaria o de caja. Los pagos no pueden superar el importe de la factura; una anotación errónea se corrige con una reversión. Los anticipos y sobrepagos requieren un procedimiento adicional.')}</p>
+  <p>{l('A Staging administrator can simulate partial payments against the synthetic, reviewed supplier cost using fictitious dates and references. The system rejects totals above the invoice and retains corrections. No bank transaction is executed.','Un administrador de Staging puede simular pagos parciales sobre el coste ficticio revisado usando fechas y referencias de prueba. El sistema rechaza importes superiores a la factura y conserva las correcciones. No se ejecutan movimientos bancarios.')}</p>
   <details className={s.panel}><summary>{l('Staging acceptance checklist','Lista de comprobación de Staging')}</summary>
    <p>{l('Use only synthetic test payment references and the existing synthetic invoice. This pilot is not Production and must never be used for a real transfer.','Utilice exclusivamente referencias de pago de prueba y la factura ficticia existente. Este piloto no es Production y nunca debe utilizarse para una transferencia real.')}</p>
    <ol>
