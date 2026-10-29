@@ -30,21 +30,21 @@ function RecordForm({yearId,item,language}:{yearId:string;item:CostPaymentOvervi
   f.set('request_id',requestId.current);f.set('draft_id',item.draft_id);f.set('year_id',yearId);
   try{
    const result=await recordSupplierPayment(f);
-   if(result.ok){requestId.current=null;setNotice(text(language,'Payment entry recorded; bank match remains unverified.','Pago anotado; conciliación bancaria aún sin verificar.'));form.reset();router.refresh();}
+   if(result.ok){requestId.current=null;setNotice(text(language,'Synthetic payment test recorded in Staging. No real money has moved.','Pago ficticio registrado en Staging. No se ha transferido dinero real.'));form.reset();router.refresh();}
    else setNotice(errorMessage(language,result));
   }catch{setNotice(text(language,'The request could not be confirmed. Refresh and check the payment history before repeating.','No se pudo confirmar la solicitud. Compruebe el historial antes de repetirla.'));}
   finally{lock.current=false;setBusy(false);}
  }
- return <details className={s.panel}><summary>{text(language,'Record a partial or full payment','Registrar pago parcial o total')}</summary>
+ return <details className={s.panel}><summary>{text(language,'Record a synthetic partial or full payment','Registrar un pago ficticio parcial o total')}</summary>
   {!permitted&&<p role="status">{item.review_status!=='reviewed'?text(language,'Cost review is required before payment registration.','Es necesario revisar el coste antes de registrar pagos.'):text(language,'The invoice is fully covered by recorded entries.','El importe de la factura ya está cubierto por las anotaciones registradas.')}</p>}
   <p><Link href={'/admin/workspaces/accountancy/administrations/'+yearId+'#costs'}>{text(language,'Open cost review','Abrir revisión de costes')}</Link>{' · '}<Link href={'/admin/workspaces/accountancy/documents/links/cost/'+item.draft_id}>{text(language,'Check original invoice PDF','Revisar PDF original de la factura')}</Link></p>
   <form onSubmit={submit}><fieldset className={s.form} disabled={busy||!permitted}>
-   <label>{text(language,'Amount (EUR)','Importe (EUR)')}<input name="amount_eur" inputMode="decimal" placeholder="0.00" maxLength={20} required/></label>
-   <label>{text(language,'Actual payment date','Fecha real del pago')}<input name="paid_on" type="date" required/></label>
-   <label className={s.wide}>{text(language,'Bank or cash reference','Referencia bancaria o de caja')}<input name="reference" minLength={3} maxLength={200} required autoComplete="off"/></label>
-   <label className={s.wide+" "+s.check}><input type="checkbox" name="confirmed_existing_transfer" value="yes" required/>{text(language,'I confirm this transfer or cash payment already took place and that the amount, date and reference were checked. Recording this does not transfer money or verify the bank statement.','Confirmo que esta transferencia o pago en efectivo ya se realizó y que he comprobado su importe, fecha y referencia. Este registro no transfiere dinero ni verifica el extracto bancario.')}</label>
-   <p className={s.wide}>{text(language,'This records an existing transfer only. It does not instruct a bank, establish tax deductibility or reconcile the bank statement.','Solo registra un movimiento existente. No ordena una transferencia, ni determina deducibilidad fiscal, ni concilia el extracto bancario.')}</p>
-   <button className={s.button} disabled={busy||!permitted}>{busy?text(language,'Saving…','Guardando…'):text(language,'Record payment','Registrar pago')}</button>
+   <label>{text(language,'Synthetic amount (EUR)','Importe ficticio (EUR)')}<input name="amount_eur" inputMode="decimal" placeholder="0.00" maxLength={20} required/></label>
+   <label>{text(language,'Simulated payment date','Fecha de pago simulada')}<input name="paid_on" type="date" required/></label>
+   <label className={s.wide}>{text(language,'Synthetic test reference','Referencia ficticia de prueba')}<input name="reference" minLength={3} maxLength={200} required autoComplete="off"/></label>
+   <label className={s.wide+" "+s.check}><input type="checkbox" name="confirmed_synthetic_staging_test" value="yes" required/>{text(language,'I confirm this is a FICTITIOUS STAGING TEST. No bank transfer or cash payment actually happened; these figures must never be treated as real expenses or payments.','Confirmo que esta es una PRUEBA FICTICIA EN STAGING. No se ha realizado ninguna transferencia ni pago real; estos importes nunca deben tratarse como gastos o pagos reales.')}</label>
+   <p className={s.wide}>{text(language,'This pilot records synthetic test history only, with no bank movement, VAT treatment or statutory posting.','Este piloto solo registra datos de prueba ficticios, sin movimientos bancarios, tratamiento de IVA ni contabilización oficial.')}</p>
+   <button className={s.button} disabled={busy||!permitted}>{busy?text(language,'Saving…','Guardando…'):text(language,'Save synthetic test payment','Guardar pago ficticio de prueba')}</button>
   </fieldset></form>{notice&&<p role="status">{notice}</p>}
  </details>;
 }
@@ -53,7 +53,7 @@ function ReverseForm({yearId,record,language}:{yearId:string;record:SupplierPaym
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(lock.current)return;lock.current=true;setBusy(true);setNotice('');
   const f=new FormData(e.currentTarget);f.set('payment_id',record.id);f.set('draft_id',record.draft_id);f.set('year_id',yearId);
-  try{const result=await reverseSupplierPayment(f);if(result.ok){setNotice(text(language,'Administrative reversal recorded. This does not mean a bank refund occurred.','Reversión administrativa registrada. No demuestra que haya ocurrido un reembolso bancario.'));router.refresh();}else setNotice(errorMessage(language,result));}
+  try{const result=await reverseSupplierPayment(f);if(result.ok){setNotice(text(language,'Synthetic Staging correction recorded. No bank refund occurred.','Corrección ficticia registrada en Staging. No se realizó ningún reembolso bancario.'));router.refresh();}else setNotice(errorMessage(language,result));}
   catch{setNotice(text(language,'Reversal could not be confirmed; refresh before retrying.','No se pudo confirmar la reversión; actualice antes de repetirla.'));}
   finally{lock.current=false;setBusy(false);}
  }
@@ -76,12 +76,12 @@ export function PaymentForms({language,yearId,overview,payments,money}:{
    return <section key={item.draft_id} className={s.panel}>
     <h2>{item.invoice_number}</h2>
     <p>{text(language,'Total','Total')}: {amounts?.gross} · {text(language,'Administratively recorded','Registrado administrativamente')}: {amounts?.recorded} · {text(language,'Without a matching entry','Sin anotación de pago')}: {amounts?.remaining}</p>
-    <p>{text(language,'Cost review','Revisión del coste')}: {item.review_status} · {text(language,'Bank verified','Verificado por banco')}: {text(language,'No','No')}</p>
+    <p>{text(language,'Cost review','Revisión del coste')}: {item.review_status} · {text(language,'Bank verified (test only)','Verificado por banco (solo prueba)')}: {text(language,'No','No')}</p>
     <RecordForm key={item.draft_id+'-'+item.recorded_cents} item={item} language={language} yearId={yearId}/>
     {!!events.length&&<div className={s.tableWrap}><table className={s.table}><thead><tr><th>{text(language,'Date','Fecha')}</th><th>{text(language,'Amount','Importe')}</th><th>{text(language,'Reference','Referencia')}</th><th>{text(language,'Administrative status','Estado administrativo')}</th></tr></thead>
     <tbody>{events.map(p=><tr key={p.id}><td>{p.paid_on}</td><td>{currency(p.amount_cents)}</td><td>{p.reference}</td><td>{p.reversed_at?
      <span>{text(language,'Reversed','Revertido')} · {p.reversal_reason}</span>:
-     <><span>{text(language,'Recorded, not bank-verified','Registrado, no conciliado')}</span><ReverseForm language={language} yearId={yearId} record={p}/></>}
+     <><span>{text(language,'Synthetic test record, not bank-verified','Registro ficticio sin conciliación bancaria')}</span><ReverseForm language={language} yearId={yearId} record={p}/></>}
     </td></tr>)}</tbody></table></div>}
    </section>;
   })}

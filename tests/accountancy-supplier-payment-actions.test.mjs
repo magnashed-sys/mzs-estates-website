@@ -51,7 +51,7 @@ function harness({enabled=true,allowed=true,matchingYear=true,rpcError=null}={})
 }
 function request(overrides={}){
  const values={request_id:req,draft_id:draft,year_id:year,amount_eur:'0.50',
- paid_on:'2026-10-29',reference:'SYNTHETIC-REFERENCE',confirmed_existing_transfer:'yes',...overrides};
+ paid_on:'2026-10-29',reference:'SYNTHETIC-REFERENCE',confirmed_synthetic_staging_test:'yes',...overrides};
  const form=new FormData();
  for(const [key,value] of Object.entries(values))if(value!==null)form.set(key,value);
  return form;
@@ -68,9 +68,18 @@ test('a non-admin cannot call payment actions and cannot reach the write RPC',as
 });
 test('no existing-transfer confirmation means no payment is registered',async()=>{
  const x=harness();
- const reply=await x.actions.recordSupplierPayment(request({confirmed_existing_transfer:null}));
+ const reply=await x.actions.recordSupplierPayment(request({confirmed_synthetic_staging_test:null}));
  assert.deepEqual(JSON.parse(JSON.stringify(reply)),{ok:false,code:'invalid'});
  assert.deepEqual(x.calls,['auth']);
+});
+test('old real-transfer checkbox cannot authorize synthetic staging events',async()=>{
+ const x=harness();
+ const result=await x.actions.recordSupplierPayment(request({
+  confirmed_synthetic_staging_test:null,confirmed_existing_transfer:'yes'
+ }));
+ assert.equal(result.ok,false);
+ assert.equal(result.code,'invalid');
+ assert.equal(x.calls.some(c=>Array.isArray(c)&&c[0]==='rpc'),false);
 });
 test('invalid amount and mismatched year or entity are rejected before RPC',async()=>{
  const bad=harness();
