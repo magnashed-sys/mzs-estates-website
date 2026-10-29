@@ -6,7 +6,7 @@ Owner authorized on 29 October 2026: prepare each improvement individually, test
 2. General standalone invoice creation — customer/entity, lines, draft review, definitive issue and controlled delivery, including personal branding rules.
 3. Receivables follow-up — aging, customer/entity totals, follow-up dates/notes and explicit reminder sending.
 4. Credit notes — controlled original-invoice linkage, partial/full credits and allocation.
-5. Consolidated accountant package — entity/period controls, completeness checks, exceptions and remaining source coverage.
+5. Consolidated accountant package — prioritize Spanish property ownership/operation and renovation-project administrations; distinct advisory, utilities, maintenance, renovation and improvement groups, separate fiscal review and import readiness. Detailed owner requirements: `spanish-accountant-package-requirements-20261029.md`. Entity/period controls, completeness checks, exceptions and remaining source coverage.
 6. Relationship dossier — broader finance/activity summary, notes and follow-ups without guessing cross-module identities.
 7. Data completeness queue — missing entity/customer/property/billing associations with direct correction links.
 8. Recurring property work — schedules, staff, deadlines and follow-up built on current maintenance/time workflows.
