@@ -16,7 +16,7 @@ export async function annualSource(db:SupabaseClient,id:string):Promise<YearSour
  }
  const links=await documentLinks(db,'cost',source.costs.map(c=>c.id));
  for(const cost of source.costs){
-  cost.archive_documents=links.filter(l=>l.is_active&&l.draft_id===cost.id&&l.document.review_status!=='superseded').map(l=>({id:l.document.id,title:l.document.title,sha256:l.document.sha256,review_status:l.document.review_status}));
+  cost.archive_documents=links.filter(l=>l.is_active&&l.draft_id===cost.id&&l.document.review_status!=='superseded').map(l=>({id:l.document.id,title:l.document.title,sha256:l.document.sha256,review_status:l.document.review_status,category:l.document.category,document_date:l.document.document_date}));
   if(cost.archive_documents.length&&cost.source_document_status==='missing')cost.source_document_status='retained_archive_pdf';
  }
  return source;
