@@ -2,7 +2,7 @@ import {isClientMail, localizedAccountMail, isLocalizedAccountLocale} from "./lo
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted" | "intro_call_requested" | "owner_stay_requested";
+type EventType = "application_received" | "account_activated" | "new_project_access" | "capital_access_granted" | "intro_call_requested" | "owner_stay_requested" | "property_staff_task_created";
 type EventRow = {
   id: string;
   user_id: string;
@@ -216,6 +216,30 @@ function template(event: EventRow, recipientName: string) {
       str(event.payload.check_out) + ", " + str(event.payload.guest_count) + " guests). Approval required. Rental charge €0.00.";
     link = site + "/admin/owner-stays";
     linkTitle = "REVIEW OWNER STAY";
+  } else if (event.event_type === "property_staff_task_created") {
+    subject = "New property manager task | MZS Group";
+    headline = "A new property task was created.";
+    intro = "A property manager has added a new task to the work dashboard.";
+    const creator = str(event.payload.creator);
+    const title = str(event.payload.title);
+    const property = str(event.payload.property);
+    const unit = str(event.payload.unit);
+    const priority = str(event.payload.priority);
+    const due = str(event.payload.due_on);
+    const details = [
+      ["Created by", creator],
+      ["Task", title],
+      ["Property", property],
+      ...(unit ? [["Unit", unit]] : []),
+      ["Priority", priority],
+      ...(due ? [["Due date", due]] : []),
+    ];
+    detailsHtml = "<p style='color:#d0c6b8;line-height:1.9'>" +
+      details.map(([label,value]) => escapeHtml(label) + ": " + escapeHtml(value)).join("<br>") + "</p>";
+    plain = "New property manager task. " +
+      details.map(([label,value]) => label + ": " + value).join("; ") + ".";
+    link = site + "/admin/workspaces/estates/staff/tasks";
+    linkTitle = "OPEN TASKS IN GROUP ADMIN";
   } else if (event.event_type === "intro_call_requested") {
     subject = "New introductory call request | " + (event.payload?.source === "consultancy" ? "MZS Consultancy" : event.payload?.source === "real-estate" ? "MZS Estates" : "MZS Capital");
     headline = "A new conversation starts here.";
@@ -306,6 +330,39 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Introductory call mail requires production");
       if (profile.role !== "admin") throw new Error("Recipient is no longer an administrator");
     }
+    if (event.event_type === "property_staff_task_created") {
+      // The recipient is fixed by the durable database trigger. Revalidate it
+      // before sending; an event payload cannot alter the destination.
+      if (process.env.VERCEL_ENV !== "production" ||
+          process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co")
+        throw new Error("Property task email requires production");
+      if (profile.email.toLowerCase() !== "magdy@mzsgroup.eu")
+        throw new Error("Unexpected property task notification recipient");
+      const {data:task,error:taskError} = await admin.from("mzs_ops_property_tasks")
+        .select("id,title,priority,due_on,property_id,unit_id,created_by,assigned_profile_id")
+        .eq("id",str(event.payload.task_id)).maybeSingle();
+      if(taskError||!task||task.created_by===null)
+        throw new Error("Property task unavailable");
+      const [{data:creator,error:creatorError},{data:property,error:propertyError}] = await Promise.all([
+        admin.from("profiles").select("full_name,role").eq("id",task.created_by).maybeSingle(),
+        admin.from("mzs_estate_properties").select("name").eq("id",task.property_id).maybeSingle(),
+      ]);
+      if(creatorError||!creator||!["client","partner"].includes(creator.role)||propertyError||!property)
+        throw new Error("Task ownership could not be verified");
+      let unitName = "";
+      if(task.unit_id){
+        const {data:unit,error:unitError} = await admin.from("mzs_estate_units")
+          .select("address,property_id").eq("id",task.unit_id).maybeSingle();
+        if(unitError||!unit||unit.property_id!==task.property_id)
+          throw new Error("Task unit could not be verified");
+        unitName=unit.address;
+      }
+      event.payload={
+        task_id:task.id,title:task.title,property:property.name,
+        creator:creator.full_name||"Property manager",
+        unit:unitName,priority:task.priority,due_on:task.due_on||"",
+      };
+    }
     if (event.event_type === "capital_access_granted") {
       if (process.env.VERCEL_ENV !== "production" || process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://ptrnjzmcehrhbsfxntgw.supabase.co") throw new Error("Capital mail requires production");
       const { data: grant, error } = await admin.from("mzs_capital_client_access")
@@ -364,6 +421,27 @@ export async function deliverOnce(eventId?: string): Promise<DeliveryResult> {
       class: error instanceof Error ? error.name : "unknown",
     });
     return { status: "failed", id: event.id };
+  }
+}
+
+/** Attempt prompt delivery after a staff task is committed.
+ * The durable outbox remains the authoritative retry mechanism; Preview
+ * cannot send notifications to the production administrator.
+ */
+export async function deliverPropertyStaffTaskNotice(taskId:string):Promise<void>{
+  if(process.env.VERCEL_ENV!=="production" ||
+     process.env.NEXT_PUBLIC_SUPABASE_URL!=="https://ptrnjzmcehrhbsfxntgw.supabase.co")return;
+  try{
+    const admin=serviceClient();
+    const {data,error}=await admin.from("mzs_mail_outbox").select("id")
+      .eq("event_type","property_staff_task_created").contains("payload",{task_id:taskId})
+      .eq("status","pending").order("created_at").limit(1);
+    if(error)throw new Error("Unable to locate task notification");
+    if(data?.length)await deliverOnce(data[0].id);
+  }catch(error){
+    console.error("[MZS property tasks] notification queued for retry",{
+      category:error instanceof Error?error.name:"unknown"
+    });
   }
 }
 

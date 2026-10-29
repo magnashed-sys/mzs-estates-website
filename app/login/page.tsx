@@ -86,9 +86,30 @@ export default function LoginPage() {
             "mzs_has_department_scope",
             { p_department: "capital" }
           );
-          window.location.replace(!scopeError && capitalScope === true
-            ? "/admin/group/capital"
-            : "/private");
+          if (!scopeError && capitalScope === true) {
+            window.location.replace("/admin/group/capital");
+            break;
+          }
+
+          // An active Client/Partner account can also be a scoped property manager.
+          // Ask the existing permission-checked endpoint rather than inferring
+          // staff access from the email address, metadata, or client role.
+          // Fail closed to the normal private dashboard when this check is unavailable.
+          let propertyManager = false;
+          try {
+            const response = await fetch("/api/private/staff-access", {
+              cache: "no-store",
+              credentials: "same-origin",
+            });
+            if (response.ok) {
+              const access: unknown = await response.json();
+              propertyManager = !!access && typeof access === "object" &&
+                "available" in access && access.available === true;
+            }
+          } catch {
+            // A temporary staff service error must not block normal sign-in.
+          }
+          window.location.replace(propertyManager ? "/staff" : "/private");
           break;
         }
         default:

@@ -43,6 +43,13 @@
 .taskCreate{border:1px solid #63513b;border-radius:9px;padding:18px;background:#1b1814;scroll-margin-top:30px}
 .taskCreate>summary{font:600 15px Arial,sans-serif;color:#d9bd8b;cursor:pointer;min-height:28px}
 .taskCreate .form{border:0;padding:16px 0 0;background:transparent}
+.taskCreate .form h2{font-size:26px}
+.taskOptional{border:1px solid #5b4b35;border-radius:6px;padding:12px;background:#211d17}
+.taskOptional>summary{min-height:34px;cursor:pointer;color:#e1c99d;font:600 13px Arial,sans-serif}
+.taskOptional label{margin-top:12px}
+.staffHours .forms{grid-template-columns:minmax(0,1fr);max-width:760px}
+.taskActions button{cursor:pointer}
+.taskActions button:focus-visible{outline:2px solid #e8cb91;outline-offset:3px}
 .taskTabs{display:flex;gap:9px;margin:20px 0 14px;flex-wrap:wrap}
 .taskTab,.taskTabActive{background:#28241c;border:1px solid #67543b;color:#e0d0b7;border-radius:6px;padding:11px 17px;min-height:44px;cursor:pointer;font:600 13px Arial,sans-serif}
 .taskTabActive{background:#d4ba8d;color:#18130e;border-color:#d4ba8d}
