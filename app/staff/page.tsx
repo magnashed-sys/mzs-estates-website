@@ -7,6 +7,7 @@ import StaffForms from './StaffForms';
 import StaffTaskBoard from './StaffTaskBoard';
 import {staffTaskEnvironment,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import WorkRegisters from './WorkRegisters';
+import LegacyWeekHistory,{type LegacyWeekRow} from './LegacyWeekHistory';
 import s from './staff.module.css';
 export const dynamic='force-dynamic';
 export default async function StaffPage({searchParams}:{searchParams:Promise<Params>}){
@@ -14,7 +15,9 @@ export default async function StaffPage({searchParams}:{searchParams:Promise<Par
  const taskEnabled=staffTaskEnvironment();
  const language=safeStaffLanguage((await cookies()).get('mzs_staff_language')?.value);
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
- const [data,units,tasks,areas]=await Promise.all([loadRegisters(db,params),allRows<{id:string;property_id:string;address:string}>((a,b)=>db.from('mzs_ops_staff_unit_directory').select('id,property_id,address',{count:'exact'}).order('id').range(a,b)),taskEnabled?allRows<PropertyTask>((a,b)=>db.from('mzs_ops_current_property_tasks').select('*',{count:'exact'}).order('created_at',{ascending:false}).order('id').range(a,b)):Promise.resolve([]),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_ops_staff_work_area_directory').select('id,name',{count:'exact'}).order('id').range(a,b))]);
+ const [data,units,tasks,areas,legacyRows]=await Promise.all([loadRegisters(db,params),allRows<{id:string;property_id:string;address:string}>((a,b)=>db.from('mzs_ops_staff_unit_directory').select('id,property_id,address',{count:'exact'}).order('id').range(a,b)),taskEnabled?allRows<PropertyTask>((a,b)=>db.from('mzs_ops_current_property_tasks').select('*',{count:'exact'}).order('created_at',{ascending:false}).order('id').range(a,b)):Promise.resolve([]),allRows<{id:string;name:string}>((a,b)=>db.from('mzs_ops_staff_work_area_directory').select('id,name',{count:'exact'}).order('id').range(a,b)),allRows<LegacyWeekRow>((a,b)=>db.from('mzs_ops_staff_legacy_history')
+  .select('id,reporting_year,iso_week,period_from,period_until,original_location,category,description,source_reference,close_status',{count:'exact'})
+  .order('reporting_year',{ascending:false}).order('iso_week',{ascending:false}).order('id').range(a,b))]);
  const requestedTask=typeof params.task==='string'?params.task:'';
  const initialTaskId=tasks.some(t=>t.id===requestedTask)?requestedTask:'';
  const ticketIds=data.tickets.rows.map(ticket=>ticket.id);
@@ -49,5 +52,5 @@ export default async function StaffPage({searchParams}:{searchParams:Promise<Par
  </section>}
  {taskEnabled?<details id="work-history" open={!!data.ticket||!!data.visit} className={s.staffHistory}>
  <summary>{staffText(language,'history')}</summary>
- <WorkRegisters data={data} params={params} properties={properties} areas={areas} tasks={tasks} staffLanguage={language}/></details>:<WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/>}</main>;
+ <WorkRegisters data={data} params={params} properties={properties} areas={areas} tasks={tasks} staffLanguage={language}/><LegacyWeekHistory rows={legacyRows} language={language}/></details>:<><WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/><LegacyWeekHistory rows={legacyRows} language={language}/></>}</main>;
 }
