@@ -70,7 +70,7 @@ export function operationsSnapshot(input:{
    subtitle:blocked?'Blocked':late?'Overdue':t.due_on&&t.due_on<=through?'Due within 7 days':!t.assigned_profile_id?'Unassigned':'Open',
    detail:(t.assigned_profile_id?people.get(t.assigned_profile_id)??'Assigned staff':'Unassigned')+
     (t.latest_note?' · '+t.latest_note:''),
-   date:t.due_on,priority,href:'/admin/workspaces/estates/staff/tasks#tasks'
+   date:t.due_on,priority,href:'/admin/workspaces/estates/staff/tasks#task-'+encodeURIComponent(t.id)
   };
  }).sort((a,b)=>{
   const rank=(v:OperationsItem)=>v.priority==='urgent'?0:v.priority==='attention'?1:2;
