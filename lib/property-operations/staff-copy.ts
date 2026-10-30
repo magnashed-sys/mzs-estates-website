@@ -25,7 +25,7 @@ const copy={
   taskOpen:'Open',taskProgress:'In progress',taskBlocked:'Waiting / blocked',taskDone:'Completed',taskCancelled:'Cancelled',
   recordActual:'Record actual time for a property, unit and, if relevant, a task.',
   hoursInfo:'Actual working time only; no salary or invoice is created.',
-  taskSaved:'Task created and visible in Group Admin.',reportSaved:'Maintenance report saved.',
+  taskSaved:'Task created and visible in Group Admin.',reportSaved:'Maintenance report saved.',viewReport:'View report and photos',
   uploadPartial:'Report saved, but not all photos could be uploaded. Open the report to add them.',
   taskExample:'e.g. Order towels for toilets',issueExample:'e.g. Leaking tap in kitchen',taskDetailsExample:'Add instructions or useful details',issueDetailsExample:'Describe the issue and its location',progressExample:'What has been done, or what is still needed?',dueShort:'Due',
   selectLocation:'Choose a location'
@@ -51,7 +51,7 @@ const copy={
   taskOpen:'Open',taskProgress:'In uitvoering',taskBlocked:'Wachten / geblokkeerd',taskDone:'Afgerond',taskCancelled:'Geannuleerd',
   recordActual:'Registreer daadwerkelijk gewerkte tijd bij een pand, unit en eventueel een taak.',
   hoursInfo:'Alleen daadwerkelijke uren; er wordt geen loon of factuur aangemaakt.',
-  taskSaved:'Taak aangemaakt en zichtbaar in de admin.',reportSaved:'Onderhoudsmelding opgeslagen.',
+  taskSaved:'Taak aangemaakt en zichtbaar in de admin.',reportSaved:'Onderhoudsmelding opgeslagen.',viewReport:'Bekijk melding en foto’s',
   uploadPartial:'Melding opgeslagen, maar niet alle foto’s konden worden verwerkt. Voeg ze via het dossier toe.',
   taskExample:'Bijv. handdoeken voor het toilet bestellen',issueExample:'Bijv. lekkende kraan in de keuken',taskDetailsExample:'Eventuele instructies of bijzonderheden',issueDetailsExample:'Wat is er aan de hand en waar precies?',progressExample:'Wat is gedaan of wat moet nog gebeuren?',dueShort:'Voor',
   selectLocation:'Kies een locatie'
@@ -77,7 +77,7 @@ const copy={
   taskOpen:'Abierta',taskProgress:'En curso',taskBlocked:'En espera / bloqueada',taskDone:'Completada',taskCancelled:'Cancelada',
   recordActual:'Registra el tiempo real por inmueble, unidad y, si procede, tarea.',
   hoursInfo:'Solo tiempo realmente trabajado; no crea salarios ni facturas.',
-  taskSaved:'Tarea creada y visible en administración.',reportSaved:'Incidencia guardada.',
+  taskSaved:'Tarea creada y visible en administración.',reportSaved:'Incidencia guardada.',viewReport:'Ver incidencia y fotos',
   uploadPartial:'Incidencia guardada, pero no todas las fotos se pudieron subir. Añádelas desde el expediente.',
   taskExample:'Ej. pedir toallas para los baños',issueExample:'Ej. grifo con fuga en la cocina',taskDetailsExample:'Instrucciones o detalles útiles',issueDetailsExample:'¿Qué ocurre y dónde?',progressExample:'¿Qué se ha hecho o qué queda pendiente?',dueShort:'Límite',
   selectLocation:'Selecciona una ubicación'
