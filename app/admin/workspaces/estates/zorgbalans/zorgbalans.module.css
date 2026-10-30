@@ -1,0 +1,26 @@
+.page{max-width:1180px;margin:auto;padding:24px 0 78px;color:#eee6db;font:14px/1.6 Arial,sans-serif}
+.page>a,.invoice a{color:#d8ba8c;text-underline-offset:4px}
+.page h1{font:400 clamp(30px,5vw,46px)/1.18 Georgia,serif;margin:8px 0 18px}
+.page h2{font:400 26px/1.2 Georgia,serif;color:#e5c89d;margin:0 0 14px}
+.kicker{font:11px/1.4 Arial,sans-serif;letter-spacing:.15em;color:#bca078;margin:23px 0 0}
+.intro{max-width:800px;color:#c5b8a6}.muted{font-size:12px;line-height:1.7;color:#ad9e89}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:26px 0}
+.stats>div{background:#191611;border:1px solid #554632;padding:18px}
+.stats small{display:block;color:#cbbda9}.stats strong{display:block;font:400 27px/1.35 Georgia,serif;margin-top:8px}
+.card{border:1px solid #574732;background:#18150f;padding:24px;margin:28px 0;display:grid;gap:13px}
+.card>p{margin:0;color:#c9b9a3;font-size:13px}
+.tableWrap{overflow-x:auto}.tableWrap table{width:100%;border-collapse:collapse;min-width:560px}
+.tableWrap td,.tableWrap th{border-bottom:1px solid #4a3d2b;padding:12px 9px;text-align:left;white-space:normal}
+.tableWrap th{color:#d9bd91;font-size:11px}.tableWrap td{font-size:12px}
+.check input{width:22px;height:22px;accent-color:#ccad7e}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fields label,.confirm label{display:grid;gap:6px;color:#ddcdb4}
+.fields input,.confirm input{background:#292319;color:#f5ecdd;border:1px solid #766347;padding:13px;width:100%;box-sizing:border-box;min-height:44px}
+.card button,.confirm button{background:#d7ba8e;color:#19150c;border:1px solid #e2c9a3;padding:13px 19px;min-height:44px;font-weight:bold;cursor:pointer}
+.card button:disabled,.confirm button:disabled{opacity:.5;cursor:not-allowed}
+.success{padding:10px;color:#cfe6bf;border:1px solid #426440}.error{padding:10px;color:#efb5a9;border:1px solid #8b5247}
+.invoiceList{display:grid;gap:15px}.invoice{padding:18px;border:1px solid #493c29;background:#201b13;display:grid;gap:10px}
+.invoice strong{font:400 19px Georgia,serif}.invoice p{margin:5px 0;color:#c8b7a0}
+.confirm{display:grid;gap:10px;max-width:590px}
+@media(max-width:750px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:16px}.fields{grid-template-columns:1fr}}
+@media(max-width:420px){.stats strong{font-size:23px}}
