@@ -109,17 +109,33 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
     <input type="hidden" name="assigned_profile_id" value={profileId}/>
     <input type="hidden" name="source_reference" value=""/>
    </>}
-   <label>{t('property')}
-    <select value={location} onChange={event=>{
-      const selection=event.target.value;
-      setLocation(selection);setUnitId('');
-      if(selection.startsWith('area:'))setKind('task');
-    }} required>
-     {properties.filter(p=>p.name.includes('IJmuiden')).map(p=>
-      <option key={p.id} value={'property:'+p.id}>{p.name}</option>)}
-     {areas.map(area=><option key={area.id} value={'area:'+area.id}>{area.name}</option>)}
-    </select>
-   </label>
+   <fieldset className={s.taskLocations}>
+    <legend>{t('property')}</legend>
+    <div className={s.taskLocationGrid}>
+     {properties.filter(p=>p.name.includes('IJmuiden')).map(p=>{
+      const value='property:'+p.id;
+      const name=p.name.includes('Andromedastraat')?'Andromedastraat IJmuiden':
+       p.name.includes('Kennemerlaan')?'Kennemerlaan IJmuiden':p.name;
+      return <label key={p.id} className={location===value?s.taskLocationActive:s.taskLocationChoice}>
+       <input type="radio" name="location_selection" value={value}
+        checked={location===value} onChange={()=>{
+         setLocation(value);setUnitId('');
+        }}/>
+       <span><strong>{name}</strong><small>{units.filter(u=>u.property_id===p.id).length} units</small></span>
+      </label>;
+     })}
+     {areas.map(area=>{
+      const value='area:'+area.id;
+      return <label key={area.id} className={location===value?s.taskLocationActive:s.taskLocationChoice}>
+       <input type="radio" name="location_selection" value={value}
+        checked={location===value} onChange={()=>{
+         setLocation(value);setUnitId('');setKind('task');
+        }}/>
+       <span><strong>{area.name}</strong><small>{t('workArea')}</small></span>
+      </label>;
+     })}
+    </div>
+   </fieldset>
    {(isArea||!units.some(u=>u.property_id===propertyId))&&<input type="hidden" name="unit_id" value=""/>}
    {!isArea&&units.some(u=>u.property_id===propertyId)&&<label>{t('unit')}
     <select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
