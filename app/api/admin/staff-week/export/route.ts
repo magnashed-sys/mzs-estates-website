@@ -1,8 +1,8 @@
 import {NextRequest} from 'next/server';
-import {requireEstateAdmin} from '../../../../../../lib/security/estate-properties';
-import {staffEnvironmentAvailable} from '../../../../../../lib/security/property-staff';
-import {allRows} from '../../../../../../lib/property-operations/staff-data';
-import {weekPdf,weekWorkbook,type FrozenVisit,type ClosedWeekReport} from '../../../../../../lib/property-operations/week-export';
+import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
+import {staffEnvironmentAvailable} from '../../../../../lib/security/property-staff';
+import {allRows} from '../../../../../lib/property-operations/staff-data';
+import {weekPdf,weekWorkbook,type FrozenVisit,type ClosedWeekReport} from '../../../../../lib/property-operations/week-export';
 export const runtime='nodejs';export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
