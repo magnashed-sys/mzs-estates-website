@@ -8,14 +8,19 @@ import s from "./staff.module.css";
 import {staffText,type StaffLanguage} from "../../lib/property-operations/staff-copy";
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
+type WorkArea={id:string;name:string};
 
-function ActualVisitForm({properties,units,tasks=[],today,language,initialTaskId}:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;language:StaffLanguage;initialTaskId?:string}){
+function ActualVisitForm({properties,units,areas=[],tasks=[],today,language,initialTaskId}:{properties:Property[];units:Unit[];areas?:WorkArea[];tasks?:PropertyTask[];today:string;language:StaffLanguage;initialTaskId?:string}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const router=useRouter();
  const [state,action,pending]=useActionState(saveActualStaffVisit,initialFormActionState);
- const assignedTasks=tasks.filter(task=>task.property_id!==null&&task.status!=='cancelled');
+ const assignedTasks=tasks.filter(task=>task.status!=='cancelled');
  const initialTask=assignedTasks.find(task=>task.id===initialTaskId);
- const [propertyId,setPropertyId]=useState(initialTask?.property_id??properties[0]?.id??"");
+ const [location,setLocation]=useState(initialTask?.work_area_id?'area:'+initialTask.work_area_id:
+   'property:'+(initialTask?.property_id??properties[0]?.id??''));
+ const isArea=location.startsWith('area:');
+ const propertyId=isArea?'':location.slice(9);
+ const workAreaId=isArea?location.slice(5):'';
  const [unitId,setUnitId]=useState(initialTask?.unit_id??"");
  const [taskId,setTaskId]=useState(initialTask?.id??"");
  useEffect(()=>{if(state.status==='success')router.refresh();},[state.status,router]);
@@ -32,19 +37,27 @@ function ActualVisitForm({properties,units,tasks=[],today,language,initialTaskId
    <select name="task_id" value={taskId} onChange={e=>{
     const id=e.target.value;setTaskId(id);
     const selected=assignedTasks.find(task=>task.id===id);
-    if(selected?.property_id){setPropertyId(selected.property_id);setUnitId(selected.unit_id??'');}
+    if(selected){
+     setLocation(selected.work_area_id?'area:'+selected.work_area_id:'property:'+selected.property_id);
+     setUnitId(selected.unit_id??'');
+    }
    }}>
     <option value="">{t('generalTask')}</option>
-    {assignedTasks.map(task=><option key={task.id} value={task.id}>{task.title}{task.unit_id?' · '+(units.find(u=>u.id===task.unit_id)?.address??'') : ''}</option>)}
+    {assignedTasks.map(task=><option key={task.id} value={task.id}>{task.title}{task.work_area_id?' · '+(areas.find(a=>a.id===task.work_area_id)?.name??''):task.unit_id?' · '+(units.find(u=>u.id===task.unit_id)?.address??''):''}</option>)}
    </select>
   </label>}
-  <label>{t('property')}<select required name="property_id" value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');setTaskId('');}}>
-   {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+  <input type="hidden" name="property_id" value={propertyId}/>
+  <input type="hidden" name="work_area_id" value={workAreaId}/>
+  <label>{t('property')}<select required name="work_location" value={location} onChange={e=>{
+   setLocation(e.target.value);setUnitId('');setTaskId('');
+  }}>
+   {properties.map(p=><option key={p.id} value={'property:'+p.id}>{p.name}</option>)}
+   {areas.map(a=><option key={a.id} value={'area:'+a.id}>{a.name}</option>)}
   </select></label>
-  <label>{t('unit')}<select name="unit_id" value={unitId} onChange={e=>{setUnitId(e.target.value);setTaskId('');}}>
+  {isArea?<input type="hidden" name="unit_id" value=""/>:<label>{t('unit')}<select name="unit_id" value={unitId} onChange={e=>{setUnitId(e.target.value);setTaskId('');}}>
    <option value="">{t('whole')}</option>
    {availableUnits.map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
-  </select></label>
+  </select></label>}
   <div className={s.timeEntryControls}>
    <label className={s.timeDate}>{t('dateLabel')}
     <input type="date" name="worked_on" defaultValue={today} required/>
@@ -108,7 +121,7 @@ function MaintenanceForm({properties,units}:{properties:Property[];units:Unit[]}
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }
-export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean;language:StaffLanguage;initialTaskId?:string}){
+export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean;language:StaffLanguage;initialTaskId?:string;areas?:WorkArea[]}){
  // The task-enabled mobile cockpit provides one unified entry point.
  // Keep the legacy maintenance form only where the task feature is disabled.
  return <div className={s.forms}>
