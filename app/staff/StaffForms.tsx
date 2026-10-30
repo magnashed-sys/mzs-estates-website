@@ -37,19 +37,19 @@ function ActualVisitForm({properties,units,tasks=[],today,language}:{properties:
    <div className={s.timeStepper}>
     <span>{t('hours')}</span>
     <div className={s.timeButtons}>
-     <button type="button" onClick={()=>adjustHours(-1)} disabled={pending||hours===0} aria-label={t('hours')+' −1'}>−</button>
+     <button type="button" onClick={()=>adjustHours(-1)} disabled={pending||hours===0} aria-label={t('hours')+' −1'}>↓</button>
      <output aria-live="polite">{hours}</output>
      <input type="hidden" name="hours" value={hours}/>
-     <button type="button" onClick={()=>adjustHours(1)} disabled={pending||hours===16} aria-label={t('hours')+' +1'}>+</button>
+     <button type="button" onClick={()=>adjustHours(1)} disabled={pending||hours===16} aria-label={t('hours')+' +1'}>↑</button>
     </div>
    </div>
    <div className={s.timeStepper}>
     <span>{t('minutes')}</span>
     <div className={s.timeButtons}>
-     <button type="button" onClick={()=>adjustMinutes(-1)} disabled={pending||minutes===0} aria-label={t('minutes')+' −15'}>−</button>
+     <button type="button" onClick={()=>adjustMinutes(-1)} disabled={pending||minutes===0} aria-label={t('minutes')+' −15'}>↓</button>
      <output aria-live="polite">{minutes}</output>
      <input type="hidden" name="minutes" value={minutes}/>
-     <button type="button" onClick={()=>adjustMinutes(1)} disabled={pending||minutes===45} aria-label={t('minutes')+' +15'}>+</button>
+     <button type="button" onClick={()=>adjustMinutes(1)} disabled={pending||minutes===45} aria-label={t('minutes')+' +15'}>↑</button>
     </div>
    </div>
   </div>
