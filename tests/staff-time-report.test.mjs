@@ -93,7 +93,7 @@ test('Time Report 2.0 separates operational work areas, units, ISO weeks and saf
  assert.equal(report.byLocation.find(([key])=>key==='area:private-magdy')[1].minutes,45);
  assert.equal(report.byProperty.reduce((n,[,v])=>n+v.count,0),5);
  assert.equal(report.byUnit.find(([key])=>key===id(101)+':'+id(401))[1].count,1);
- assert.deepEqual(report.byWeek.map(([key])=>key),['2026-09-28','2026-10-05']);
+ assert.deepEqual(clean(report.byWeek.map(([key])=>key)),['2026-09-28','2026-10-05']);
  assert.equal(report.byPersonWeek.find(([key])=>key===id(201)+':2026-10-05')[1].minutes,45);
  const area=report.visits.find(v=>v.work_area_id==='private-magdy');
  assert.equal(area.property_id,null);assert.equal(area.location_name,'Prive Magdy');
