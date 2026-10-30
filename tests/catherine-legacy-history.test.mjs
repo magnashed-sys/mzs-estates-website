@@ -7,7 +7,7 @@ test('Catherine prelaunch history is an isolated, owner-only, read-only archive'
  const sql=read('supabase/migrations/20261030113000_catherine_legacy_week_history.sql');
  assert.match(sql,/mzs_ops_staff_legacy_history/);
  assert.match(sql,/enable row level security/);
- assert.match(sql,/profile_id\s*=\s*\(select auth\.uid\(\)\)/);
+ assert.match(sql,/\(select auth\.uid\(\)\)\s*=\s*profile_id/);
  assert.match(sql,/p\.is_active/);
  assert.match(sql,/grant select on public\.mzs_ops_staff_legacy_history to authenticated/);
  assert.doesNotMatch(sql,/grant (insert|update|delete) on public\.mzs_ops_staff_legacy_history to authenticated/i);
