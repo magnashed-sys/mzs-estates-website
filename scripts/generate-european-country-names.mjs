@@ -3,7 +3,7 @@
  */
 import {getCountries} from 'libphonenumber-js';
 import {writeFileSync} from 'node:fs';
-const codes=[...new Set([...getCountries(),'AQ','BV','GS','HM','PN','TF','UM'])].filter(c=>!['AC','TA'].includes(c)).sort();
+const codes=[...new Set([...getCountries(),'AQ','BV','GS','HM','PN','TF','UM'])].sort();
 const data=Object.fromEntries(['da','uk','fi','cs'].map(locale=>{
  const names=new Intl.DisplayNames([locale],{type:'region'});
  return [locale,codes.map(code=>({code,name:names.of(code)||code})).sort((a,b)=>a.name.localeCompare(b.name,locale))];

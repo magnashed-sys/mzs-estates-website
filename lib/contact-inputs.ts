@@ -19,7 +19,7 @@ export function countryName(code: string, locale = 'en') {
 export function countryOptions(locale: string, telephone = false) {
   // Persisted labels and ordering avoid hydration mismatches between Node and browser CLDR releases.
   const stable = stableCountries(locale);
-  if (stable) return stable.filter(item => !telephone || phoneCountries.includes(item.code as CountryCode));
+  if (stable) return stable.filter(item => telephone ? phoneCountries.includes(item.code as CountryCode) : countryCodes.includes(item.code));
   return (telephone ? phoneCountries : countryCodes).map(code => ({code, name: countryName(code, locale)}))
     .sort((a, b) => a.name.localeCompare(b.name, locale));
 }

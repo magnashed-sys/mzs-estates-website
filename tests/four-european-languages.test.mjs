@@ -110,9 +110,11 @@ test('New-language country labels and order remain stable even if the runtime IC
  });
  for(const code of codes){
   const options=exports.countryOptions(code);assert.equal(options.length,contacts.countryCodes.length);
-  assert.deepEqual(JSON.parse(JSON.stringify(options)),stable[code]);
+  assert.deepEqual(JSON.parse(JSON.stringify(options)),stable[code].filter(x=>contacts.countryCodes.includes(x.code)));
   assert.equal(exports.countryName('HK',code),stable[code].find(x=>x.code==='HK').name);
   assert.ok(!exports.countryOptions(code,true).some(x=>x.code==='AQ'));
+  assert.deepEqual(Array.from(exports.countryOptions(code,true),x=>x.code).sort(),phone.getCountries().sort());
+  assert.deepEqual(Array.from(options,x=>x.code).sort(),Array.from(contacts.countryCodes).sort());
  }
 });
 test('Production sitemap includes all 100 marketing routes and preview stays non-indexable',()=>{

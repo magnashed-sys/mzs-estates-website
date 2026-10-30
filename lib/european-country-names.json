@@ -53,6 +53,10 @@
       "name": "Aruba"
     },
     {
+      "code": "AC",
+      "name": "Ascensionøen"
+    },
+    {
       "code": "AZ",
       "name": "Aserbajdsjan"
     },
@@ -905,6 +909,10 @@
       "name": "Trinidad og Tobago"
     },
     {
+      "code": "TA",
+      "name": "Tristan da Cunha"
+    },
+    {
       "code": "TN",
       "name": "Tunesien"
     },
@@ -1627,6 +1635,10 @@
       "name": "Острів Буве"
     },
     {
+      "code": "AC",
+      "name": "Острів Вознесіння"
+    },
+    {
       "code": "IM",
       "name": "Острів Мен"
     },
@@ -1879,6 +1891,10 @@
       "name": "Тринідад і Тобаго"
     },
     {
+      "code": "TA",
+      "name": "Трістан-да-Кунья"
+    },
+    {
       "code": "TV",
       "name": "Тувалу"
     },
@@ -2063,6 +2079,10 @@
     {
       "code": "AW",
       "name": "Aruba"
+    },
+    {
+      "code": "AC",
+      "name": "Ascension-saari"
     },
     {
       "code": "AU",
@@ -2901,6 +2921,10 @@
       "name": "Trinidad ja Tobago"
     },
     {
+      "code": "TA",
+      "name": "Tristan da Cunha"
+    },
+    {
       "code": "TD",
       "name": "Tšad"
     },
@@ -3061,6 +3085,10 @@
     {
       "code": "AW",
       "name": "Aruba"
+    },
+    {
+      "code": "AC",
+      "name": "Ascension"
     },
     {
       "code": "AU",
@@ -3929,6 +3957,10 @@
     {
       "code": "TT",
       "name": "Trinidad a Tobago"
+    },
+    {
+      "code": "TA",
+      "name": "Tristan da Cunha"
     },
     {
       "code": "TN",
