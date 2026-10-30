@@ -1,6 +1,7 @@
 "use client";
 import {initialFormActionState} from "../../lib/property-operations/form-state";
-import {useActionState,useState} from "react";
+import {useActionState,useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
 import {saveActualStaffVisit,reportMaintenanceTicket} from "./actions";
 import type {PropertyTask} from "../../lib/property-operations/property-tasks";
 import s from "./staff.module.css";
@@ -8,25 +9,39 @@ import {staffText,type StaffLanguage} from "../../lib/property-operations/staff-
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
 
-function ActualVisitForm({properties,units,tasks=[],today,language}:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;language:StaffLanguage}){
+function ActualVisitForm({properties,units,tasks=[],today,language,initialTaskId}:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;language:StaffLanguage;initialTaskId?:string}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
+ const router=useRouter();
  const [state,action,pending]=useActionState(saveActualStaffVisit,initialFormActionState);
- const [propertyId,setPropertyId]=useState(properties[0]?.id??"");
- const [unitId,setUnitId]=useState("");
+ const assignedTasks=tasks.filter(task=>task.property_id!==null&&task.status!=='cancelled');
+ const initialTask=assignedTasks.find(task=>task.id===initialTaskId);
+ const [propertyId,setPropertyId]=useState(initialTask?.property_id??properties[0]?.id??"");
+ const [unitId,setUnitId]=useState(initialTask?.unit_id??"");
+ const [taskId,setTaskId]=useState(initialTask?.id??"");
+ useEffect(()=>{if(state.status==='success')router.refresh();},[state.status,router]);
  const [hours,setHours]=useState(0),[minutes,setMinutes]=useState(30);
  const adjustHours=(change:number)=>setHours(value=>Math.min(16,Math.max(0,value+change)));
  const adjustMinutes=(change:number)=>setMinutes(value=>Math.min(45,Math.max(0,value+change*15)));
  const availableUnits=units.filter(u=>u.property_id===propertyId);
- const possibleTasks=tasks.filter(t=>t.property_id===propertyId&&
-   (!t.unit_id||t.unit_id===unitId)&&t.status!=='cancelled');
+
  const actualMinutes=hours*60+minutes;
  return <form className={s.form} action={action}>
   <h2>{t("workingTime")}</h2>
   <p className={s.description}>{t("hoursInfo")}</p>
-  <label>{t('property')}<select required name="property_id" value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}}>
+  {assignedTasks.length>0&&<label>{t('relatedTask')}
+   <select name="task_id" value={taskId} onChange={e=>{
+    const id=e.target.value;setTaskId(id);
+    const selected=assignedTasks.find(task=>task.id===id);
+    if(selected?.property_id){setPropertyId(selected.property_id);setUnitId(selected.unit_id??'');}
+   }}>
+    <option value="">{t('generalTask')}</option>
+    {assignedTasks.map(task=><option key={task.id} value={task.id}>{task.title}{task.unit_id?' · '+(units.find(u=>u.id===task.unit_id)?.address??'') : ''}</option>)}
+   </select>
+  </label>}
+  <label>{t('property')}<select required name="property_id" value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');setTaskId('');}}>
    {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
   </select></label>
-  <label>{t('unit')}<select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
+  <label>{t('unit')}<select name="unit_id" value={unitId} onChange={e=>{setUnitId(e.target.value);setTaskId('');}}>
    <option value="">{t('whole')}</option>
    {availableUnits.map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
   </select></label>
@@ -54,10 +69,7 @@ function ActualVisitForm({properties,units,tasks=[],today,language}:{properties:
    </div>
   </div>
   <p className={s.taskMeta}>{t('total')}: {hours}h {String(minutes).padStart(2,'0')}m</p>
-  {tasks.length>0&&<label>{t('relatedTask')}<select name="task_id" key={propertyId+'-'+unitId} defaultValue="">
-   <option value="">{t('generalTask')}</option>
-   {possibleTasks.map(t=><option key={t.id} value={t.id}>{t.title} · {t.status.replaceAll('_',' ')}</option>)}
-  </select></label>}
+
   <label>{t('workCategory')}<select name="task_category" defaultValue="cleaning">
    <option value="cleaning">{t('cleaning')}</option>
    <option value="inspection">{t('inspection')}</option>
@@ -96,7 +108,7 @@ function MaintenanceForm({properties,units}:{properties:Property[];units:Unit[]}
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }
-export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean;language:StaffLanguage}){
+export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean;language:StaffLanguage;initialTaskId?:string}){
  // The task-enabled mobile cockpit provides one unified entry point.
  // Keep the legacy maintenance form only where the task feature is disabled.
  return <div className={s.forms}>

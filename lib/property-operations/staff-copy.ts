@@ -28,6 +28,7 @@ const copy={
   taskSaved:'Task created and visible in Group Admin.',reportSaved:'Maintenance report saved.',viewReport:'View report and photos',photosUploaded:'photo(s) uploaded',
   uploadPartial:'Report saved, but not all photos could be uploaded. Open the report to add them.',
   taskExample:'e.g. Order towels for toilets',issueExample:'e.g. Leaking tap in kitchen',taskDetailsExample:'Add instructions or useful details',issueDetailsExample:'Describe the issue and its location',progressExample:'What has been done, or what is still needed?',dueShort:'Due',
+  logTimeForTask:'Log time for this task',photoProgress:'Uploading photo',noHighPriority:'No urgent or high-priority tasks.',recentReports:'Recent maintenance reports',viewAllReports:'View all reports',seeReport:'View report',noRecentReports:'No maintenance reports yet.',
   workArea:'Work location',selectLocation:'Choose a location'
  },
  nl:{
@@ -54,6 +55,7 @@ const copy={
   taskSaved:'Taak aangemaakt en zichtbaar in de admin.',reportSaved:'Onderhoudsmelding opgeslagen.',viewReport:'Bekijk melding en foto’s',photosUploaded:'foto(’s) verwerkt',
   uploadPartial:'Melding opgeslagen, maar niet alle foto’s konden worden verwerkt. Voeg ze via het dossier toe.',
   taskExample:'Bijv. handdoeken voor het toilet bestellen',issueExample:'Bijv. lekkende kraan in de keuken',taskDetailsExample:'Eventuele instructies of bijzonderheden',issueDetailsExample:'Wat is er aan de hand en waar precies?',progressExample:'Wat is gedaan of wat moet nog gebeuren?',dueShort:'Voor',
+  logTimeForTask:'Uren voor deze taak registreren',photoProgress:'Foto uploaden',noHighPriority:'Geen dringende of hogeprioriteitstaken.',recentReports:'Recente onderhoudsmeldingen',viewAllReports:'Alle meldingen bekijken',seeReport:'Melding bekijken',noRecentReports:'Nog geen onderhoudsmeldingen.',
   workArea:'Werklocatie',selectLocation:'Kies een locatie'
  },
  es:{
@@ -80,6 +82,7 @@ const copy={
   taskSaved:'Tarea creada y visible en administración.',reportSaved:'Incidencia guardada.',viewReport:'Ver incidencia y fotos',photosUploaded:'foto(s) subidas',
   uploadPartial:'Incidencia guardada, pero no todas las fotos se pudieron subir. Añádelas desde el expediente.',
   taskExample:'Ej. pedir toallas para los baños',issueExample:'Ej. grifo con fuga en la cocina',taskDetailsExample:'Instrucciones o detalles útiles',issueDetailsExample:'¿Qué ocurre y dónde?',progressExample:'¿Qué se ha hecho o qué queda pendiente?',dueShort:'Límite',
+  logTimeForTask:'Registrar horas de esta tarea',photoProgress:'Subiendo foto',noHighPriority:'No hay tareas urgentes o de alta prioridad.',recentReports:'Incidencias recientes',viewAllReports:'Ver todas las incidencias',seeReport:'Ver incidencia',noRecentReports:'Todavía no hay incidencias.',
   workArea:'Lugar de trabajo',selectLocation:'Selecciona una ubicación'
  }
 } as const;
