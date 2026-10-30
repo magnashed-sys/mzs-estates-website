@@ -2,12 +2,15 @@
 import {useActionState,useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
+import {addMyMaintenanceProgress} from './ticket-note-actions';
+import type {Ticket} from '../../lib/property-operations/staff-work';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import s from './staff.module.css';
 import {staffText,type StaffLanguage} from '../../lib/property-operations/staff-copy';
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
 type WorkArea={id:string;name:string};
+type FollowUp={id:string;ticket_id:string;note_kind:string;note:string;created_at:string};
 type Result={status:'idle'|'success'|'error'|'warning';message:string};
 const initial:Result={status:'idle',message:''};
 function Message({state}:{state:Result}){return state.message&&<p role="status" className={state.status==='error'?s.error:state.status==='warning'?s.noticeWarning:s.confirm}>{state.message}</p>;}
@@ -24,6 +27,24 @@ function Progress({task,language}:{task:PropertyTask;language:StaffLanguage}){
    </select>
   </label>
   <label>{t('progressNote')} <textarea name="note" minLength={3} maxLength={1500} rows={2} required placeholder={t('progressExample')}/></label>
+  <button type="submit" disabled={pending}>{pending?t('saving'):t('saveProgress')}</button>
+  <Message state={state}/>
+ </form>;
+}
+function TicketFollowUp({ticket,language}:{ticket:Ticket;language:StaffLanguage}){
+ const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
+ const [state,action,pending]=useActionState(addMyMaintenanceProgress,initial);
+ const router=useRouter();
+ useEffect(()=>{if(state.status==='success')router.refresh();},[state.status,router]);
+ return <form className={s.taskProgressForm} action={action}>
+  <input type="hidden" name="ticket_id" value={ticket.id}/>
+  <label>{t('maintenanceProgressType')}<select name="note_kind" defaultValue="progress">
+   <option value="progress">{t('maintenanceProgressDoing')}</option>
+   <option value="blocked">{t('maintenanceProgressBlocked')}</option>
+   <option value="ready_for_review">{t('maintenanceProgressReady')}</option>
+  </select></label>
+  <label>{t('progressNote')}<textarea name="note" rows={2} required minLength={8} maxLength={1500}
+   placeholder={t('progressExample')}/></label>
   <button type="submit" disabled={pending}>{pending?t('saving'):t('saveProgress')}</button>
   <Message state={state}/>
  </form>;
@@ -190,8 +211,8 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
   </form>
  </section>;
 }
-export default function StaffTaskBoard({tasks,properties,units,areas,profileId,today,language}:{
- tasks:PropertyTask[];properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;today:string;language:StaffLanguage;
+export default function StaffTaskBoard({tasks,tickets,followups,properties,units,areas,profileId,today,language}:{
+ tasks:PropertyTask[];tickets:Ticket[];followups:FollowUp[];properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;today:string;language:StaffLanguage;
 }){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [filter,setFilter]=useState<'open'|'high'|'all'>('open');
@@ -200,6 +221,9 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
  const list=taskOrder(tasks).filter(task=>
   filter==='all'||(filter==='open'?!['done','cancelled'].includes(task.status):
     !['done','cancelled'].includes(task.status)&&['high','urgent'].includes(task.priority)));
+ const maintenance=tickets.filter(ticket=>
+  filter==='all'||(ticket.status!=='closed'&&ticket.status!=='resolved'&&
+    (filter!=='high'||ticket.priority==='urgent')));
  const prop=new Map(properties.map(p=>[p.id,p.name]));
  const areaName=new Map(areas.map(area=>[area.id,area.name]));
  const unit=new Map(units.map(u=>[u.id,u.address]));
@@ -231,10 +255,31 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
    <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · '+t('dueShort')+' '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
    {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
-   {task.property_id&&<a className={s.taskInlineLink} href={'/staff?task='+encodeURIComponent(task.id)+'#hours'}>{t('logTimeForTask')}</a>}
+   <a className={s.taskInlineLink} href={'/staff?task='+encodeURIComponent(task.id)+'#hours'}>{t('logTimeForTask')}</a>
    {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>{t('progress')}</summary><Progress task={task} language={language}/></details>}
   </article>)}
-  {!list.length&&<p className={s.note}>{filter==='high'?t('noHighPriority'):t('noTasks')}</p>}</div>
+  {!list.length&&!maintenance.length&&<p className={s.note}>{filter==='high'?t('noHighPriority'):t('noTasks')}</p>}</div>
+  {maintenance.length>0&&<div className={s.maintenanceInTasks} aria-label={t('maintenanceFollowUpTitle')}>
+   <h3>{t('maintenanceFollowUpTitle')}</h3>
+   <div className={s.taskCardList}>
+    {maintenance.map(ticket=>{
+     const latest=followups.find(n=>n.ticket_id===ticket.id);
+     return <article key={ticket.id} className={s.taskCard}>
+      <div className={s.taskCardTop}><strong>{ticket.title}</strong>
+       <span className={s.taskChip}>{t('maintenanceBadge')}</span></div>
+      <p className={s.taskMeta}>{prop.get(ticket.property_id)??t('property')}</p>
+      <p className={s.taskMeta}>{ticket.status.replaceAll('_',' ')} · {ticket.priority==='urgent'?t('urgent'):t('normal')}</p>
+      <p>{ticket.description}</p>
+      {latest&&<p className={s.taskMeta}>{t('currentTask')}: {latest.note}</p>}
+      <a className={s.taskInlineLink} href={'/staff?ticket='+encodeURIComponent(ticket.id)+'#ticket'}>{t('viewReport')}</a>
+      {ticket.status!=='closed'&&<details className={s.taskDetails}>
+       <summary>{t('maintenanceFollowUpAction')}</summary>
+       <TicketFollowUp key={ticket.id+'-'+(latest?.id??'')} ticket={ticket} language={language}/>
+      </details>}
+     </article>;
+    })}
+   </div>
+  </div>}
   <p className={s.taskDisclaimer}>{t('note')}</p>
  </section>;
 }

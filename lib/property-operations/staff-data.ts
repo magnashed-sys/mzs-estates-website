@@ -38,7 +38,11 @@ export async function loadRegisters(db:DB,params:Params,admin=false){
  ]);
  const decisions:Decision[]=[];
  for(let i=0;i<corrections.length;i+=100){const ids=corrections.slice(i,i+100).map(c=>c.id);decisions.push(...await allRows<Decision>((a,b)=>db.from('mzs_ops_visit_correction_decisions').select('correction_id,decision,reason',{count:'exact'}).in('correction_id',ids).order('id').range(a,b)));}
+ const staffNotes=ticket.data?await allRows<{id:string;ticket_id:string;note_kind:string;note:string;created_at:string}>(
+  (a,b)=>db.from('mzs_ops_staff_ticket_notes').select('id,ticket_id,note_kind,note,created_at',{count:'exact'})
+  .eq('ticket_id',ticket.data.id).order('created_at',{ascending:false}).order('id').range(a,b)
+ ):[];
  const photos=ticket.data?await allRows<{id:string;created_at:string}>((a,b)=>db.from('mzs_ops_maintenance_photos').select('id,created_at',{count:'exact'}).eq('ticket_id',ticket.data.id).order('created_at').order('id').range(a,b)):[];
  const holds=admin&&photos.length?await allRows<{photo_id:string}>((a,b)=>db.from('mzs_ops_maintenance_photo_holds').select('photo_id',{count:'exact'}).in('photo_id',photos.map(p=>p.id)).order('id').range(a,b)):[];
- return {property,visits:{...visits,rows:visits.rows as Visit[]},tickets:{...tickets,rows:tickets.rows as Ticket[]},visit:visit.data as Visit|null,ticket:ticket.data as Ticket|null,corrections,decisions,reviews,events,photos:photos.map(p=>({...p,held:holds.some(h=>h.photo_id===p.id)}))};
+ return {property,visits:{...visits,rows:visits.rows as Visit[]},tickets:{...tickets,rows:tickets.rows as Ticket[]},visit:visit.data as Visit|null,ticket:ticket.data as Ticket|null,corrections,decisions,reviews,events,staffNotes,photos:photos.map(p=>({...p,held:holds.some(h=>h.photo_id===p.id)}))};
 }

@@ -20,6 +20,7 @@ function nullableId(form:FormData):string|null{
 export async function saveActualStaffVisit(_previous:StaffActionState,form:FormData):Promise<StaffActionState>{
  const {db,properties,user}=await requirePropertyStaff();
  const propertyId=String(form.get("property_id")??"");
+ const workAreaId=String(form.get("work_area_id")??"");
  const on=String(form.get("worked_on")??"");
  const hoursField=form.get('hours'),minutesField=form.get('minutes');
  const fromClock=hoursField!==null||minutesField!==null;
@@ -31,7 +32,9 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
    Number(String(form.get('actual_minutes')??''));
  const category=String(form.get("task_category")??"");
  const description=String(form.get("description")??"").trim();
- if(!uuid.test(propertyId)||!properties.some(p=>p.id===propertyId)||
+ if((!!propertyId)===(!!workAreaId) ||
+   (propertyId&&(!uuid.test(propertyId)||!properties.some(p=>p.id===propertyId))) ||
+   (workAreaId&&!['maintenance-beverwijk','private-magdy'].includes(workAreaId)) ||
    !dateValid(on)||!Number.isSafeInteger(minutes)||minutes<1||minutes>960||
    !["cleaning","inspection","maintenance","gardening","guest_service","other"].includes(category)||
    description.length<3||description.length>1500){
@@ -39,20 +42,28 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
  }
  let unitId:string|null;
  try{unitId=nullableId(form);}catch{return {status:"error",message:"De gekozen unit is ongeldig."};}
+ if(workAreaId&&unitId)return {status:'error',message:'Operational locations do not have rental units.'};
+ if(workAreaId){
+  const {data:area,error:areaError}=await db.from('mzs_ops_staff_work_area_directory')
+   .select('id').eq('id',workAreaId).maybeSingle();
+  if(areaError||!area)return {status:'error',message:'Work location not assigned to your account.'};
+ }
  let taskId:string|null=null;
  if(staffTaskEnvironment()){
   const raw=String(form.get('task_id')??'');
   if(raw){
    if(!uuid.test(raw))return {status:'error',message:'Invalid task selection.'};
    const {data:task,error:taskError}=await db.from('mzs_ops_property_tasks')
-    .select('id,property_id,unit_id,assigned_profile_id').eq('id',raw).maybeSingle();
+    .select('id,property_id,work_area_id,unit_id,assigned_profile_id').eq('id',raw).maybeSingle();
    if(taskError||!task||task.assigned_profile_id!==user.id||
-      !validateTaskPlacement(task,{property_id:propertyId,unit_id:unitId}))
-    return {status:'error',message:'Task must belong to your property and selected unit.'};
+      !(workAreaId?
+         task.work_area_id===workAreaId&&task.property_id===null&&unitId===null:
+         task.work_area_id===null&&validateTaskPlacement(task,{property_id:propertyId,unit_id:unitId})))
+    return {status:'error',message:'Task must belong to your assigned work location and unit.'};
    taskId=raw;
   }
  }else if(form.get('task_id'))return {status:'error',message:'Task linking not available.'};
- const payload:Record<string,unknown>={property_id:propertyId,unit_id:unitId,worked_on:on,
+ const payload:Record<string,unknown>={property_id:propertyId||null,work_area_id:workAreaId||null,unit_id:unitId,worked_on:on,
   actual_minutes:minutes,task_category:category,description};
  if(taskId)payload.task_id=taskId;
  const {error}=await db.from("mzs_ops_staff_visits").insert(payload);
