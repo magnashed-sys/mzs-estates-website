@@ -162,6 +162,7 @@ export const adminDirectory = [
     "es": "Tareas y mantenimiento",
     "href": "/admin/workspaces/estates/staff/tasks"
   },
+ {group:"Staff",en:"Recurring work",es:"Trabajos recurrentes",href:"/admin/workspaces/estates/staff/recurring"},
   {
     "group": "Staff",
     "en": "Operations action center",

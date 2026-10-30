@@ -35,6 +35,7 @@ export default async function Tasks(){
    <div><small>{tr('Completed','Completadas')}</small><strong>{stats.completed}</strong></div>
   </div>
   <p className={s.note}>{tr('Supplier costs and historical expense statements are not tasks or recorded worked hours. Tasks do not create work orders, invoices or cash movements.','Los costes históricos no se convierten en tareas ni horas trabajadas. Las tareas no generan órdenes, facturas ni movimientos de dinero.')}</p>
+  <p><Link href="/admin/workspaces/estates/staff/recurring">{tr('Recurring work →','Trabajos recurrentes →')}</Link></p>
   <PropertyTaskAdmin language={language==='es'?'es':'en'} properties={properties} units={units} members={members} scopes={scopes} tasks={tasks} areas={areas} timeTotals={[...byTask.values()]}/>
  </main>;
 }
