@@ -25,7 +25,7 @@ export function dossierHref(key:QueueKey,id:string,page=1){
  return `/admin/workspaces/estates/staff?${key==='visits'||key==='corrections'?'visit':'ticket'}=${id}&inbox=${key}&inboxPage=${pageNumber(String(page))}#${key==='visits'||key==='corrections'?'visit':key==='budgets'?'work-orders':'ticket'}`;
 }
 const isVisit=(key:QueueKey)=>key==='visits'||key==='corrections';
-const columns={visits:'id,property_id,profile_id,worked_on,effective_minutes,description',tickets:'id,property_id,responsible_profile_id,scheduled_for,priority,title,created_at',budgets:'id,ticket_id,quotation_reference,scope_of_work,created_at'};
+const columns={visits:'id,property_id,work_area_id,profile_id,worked_on,effective_minutes,description',tickets:'id,property_id,responsible_profile_id,scheduled_for,priority,title,created_at',budgets:'id,ticket_id,quotation_reference,scope_of_work,created_at'};
 function query(db:DB,key:QueueKey,today:string,head=false){
  if(!validDate(today))throw Error("Invalid reporting date");
  const table=isVisit(key)?'mzs_ops_current_visits':key==='budgets'?'mzs_ops_current_work_orders':'mzs_ops_current_tickets';
@@ -54,7 +54,7 @@ export async function loadQueueCounts(db:DB,today:string){
   catch{return {...queue,count:null};}
  }));
 }
-type Source={id:string;property_id?:string;profile_id?:string;responsible_profile_id?:string|null;worked_on?:string;effective_minutes?:number;description?:string;scheduled_for?:string|null;priority?:string;title?:string;ticket_id?:string;quotation_reference?:string;scope_of_work?:string;created_at?:string};
+type Source={id:string;property_id?:string|null;work_area_id?:string|null;profile_id?:string;responsible_profile_id?:string|null;worked_on?:string;effective_minutes?:number;description?:string;scheduled_for?:string|null;priority?:string;title?:string;ticket_id?:string;quotation_reference?:string;scope_of_work?:string;created_at?:string};
 export type QueueItem={id:string;property:string;person:string;title:string;detail:string;date:string;urgent:boolean;href:string};
 export async function loadQueuePage(db:DB,key:QueueKey,requestedPage:number,today:string){
  let page=pageNumber(String(requestedPage));
@@ -78,16 +78,22 @@ export async function loadQueuePage(db:DB,key:QueueKey,requestedPage:number,toda
   return new Map(rows.map(x=>[x.id,x]));
  }
  const tickets=key==='budgets'?await lookup<{id:string;property_id:string;title:string}>('mzs_ops_current_tickets','id,property_id,title',source.map(x=>x.ticket_id)):new Map<string,{id:string;property_id:string;title:string}>();
- const [properties,people]=await Promise.all([
+ const areaIds=[...new Set(source.map(x=>x.work_area_id).filter((id):id is string=>typeof id==='string'))];
+ if(areaIds.some(id=>!['maintenance-beverwijk','private-magdy'].includes(id)))throw Error('Invalid work-area reference');
+ const [properties,people,areas]=await Promise.all([
   lookup<{id:string;name:string}>('mzs_estate_properties','id,name',source.map(x=>x.property_id??tickets.get(x.ticket_id??'')?.property_id)),
-  lookup<{id:string;full_name:string|null}>('profiles','id,full_name',source.map(x=>isVisit(key)?x.profile_id:x.responsible_profile_id))
+  lookup<{id:string;full_name:string|null}>('profiles','id,full_name',source.map(x=>isVisit(key)?x.profile_id:x.responsible_profile_id)),
+  areaIds.length?db.from('mzs_ops_staff_work_areas').select('id,name').in('id',areaIds).limit(25):Promise.resolve({data:[],error:null})
  ]);
+ if(areas.error||!areas.data||areas.data.length!==areaIds.length)throw Error('Work-area data missing');
+ const areaNames=new Map(areas.data.map(row=>[row.id,row.name]));
  const items:QueueItem[]=source.map(row=>{
   const ticket=tickets.get(row.ticket_id??'');
   const property=properties.get(row.property_id??ticket?.property_id??'');
-  if(!property)throw Error("Property missing");
+  const area=row.work_area_id?areaNames.get(row.work_area_id):undefined;
+  if(!property&&!area)throw Error("Work location missing");
   const personId=isVisit(key)?row.profile_id:row.responsible_profile_id;
-  return {id:row.id,property:property.name,person:personId?(people.get(personId)?.full_name??"Name missing"):"Not yet assigned",
+  return {id:row.id,property:property?.name??area!,person:personId?(people.get(personId)?.full_name??"Name missing"):"Not yet assigned",
    title:isVisit(key)?`${row.effective_minutes} minutes`:key==='budgets'?row.quotation_reference??"Work order":row.title??"Maintenance",
    detail:isVisit(key)?row.description??'':key==='budgets'?`${ticket?.title} · ${row.scope_of_work}`:'',
    date:isVisit(key)?row.worked_on??'':key==='budgets'?row.created_at?.slice(0,10)??'':row.scheduled_for??"Not yet scheduled",
