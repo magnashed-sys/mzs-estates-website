@@ -102,6 +102,7 @@ export const adminDirectory = [
     "es": "Acceso a proyectos",
     "href": "/admin/project-access"
   },
+  {group:"Accountancy",en:"Accountant handovers",es:"Entregas al asesor",href:"/admin/workspaces/accountancy/handovers"},
   {
     "group": "Accountancy",
     "en": "Invoices",
