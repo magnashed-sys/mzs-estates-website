@@ -8,7 +8,7 @@ import {type loadRegisters,type Params,one} from '../../lib/property-operations/
 import {ReviewForm,CorrectionForm,CorrectionDecisionForm,TicketProgressForm} from './WorkForms';
 import s from './staff.module.css';
 import type {StaffLanguage} from '../../lib/property-operations/staff-copy';
-import type {AdminTranslator} from '../../lib/admin/translation';
+import {createAdminTranslator,type AdminTranslator} from '../../lib/admin/translation';
 const staffHistoryLabels:Record<'nl'|'es',Record<string,string>>={
  nl:{
   'Filter by property':'Filter op pand','All assigned properties':'Alle toegewezen panden',
@@ -57,12 +57,13 @@ const staffHistoryLabels:Record<'nl'|'es',Record<string,string>>={
 type Data=Awaited<ReturnType<typeof loadRegisters>>;
 export default function WorkRegisters({data,params,properties,tasks=[],members=[],assignees=members,admin=false,staffLanguage}:{data:Data;params:Params;properties:Property[];tasks?:PropertyTask[];members?:Member[];assignees?:Member[];admin?:boolean;staffLanguage?:StaffLanguage}){
  const {t:baseT,locale:adminLocale}=useAdminI18n();
+ // Staff language selection must not inherit the public-site locale.
+ const staffFallback=createAdminTranslator(staffLanguage==='es'?'es':'en');
  const adminT:AdminTranslator=(source,values)=>{
-  if(admin||!staffLanguage||staffLanguage==='en'||source===null||source===undefined)
-   return baseT(source,values);
-  const literal=String(source);
-  const translated=staffHistoryLabels[staffLanguage]?.[literal];
-  return translated&&!values?translated:baseT(source,values);
+  if(admin||!staffLanguage)return baseT(source,values);
+  const literal=String(source??'');
+  const translated=staffLanguage==='en'?undefined:staffHistoryLabels[staffLanguage]?.[literal];
+  return translated&&!values?translated:staffFallback(source,values);
  };
 
  const base=admin?'/admin/workspaces/estates/staff':'/staff';
