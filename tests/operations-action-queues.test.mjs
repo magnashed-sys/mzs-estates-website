@@ -116,7 +116,7 @@ test('action page checks environment and active administrator before reading que
 });
 test('successful operation invalidation refreshes both dashboards and the complete queue',()=>{
  const paths=[],exports={};vm.runInNewContext(compile('lib/property-operations/revalidate.ts'),{exports,require:()=>({revalidatePath:path=>paths.push(path)})});
- exports.revalidateOperations();assert.deepEqual(paths,['/staff','/admin/workspaces/estates/staff','/admin/workspaces/estates/actions','/admin/workspaces/estates/time-report','/admin/workspaces/estates','/admin/workspaces/group']);
+ exports.revalidateOperations();assert.deepEqual(paths,['/staff','/admin/workspaces/estates/staff','/admin/workspaces/estates/actions','/admin/workspaces/estates/time-report','/admin/workspaces/estates','/admin/workspaces/estates/zorgbalans','/admin/workspaces/group']);
 });
 test('time action queues support work-area visits without inventing a property dossier',async()=>{
  await pg.query('insert into mzs_ops_current_visits(id,property_id,profile_id,worked_on,effective_minutes,description,review_decision,correction_pending,work_area_id) values($1,null,$2,$3,$4,$5,null,false,$6)',[
