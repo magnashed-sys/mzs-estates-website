@@ -38,21 +38,48 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
   event.preventDefault();
   if(maintenancePending)return;
   const form=event.currentTarget;
+  const formData=new FormData(form);
+  const files=formData.getAll('photos')
+   .filter((item):item is File=>item instanceof File&&item.size>0);
+  if(files.length>3||files.some(file=>
+    file.size>4194304||!['image/jpeg','image/png','image/webp'].includes(file.type))){
+   setMaintenanceState({status:'error',message:t('photoHint')});
+   return;
+  }
+  formData.delete('photos');
   setMaintenancePending(true);setMaintenanceState(initial);setLastTicketId(null);
   try{
    const response=await fetch('/api/staff/report-with-photos',{
-    method:'POST',body:new FormData(form),credentials:'same-origin'
+    method:'POST',body:formData,credentials:'same-origin'
    });
    const payload:unknown=await response.json();
    const message=payload&&typeof payload==='object'&&'message' in payload&&
     typeof payload.message==='string'?payload.message:'Maintenance report could not be saved.';
    const ticketId=payload&&typeof payload==='object'&&'ticketId' in payload&&
-    typeof payload.ticketId==='string'?payload.ticketId:null;
-   if(response.ok){
-    setMaintenanceState({status:'success',message});
-    setLastTicketId(ticketId);
-    form.reset();router.refresh();
-   }else setMaintenanceState({status:'error',message});
+    typeof payload.ticketId==='string'&&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.ticketId)
+      ?payload.ticketId:null;
+   if(!response.ok||!ticketId){
+    setMaintenanceState({status:'error',message});return;
+   }
+   setLastTicketId(ticketId);
+   let uploaded=0;
+   for(const file of files){
+    const upload=new FormData();
+    upload.set('ticket_id',ticketId);
+    upload.set('file',file);
+    try{
+     const photo=await fetch('/api/staff/maintenance-photo',{
+      method:'POST',body:upload,credentials:'same-origin'
+     });
+     if(!photo.ok)break;
+     uploaded+=1;
+    }catch{break;}
+   }
+   setMaintenanceState({status:'success',message:uploaded===files.length
+    ?t('reportSaved')+(files.length?' '+uploaded+' '+t('photosUploaded'):'')
+    :t('uploadPartial')});
+   form.reset();router.refresh();
   }catch{
    setMaintenanceState({status:'error',message:'Could not confirm submission. Check the maintenance register before trying again.'});
   }finally{setMaintenancePending(false);}
