@@ -1,5 +1,140 @@
 /** Client-facing copy only. Authorization, claiming and delivery stay in notifications.ts. */
 const copy = {
+
+  "da": {
+    "member": "kunde",
+    "dear": "Hej",
+    "confidential": "Denne personlige besked er beregnet til den angivne modtager. Videresend ikke beskeder om kontosikkerhed.",
+    "motto": "PRIVAT · UAFHÆNGIG · INTERNATIONAL",
+    "projects": "Dine tildelte projekter",
+    "login": "LOG IND",
+    "collection": "SE MIN KOLLEKTION",
+    "capital": "ÅBN PRIVATE CAPITAL",
+    "access": "PRIVAT ADGANG",
+    "invitation": "KUN EFTER INVITATION",
+    "account_activated": [
+      "Din MZS Group-konto er nu aktiv",
+      "Velkommen til din private kollektion.",
+      "Din MZS Group-konto er godkendt og aktiveret. Du kan nu se de muligheder, der er udvalgt til dig."
+    ],
+    "new_project_access": [
+      "Ny adgang til private projekter | MZS Group",
+      "Nye muligheder i din kollektion.",
+      "Din MZS Group-konto har fået yderligere adgang til private projekter."
+    ],
+    "capital_access_granted": [
+      "Din Private Capital-adgang | MZS Group",
+      "Din private sag er tilgængelig.",
+      "Din MZS Group-konto har fået adgang til en Private Capital-sag. Log ind for at se dit overblik sikkert."
+    ],
+    "types": {
+      "investment": "Investering",
+      "financing": "Finansiering",
+      "sale": "Privat salg",
+      "rental": "Privat udlejning"
+    }
+  },
+  "uk": {
+    "member": "клієнт",
+    "dear": "Вітаємо",
+    "confidential": "Це особисте повідомлення призначене зазначеному одержувачу. Не пересилайте повідомлення про безпеку облікового запису.",
+    "motto": "ПРИВАТНІСТЬ · НЕЗАЛЕЖНІСТЬ · МІЖНАРОДНІСТЬ",
+    "projects": "Призначені вам проєкти",
+    "login": "УВІЙТИ",
+    "collection": "ПЕРЕГЛЯНУТИ МОЮ КОЛЕКЦІЮ",
+    "capital": "ВІДКРИТИ PRIVATE CAPITAL",
+    "access": "ПРИВАТНИЙ ДОСТУП",
+    "invitation": "ЛИШЕ ЗА ЗАПРОШЕННЯМ",
+    "account_activated": [
+      "Ваш обліковий запис MZS Group активний",
+      "Ласкаво просимо до вашої приватної колекції.",
+      "Ваш обліковий запис MZS Group схвалено й активовано. Тепер ви можете переглядати підібрані для вас можливості."
+    ],
+    "new_project_access": [
+      "Новий доступ до приватних проєктів | MZS Group",
+      "Нові можливості у вашій колекції.",
+      "Вашому обліковому запису MZS Group надано додатковий доступ до приватних проєктів."
+    ],
+    "capital_access_granted": [
+      "Ваш доступ до Private Capital | MZS Group",
+      "Ваше приватне досьє доступне.",
+      "Вашому обліковому запису MZS Group надано доступ до досьє Private Capital. Увійдіть для безпечного перегляду."
+    ],
+    "types": {
+      "investment": "Інвестиція",
+      "financing": "Фінансування",
+      "sale": "Приватний продаж",
+      "rental": "Приватна оренда"
+    }
+  },
+  "fi": {
+    "member": "asiakas",
+    "dear": "Hei",
+    "confidential": "Tämä henkilökohtainen viesti on tarkoitettu nimetylle vastaanottajalle. Älä välitä tilin turvallisuutta koskevia viestejä eteenpäin.",
+    "motto": "YKSITYINEN · RIIPPUMATON · KANSAINVÄLINEN",
+    "projects": "Sinulle osoitetut hankkeet",
+    "login": "KIRJAUDU SISÄÄN",
+    "collection": "KATSO OMA KOKOELMA",
+    "capital": "AVAA PRIVATE CAPITAL",
+    "access": "YKSITYINEN PÄÄSY",
+    "invitation": "VAIN KUTSUTUILLE",
+    "account_activated": [
+      "MZS Group -tilisi on nyt aktiivinen",
+      "Tervetuloa yksityiseen kokoelmaasi.",
+      "MZS Group -tilisi on hyväksytty ja aktivoitu. Voit nyt tutustua sinulle valittuihin mahdollisuuksiin."
+    ],
+    "new_project_access": [
+      "Uusi pääsy yksityisiin hankkeisiin | MZS Group",
+      "Uusia mahdollisuuksia kokoelmassasi.",
+      "MZS Group -tilillesi on myönnetty lisää käyttöoikeuksia yksityisiin hankkeisiin."
+    ],
+    "capital_access_granted": [
+      "Private Capital -käyttöoikeutesi | MZS Group",
+      "Yksityiset asiakirjasi ovat saatavilla.",
+      "MZS Group -tilillesi on myönnetty pääsy Private Capital -asiakirjakokonaisuuteen. Kirjaudu sisään tarkastellaksesi näkymääsi turvallisesti."
+    ],
+    "types": {
+      "investment": "Sijoitus",
+      "financing": "Rahoitus",
+      "sale": "Yksityinen myynti",
+      "rental": "Yksityinen vuokraus"
+    }
+  },
+  "cs": {
+    "member": "klient",
+    "dear": "Dobrý den",
+    "confidential": "Tato osobní zpráva je určena uvedenému příjemci. Nepřeposílejte zprávy o zabezpečení účtu.",
+    "motto": "SOUKROMÝ · NEZÁVISLÝ · MEZINÁRODNÍ",
+    "projects": "Vaše přiřazené projekty",
+    "login": "PŘIHLÁSIT SE",
+    "collection": "ZOBRAZIT MOJI KOLEKCI",
+    "capital": "OTEVŘÍT PRIVATE CAPITAL",
+    "access": "SOUKROMÝ PŘÍSTUP",
+    "invitation": "POUZE NA POZVÁNÍ",
+    "account_activated": [
+      "Váš účet MZS Group je nyní aktivní",
+      "Vítejte ve své soukromé kolekci.",
+      "Váš účet MZS Group byl schválen a aktivován. Nyní můžete prohlížet příležitosti vybrané pro vás."
+    ],
+    "new_project_access": [
+      "Nový přístup k soukromým projektům | MZS Group",
+      "Nové příležitosti ve vaší kolekci.",
+      "Vašemu účtu MZS Group byl udělen další přístup k soukromým projektům."
+    ],
+    "capital_access_granted": [
+      "Váš přístup k Private Capital | MZS Group",
+      "Váš soukromý spis je dostupný.",
+      "Vašemu účtu MZS Group byl udělen přístup ke spisu Private Capital. Pro bezpečné zobrazení přehledu se přihlaste."
+    ],
+    "types": {
+      "investment": "Investice",
+      "financing": "Financování",
+      "sale": "Soukromý prodej",
+      "rental": "Soukromý pronájem"
+    }
+  }
+,
+
   ru: {
     member: 'клиент', dear: 'Здравствуйте,', access: 'ЛИЧНЫЙ ДОСТУП',
     confidential: 'Это личное сообщение предназначено указанному получателю. Не пересылайте сообщения о безопасности аккаунта.',

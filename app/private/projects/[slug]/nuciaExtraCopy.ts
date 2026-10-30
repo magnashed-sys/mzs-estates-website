@@ -1,4 +1,47 @@
 const copy: Record<string, readonly string[]> = {
+
+  "da": [
+    "Vaskerum",
+    "Separat vaskerum med to vaskemaskiner og to tørretumblere.",
+    "Villaen om natten",
+    "Varm udendørs belysning omkring villaen, poolen og haven.",
+    "Terrasse i skumringen",
+    "Oplyst pool",
+    "Villa og pool om natten",
+    "Havebelysning"
+  ],
+  "uk": [
+    "Пральня",
+    "Окрема пральня з двома пральними та двома сушильними машинами.",
+    "Вілла вночі",
+    "Тепле зовнішнє освітлення навколо вілли, басейну та саду.",
+    "Тераса в сутінках",
+    "Освітлений басейн",
+    "Вілла й басейн уночі",
+    "Освітлення саду"
+  ],
+  "fi": [
+    "Pyykkihuone",
+    "Erillinen pyykkihuone, jossa on kaksi pesukonetta ja kaksi kuivausrumpua.",
+    "Huvila yöllä",
+    "Lämmin ulkovalaistus huvilan, altaan ja puutarhan ympärillä.",
+    "Terassi hämärässä",
+    "Valaistu allas",
+    "Huvila ja allas yöllä",
+    "Puutarhan valaistus"
+  ],
+  "cs": [
+    "Prádelna",
+    "Samostatná prádelna se dvěma pračkami a dvěma sušičkami.",
+    "Vila v noci",
+    "Teplé venkovní osvětlení kolem vily, bazénu a zahrady.",
+    "Terasa za soumraku",
+    "Osvětlený bazén",
+    "Vila a bazén v noci",
+    "Zahradní osvětlení"
+  ]
+,
+
   "en": [
     "Laundry room",
     "Separate laundry room with two washing machines and two tumble dryers.",

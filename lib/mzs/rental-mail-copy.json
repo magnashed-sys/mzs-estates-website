@@ -586,5 +586,173 @@
     "motto": "PRIVAT · UAVHENGIG · INTERNASJONAL",
     "cancelFooter": "Eventuelle betalinger og refusjoner håndteres separat. Kontakt MZS Group hvis du trenger hjelp.",
     "footer": "Du finner gjeldende status på din personlige konto. Kontakt MZS Group hvis du trenger hjelp."
+  },
+  "da": {
+    "title": {
+      "requested": "Din reservationsanmodning er modtaget",
+      "confirmed": "Din reservation er bekræftet",
+      "modified": "Din reservation er ændret",
+      "cancelled": "Din reservation er annulleret"
+    },
+    "intro": {
+      "requested": "Vi har modtaget din anmodning. Dette er endnu ikke en bekræftet reservation. Efter individuel gennemgang og godkendelse sender MZS Group en særskilt bekræftelse.",
+      "confirmed": "MZS Group har godkendt og bekræftet din reservation. Vi glæder os til dit ophold.",
+      "modified": "MZS Group har ændret din bekræftede reservation. Oplysningerne nedenfor erstatter oplysningerne i den tidligere bekræftelse.",
+      "cancelled": "MZS Group har annulleret din reservation. Den tidligere bekræftelse er ikke længere gyldig. Rejs ikke på grundlag af den bekræftelse."
+    },
+    "status": {
+      "requested": "ANMODNING — IKKE BEKRÆFTET",
+      "confirmed": "BEKRÆFTET",
+      "modified": "BEKRÆFTET — ÆNDRET",
+      "cancelled": "ANNULLERET — UGYLDIG"
+    },
+    "labels": {
+      "status": "Status",
+      "property": "Ejendom",
+      "checkIn": "Indtjekning",
+      "checkOut": "Udtjekning",
+      "nights": "Antal nætter",
+      "guests": "Gæster",
+      "estimate": "Anslået beløb",
+      "confirmed": "Bekræftet beløb",
+      "previous": "Tidligere bekræftet beløb",
+      "reference": "Reservationsreference",
+      "heating": "Ønske om poolopvarmning",
+      "notes": "Særlige ønsker"
+    },
+    "yes": "Ja",
+    "no": "Nej",
+    "none": "Ingen",
+    "greeting": "Hej,",
+    "action": "SE MIN RESERVATION",
+    "cancelFooter": "Eventuelle betalinger og tilbagebetalinger håndteres separat. Kontakt MZS Group, hvis du har brug for hjælp.",
+    "footer": "Du finder den aktuelle status på din personlige konto. Kontakt MZS Group, hvis du har brug for hjælp.",
+    "motto": "PRIVAT · UAFHÆNGIG · INTERNATIONAL"
+  },
+  "uk": {
+    "title": {
+      "requested": "Ваш запит на бронювання отримано",
+      "confirmed": "Ваше бронювання підтверджено",
+      "modified": "Ваше бронювання змінено",
+      "cancelled": "Ваше бронювання скасовано"
+    },
+    "intro": {
+      "requested": "Ми отримали ваш запит. Це ще не підтверджене бронювання. Після індивідуального розгляду та схвалення MZS Group надішле окреме підтвердження.",
+      "confirmed": "MZS Group схвалила й підтвердила ваше бронювання. З нетерпінням чекаємо на ваш приїзд.",
+      "modified": "MZS Group змінила ваше підтверджене бронювання. Наведені нижче дані замінюють інформацію з попереднього підтвердження.",
+      "cancelled": "MZS Group скасувала ваше бронювання. Попереднє підтвердження більше не дійсне. Не вирушайте в подорож на підставі того підтвердження."
+    },
+    "status": {
+      "requested": "ЗАПИТ — НЕ ПІДТВЕРДЖЕНО",
+      "confirmed": "ПІДТВЕРДЖЕНО",
+      "modified": "ПІДТВЕРДЖЕНО — ЗМІНЕНО",
+      "cancelled": "СКАСОВАНО — НЕДІЙСНЕ"
+    },
+    "labels": {
+      "status": "Статус",
+      "property": "Об’єкт",
+      "checkIn": "Заїзд",
+      "checkOut": "Виїзд",
+      "nights": "Кількість ночей",
+      "guests": "Гості",
+      "estimate": "Орієнтовна сума",
+      "confirmed": "Підтверджена сума",
+      "previous": "Попередньо підтверджена сума",
+      "reference": "Номер бронювання",
+      "heating": "Запит на підігрів басейну",
+      "notes": "Особливі побажання"
+    },
+    "yes": "Так",
+    "no": "Ні",
+    "none": "Немає",
+    "greeting": "Вітаємо,",
+    "action": "ПЕРЕГЛЯНУТИ МОЄ БРОНЮВАННЯ",
+    "cancelFooter": "Усі платежі та повернення коштів обробляються окремо. Зверніться до MZS Group, якщо потрібна допомога.",
+    "footer": "Поточний статус доступний у вашому особистому кабінеті. Зверніться до MZS Group, якщо потрібна допомога.",
+    "motto": "ПРИВАТНІСТЬ · НЕЗАЛЕЖНІСТЬ · МІЖНАРОДНІСТЬ"
+  },
+  "fi": {
+    "title": {
+      "requested": "Varauspyyntösi on vastaanotettu",
+      "confirmed": "Varauksesi on vahvistettu",
+      "modified": "Varaustasi on muutettu",
+      "cancelled": "Varauksesi on peruutettu"
+    },
+    "intro": {
+      "requested": "Olemme vastaanottaneet pyyntösi. Tämä ei ole vielä vahvistettu varaus. MZS Group lähettää erillisen vahvistuksen yksilöllisen tarkistuksen ja hyväksynnän jälkeen.",
+      "confirmed": "MZS Group on hyväksynyt ja vahvistanut varauksesi. Odotamme vierailuasi.",
+      "modified": "MZS Group on muuttanut vahvistettua varaustasi. Alla olevat tiedot korvaavat aiemman vahvistuksen tiedot.",
+      "cancelled": "MZS Group on peruuttanut varauksesi. Aiempi vahvistus ei ole enää voimassa. Älä matkusta sen vahvistuksen perusteella."
+    },
+    "status": {
+      "requested": "PYYNTÖ — EI VAHVISTETTU",
+      "confirmed": "VAHVISTETTU",
+      "modified": "VAHVISTETTU — MUUTETTU",
+      "cancelled": "PERUUTETTU — EI VOIMASSA"
+    },
+    "labels": {
+      "status": "Tila",
+      "property": "Kiinteistö",
+      "checkIn": "Sisäänkirjautuminen",
+      "checkOut": "Uloskirjautuminen",
+      "nights": "Öiden määrä",
+      "guests": "Vieraat",
+      "estimate": "Arvioitu summa",
+      "confirmed": "Vahvistettu summa",
+      "previous": "Aiemmin vahvistettu summa",
+      "reference": "Varausviite",
+      "heating": "Altaan lämmityspyyntö",
+      "notes": "Erityistoiveet"
+    },
+    "yes": "Kyllä",
+    "no": "Ei",
+    "none": "Ei mitään",
+    "greeting": "Hei,",
+    "action": "KATSO OMA VARAUS",
+    "cancelFooter": "Mahdolliset maksut ja palautukset käsitellään erikseen. Ota yhteyttä MZS Groupiin, jos tarvitset apua.",
+    "footer": "Löydät nykyisen tilan omalta tililtäsi. Ota yhteyttä MZS Groupiin, jos tarvitset apua.",
+    "motto": "YKSITYINEN · RIIPPUMATON · KANSAINVÄLINEN"
+  },
+  "cs": {
+    "title": {
+      "requested": "Vaše žádost o rezervaci byla přijata",
+      "confirmed": "Vaše rezervace je potvrzena",
+      "modified": "Vaše rezervace byla změněna",
+      "cancelled": "Vaše rezervace byla zrušena"
+    },
+    "intro": {
+      "requested": "Obdrželi jsme vaši žádost. Nejedná se zatím o potvrzenou rezervaci. Po individuálním posouzení a schválení zašle MZS Group samostatné potvrzení.",
+      "confirmed": "MZS Group schválila a potvrdila vaši rezervaci. Těšíme se na váš pobyt.",
+      "modified": "MZS Group změnila vaši potvrzenou rezervaci. Níže uvedené údaje nahrazují informace v předchozím potvrzení.",
+      "cancelled": "MZS Group zrušila vaši rezervaci. Předchozí potvrzení již není platné. Necestujte na základě tohoto potvrzení."
+    },
+    "status": {
+      "requested": "ŽÁDOST — NEPOTVRZENO",
+      "confirmed": "POTVRZENO",
+      "modified": "POTVRZENO — ZMĚNĚNO",
+      "cancelled": "ZRUŠENO — NEPLATNÉ"
+    },
+    "labels": {
+      "status": "Stav",
+      "property": "Nemovitost",
+      "checkIn": "Příjezd",
+      "checkOut": "Odjezd",
+      "nights": "Počet nocí",
+      "guests": "Hosté",
+      "estimate": "Odhadovaná částka",
+      "confirmed": "Potvrzená částka",
+      "previous": "Dříve potvrzená částka",
+      "reference": "Reference rezervace",
+      "heating": "Požadavek na ohřev bazénu",
+      "notes": "Zvláštní požadavky"
+    },
+    "yes": "Ano",
+    "no": "Ne",
+    "none": "Žádné",
+    "greeting": "Dobrý den,",
+    "action": "ZOBRAZIT MOJI REZERVACI",
+    "cancelFooter": "Případné platby a vrácení peněz se řeší samostatně. Pokud potřebujete pomoc, kontaktujte MZS Group.",
+    "footer": "Aktuální stav najdete ve svém osobním účtu. Pokud potřebujete pomoc, kontaktujte MZS Group.",
+    "motto": "SOUKROMÝ · NEZÁVISLÝ · MEZINÁRODNÍ"
   }
 }

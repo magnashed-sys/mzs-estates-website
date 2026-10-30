@@ -1,5 +1,40 @@
 /** title, purpose, accept, reject, reopen, detail */
 export const analyticsCopy: Record<string, readonly string[]> = {
+
+  "da": [
+    "Websitestatistik",
+    "Må MZS Group bruge Google Analytics-cookies til at måle besøg på offentlige sider og modtagne forespørgsler?",
+    "Acceptér statistik",
+    "Afvis statistik",
+    "Cookieindstillinger",
+    "Valgfrit. Formularindhold sendes ikke. Ingen personaliseret annoncering. Du kan til enhver tid ændre dit valg her. Valget gemmes i 180 dage. Spørgsmål: info@mzsgroup.eu."
+  ],
+  "uk": [
+    "Статистика сайту",
+    "Чи дозволяєте MZS Group використовувати файли cookie Google Analytics для вимірювання відвідувань публічних сторінок та успішно отриманих запитів?",
+    "Дозволити статистику",
+    "Відхилити статистику",
+    "Налаштування cookie",
+    "Необов’язково. Вміст форм не надсилається. Без персоналізації реклами. Ви можете змінити вибір тут будь-коли. Вибір зберігається 180 днів. Запитання: info@mzsgroup.eu."
+  ],
+  "fi": [
+    "Sivustotilastot",
+    "Saako MZS Group käyttää Google Analytics -evästeitä julkisten sivujen käyntien ja onnistuneiden tiedustelujen mittaamiseen?",
+    "Hyväksy tilastointi",
+    "Hylkää tilastointi",
+    "Evästeasetukset",
+    "Valinnainen. Lomakkeiden sisältöä ei lähetetä. Ei mainonnan personointia. Voit muuttaa valintaasi täällä milloin tahansa. Valinta tallennetaan 180 päiväksi. Kysymykset: info@mzsgroup.eu."
+  ],
+  "cs": [
+    "Statistiky webu",
+    "Může MZS Group používat cookies Google Analytics k měření návštěv veřejných stránek a úspěšně přijatých dotazů?",
+    "Přijmout statistiky",
+    "Odmítnout statistiky",
+    "Nastavení cookies",
+    "Nepovinné. Obsah formulářů se neodesílá. Žádná personalizace reklamy. Volbu můžete kdykoli změnit zde. Ukládá se na 180 dní. Dotazy: info@mzsgroup.eu."
+  ]
+,
+
  en:['Website analytics','May MZS Group use Google Analytics cookies to measure public page visits and successful enquiries?','Accept analytics','Reject analytics','Cookie settings','Optional. No form contents are sent. No advertising personalisation. You can change your choice here at any time. Your choice is saved for 180 days. Questions: info@mzsgroup.eu.'],
  nl:['Websitestatistieken','Mag MZS Group Google Analytics-cookies gebruiken om bezoeken aan publieke pagina’s en geslaagde aanvragen te meten?','Statistieken accepteren','Statistieken weigeren','Cookie-instellingen','Optioneel. Formulierinhoud wordt niet meegestuurd. Geen advertentiepersonalisatie. U kunt uw keuze hier altijd wijzigen. Uw keuze wordt 180 dagen bewaard. Vragen: info@mzsgroup.eu.'],
  es:['Estadísticas del sitio','¿Puede MZS Group usar cookies de Google Analytics para medir visitas a páginas públicas y solicitudes recibidas?','Aceptar estadísticas','Rechazar estadísticas','Ajustes de cookies','Opcional. No enviamos el contenido de los formularios. Sin publicidad personalizada. Puede cambiar su elección aquí en cualquier momento. Se guarda durante 180 días. Consultas: info@mzsgroup.eu.'],

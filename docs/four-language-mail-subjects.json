@@ -1,0 +1,22 @@
+{
+  "da": {
+    "confirmation": "Bekræft din MZS Group-e-mailadresse",
+    "recovery": "Nulstil din MZS Group-adgangskode"
+  },
+  "uk": {
+    "confirmation": "Підтвердьте електронну адресу MZS Group",
+    "recovery": "Скиньте пароль MZS Group"
+  },
+  "fi": {
+    "confirmation": "Vahvista MZS Group -sähköpostiosoitteesi",
+    "recovery": "Palauta MZS Group -salasanasi"
+  },
+  "cs": {
+    "confirmation": "Potvrďte svou e-mailovou adresu u MZS Group",
+    "recovery": "Obnovte heslo MZS Group"
+  },
+  "tr": {
+    "confirmation": "MZS Group e-posta adresinizi doğrulayın",
+    "recovery": "MZS Group şifrenizi sıfırlayın"
+  }
+}

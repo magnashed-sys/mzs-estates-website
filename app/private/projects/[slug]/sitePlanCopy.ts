@@ -1,4 +1,43 @@
 export const sitePlanCopy: Record<string, readonly string[]> = {
+
+  "da": [
+    "Udforsk ejendommen",
+    "Skematisk oversigt · ikke målfast",
+    "Forreste gæstebolig",
+    "Bagerste gæstebolig",
+    "Hovedbolig",
+    "3 parkeringspladser",
+    "Vælg et område for at se billederne."
+  ],
+  "uk": [
+    "Огляньте територію",
+    "Схематичний огляд · не в масштабі",
+    "Переднє гостьове помешкання",
+    "Заднє гостьове помешкання",
+    "Основний будинок",
+    "3 паркомісця",
+    "Оберіть зону, щоб переглянути її фотографії."
+  ],
+  "fi": [
+    "Tutustu kiinteistöön",
+    "Kaaviomainen yleiskuva · ei mittakaavassa",
+    "Etummainen vierasmajoitus",
+    "Takimmainen vierasmajoitus",
+    "Päätalo",
+    "3 pysäköintipaikkaa",
+    "Valitse alue nähdäksesi sen kuvat."
+  ],
+  "cs": [
+    "Prozkoumejte nemovitost",
+    "Schematický přehled · není v měřítku",
+    "Přední ubytování pro hosty",
+    "Zadní ubytování pro hosty",
+    "Hlavní rezidence",
+    "3 parkovací místa",
+    "Vyberte oblast pro zobrazení fotografií."
+  ]
+,
+
   "en": [
     "Explore the property",
     "Schematic overview · not to scale",

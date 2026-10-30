@@ -3,6 +3,49 @@ import {getLocale} from 'next-intl/server';
 import styles from './CaseStudies.module.css';
 
 const captions: Record<string, readonly string[]> = {
+
+  "da": [
+    "Udvikling",
+    "Transformation",
+    "Køb",
+    "Ejendom med flere lejere",
+    "Lystbådehavn",
+    "Ejendom med flere enheder",
+    "Nederlandene",
+    "Spanien"
+  ],
+  "uk": [
+    "Девелопмент",
+    "Трансформація",
+    "Придбання",
+    "Об’єкт із кількома орендарями",
+    "Яхтова марина",
+    "Багатоквартирний об’єкт",
+    "Нідерланди",
+    "Іспанія"
+  ],
+  "fi": [
+    "Kehittäminen",
+    "Muutoshanke",
+    "Hankinta",
+    "Monivuokralaiskiinteistö",
+    "Venesatama",
+    "Usean yksikön kiinteistö",
+    "Alankomaat",
+    "Espanja"
+  ],
+  "cs": [
+    "Development",
+    "Transformace",
+    "Akvizice",
+    "Nemovitost s více nájemci",
+    "Přístav",
+    "Nemovitost s více jednotkami",
+    "Nizozemsko",
+    "Španělsko"
+  ]
+,
+
 "nb":["Utvikling", "Transformasjon", "Kjøp", "Eiendom med flere leietakere", "Småbåthavn", "Eiendom med flere enheter", "Nederland", "Spania"],
 "sv":["Utveckling", "Omvandling", "Förvärv", "Fastighet med flera hyresgäster", "Småbåtshamn", "Fastighet med flera enheter", "Nederländerna", "Spanien"],
 "pl":["Realizacja", "Przekształcenie", "Zakup", "Nieruchomość z wieloma najemcami", "Marina", "Nieruchomość wielolokalowa", "Holandia", "Hiszpania"],
@@ -22,6 +65,13 @@ const captions: Record<string, readonly string[]> = {
  lt: ['Plėtra', 'Pertvarkymas', 'Įsigijimas', 'Kelių nuomininkų turtas', 'Jachtų prieplauka', 'Kelių vienetų turtas', 'Nyderlandai', 'Ispanija'],
 };
 const units: Record<string,string> = {
+
+  "da": "enheder",
+  "uk": "одиниць",
+  "fi": "yksikköä",
+  "cs": "jednotek"
+,
+
 "nb":"enheter",
 "sv":"enheter",
 "pl":"lokali",
@@ -30,6 +80,13 @@ const units: Record<string,string> = {
 nl:'units',en:'units',es:'unidades',de:'Einheiten',fr:'unités',it:'unità',pt:'unidades',ru:'объектов',ar:'وحدة',tr:'birim',lt:'vienetų'};
 
 const financing: Record<string,string> = {
+
+  "da": "Finansiering · Opførelse af erhvervscenter",
+  "uk": "Фінансування · Будівництво бізнес-центру",
+  "fi": "Rahoitus · Liikekeskuksen rakentaminen",
+  "cs": "Financování · Výstavba podnikatelského centra"
+,
+
 "nb":"Finansiering · Oppføring av næringsbygg",
 "sv":"Finansiering · Uppförande av företagscenter",
 "pl":"Finansowanie · Budowa centrum biznesowego",
@@ -49,6 +106,13 @@ const financing: Record<string,string> = {
  lt:'Finansavimas · Verslo centro statyba',
 };
 const introductions: Record<string,string> = {
+
+  "da": "Dette er et udvalg af vores projekter. I en personlig samtale fortæller vi gerne om flere projekter, der passer til dine interesser og planer.",
+  "uk": "Це добірка наших проєктів. В особистій розмові ми радо розповімо про інші проєкти, що відповідають вашим інтересам і планам.",
+  "fi": "Tässä on valikoima hankkeitamme. Keskustelemme mielellämme henkilökohtaisesti myös muista kiinnostuksiisi ja suunnitelmiisi sopivista hankkeista.",
+  "cs": "Toto je výběr našich projektů. Při osobním rozhovoru rádi představíme další projekty odpovídající vašim zájmům a plánům."
+,
+
 "nb":"Dette er et utvalg av prosjektene våre. I en personlig samtale presenterer vi gjerne flere prosjekter som passer dine interesser og planer.",
 "sv":"Detta är ett urval av våra projekt. Vid ett personligt samtal berättar vi gärna om fler projekt som passar dina intressen och planer.",
 "pl":"To wybrane przykłady naszych projektów. Podczas osobistej rozmowy chętnie przedstawimy kolejne projekty odpowiadające Państwa zainteresowaniom i planom.",
@@ -69,6 +133,13 @@ const introductions: Record<string,string> = {
 };
 
 const management: Record<string,string> = {
+
+  "da": "Ejendomsforvaltning og drift",
+  "uk": "Управління та експлуатація нерухомості",
+  "fi": "Kiinteistöjen hallinnointi ja ylläpito",
+  "cs": "Správa a provoz nemovitostí"
+,
+
 "nb":"Eiendomsforvaltning og drift",
 "sv":"Fastighetsförvaltning och drift",
 "pl":"Zarządzanie i eksploatacja nieruchomości",
@@ -89,7 +160,7 @@ export default async function CaseStudies({sectionNumber = '04'}: {sectionNumber
   {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
-  <div className={styles.heading}><span aria-hidden="true">{sectionNumber}</span><h2 id="case-studies-title">Case Studies</h2></div>
+  <div className={styles.heading}><span aria-hidden="true">{sectionNumber}</span><h2 id="case-studies-title">{({da:'Projekteksempler',uk:'Приклади проєктів',fi:'Hanke-esimerkit',cs:'Případové studie'} as Record<string,string>)[locale] ?? 'Case Studies'}</h2></div>
   <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
    <div className={['amsterdam-85-units', 'ijmuiden-transformatie', 'ibiza-20-units'].includes(project.image) ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>
