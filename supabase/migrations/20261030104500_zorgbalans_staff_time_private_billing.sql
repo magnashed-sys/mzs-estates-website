@@ -71,7 +71,7 @@ create view public.mzs_ops_zorgbalans_billable_visits
   greatest(1,(v.effective_minutes+59)/60)*2500::bigint as net_cents,
   v.review_decision, v.correction_pending,v.work_area_id
  from public.mzs_ops_current_visits v
- where v.work_area_id='zorgbalans'
+ where (select public.is_admin()) and v.work_area_id='zorgbalans'
   and v.worked_on>=date '2026-10-26'
   and v.review_decision='approved' and v.correction_pending=false
   and not exists(select 1 from public.mzs_ops_zorgbalans_invoice_lines l where l.visit_id=v.id);
