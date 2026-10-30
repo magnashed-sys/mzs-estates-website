@@ -3,7 +3,7 @@ import {requirePropertyStaff} from '../../lib/security/property-staff';
 import {revalidateOperations} from '../../lib/property-operations/revalidate';
 import {revalidatePath} from 'next/cache';
 
-type Result={status:'idle'|'success'|'error';message:string};
+type Result={status:'idle'|'success'|'error'|'warning';message:string};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Append-only staff progress, never an admin maintenance-status change. */
 export async function addMyMaintenanceProgress(_previous:Result,form:FormData):Promise<Result>{
