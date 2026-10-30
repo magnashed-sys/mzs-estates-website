@@ -36,7 +36,7 @@ export default async function StaffPage({searchParams}:{searchParams:Promise<Par
    {data.tickets.rows.slice(0,3).map(ticket=><a key={ticket.id}
     href={'/staff?ticket='+encodeURIComponent(ticket.id)+'#ticket'} className={s.recentMaintenanceItem}>
     <span><strong>{ticket.title}</strong>
-     <small>{properties.find(p=>p.id===ticket.property_id)?.name??staffText(language,'property')} · {ticket.created_at.slice(0,10)}</small></span>
+     <small>{properties.find(p=>p.id===ticket.property_id)?.name??staffText(language,'property')}</small></span>
     <span aria-hidden="true">›</span>
    </a>)}
   </div>:<p className={s.description}>{staffText(language,'noRecentReports')}</p>}
