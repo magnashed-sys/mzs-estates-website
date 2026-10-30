@@ -258,6 +258,7 @@ export default function RelationshipDossierPage() {
         </div>
         <span className={styles.status}>{person.is_active ? adminT("Active account") : adminT("Inactive account")}</span>
       </div>
+      <p><Link className="admin-button" href={'/admin/relationships/overview?profile='+person.id}>Relationship 360° →</Link></p>
       <div className={styles.metrics}>
         <div><span>{adminT("Declared companies")}</span><strong>{companies.length}</strong></div>
         <div><span>{adminT("Assigned projects")}</span><strong>{attached.length}</strong></div>
