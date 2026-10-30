@@ -1,3 +1,4 @@
+import europeanCountries from './european-country-names.json';
 import {getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode} from 'libphonenumber-js';
 
 // ISO 3166-1 territories without a separate telephone plan are still valid addresses.
@@ -9,8 +10,16 @@ function displayNames(locale: string) {
   if (!names.has(locale)) names.set(locale, new Intl.DisplayNames([locale], {type: 'region'}));
   return names.get(locale)!;
 }
-export function countryName(code: string, locale = 'en') { return displayNames(locale).of(code) || code; }
+function stableCountries(locale: string): readonly {code: string; name: string}[] | undefined {
+  return Object.hasOwn(europeanCountries, locale) ? europeanCountries[locale as keyof typeof europeanCountries] : undefined;
+}
+export function countryName(code: string, locale = 'en') {
+  return stableCountries(locale)?.find(item => item.code === code)?.name ?? displayNames(locale).of(code) ?? code;
+}
 export function countryOptions(locale: string, telephone = false) {
+  // Persisted labels and ordering avoid hydration mismatches between Node and browser CLDR releases.
+  const stable = stableCountries(locale);
+  if (stable) return stable.filter(item => !telephone || phoneCountries.includes(item.code as CountryCode));
   return (telephone ? phoneCountries : countryCodes).map(code => ({code, name: countryName(code, locale)}))
     .sort((a, b) => a.name.localeCompare(b.name, locale));
 }

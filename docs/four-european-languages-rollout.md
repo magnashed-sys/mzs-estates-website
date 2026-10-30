@@ -30,6 +30,10 @@ Both cover all 20 site languages with the established English fallback. They pre
 
 These repository files do not install Supabase Auth provider settings. As previously agreed, the owner publishes those settings manually after review. No real confirmation/recovery messages were sent for this change. Inbox delivery and provider-side subject rendering are not verified by local tests.
 
+## Country-label consistency
+
+Browser QA exposed different region names between Node and Chromium CLDR versions (for example Hong Kong labels). The four new locales now use committed, ordered country-name snapshots for both server and browser rendering. `scripts/generate-european-country-names.mjs` regenerates these deliberately for review. Telephone filtering and stored-country recognition are retained.
+
 ## Validation
 
 Automated coverage includes message structure/ICU parity, native plural rendering, all twenty flag names and their exact order in public/inline/account menus, locale persistence, registration language metadata, protected-route exclusions, private-capital rendering/access guards, translated country roundtrips, email escaping and safe destinations, cancellation distinctions and unchanged Auth token links.

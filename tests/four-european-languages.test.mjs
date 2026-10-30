@@ -19,7 +19,7 @@ const codes=['da','uk','fi','cs'];
 const order=['en','nl','de','fr','es','it','da','nb','sv','fi','cs','pl','lt','uk','ro','ru','tr','zh-CN','ar','pt-BR'];
 const expectedNames=['English','Nederlands','Deutsch','Français','Español','Italiano','Dansk','Norsk bokmål','Svenska','Suomi','Čeština','Polski','Lietuvių','Українська','Română','Русский','Türkçe','简体中文','العربية','Português (Brasil)'];
 const mail=load('lib/mzs/localized-account-mail.ts');
-const contacts=load('lib/contact-inputs.ts',{'libphonenumber-js':phone});
+const contacts=load('lib/contact-inputs.ts',{'libphonenumber-js':phone,'./european-country-names.json':{default:JSON.parse(read('lib/european-country-names.json'))}});
 const visits=load('lib/mzs/visitor-report.ts');
 const rental=JSON.parse(read('lib/mzs/rental-mail-copy.json'));
 const analytics=load('lib/analytics/copy.ts').analyticsCopy;
@@ -100,5 +100,25 @@ test('Consolidated Auth review templates cover twenty languages with exact links
    const body=read(`docs/${stem}-${code}.html`);assert.ok(body.includes(`lang="${code}"`));assert.deepEqual(hrefs(body),hrefs(original));
    if(stem.includes('reset'))assert.ok(body.includes('8'));
   }
+ }
+});
+test('New-language country labels and order remain stable even if the runtime ICU differs',()=>{
+ const exports={},stable=JSON.parse(read('lib/european-country-names.json'));
+ vm.runInNewContext(ts.transpileModule(read('lib/contact-inputs.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{
+  exports,Intl:{DisplayNames:class{constructor(){throw Error('Runtime-dependent names must not render new-language options');}}},
+  require:n=>n==='libphonenumber-js'?phone:{default:stable}
+ });
+ for(const code of codes){
+  const options=exports.countryOptions(code);assert.equal(options.length,contacts.countryCodes.length);
+  assert.deepEqual(JSON.parse(JSON.stringify(options)),stable[code]);
+  assert.equal(exports.countryName('HK',code),stable[code].find(x=>x.code==='HK').name);
+  assert.ok(!exports.countryOptions(code,true).some(x=>x.code==='AQ'));
+ }
+});
+test('Production sitemap includes all 100 marketing routes and preview stays non-indexable',()=>{
+ for(const environment of ['production','preview']){
+  const exports={};vm.runInNewContext(ts.transpileModule(read('app/sitemap.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env:{VERCEL_ENV:environment}},require:()=>routing});
+  const entries=exports.default();assert.equal(entries.length,environment==='production'?100:0);
+  if(environment==='production')for(const l of codes)assert.ok(entries.some(e=>e.url===`https://www.mzsgroup.com/${l}/consultancy`));
  }
 });
