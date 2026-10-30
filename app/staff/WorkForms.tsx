@@ -19,12 +19,15 @@ return <label>{adminT("Explanation (visible to staff member)")}<textarea name="r
 export function ReviewForm({visit}:{visit:Visit}){
  const {t:adminT,locale:adminLocale}=useAdminI18n();
 
+ const zorgbalans=visit.work_area_id==='zorgbalans';
  const [decision,setDecision]=useState('approved'),[billing,setBilling]=useState(false);
  return <ActionForm action={reviewActualVisit} label={adminT("Record review")}><h3>{adminT("Review time ·")} {visit.effective_minutes}  {adminT("minutes")}</h3>
  <input type="hidden" name="visit_id" value={visit.id}/><input type="hidden" name="correction_id" value={visit.correction_id??''}/>
  <label>{adminT("Decision")}<select name="decision" value={decision} onChange={e=>setDecision(e.target.value)}><option value="approved">{adminT("Approve")}</option><option value="rejected">{adminT("Return with explanation")}</option></select></label><Reason/>
- <label>{adminT("Recharge")}<select name="recharge_class" value={decision==='approved'&&billing?'review_candidate':'not_billable'} onChange={e=>setBilling(e.target.value==='review_candidate')}><option value="not_billable">{adminT("No recharge proposal")}</option>{decision==='approved'&&<option value="review_candidate">{adminT("Separate minute proposal")}</option>}</select></label>
- {decision==='approved'&&billing&&<><p>{adminT("Proposal only; actual worked minutes remain")} {visit.effective_minutes}{adminT(". No rate or invoice is calculated.")}</p><label>{adminT("Minimum minutes")}<input type="number" name="minimum_minutes" min={0} max={960} required/></label><label>{adminT("Round in minute increments")}<input type="number" name="increment_minutes" min={1} max={960} required/></label></>}
+ {zorgbalans&&<p>{adminT("Zorgbalans hours are recharged through the separate private billing workflow after approval.")}</p>}
+ <label>{adminT("Recharge")}<select name="recharge_class" value={zorgbalans?'not_billable':decision==='approved'&&billing?'review_candidate':'not_billable'} disabled={zorgbalans} onChange={e=>setBilling(e.target.value==='review_candidate')}><option value="not_billable">{adminT("No recharge proposal")}</option>{decision==='approved'&&!zorgbalans&&<option value="review_candidate">{adminT("Separate minute proposal")}</option>}</select></label>
+ {zorgbalans&&<input type="hidden" name="recharge_class" value="not_billable"/>}
+ {decision==='approved'&&billing&&!zorgbalans&&<><p>{adminT("Proposal only; actual worked minutes remain")} {visit.effective_minutes}{adminT(". No rate or invoice is calculated.")}</p><label>{adminT("Minimum minutes")}<input type="number" name="minimum_minutes" min={0} max={960} required/></label><label>{adminT("Round in minute increments")}<input type="number" name="increment_minutes" min={1} max={960} required/></label></>}
  </ActionForm>;
 }
 export function CorrectionForm({visit}:{visit:Visit}){
