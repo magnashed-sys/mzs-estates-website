@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import ts from 'typescript';
 const require=createRequire(import.meta.url), api={};
-new Function('exports','require',ts.transpileModule(readFileSync('lib/contact-inputs.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(api,require);
+new Function('exports','require',ts.transpileModule(readFileSync('lib/contact-inputs.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(api,name=>name==='./european-country-names.json'?{default:JSON.parse(readFileSync('lib/european-country-names.json','utf8'))}:require(name));
 test('country choices include address-only territories and preserve localized legacy recognition',()=>{
  for(const code of ['NL','ES','AE','GB','US','BR','AQ','BV','HM','TF','UM','XK'])assert.ok(api.countryCodes.includes(code));
  assert.equal(new Set(api.countryCodes).size,api.countryCodes.length);

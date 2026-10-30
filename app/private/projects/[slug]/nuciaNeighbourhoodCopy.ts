@@ -1,4 +1,47 @@
 export const nuciaNeighbourhoodCopy: Record<string, readonly string[]> = {
+
+  "da": [
+    "Oplev området",
+    "Strande, kultur, natur og sport omkring La Nucía.",
+    "Kortet viser området, ikke ejendommens præcise placering.",
+    "Åbn i Google Maps",
+    "Historisk centrum og havudsigt",
+    "Strand og promenade",
+    "Natur og fyrtårnet i Albir",
+    "Sportskompleks i La Nucía"
+  ],
+  "uk": [
+    "Дослідіть околиці",
+    "Пляжі, культура, природа та спорт навколо La Nucía.",
+    "Карта показує район, а не точне розташування об’єкта.",
+    "Відкрити в Google Maps",
+    "Історичний центр і вид на море",
+    "Пляж і променад",
+    "Природа та маяк Albir",
+    "Спортивний комплекс у La Nucía"
+  ],
+  "fi": [
+    "Tutustu alueeseen",
+    "Rantoja, kulttuuria, luontoa ja urheilua La Nucían ympärillä.",
+    "Kartta näyttää alueen, ei kiinteistön tarkkaa sijaintia.",
+    "Avaa Google Mapsissa",
+    "Historiallinen keskusta ja merinäköala",
+    "Ranta ja rantakatu",
+    "Luonto ja Albirin majakka",
+    "La Nucían urheilukeskus"
+  ],
+  "cs": [
+    "Prozkoumejte okolí",
+    "Pláže, kultura, příroda a sport v okolí La Nucía.",
+    "Mapa ukazuje oblast, nikoli přesnou polohu nemovitosti.",
+    "Otevřít v Google Maps",
+    "Historické centrum a výhled na moře",
+    "Pláž a promenáda",
+    "Příroda a maják Albir",
+    "Sportovní areál v La Nucía"
+  ]
+,
+
   "nl": [
     "Ontdek de omgeving",
     "Strand, cultuur, natuur en sport rondom La Nucía.",
