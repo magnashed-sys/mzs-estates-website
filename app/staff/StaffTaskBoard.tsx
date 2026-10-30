@@ -1,5 +1,6 @@
 'use client';
 import {useActionState,useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import s from './staff.module.css';
@@ -29,13 +30,15 @@ type EntryKind='task'|'maintenance';
 function NewWorkItem({properties,units,areas,profileId,language}:{properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;language:StaffLanguage}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
+ const router=useRouter();
+ const [lastTicketId,setLastTicketId]=useState<string|null>(null);
  const [maintenanceState,setMaintenanceState]=useState<Result>(initial);
  const [maintenancePending,setMaintenancePending]=useState(false);
  async function submitMaintenance(event:React.FormEvent<HTMLFormElement>){
   event.preventDefault();
   if(maintenancePending)return;
   const form=event.currentTarget;
-  setMaintenancePending(true);setMaintenanceState(initial);
+  setMaintenancePending(true);setMaintenanceState(initial);setLastTicketId(null);
   try{
    const response=await fetch('/api/staff/report-with-photos',{
     method:'POST',body:new FormData(form),credentials:'same-origin'
@@ -46,9 +49,9 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
    const ticketId=payload&&typeof payload==='object'&&'ticketId' in payload&&
     typeof payload.ticketId==='string'?payload.ticketId:null;
    if(response.ok){
-    setMaintenanceState({status:'success',message:message+
-      (ticketId?' View: /staff?ticket='+encodeURIComponent(ticketId)+'#ticket':'')});
-    form.reset();
+    setMaintenanceState({status:'success',message});
+    setLastTicketId(ticketId);
+    form.reset();router.refresh();
    }else setMaintenanceState({status:'error',message});
   }catch{
    setMaintenanceState({status:'error',message:'Could not confirm submission. Check the maintenance register before trying again.'});
@@ -132,6 +135,8 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
    </>}
    <button disabled={pending||(!propertyId&&!workAreaId)} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
    <Message state={result}/>
+   {isMaintenance&&lastTicketId&&<a className={s.taskSecondary}
+     href={'/staff?ticket='+encodeURIComponent(lastTicketId)+'#ticket'}>{t('viewReport')}</a>}
   </form>
  </section>;
 }
