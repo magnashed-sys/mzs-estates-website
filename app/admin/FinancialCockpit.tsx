@@ -17,8 +17,11 @@ const displayEuroExact=(n:number, adminLocale = 'en-GB')=>new Intl.NumberFormat(
 const monthLabel=(key:string, adminLocale = 'en-GB')=>new Date(key+'-01T12:00:00Z').toLocaleDateString(adminLocale,{month:'short',timeZone:'UTC'});
 const sum=(rows:MonthlyMoney[],key:keyof MonthlyMoney)=>rows.reduce((a,r)=>a+Number(r[key]),0);
 export default function FinancialCockpit({refreshVersion}:{refreshVersion:number}){
- const {t:adminT,locale:adminLocale}=useAdminI18n();
+ const {t:adminT,locale:adminLocale,language}=useAdminI18n();
 
+ const tr=(en:string,es:string)=>language==='es'?es:en;
+ const [view,setView]=useState<'overview'|'forecast'|'balances'|'history'|'report'>('overview');
+ const detail=view==='balances'?'balances':view==='history'?'history':view==='report'?'full':'summary';
  const [current]=useState(madridParts);
  const [year,setYear]=useState(current.year);
  const [month,setMonth]=useState(current.month);
@@ -31,12 +34,12 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  useEffect(()=>{
   const ctrl=new AbortController();
   setLoading(true);setError('');setData(null);
-  fetch('/api/admin/financial-cockpit?year='+year+'&entity='+encodeURIComponent(entity),{cache:'no-store',signal:ctrl.signal})
+  fetch('/api/admin/financial-cockpit?year='+year+'&entity='+encodeURIComponent(entity)+'&detail='+detail,{cache:'no-store',signal:ctrl.signal})
    .then(async r=>{if(!r.ok)throw new Error('The complete financial overview could not be loaded.');return r.json() as Promise<FinancialPhase2>;})
-   .then(next=>{setEntityOptions(next.entities);setData(next);}).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
+   .then(next=>{if(!ctrl.signal.aborted){setEntityOptions(next.entities);setData(next);}}).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
    .finally(()=>{if(!ctrl.signal.aborted)setLoading(false);});
   return ()=>ctrl.abort();
- },[year,entity,retry,refreshVersion]);
+ },[year,entity,detail,retry,refreshVersion]);
  const selected=data?.rows.find(r=>r.month===year+'-'+String(month).padStart(2,'0'));
  const rows=data?.rows||[];
  const loanAvailable=data?.loansAvailable===true;
@@ -45,7 +48,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  const chartMax=Math.max(1,...rows.flatMap(r=>[r.rentForecast,loanAttributed?r.interestIn:0,loanAttributed?r.interestOut:0]));
  const loanNotice=data?.quality.loansNeedingReview||0;
  const exportCsv=()=>{
-  if(!data||loading)return;
+  if(!data||loading||data.loadedDetail!=='full')return;
   const headers=['Month','Expected rent EUR','Recorded rent receipts EUR','Scheduled interest income EUR',
    'Scheduled interest expense EUR','Recorded interest received EUR','Recorded interest paid EUR',
    'Net forecast EUR','Net recorded EUR','Gripp included in report','Gripp invoice count','Gripp invoiced excl VAT EUR','Gripp invoiced incl VAT EUR','Gripp settled in source EUR (payment date unknown)','Gripp open in source EUR (snapshot date unknown)'];
@@ -82,14 +85,15 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
       {entityOptions.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
      </select></label>
     <button type="button" onClick={()=>setRetry(r=>r+1)} disabled={loading} className={s.refresh}>{adminT("Refresh ↗")}</button>
-    <button type="button" onClick={exportCsv} disabled={loading||!data} className={s.refresh}>{adminT("Export CSV ↓")}</button>
+    {view==='report'&&<button type="button" onClick={exportCsv} disabled={loading||!data||data.loadedDetail!=='full'} className={s.refresh}>{adminT("Export CSV ↓")}</button>}
    </div>
   </div>
+  <nav className={s.views} aria-label={tr('Financial views','Vistas financieras')}>{([['overview','Summary','Resumen'],['forecast','Monthly outlook','Previsión mensual'],['balances','Invoice balances','Saldos de facturas'],['history','Historical invoicing','Facturación histórica'],['report','Detailed report & export','Informe detallado y exportación']] as const).map(([key,en,es])=><button key={key} type="button" aria-pressed={view===key} onClick={()=>setView(key)}>{tr(en,es)}</button>)}</nav>
   {loading&&<div className={s.status} role="status">{adminT("Loading verified financial registers…")}</div>}
   {error&&<div className={s.failure} role="alert">{adminT(error)}</div>}
   {data&&!loading&&<>
    <p><a href="/admin/workspaces/estates/reports">{adminT("Property expense drafts and accountant export →")}</a></p><div className={s.scopeNote}>{adminT("Reporting scope:")} <strong>{entityLabel}</strong>{adminT(". Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.")}</div>
-   <div className={s.metrics}>
+   {view==='overview'&&<div className={s.metrics}>
     {cards.map(card=><div key={card.title} className={s.metric}>
      <div className={s.metricHead}><span className={s.kicker}>{adminT(card.title)}</span><span className={s.dot} data-kind={card.accent}/></div>
      <strong className={s.metricValue}>{card.available?(card.title==='Interest actually received'?displayEuroExact(card.value, adminLocale):displayEuro(card.value, adminLocale)):'—'}</strong>
@@ -104,11 +108,11 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
      <div className={s.metricDivider}/>
      <div className={s.metricBottom}><span>{adminT("Next 3 months")}</span><span>{data.bookings.confirmed}  {adminT("confirmed stays")}</span></div>
      <p className={s.metricLine}>{entity==='all'||entity==='unassigned'?adminT("Quoted stay value, allocated by nights. No test or cancelled bookings."):adminT("Holiday bookings do not yet have verified legal-entity assignments.")}</p>
-     <Link className={s.cardLink} href="/admin?tab=bookings">{adminT("View bookings ↗")}</Link>
+     <Link className={s.cardLink} href="/admin/bookings">{adminT("View bookings ↗")}</Link>
     </div>
-   </div>
-   {data.currentInvoices&&<section className={s.reportTable} aria-label={adminT("Current invoice balances")}><div className={s.panelHeading}><h3>{adminT("Current invoice balances ·")} {year}</h3>{entity!=='unassigned'&&<Link className={s.cardLink} href={'/admin/workspaces/accountancy/sales?year='+year+(entity==='all'?'':'&entity='+encodeURIComponent(entity))}>{adminT("View invoices and export current balances →")}</Link>}</div><div className={s.metrics}>{[['Recorded outstanding',data.currentInvoices.outstanding],['Overdue recorded balance',data.currentInvoices.overdue],['Credit balances',data.currentInvoices.credits],['Invoiced with payment unknown',data.currentInvoices.unknownGross]].map(([label,value])=><div className={s.metric} key={label}><span className={s.kicker}>{adminT(label)}</span><strong className={s.metricValue}>{displayEuroExact(Number(value)/100, adminLocale)}</strong></div>)}</div><p className={s.note}>{data.currentInvoices.count}  {adminT("issued invoices in the selected year and entity;")} {data.currentInvoices.unknown}  {adminT("payment balances unknown. Includes active new receipts on imported invoices. Imported invoices are included only for invoice year 2026. This is the current remaining balance of those invoices, not cash received in the selected month or year. Unknown balances are excluded from outstanding amounts. Historical Gripp snapshots remain separately preserved below. Do not add this total to the rental-only totals.")}</p></section>}
-   {data.historical.enabled&&<section className={s.reportTable} aria-label={adminT("Historical invoicing 2026")}>
+   </div>}
+   {view==='balances'&&data.currentInvoices&&<section className={s.reportTable} aria-label={adminT("Current invoice balances")}><div className={s.panelHeading}><h3>{adminT("Current invoice balances ·")} {year}</h3>{entity!=='unassigned'&&<Link className={s.cardLink} href={'/admin/workspaces/accountancy/sales?year='+year+(entity==='all'?'':'&entity='+encodeURIComponent(entity))}>{adminT("View invoices and export current balances →")}</Link>}</div><div className={s.metrics}>{[['Recorded outstanding',data.currentInvoices.outstanding],['Overdue recorded balance',data.currentInvoices.overdue],['Credit balances',data.currentInvoices.credits],['Invoiced with payment unknown',data.currentInvoices.unknownGross]].map(([label,value])=><div className={s.metric} key={label}><span className={s.kicker}>{adminT(label)}</span><strong className={s.metricValue}>{displayEuroExact(Number(value)/100, adminLocale)}</strong></div>)}</div><p className={s.note}>{data.currentInvoices.count}  {adminT("issued invoices in the selected year and entity;")} {data.currentInvoices.unknown}  {adminT("payment balances unknown. Includes active new receipts on imported invoices. Imported invoices are included only for invoice year 2026. This is the current remaining balance of those invoices, not cash received in the selected month or year. Unknown balances are excluded from outstanding amounts. Historical Gripp snapshots remain separately preserved below. Do not add this total to the rental-only totals.")}</p></section>}
+   {view==='history'&&data.historical.enabled&&<section className={s.reportTable} aria-label={adminT("Historical invoicing 2026")}>
     <div className={s.panelHeading}><div><p className={s.eyebrow}>{adminT("GRIPP /")} {year}</p><h3>{adminT("Historical invoicing.")}</h3></div><Link className={s.cardLink} href={'/admin/workspaces/accountancy/invoices?year='+year}>{adminT("View source invoices ↗")}</Link></div>
     <p className={s.scopeNote}>{data.historical.totals.count}  {adminT("invoices in the selected reporting entity, including")} {data.historical.totals.credits}  {adminT("credit invoice(s). Totals use the invoice date; credit amounts reduce the totals.")}</p>
     <div className={s.metrics}>
@@ -121,16 +125,16 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
     </div>
     <p className={s.note}>{adminT("Included in this report as invoicing, not recognised revenue or dated bank receipts. Amounts can include deposits and rent for other periods. Gripp balances are source snapshots with no reliable snapshot or payment date. They are not added to forecasts, current MZS receivables or recorded cash movements. Customer, property and revenue-period allocation still needs review. The archive link opens all issuers for this year.")}</p>
    </section>}
-   <section className={s.netStrip} aria-label={adminT("Forecast and recorded cash movements")}>
+   {view==='overview'&&<section className={s.netStrip} aria-label={adminT("Forecast and recorded cash movements")}>
      <div><span>{adminT("Annual net cashflow forecast")}</span><strong>{displayEuro(data.report.expectedNet, adminLocale)}</strong><small>{adminT("Contract rent + interest income − interest expense. Excludes bookings, principal and other operating costs.")}</small></div>
      <div><span>{adminT("Recorded net cash movements")}</span><strong>{displayEuro(data.report.recordedNet, adminLocale)}</strong><small>{adminT("Only MZS payment entries. Not a fully reconciled bank balance.")}</small></div>
      <div><span>{adminT("Outstanding issued invoices")}</span><strong>{displayEuro(data.report.outstandingRent, adminLocale)}</strong><small>{displayEuro(data.report.overdueRent, adminLocale)}  {adminT("past due; check bank reconciliation before collection.")}</small></div>
-    </section>
-    <div className={s.summaryGrid}>
+    </section>}
+    {view==='forecast'&&<div className={s.summaryGrid}>
     <section className={s.chartPanel} aria-label={adminT("Monthly cashflow forecasts")}>
      <div className={s.panelHeading}><div><p className={s.eyebrow}>{adminT("TWELVE MONTH OVERVIEW")}</p><h3>{adminT("Contractual outlook.")}</h3></div><span className={s.year}>{year}</span></div>
      <div className={s.legend}><span><i className={s.rent}/>{adminT("Contract rent")}</span><span><i className={s.credit}/>{adminT("Interest income")}</span><span><i className={s.expense}/>{adminT("Interest expense")}</span></div>
-     <div className={s.chart} role="img" aria-label={adminT("Monthly contract rents and loan interest. Values and details shown below each month.")}>
+     <div className={s.chart} aria-label={adminT("Monthly contract rents and loan interest. Values and details shown below each month.")}>
       {rows.map(row=><div className={s.chartRow} key={row.month}>
        <span className={s.chartMonth}>{monthLabel(row.month, adminLocale)}</span>
        <div className={s.bars}>
@@ -138,7 +142,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
         <div className={s.barCredit} style={{width:(row.interestIn/chartMax*100)+'%'}} title={adminT("Scheduled interest in {p0}", {p0: displayEuro(row.interestIn, adminLocale)})}/>
         <div className={s.barExpense} style={{width:(row.interestOut/chartMax*100)+'%'}} title={adminT("Scheduled interest out {p0}", {p0: displayEuro(row.interestOut, adminLocale)})}/>
        </div>
-       <span className={s.chartAmount}>{displayEuro(row.rentForecast, adminLocale)}</span>
+       <dl className={s.chartAmounts}><div><dt>{adminT("Contract rent")}</dt><dd>{displayEuro(row.rentForecast,adminLocale)}</dd></div><div><dt>{adminT("Interest income")}</dt><dd>{loanAttributed?displayEuro(row.interestIn,adminLocale):'—'}</dd></div><div><dt>{adminT("Interest expense")}</dt><dd>{loanAttributed?displayEuro(row.interestOut,adminLocale):'—'}</dd></div></dl>
       </div>)}
      </div>
      <p className={s.note}>{adminT("Bars show projected rental billing and scheduled interest — not confirmed bank receipts. Rental forecast includes any contract VAT. Holiday bookings are shown separately to avoid possible double counting.")}</p>
@@ -169,22 +173,22 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
       <p className={s.miniCopy}>{adminT("Only explicit issuer IDs link contract and invoice totals to legal entities. Principal, deposits and booking receipts are never treated as interest.")}</p>
      </section>
     </div>
-   </div>
-   <section className={s.reportTable} aria-label={adminT("Monthly financial reporting")}>
+   </div>}
+   {view==='report'&&<section className={s.reportTable} aria-label={adminT("Monthly financial reporting")}>
     <div className={s.panelHeading}><div><p className={s.eyebrow}>{adminT("FINANCIAL REPORT /")} {year}</p><h3>{adminT("Forecast versus recorded.")}</h3></div><button className={s.refresh} type="button" onClick={exportCsv}>{adminT("Export report CSV ↓")}</button></div>
-    <div className={s.tableScroll}><table>
+    <div className={s.tableScroll} tabIndex={0} role="region" aria-label={tr('Monthly figures — scroll horizontally','Importes mensuales: deslice horizontalmente')}><table>
      <thead><tr><th>{adminT("Month")}</th><th>{adminT("Rent forecast")}</th><th>{adminT("Interest in")}</th><th>{adminT("Interest out")}</th><th>{adminT("Net forecast")}</th><th>{adminT("Net recorded")}</th>{data.historical.enabled&&<><th>{adminT("Gripp invoiced excl. VAT")}</th><th>{adminT("Gripp invoiced incl. VAT")}</th><th>{adminT("Gripp source open")}</th></>}</tr></thead>
      <tbody>{rows.map(r=><tr key={r.month}><th scope="row">{monthLabel(r.month, adminLocale)} {year}</th>
       <td>{displayEuro(r.rentForecast, adminLocale)}</td><td>{loanAttributed?displayEuro(r.interestIn, adminLocale):'—'}</td>
       <td>{loanAttributed?displayEuro(r.interestOut, adminLocale):'—'}</td>
       <td>{displayEuro(r.rentForecast+r.interestIn-r.interestOut, adminLocale)}</td>
       <td>{displayEuro(r.rentReceived+r.interestReceived-r.interestPaid, adminLocale)}</td>
-      {data.currentInvoices&&<section className={s.reportTable} aria-label={adminT("Current invoice balances")}><div className={s.panelHeading}><h3>{adminT("Current invoice balances ·")} {year}</h3>{entity!=='unassigned'&&<Link className={s.cardLink} href={'/admin/workspaces/accountancy/sales?year='+year+(entity==='all'?'':'&entity='+encodeURIComponent(entity))}>{adminT("View invoices and export current balances →")}</Link>}</div><div className={s.metrics}>{[['Recorded outstanding',data.currentInvoices.outstanding],['Overdue recorded balance',data.currentInvoices.overdue],['Credit balances',data.currentInvoices.credits],['Invoiced with payment unknown',data.currentInvoices.unknownGross]].map(([label,value])=><div className={s.metric} key={label}><span className={s.kicker}>{adminT(label)}</span><strong className={s.metricValue}>{displayEuroExact(Number(value)/100, adminLocale)}</strong></div>)}</div><p className={s.note}>{data.currentInvoices.count}  {adminT("issued invoices in the selected year and entity;")} {data.currentInvoices.unknown}  {adminT("payment balances unknown. Includes active new receipts on imported invoices. Imported invoices are included only for invoice year 2026. This is the current remaining balance of those invoices, not cash received in the selected month or year. Unknown balances are excluded from outstanding amounts. Historical Gripp snapshots remain separately preserved below. Do not add this total to the rental-only totals.")}</p></section>}
    {data.historical.enabled&&(()=>{const h=data.historical.rows.find(h=>h.month===r.month)!;return <><td>{displayEuroExact(h.netCents/100, adminLocale)}</td><td>{displayEuroExact(h.grossCents/100, adminLocale)}</td><td>{displayEuroExact(h.openCents/100, adminLocale)}</td></>;})()}
      </tr>)}</tbody>
     </table></div>
     <p className={s.note}>{adminT("Only interest assigned to the selected entity is included; unlinked interest appears under Unassigned. Exports follow the selected reporting scope. Gripp columns group invoices by issue month; source settlements are not monthly cash receipts.")}</p>
-   </section>
+   </section>}
+   {view==='history'&&!data.historical.enabled&&<p role="status">{tr('Historical invoicing is available for 2026.','La facturación histórica está disponible para 2026.')}</p>}
    <p className={s.footerNote}>{adminT("Financial Cockpit · Scope:")} {entityLabel}  {adminT("· Not a bank statement, operating profit calculation or audited financial report.")}</p>
   </>}
  </section>;

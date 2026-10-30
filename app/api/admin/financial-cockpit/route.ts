@@ -35,6 +35,9 @@ export async function GET(request:NextRequest){
   const year=requested===null?currentYear:Number(requested);
   if(!Number.isInteger(year)||![2026,currentYear-1,currentYear,currentYear+1].includes(year))
    return Response.json({error:'Invalid reporting year'},{status:400,headers});
+  const detail=request.nextUrl.searchParams.get('detail')||'full';
+  if(!['summary','balances','history','full'].includes(detail))return Response.json({error:'Invalid detail level'},{status:400,headers});
+  const includeArchive=detail==='history'||detail==='full',includeBalances=detail==='balances'||detail==='full';
   const capitalOn=capitalDealsEnabled();
   const entityId=request.nextUrl.searchParams.get('entity')||'all';
   if(entityId!=='all'&&entityId!=='unassigned'&&!/^[a-f0-9-]{36}$/i.test(entityId))
@@ -48,8 +51,8 @@ export async function GET(request:NextRequest){
    capitalOn?readRegister(db,'mzs_capital_payments'):Promise.resolve([]),
    readRegister(db,'mzs_lease_issuers'),
    readRegister(db,'mzs_lease_invoices'),
-   readFinancialArchive(db,year),
-   loadInvoiceRegister(db,year)
+   includeArchive?readFinancialArchive(db,year):Promise.resolve([]),
+   includeBalances?loadInvoiceRegister(db,year):Promise.resolve([])
   ]);
   const result=buildFinancialPhase2({
    year,asOf:today,entityId,
@@ -59,7 +62,7 @@ export async function GET(request:NextRequest){
    issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[],archiveInvoices
   });
   const filters=invoiceFilters({year:String(year)});const chosen=entityId==='unassigned'?[]:currentInvoices.filter(i=>(year===2026||i.source!=='archive')&&(entityId==='all'||i.issuerId===entityId));
-  return Response.json({...result,currentInvoices:selectInvoices(chosen,filters,today).totals},{headers});
+  return Response.json({...result,loadedDetail:detail,historical:{...result.historical,enabled:includeArchive&&result.historical.enabled},...(includeBalances?{currentInvoices:selectInvoices(chosen,filters,today).totals}:{})},{headers});
  }catch{
   // Do not leak which private financial register exists or failed.
   return Response.json({error:'Financial overview is currently unavailable; no partial totals are shown.'},{status:503,headers});
