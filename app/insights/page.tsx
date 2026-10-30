@@ -24,10 +24,10 @@ export default async function InsightsPage({searchParams}:Props){
  const {items,count}=await listInsights(locale,page,category,region);
  const labels={'real-estate':t('real_estate'),'private-capital':t('private_capital'),consultancy:t('consultancy')};
  const pageHref=(n:number)=>insightPath(locale)+'?'+new URLSearchParams({...(category?{category}:{}),...(region?{region}:{}),page:String(n)});
- return <main className={s.page}><PublicHeader/><div className={s.wrap}>
+ return <main className={s.page}><div className={s.header}><PublicHeader/></div><div className={s.wrap}>
   <section className={s.hero}><p className={s.eyebrow}>MZS GROUP / INSIGHTS</p><h1>MZS Insights<span>.</span></h1><p>{c.intro}</p></section>
   <form className={s.filters} action={insightPath(locale)}><label>{c.all}<select name="category" defaultValue={category}><option value="">{c.all}</option>{categories.map(k=><option key={k} value={k}>{labels[k]}</option>)}</select></label><label>{c.region}<input name="region" defaultValue={region} maxLength={80}/></label><button>{c.filter}</button></form>
   {items.length?<Cards items={items} labels={labels}/>:<div className={s.empty}><span aria-hidden="true">✧</span><p>{c.empty}</p>{(category||region||page>1)&&<Link href={insightPath(locale)}>{c.back}</Link>}</div>}
   <nav className={s.pagination} aria-label={c.next}>{page>1&&<Link href={pageHref(page-1)}>{c.previous}</Link>}{page*12<count&&<Link href={pageHref(page+1)}>{c.next}</Link>}</nav>
- </div><HomeContactFooter/></main>;
+ </div><div className={s.footer}><HomeContactFooter/></div></main>;
 }

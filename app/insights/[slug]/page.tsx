@@ -31,7 +31,7 @@ export default async function ArticlePage({params}:Props){
  const languageLinks=Object.fromEntries(locales.flatMap(l=>variants.filter(v=>v.locale===l).map(v=>[v.locale,insightPath(v.locale,v.slug)])));
  const schema={'@context':'https://schema.org','@type':'Article',headline:a.title,description:a.summary,inLanguage:a.locale,
   datePublished:a.publish_at,dateModified:a.content_updated_on,author:{'@type':'Person',name:a.author},publisher:{'@type':'Organization',name:'MZS Group'},mainEntityOfPage:'https://www.mzsgroup.com'+insightPath(locale,a.slug)};
- return <main className={s.page}><PublicHeader languageLinks={languageLinks}/><div className={s.wrap}>
+ return <main className={s.page}><div className={s.header}><PublicHeader languageLinks={languageLinks}/></div><div className={s.wrap}>
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
@@ -40,7 +40,7 @@ export default async function ArticlePage({params}:Props){
    <div className={s.cta}><Link href={localizedPath('/'+a.category,locale)}>{labels[a.category]} ↗</Link><a href="#introductory-call">{c.contact} ↗</a></div>
   </article>
   {!!related.length&&<section className={s.related}><h2>{c.related}</h2><Cards items={related} labels={labels}/></section>}
- </div><IntroCallForm source={a.category} preview={process.env.VERCEL_ENV==='preview'} sectionNumber="" introduction={c.contact}/><HomeContactFooter/>
+ </div><div className={s.contact}><IntroCallForm source={a.category} preview={process.env.VERCEL_ENV==='preview'} sectionNumber="" introduction={c.contact}/></div><div className={s.footer}><HomeContactFooter/></div>
  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  </main>;
 }

@@ -18,6 +18,6 @@ export default async function EditInsight({params}:{params:Promise<{id:string}>}
  if(versions.error||audit.error)throw new Error('Article history could not be loaded.');
  return <main className={s.page}><Link href="/admin/insights">← MZS Insights</Link><h1>{es?'Editar artículo':'Edit article'}</h1>
  <details className={s.panel}><summary>{es?'Versiones de idioma':'Language versions'} ({versions.data.length}/24)</summary><nav className={s.languages}>{locales.map(locale=>{const version=versions.data.find(v=>v.locale===locale);return <Link aria-current={version?.id===id?'page':undefined} key={locale} href={version?'/admin/insights/'+version.id:'/admin/insights/new?'+new URLSearchParams({article:data.article_id,locale})}>{locale} {version?'✓':'+'}</Link>})}</nav></details>
- <Editor article={data as Insight} es={es}/>
+ <Editor key={data.id} article={data as Insight} es={es}/>
  <details className={s.panel}><summary>{es?'Historial · últimos 10 cambios':'History · latest 10 changes'}</summary><ul>{audit.data.map(a=><li key={a.id}>{new Intl.DateTimeFormat(es?'es':'en',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Madrid'}).format(new Date(a.changed_at))} (Madrid) · #{String(a.revision)} · {String(a.status)}</li>)}</ul></details></main>;
 }
