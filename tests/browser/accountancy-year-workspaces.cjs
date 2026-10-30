@@ -39,6 +39,7 @@ const server=http.createServer(async(req,res)=>{
  const storage='/storage/v1/object/';
  if(path.startsWith(storage+'sign/')){const key=decodeURIComponent(path.slice((storage+'sign/'+bucket+'/').length));if(!files.has(key))return send({},404);return send({signedURL:'/object/sign/'+bucket+'/'+key+'?token=synthetic-only'});}
  if(path.startsWith(storage+'authenticated/')){const key=decodeURIComponent(path.slice((storage+'authenticated/'+bucket+'/').length));res.setHeader('Content-Type','application/pdf');res.end(files.get(key)||Buffer.alloc(0));return;}
+ if(path.startsWith(storage+bucket+'/')&&req.method==='GET'){const key=decodeURIComponent(path.slice((storage+bucket+'/').length));if(!files.has(key))return send({message:'Missing synthetic original'},404);res.setHeader('Content-Type','application/pdf');res.end(files.get(key));return;}
  if(path===storage+bucket&&req.method==='DELETE'){for(const p of data.prefixes??[])if(!docs.some(d=>d.file_path===p))files.delete(p);return send([]);}
  if(path.startsWith(storage+bucket+'/')&&req.method==='POST'){
   const key=decodeURIComponent(path.slice((storage+bucket+'/').length));if(files.has(key))return send({message:'Exists'},409);
@@ -87,6 +88,6 @@ const server=http.createServer(async(req,res)=>{
   failed=true;r=await request(detail+'/export');assert.equal(r.status,503);failed=false;
   role='client';assert.equal((await request(detail+'/import')).status,404);assert.equal((await request(detail)).status,404);assert.equal((await request(detail+'/export')).status,404);
   role='admin';assert.equal((await request(detail+'/import',false)).status,307);assert.equal((await request(detail,false)).status,307);assert.equal((await request(detail+'/export',false)).status,307);
-  console.log('Annual administration HTTP integration passed: authenticated EN/ES screens; real Next save-year, stale-revision, create-cost, duplicate and review server actions; amounts and filters; real ZIP serialization; fail-closed export; client denial and anonymous redirects.');
+  console.log('Annual administration HTTP integration passed: authenticated EN/ES screens; real Next actions; >5 MiB streamed ZIP with byte-identical original and manifest; other-year exclusion; corrupt-source and outage fail-closed export; client denial and anonymous redirects.');
  }finally{app.kill('SIGTERM');server.close();fs.closeSync(log);}
 })().catch(e=>{console.error(e);process.exitCode=1});
