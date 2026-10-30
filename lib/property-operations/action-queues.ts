@@ -86,7 +86,7 @@ export async function loadQueuePage(db:DB,key:QueueKey,requestedPage:number,toda
   areaIds.length?db.from('mzs_ops_staff_work_areas').select('id,name').in('id',areaIds).limit(25):Promise.resolve({data:[],error:null})
  ]);
  if(areas.error||!areas.data||areas.data.length!==areaIds.length)throw Error('Work-area data missing');
- const areaNames=new Map(areas.data.map(row=>[row.id,row.name]));
+ const areaNames=new Map<string,string>((areas.data as {id:string;name:string}[]).map(row=>[row.id,row.name] as [string,string]));
  const items:QueueItem[]=source.map(row=>{
   const ticket=tickets.get(row.ticket_id??'');
   const property=properties.get(row.property_id??ticket?.property_id??'');
