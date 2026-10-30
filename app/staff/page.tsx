@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {cookies} from 'next/headers';
 import {safeStaffLanguage,staffText} from '../../lib/property-operations/staff-copy';
 import StaffLanguagePicker from './StaffLanguagePicker';
@@ -36,6 +37,7 @@ export default async function StaffPage({searchParams}:{searchParams:Promise<Par
   <h1 className={s.managerBrandTitle}>Property Manager</h1>
   <StaffLanguagePicker initial={language}/>
  </header>
+ <p><Link href="/staff/follow-ups">{language==='nl'?'Mijn administratieve opvolgtaken →':language==='es'?'Mis tareas de seguimiento →':'My administrative follow-up tasks →'}</Link></p>
  {taskEnabled?<StaffTaskBoard tasks={tasks} tickets={data.tickets.rows} followups={followups} properties={properties} units={units} areas={areas} profileId={user.id} today={today} language={language}/>:<><h2>Werkbezoeken &amp; onderhoud</h2><p>Registreer je werkzaamheden en volg de beoordeling en opvolging. Alleen jouw toegewezen objecten zijn beschikbaar.</p></>}
  <section id="hours" className={s.staffHours}><div className={s.mobileHead}><h2>{taskEnabled?staffText(language,'workingTime'):'Werkbezoeken & onderhoud'}</h2><p>{taskEnabled?staffText(language,'recordActual'):'Registreer je werkzaamheden en volg de beoordeling en opvolging.'}</p></div><StaffForms properties={properties} units={units} areas={areas} tasks={tasks} today={today} showMaintenanceForm={!taskEnabled} language={language} initialTaskId={initialTaskId}/></section>
  {taskEnabled&&<section className={s.recentMaintenance} aria-labelledby="recent-maintenance-heading">
