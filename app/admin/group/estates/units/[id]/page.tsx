@@ -27,6 +27,22 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
     .eq('id', unit.property_id).maybeSingle();
   if (propertyError || !property) return <p role="alert" className={s.error}>{adminT("The linked property is unavailable. Please try again later.")}</p>;
   const {data:contracts,error:contractError}=contractsAvailable()?await db.from('mzs_lease_contracts').select('id,title,status,tenant_name,unit_ids,lease_start,lease_end,lines').contains('unit_ids',[id]):{data:[],error:null};
+  // Maintenance evidence remains in the secured maintenance archive. A unit
+  // dossier links to it by unit_id rather than duplicating stored photographs.
+  const {data:maintenance,error:maintenanceError}=await db.from('mzs_ops_maintenance_tickets')
+   .select('id,title,status,created_at').eq('unit_id',id)
+   .order('created_at',{ascending:false}).limit(100);
+  const maintenanceIds=(maintenance??[]).map(t=>t.id);
+  const {data:maintenancePhotos,error:photoError}=maintenanceIds.length
+   ?await db.from('mzs_ops_maintenance_photos')
+      .select('id,ticket_id,created_at').in('ticket_id',maintenanceIds)
+      .order('created_at',{ascending:false}).limit(300)
+   :{data:[],error:null};
+  const photoIds=(maintenancePhotos??[]).map(p=>p.id);
+  const {data:heldPhotos,error:heldError}=photoIds.length
+   ?await db.from('mzs_ops_maintenance_photo_holds').select('photo_id').in('photo_id',photoIds)
+   :{data:[],error:null};
+  const heldIds=new Set((heldPhotos??[]).map(p=>p.photo_id));
   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const current=currentUnitContracts(contracts||[],id,today);
   return <>
@@ -54,6 +70,23 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
       {unit.rent_included && <p className={s.note}>{adminT("Rent is included in another unit’s rent. No separate rent is added to the property totals.")}</p>}
       <p className={s.note}>{adminT(property.rent_basis)}</p>
       <p className={s.note}>{adminT("Long-term agreements do not make this unit available for online holiday bookings.")}</p>
+    </section>
+    <section className={s.section}>
+      <h2>Maintenance reports &amp; photos</h2>
+      {maintenanceError||photoError||heldError?<p role="alert">Maintenance records are temporarily unavailable.</p>:
+       !maintenance?.length?<p className={s.note}>No maintenance reports are linked to this unit.</p>:
+       <div>{maintenance.map(ticket=>{
+        const images=(maintenancePhotos??[]).filter(photo=>photo.ticket_id===ticket.id&&!heldIds.has(photo.id));
+        return <article key={ticket.id}>
+          <p><strong>{ticket.title}</strong> · {ticket.created_at.slice(0,10)} · {ticket.status}</p>
+          {images.length?<ul>{images.map((photo,index)=><li key={photo.id}>
+            <a className={s.link} href={`/api/staff/maintenance-photo/${photo.id}`}
+             target="_blank" rel="noopener noreferrer">Photo {index+1} — {photo.created_at.slice(0,10)}</a>
+           </li>)}</ul>:<p className={s.note}>No photographs attached.</p>}
+        </article>;
+       })}</div>}
+      {(maintenance?.length??0)===100&&<p className={s.note}>Showing the 100 most recent reports.</p>}
+      <p className={s.note}>Photos remain private and are accessed through the controlled maintenance archive; the original file record is not duplicated.</p>
     </section>
     <section className={s.section}><h2>{adminT("Contract history & planned agreements")}</h2>{(contracts||[]).map(c=><p key={c.id}><Link href={`/admin/group/estates/contracts?contract=${c.id}`}>{c.title}</Link> · {adminT(c.status)} · {c.lease_start} — {c.lease_end||adminT("open-ended")}</p>)}<Link href={`/admin/group/estates/contracts?view=invoices&unit=${id}`}>{adminT("Invoice drafts for this unit →")}</Link></section>
     <section className={s.section}><h2>{adminT("Source")}</h2><p className={s.note}>{unit.source_reference}</p></section>

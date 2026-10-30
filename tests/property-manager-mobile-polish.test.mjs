@@ -1,0 +1,78 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+
+const file=path=>readFileSync(path,'utf8');
+test('language picker and compact time controls are scoped to Property Manager',()=>{
+ const page=file('app/staff/page.tsx');
+ const picker=file('app/staff/StaffLanguagePicker.tsx');
+ const forms=file('app/staff/StaffForms.tsx');
+ const board=file('app/staff/StaffTaskBoard.tsx');
+ assert.match(page,/StaffLanguagePicker initial=\{language\}/);
+ assert.match(picker,/<option value="nl">NL<\/option>/);
+ assert.match(picker,/<option value="en">EN<\/option>/);
+ assert.match(picker,/<option value="es">ES<\/option>/);
+ assert.match(picker,/mzs_staff_language/);
+ assert.match(forms,/adjustHours\(-1\)/);
+ assert.match(forms,/adjustHours\(1\)/);
+ assert.match(forms,/adjustMinutes\(-1\)/);
+ assert.match(forms,/adjustMinutes\(1\)/);
+ assert.match(forms,/change\*15/);
+ assert.match(forms,/name="hours" value=\{hours\}/);
+ assert.match(forms,/name="minutes" value=\{minutes\}/);
+ assert.match(forms,/t\('descriptionWork'\)/);
+ assert.doesNotMatch(forms,/What did you actually do\?/);
+ assert.match(board,/<h2 id="staff-tasks-title">\{t\('tasks'\)\}<\/h2>/);
+ assert.doesNotMatch(board,/See what needs attention and record progress directly/);
+});
+test('Beverwijk/private locations are separated from rental ownership with RLS and exact scope',()=>{
+ const sql=file('supabase/migrations/20261030024500_property_manager_operational_areas.sql');
+ assert.match(sql,/create table public\.mzs_ops_staff_work_areas/);
+ assert.match(sql,/'maintenance-beverwijk','Onderhoud Beverwijk'/);
+ assert.match(sql,/'private-magdy','Prive Magdy'/);
+ assert.match(sql,/alter table public\.mzs_ops_staff_work_areas enable row level security/);
+ assert.match(sql,/create policy ops_work_area_read/);
+ assert.match(sql,/alter table public\.mzs_ops_property_tasks add column work_area_id/);
+ assert.match(sql,/ops_can_work_on_area/);
+ assert.doesNotMatch(sql,/insert into public\.mzs_estate_properties/i);
+ const form=file('app/staff/StaffTaskBoard.tsx');
+ assert.match(form,/const value='area:'\+area\.id/);
+ assert.match(form,/const value='property:'\+p\.id/);
+ assert.match(form,/name="work_area_id"/);
+ assert.match(form,/className=\{s\.taskLocationGrid\}/);
+ assert.match(form,/type="radio" name="location_selection"/);
+ assert.match(form,/areas\.map\(area=>/);
+ assert.match(form,/properties\.filter\(p=>p\.name\.includes\('IJmuiden'\)\)/);
+ assert.doesNotMatch(form,/select value=\{location\}/);
+ assert.match(file('app/staff/staff.module.css'),/\.taskLocationGrid\{display:grid/);
+});
+test('photos are selected together then securely uploaded one-by-one below the serverless request limit',()=>{
+ const create=file('app/api/staff/report-with-photos/route.ts');
+ const photo=file('app/api/staff/maintenance-photo/route.ts');
+ const board=file('app/staff/StaffTaskBoard.tsx');
+ assert.match(create,/mzs_ops_maintenance_tickets/);
+ assert.match(create,/form\.has\('photos'\)/);
+ assert.match(create,/size>32000/);
+ assert.match(create,/ticketId:ticket\.id/);
+ assert.match(photo,/normalizeMaintenancePhoto/);
+ assert.match(photo,/MAX_PHOTO_BYTES/);
+ assert.match(photo,/mzs_ops_maintenance_photos/);
+ assert.match(board,/formData\.delete\('photos'\)/);
+ assert.match(board,/files\.length>3/);
+ assert.match(board,/fetch\('\/api\/staff\/maintenance-photo'/);
+ assert.match(board,/for\(const file of files\)/);
+ assert.doesNotMatch(create,/SUPABASE_SERVICE_ROLE_KEY/);
+ const page=file('app/admin/group/estates/units/[id]/page.tsx');
+ assert.match(page,/\.eq\('unit_id',id\)/);
+ assert.match(page,/mzs_ops_maintenance_photo_holds/);
+ assert.match(page,/\/api\/staff\/maintenance-photo\//);
+});
+
+test('staff history language follows its own selection rather than the public-site locale',()=>{
+ const history=file('app/staff/WorkRegisters.tsx');
+ assert.match(history,/createAdminTranslator\(staffLanguage==='es'\?'es':'en'\)/);
+ assert.match(history,/if\(admin\|\|!staffLanguage\)return baseT\(source,values\)/);
+ assert.match(history,/staffHistoryLabels\[staffLanguage\]/);
+});

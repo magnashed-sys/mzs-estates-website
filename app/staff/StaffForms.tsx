@@ -4,48 +4,70 @@ import {useActionState,useState} from "react";
 import {saveActualStaffVisit,reportMaintenanceTicket} from "./actions";
 import type {PropertyTask} from "../../lib/property-operations/property-tasks";
 import s from "./staff.module.css";
+import {staffText,type StaffLanguage} from "../../lib/property-operations/staff-copy";
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
 
-function ActualVisitForm({properties,units,tasks=[],today}:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string}){
+function ActualVisitForm({properties,units,tasks=[],today,language}:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;language:StaffLanguage}){
+ const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [state,action,pending]=useActionState(saveActualStaffVisit,initialFormActionState);
  const [propertyId,setPropertyId]=useState(properties[0]?.id??"");
  const [unitId,setUnitId]=useState("");
  const [hours,setHours]=useState(0),[minutes,setMinutes]=useState(30);
+ const adjustHours=(change:number)=>setHours(value=>Math.min(16,Math.max(0,value+change)));
+ const adjustMinutes=(change:number)=>setMinutes(value=>Math.min(45,Math.max(0,value+change*15)));
  const availableUnits=units.filter(u=>u.property_id===propertyId);
  const possibleTasks=tasks.filter(t=>t.property_id===propertyId&&
    (!t.unit_id||t.unit_id===unitId)&&t.status!=='cancelled');
  const actualMinutes=hours*60+minutes;
  return <form className={s.form} action={action}>
-  <h2>Log working time</h2>
-  <p className={s.description}>Record each actual visit separately. No salary, billing or invoice is created.</p>
-  <label>Property<select required name="property_id" value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}}>
+  <h2>{t("workingTime")}</h2>
+  <p className={s.description}>{t("hoursInfo")}</p>
+  <label>{t('property')}<select required name="property_id" value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}}>
    {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
   </select></label>
-  <label>Unit (optional)<select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
-   <option value="">Whole property / general area</option>
+  <label>{t('unit')}<select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
+   <option value="">{t('whole')}</option>
    {availableUnits.map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
   </select></label>
-  <div className={s.two}>
-   <label>Work date<input type="date" name="worked_on" defaultValue={today} required/></label>
-   <label>Hours<input type="number" name="hours" value={hours} onChange={e=>setHours(Number(e.target.value))} min={0} max={16} step={1} required/></label>
-   <label>Minutes<input type="number" name="minutes" value={minutes} onChange={e=>setMinutes(Number(e.target.value))} min={0} max={59} step={1} required/></label>
+  <div className={s.timeEntryControls}>
+   <label className={s.timeDate}>{t('dateLabel')}
+    <input type="date" name="worked_on" defaultValue={today} required/>
+   </label>
+   <div className={s.timeStepper}>
+    <span>{t('hours')}</span>
+    <div className={s.timeButtons}>
+     <button type="button" onClick={()=>adjustHours(-1)} disabled={pending||hours===0} aria-label={t('hours')+' −1'}>↓</button>
+     <output aria-live="polite">{hours}</output>
+     <input type="hidden" name="hours" value={hours}/>
+     <button type="button" onClick={()=>adjustHours(1)} disabled={pending||hours===16} aria-label={t('hours')+' +1'}>↑</button>
+    </div>
+   </div>
+   <div className={s.timeStepper}>
+    <span>{t('minutes')}</span>
+    <div className={s.timeButtons}>
+     <button type="button" onClick={()=>adjustMinutes(-1)} disabled={pending||minutes===0} aria-label={t('minutes')+' −15'}>↓</button>
+     <output aria-live="polite">{minutes}</output>
+     <input type="hidden" name="minutes" value={minutes}/>
+     <button type="button" onClick={()=>adjustMinutes(1)} disabled={pending||minutes===45} aria-label={t('minutes')+' +15'}>↑</button>
+    </div>
+   </div>
   </div>
-  <p className={s.taskMeta}>Total: {Number.isFinite(actualMinutes)?actualMinutes:0} minutes</p>
-  {tasks.length>0&&<label>Related task (optional)<select name="task_id" key={propertyId+'-'+unitId} defaultValue="">
-   <option value="">General work / no specific task</option>
+  <p className={s.taskMeta}>{t('total')}: {hours}h {String(minutes).padStart(2,'0')}m</p>
+  {tasks.length>0&&<label>{t('relatedTask')}<select name="task_id" key={propertyId+'-'+unitId} defaultValue="">
+   <option value="">{t('generalTask')}</option>
    {possibleTasks.map(t=><option key={t.id} value={t.id}>{t.title} · {t.status.replaceAll('_',' ')}</option>)}
   </select></label>}
-  <label>Work category<select name="task_category" defaultValue="cleaning">
-   <option value="cleaning">Cleaning</option>
-   <option value="inspection">Inspection</option>
-   <option value="maintenance">Maintenance</option>
-   <option value="gardening">Gardening</option>
-   <option value="guest_service">Guest service</option>
-   <option value="other">Other</option>
+  <label>{t('workCategory')}<select name="task_category" defaultValue="cleaning">
+   <option value="cleaning">{t('cleaning')}</option>
+   <option value="inspection">{t('inspection')}</option>
+   <option value="maintenance">{t('maintenanceCategory')}</option>
+   <option value="gardening">{t('gardening')}</option>
+   <option value="guest_service">{t('guestService')}</option>
+   <option value="other">{t('other')}</option>
   </select></label>
-  <label>Work performed<textarea name="description" required rows={3} minLength={3} maxLength={1500} placeholder="What did you actually do?"/></label>
-  <button type="submit" disabled={pending||actualMinutes<1||actualMinutes>960}>{pending?"Saving…":"Save working time"}</button>
+  <label>{t('descriptionWork')}<textarea name="description" required rows={3} minLength={3} maxLength={1500} placeholder={t('descriptionWork')}/></label>
+  <button type="submit" disabled={pending||actualMinutes<1||actualMinutes>960}>{pending?t('saving'):t('saveTime')}</button>
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }
@@ -74,7 +96,7 @@ function MaintenanceForm({properties,units}:{properties:Property[];units:Unit[]}
   {state.message&&<p role="status" className={state.status==="error"?s.error:s.confirm}>{state.message}</p>}
  </form>;
 }
-export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean}){
+export default function StaffForms(props:{properties:Property[];units:Unit[];tasks?:PropertyTask[];today:string;showMaintenanceForm?:boolean;language:StaffLanguage}){
  // The task-enabled mobile cockpit provides one unified entry point.
  // Keep the legacy maintenance form only where the task feature is disabled.
  return <div className={s.forms}>

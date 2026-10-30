@@ -1,135 +1,229 @@
 'use client';
 import {useActionState,useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
-import {reportMaintenanceTicket} from './actions';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
 import s from './staff.module.css';
+import {staffText,type StaffLanguage} from '../../lib/property-operations/staff-copy';
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
+type WorkArea={id:string;name:string};
 type Result={status:'idle'|'success'|'error';message:string};
 const initial:Result={status:'idle',message:''};
 function Message({state}:{state:Result}){return state.message&&<p role="status" className={state.status==='error'?s.error:s.confirm}>{state.message}</p>;}
-function Progress({task}:{task:PropertyTask}){
+function Progress({task,language}:{task:PropertyTask;language:StaffLanguage}){
+ const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [state,action,pending]=useActionState(updateMyTaskProgress,initial);
  return <form className={s.taskProgressForm} action={action}>
   <input type="hidden" name="task_id" value={task.id}/>
-  <label>Update status
+  <label>{t('progress')}
    <select name="status" defaultValue={task.status==='open'?'in_progress':task.status==='done'?'done':task.status}>
-    <option value="in_progress">In progress</option><option value="blocked">Waiting / blocked</option><option value="done">Completed</option>
+    <option value="in_progress">{t('taskProgress')}</option><option value="blocked">{t('taskBlocked')}</option><option value="done">{t('taskDone')}</option>
    </select>
   </label>
-  <label>Progress note <textarea name="note" minLength={3} maxLength={1500} rows={2} required placeholder="What has been done, or what is still needed?"/></label>
-  <button type="submit" disabled={pending}>{pending?'Saving…':'Save progress'}</button>
+  <label>{t('progressNote')} <textarea name="note" minLength={3} maxLength={1500} rows={2} required placeholder={t('progressExample')}/></label>
+  <button type="submit" disabled={pending}>{pending?t('saving'):t('saveProgress')}</button>
   <Message state={state}/>
  </form>;
 }
 type EntryKind='task'|'maintenance';
-function NewWorkItem({properties,units,profileId}:{properties:Property[];units:Unit[];profileId:string}){
+function NewWorkItem({properties,units,areas,profileId,language}:{properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;language:StaffLanguage}){
+ const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
- const [maintenanceState,maintenanceAction,maintenancePending]=useActionState(reportMaintenanceTicket,initial);
+ const router=useRouter();
+ const [lastTicketId,setLastTicketId]=useState<string|null>(null);
+ const [maintenanceState,setMaintenanceState]=useState<Result>(initial);
+ const [maintenancePending,setMaintenancePending]=useState(false);
+ async function submitMaintenance(event:React.FormEvent<HTMLFormElement>){
+  event.preventDefault();
+  if(maintenancePending)return;
+  const form=event.currentTarget;
+  const formData=new FormData(form);
+  const files=formData.getAll('photos')
+   .filter((item):item is File=>item instanceof File&&item.size>0);
+  if(files.length>3||files.some(file=>
+    file.size>4194304||!['image/jpeg','image/png','image/webp'].includes(file.type))){
+   setMaintenanceState({status:'error',message:t('photoHint')});
+   return;
+  }
+  formData.delete('photos');
+  setMaintenancePending(true);setMaintenanceState(initial);setLastTicketId(null);
+  try{
+   const response=await fetch('/api/staff/report-with-photos',{
+    method:'POST',body:formData,credentials:'same-origin'
+   });
+   const payload:unknown=await response.json();
+   const message=payload&&typeof payload==='object'&&'message' in payload&&
+    typeof payload.message==='string'?payload.message:'Maintenance report could not be saved.';
+   const ticketId=payload&&typeof payload==='object'&&'ticketId' in payload&&
+    typeof payload.ticketId==='string'&&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.ticketId)
+      ?payload.ticketId:null;
+   if(!response.ok||!ticketId){
+    setMaintenanceState({status:'error',message});return;
+   }
+   setLastTicketId(ticketId);
+   let uploaded=0;
+   for(const file of files){
+    const upload=new FormData();
+    upload.set('ticket_id',ticketId);
+    upload.set('file',file);
+    try{
+     const photo=await fetch('/api/staff/maintenance-photo',{
+      method:'POST',body:upload,credentials:'same-origin'
+     });
+     if(!photo.ok)break;
+     uploaded+=1;
+    }catch{break;}
+   }
+   setMaintenanceState({status:'success',message:uploaded===files.length
+    ?t('reportSaved')+(files.length?' '+uploaded+' '+t('photosUploaded'):'')
+    :t('uploadPartial')});
+   form.reset();router.refresh();
+  }catch{
+   setMaintenanceState({status:'error',message:'Could not confirm submission. Check the maintenance register before trying again.'});
+  }finally{setMaintenancePending(false);}
+ }
  const [kind,setKind]=useState<EntryKind>('task');
- const [propertyId,setPropertyId]=useState(properties[0]?.id??'');
+ const [location,setLocation]=useState(properties[0]?'property:'+properties[0].id:'');
+ const isArea=location.startsWith('area:');
+ const propertyId=isArea?'':location.startsWith('property:')?location.slice(9):'';
+ const workAreaId=isArea?location.slice(5):'';
  const [unitId,setUnitId]=useState('');
- const isMaintenance=kind==='maintenance';
+ const isMaintenance=kind==='maintenance'&&!isArea;
  const result=isMaintenance?maintenanceState:taskState;
  const pending=isMaintenance?maintenancePending:taskPending;
  return <section id="work-create" className={s.taskCreate} aria-labelledby="work-create-title">
-  <form key={kind} className={s.form} action={isMaintenance?maintenanceAction:taskAction}>
-   <h2 id="work-create-title">New task or report</h2>
-   <p className={s.description}>Choose what you need to record. Both options will be visible to your manager.</p>
-   <label>What would you like to add?
+  <form key={kind} className={s.form} action={isMaintenance?undefined:taskAction} onSubmit={isMaintenance?submitMaintenance:undefined}>
+   <h2 id="work-create-title">{t('createHeading')}</h2>
+   
+   <label>{t('addType')}
     <select value={kind} onChange={e=>setKind(e.target.value as EntryKind)}>
-     <option value="task">Task / general work</option>
-     <option value="maintenance">Maintenance issue / repair request</option>
+     <option value="task">{t('task')}</option>
+     {!isArea&&<option value="maintenance">{t('maintenance')}</option>}
     </select>
    </label>
    <input type="hidden" name="property_id" value={propertyId}/>
+   <input type="hidden" name="work_area_id" value={workAreaId}/>
    {!isMaintenance&&<>
     <input type="hidden" name="assigned_profile_id" value={profileId}/>
     <input type="hidden" name="source_reference" value=""/>
    </>}
-   {properties.length>1?<label>Property
-    <select value={propertyId} onChange={e=>{setPropertyId(e.target.value);setUnitId('');}} required>
-     {properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-    </select>
-   </label>:<p className={s.taskMeta}>Property: {properties[0]?.name??'No assigned property'}</p>}
-   {units.some(u=>u.property_id===propertyId)&&<label>Unit (optional)
+   <fieldset className={s.taskLocations}>
+    <legend>{t('property')}</legend>
+    <div className={s.taskLocationGrid}>
+     {properties.filter(p=>p.name.includes('IJmuiden')).map(p=>{
+      const value='property:'+p.id;
+      const name=p.name.includes('Andromedastraat')?'Andromedastraat IJmuiden':
+       p.name.includes('Kennemerlaan')?'Kennemerlaan IJmuiden':p.name;
+      return <label key={p.id} className={location===value?s.taskLocationActive:s.taskLocationChoice}>
+       <input type="radio" name="location_selection" value={value}
+        checked={location===value} onChange={()=>{
+         setLocation(value);setUnitId('');
+        }}/>
+       <span><strong>{name}</strong><small>{units.filter(u=>u.property_id===p.id).length} units</small></span>
+      </label>;
+     })}
+     {areas.map(area=>{
+      const value='area:'+area.id;
+      return <label key={area.id} className={location===value?s.taskLocationActive:s.taskLocationChoice}>
+       <input type="radio" name="location_selection" value={value}
+        checked={location===value} onChange={()=>{
+         setLocation(value);setUnitId('');setKind('task');
+        }}/>
+       <span><strong>{area.name}</strong><small>{t('workArea')}</small></span>
+      </label>;
+     })}
+    </div>
+   </fieldset>
+   {(isArea||!units.some(u=>u.property_id===propertyId))&&<input type="hidden" name="unit_id" value=""/>}
+   {!isArea&&units.some(u=>u.property_id===propertyId)&&<label>{t('unit')}
     <select name="unit_id" value={unitId} onChange={e=>setUnitId(e.target.value)}>
-     <option value="">Whole property / common area</option>
+     <option value="">{t('whole')}</option>
      {units.filter(u=>u.property_id===propertyId).map(u=><option key={u.id} value={u.id}>{u.address}</option>)}
     </select>
    </label>}
-   <label>{isMaintenance?'What needs repairing?':'What needs to be done?'}
-    <input name="title" minLength={5} maxLength={140} required placeholder={isMaintenance?'e.g. Leaking tap in kitchen':'e.g. Order towels for toilets'}/>
+   <label>{t(isMaintenance?'issueTitle':'taskTitle')}
+    <input name="title" minLength={5} maxLength={140} required placeholder={t(isMaintenance?'issueExample':'taskExample')}/>
    </label>
-   <label>{isMaintenance?'Describe the issue':'Details (optional)'}
+   <label>{t(isMaintenance?'description':'details')}
     <textarea name="description" rows={3} minLength={isMaintenance?8:undefined}
      maxLength={2000} required={isMaintenance}
-     placeholder={isMaintenance?'What is wrong and where?':'Add any instructions or useful details'}/>
+     placeholder={t(isMaintenance?'issueDetailsExample':'taskDetailsExample')}/>
    </label>
-   <label>{isMaintenance?'Urgency':'Priority'}
+   <label>{t(isMaintenance?'urgency':'priority')}
     <select key={kind} name="priority" defaultValue={isMaintenance?'routine':'normal'}>
      {isMaintenance?<>
-      <option value="routine">Normal</option>
-      <option value="soon">Needs attention soon</option>
-      <option value="urgent">Urgent</option>
+      <option value="routine">{t('normal')}</option>
+      <option value="soon">{t('soon')}</option>
+      <option value="urgent">{t('urgent')}</option>
      </>:<>
-      <option value="normal">Normal</option>
-      <option value="high">High</option>
-      <option value="urgent">Urgent</option>
-      <option value="low">Low</option>
+      <option value="normal">{t('normal')}</option>
+      <option value="high">{t('high')}</option>
+      <option value="urgent">{t('urgent')}</option>
+      <option value="low">{t('low')}</option>
      </>}
     </select>
    </label>
    {!isMaintenance&&<details className={s.taskOptional}>
-    <summary>Additional planning (optional)</summary>
-    <label>Due date <input name="due_on" type="date"/></label>
+    <summary>{t('planning')}</summary>
+    <label>{t('dueDate')} <input name="due_on" type="date"/></label>
    </details>}
-   {isMaintenance&&<p className={s.description}>This creates a maintenance report for review. It does not automatically authorize a supplier or create an invoice. For immediate danger, call the responsible manager.</p>}
-   <button disabled={pending||!propertyId} type="submit">{pending?'Saving…':isMaintenance?'Send maintenance report':'Create task'}</button>
+   {isMaintenance&&<>
+    <label>{t('photos')}
+     <input type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp"/>
+    </label>
+    <p className={s.description}>{t('photoHint')}</p>
+    <p className={s.description}>{t('photoWarning')}</p>
+   </>}
+   <button disabled={pending||(!propertyId&&!workAreaId)} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
    <Message state={result}/>
+   {isMaintenance&&lastTicketId&&<a className={s.taskSecondary}
+     href={'/staff?ticket='+encodeURIComponent(lastTicketId)+'#ticket'}>{t('viewReport')}</a>}
   </form>
  </section>;
 }
-export default function StaffTaskBoard({tasks,properties,units,profileId,today}:{
- tasks:PropertyTask[];properties:Property[];units:Unit[];profileId:string;today:string;
+export default function StaffTaskBoard({tasks,properties,units,areas,profileId,today,language}:{
+ tasks:PropertyTask[];properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;today:string;language:StaffLanguage;
 }){
+ const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [showAll,setShowAll]=useState(false);
  const [showNew,setShowNew]=useState(false);
  const summary=taskOverview(tasks,today);
  const list=taskOrder(tasks).filter(t=>showAll||!['done','cancelled'].includes(t.status));
  const prop=new Map(properties.map(p=>[p.id,p.name]));
+ const areaName=new Map(areas.map(area=>[area.id,area.name]));
  const unit=new Map(units.map(u=>[u.id,u.address]));
  return <section className={s.staffTasks} aria-labelledby="staff-tasks-title">
   <div className={s.mobileHead}>
-   <h2 id="staff-tasks-title">My tasks</h2>
-   <p>See what needs attention and record progress directly from your phone.</p>
+   <h2 id="staff-tasks-title">{t('tasks')}</h2>
+
   </div>
   <div className={s.mobileStats}>
-   <div><small>Open tasks</small><strong>{summary.open}</strong></div>
-   <div><small>Due / no date</small><strong>{summary.today}</strong></div>
-   <div><small>High priority</small><strong>{summary.urgent}</strong></div>
-   <div><small>Completed</small><strong>{summary.completed}</strong></div>
+   <div><small>{t('openTasks')}</small><strong>{summary.open}</strong></div>
+   <div><small>{t('dueToday')}</small><strong>{summary.today}</strong></div>
+   <div><small>{t('priorityHigh')}</small><strong>{summary.urgent}</strong></div>
+   <div><small>{t('completed')}</small><strong>{summary.completed}</strong></div>
   </div>
   <div className={s.taskActions}>
    <button type="button" className={s.taskPrimary} aria-expanded={showNew}
-    aria-controls="work-create" onClick={()=>setShowNew(x=>!x)}>+ New task / report</button>
-   <a className={s.taskSecondary} href="#hours">+ Log working time</a>
+    aria-controls="work-create" onClick={()=>setShowNew(x=>!x)}>{t('newEntry')}</button>
+   <a className={s.taskSecondary} href="#hours">{t('logTime')}</a>
   </div>
-  {showNew&&<NewWorkItem properties={properties} units={units} profileId={profileId}/>} 
+  {showNew&&<NewWorkItem properties={properties} units={units} areas={areas} profileId={profileId} language={language}/>} 
   <div className={s.taskTabs} role="group" aria-label="Task status filter">
-   <button type="button" className={!showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(false)}>Open ({summary.open})</button>
-   <button type="button" className={showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(true)}>All tasks</button>
+   <button type="button" className={!showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(false)} >{t('taskOpen')} ({summary.open})</button>
+   <button type="button" className={showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(true)}>{t('allTasks')}</button>
   </div>
   <div className={s.taskCardList}>{list.map(task=><article className={s.taskCard} key={task.id}>
-   <div className={s.taskCardTop}><strong>{task.title}</strong><span className={s.taskChip}>{taskStatusName[task.status]}</span></div>
-   <p className={s.taskMeta}>{prop.get(task.property_id)??'Property'}{task.unit_id?' · '+(unit.get(task.unit_id)??'Unit'):''}</p>
-   <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · Due '+task.due_on:''}</p>
+   <div className={s.taskCardTop}><strong>{task.title}</strong><span className={s.taskChip}>{t(task.status==='open'?'taskOpen':task.status==='in_progress'?'taskProgress':task.status==='blocked'?'taskBlocked':task.status==='done'?'taskDone':'taskCancelled')}</span></div>
+   <p className={s.taskMeta}>{task.work_area_id?areaName.get(task.work_area_id)??'Work area':prop.get(task.property_id??'')??'Property'}{task.unit_id?' · '+(unit.get(task.unit_id)??'Unit'):''}</p>
+   <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · '+t('dueShort')+' '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
-   {task.latest_note&&<p className={s.taskMeta}>Last update: {task.latest_note}</p>}
-   {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>Update progress</summary><Progress task={task}/></details>}
+   {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
+   {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>{t('progress')}</summary><Progress task={task} language={language}/></details>}
   </article>)}
-  {!list.length&&<p className={s.note}>No open tasks yet. Use “New task / report” to add work, or wait for your manager to assign it.</p>}</div>
-  <p className={s.taskDisclaimer}>Only your assigned properties and tasks are visible. Tasks and worked hours do not issue invoices or make payments.</p>
+  {!list.length&&<p className={s.note}>{t('noTasks')}</p>}</div>
+  <p className={s.taskDisclaimer}>{t('note')}</p>
  </section>;
 }

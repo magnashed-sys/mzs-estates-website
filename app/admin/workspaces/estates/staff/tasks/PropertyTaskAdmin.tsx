@@ -8,6 +8,7 @@ type Property={id:string;name:string;address?:string};
 type Unit={id:string;property_id:string;address:string};
 type Member={id:string;full_name:string;is_active:boolean};
 type Scope={profile_id:string;property_id:string};
+type WorkArea={id:string;name:string};
 type Result={status:'idle'|'error'|'success';message:string};
 const initial:Result={status:'idle',message:''};
 function Message({data}:{data:Result}){return data.message&&<p className={data.status==='error'?s.error:s.confirm} role="status">{data.message}</p>;}
@@ -61,13 +62,13 @@ function Progress({task,language}:{task:PropertyTask;language:'en'|'es'}){
   <Message data={data}/>
  </form>;
 }
-export default function PropertyTaskAdmin({properties,units,members,scopes,tasks,language,timeTotals}:{
- properties:Property[];units:Unit[];members:Member[];scopes:Scope[];tasks:PropertyTask[];language:'en'|'es';timeTotals:{task_id:string;minutes:number;visits:number}[];
+export default function PropertyTaskAdmin({properties,units,members,scopes,tasks,areas,language,timeTotals}:{
+ properties:Property[];units:Unit[];members:Member[];scopes:Scope[];tasks:PropertyTask[];areas:WorkArea[];language:'en'|'es';timeTotals:{task_id:string;minutes:number;visits:number}[];
 }){
  const tr=(en:string,es:string)=>language==='es'?es:en;
  const [filter,setFilter]=useState<'active'|'all'|'done'>('active');
  const visible=taskOrder(tasks).filter(t=>filter==='all'||(filter==='done'?t.status==='done':!['done','cancelled'].includes(t.status)));
- const props=new Map(properties.map(x=>[x.id,x])),people=new Map(members.map(x=>[x.id,x]));
+ const props=new Map(properties.map(x=>[x.id,x])),areaName=new Map(areas.map(x=>[x.id,x.name])),people=new Map(members.map(x=>[x.id,x]));
  return <div>
   <details className={s.panel}><summary>+ {tr('New task','Nueva tarea')}</summary>
    <TaskForm properties={properties} units={units} members={members} scopes={scopes} language={language}/>
@@ -78,13 +79,13 @@ export default function PropertyTaskAdmin({properties,units,members,scopes,tasks
   <div className={s.taskCardList}>
    {visible.map(t=><article key={t.id} className={s.taskCard}>
     <div className={s.taskCardTop}><strong>{t.title}</strong><span className={s.taskChip}>{taskStatusName[t.status]}</span></div>
-    <p className={s.taskMeta}>{props.get(t.property_id)?.name??tr('Property','Inmueble')}{t.unit_id?' · '+(units.find(u=>u.id===t.unit_id)?.address??tr('Unit','Unidad')):''}</p>
+    <p className={s.taskMeta}>{t.work_area_id?areaName.get(t.work_area_id)??tr('Work area','Área de trabajo'):props.get(t.property_id??'')?.name??tr('Property','Inmueble')}{t.unit_id?' · '+(units.find(u=>u.id===t.unit_id)?.address??tr('Unit','Unidad')):''}</p>
     <p className={s.taskMeta}>{tr('Assigned to','Asignado a')}: {people.get(t.assigned_profile_id??'')?.full_name??tr('Unassigned','Sin asignar')} · {taskPriorityName[t.priority]}{t.due_on?' · '+t.due_on:''}</p>
     <p className={s.taskMeta}>{tr('Working time registered','Gastos de tiempo registrados')}: {((timeTotals.find(x=>x.task_id===t.id)?.minutes??0)/60).toFixed(2)} h · {timeTotals.find(x=>x.task_id===t.id)?.visits??0} {tr('visits','visitas')} ({tr('not yet billable','todavía no facturable')})</p>
     {t.description&&<p>{t.description}</p>}
     {t.latest_note&&<p className={s.taskMeta}>{tr('Latest','Última actualización')}: {t.latest_note}</p>}
     <div className={s.taskDetails}>
-     <details><summary>{tr('Edit / reassign','Editar / reasignar')}</summary><TaskForm task={t} properties={properties} units={units} members={members} scopes={scopes} language={language}/></details>
+     {!t.work_area_id&&<details><summary>{tr('Edit / reassign','Editar / reasignar')}</summary><TaskForm task={t} properties={properties} units={units} members={members} scopes={scopes} language={language}/></details>}
      <details><summary>{tr('Status and follow-up','Estado y seguimiento')}</summary><Progress task={t} language={language}/></details>
     </div>
    </article>)}

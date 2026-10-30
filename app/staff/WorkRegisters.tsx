@@ -7,9 +7,64 @@ import type {PropertyTask} from '../../lib/property-operations/property-tasks';
 import {type loadRegisters,type Params,one} from '../../lib/property-operations/staff-data';
 import {ReviewForm,CorrectionForm,CorrectionDecisionForm,TicketProgressForm} from './WorkForms';
 import s from './staff.module.css';
+import type {StaffLanguage} from '../../lib/property-operations/staff-copy';
+import {createAdminTranslator,type AdminTranslator} from '../../lib/admin/translation';
+const staffHistoryLabels:Record<'nl'|'es',Record<string,string>>={
+ nl:{
+  'Filter by property':'Filter op pand','All assigned properties':'Alle toegewezen panden',
+  'Show records':'Registraties tonen','My work visits':'Mijn urenregistraties',
+  'My maintenance reports':'Mijn onderhoudsmeldingen','Date / property':'Datum / pand',
+  'Minutes':'Minuten','Review':'Beoordeling','Details':'Details',
+  'Open work visit':'Open urenregistratie','No work visits recorded yet.':'Nog geen uren geregistreerd.',
+  'Maintenance register':'Onderhoudsregister','Property / report':'Pand / melding',
+  'Status':'Status','Planning':'Planning','Open report':'Open melding',
+  'No maintenance reports yet.':'Nog geen onderhoudsmeldingen.',
+  'Not yet scheduled':'Nog niet ingepland','Time entry pages':'Pagina’s urenregistratie',
+  'Maintenance pages':'Pagina’s onderhoud','← Previous':'← Vorige','Next →':'Volgende →',
+  'Page':'Pagina','of':'van','records':'registraties','Property':'Pand',
+  'Correction history':'Correctiegeschiedenis','Review history':'Beoordelingsgeschiedenis',
+  'Not yet reviewed.':'Nog niet beoordeeld.','No corrections requested.':'Geen correcties aangevraagd.',
+  'Work visit ·':'Werkbezoek ·','Originally:':'Oorspronkelijk:',
+  'minutes':'minuten','approved':'goedgekeurd','rejected':'afgewezen',
+  'Awaiting review':'Wacht op beoordeling','Returned':'Afgewezen','Approved':'Goedgekeurd',
+  'Originally':'Oorspronkelijk','Explanation:':'Toelichting:',
+  'Work performed':'Uitgevoerde werkzaamheden','Related task':'Gekoppelde taak',
+  'Latest':'Laatste update','Maintenance photos':'Onderhoudsfoto’s'
+ },
+ es:{
+  'Filter by property':'Filtrar por inmueble','All assigned properties':'Todos los inmuebles asignados',
+  'Show records':'Mostrar registros','My work visits':'Mis horas registradas',
+  'My maintenance reports':'Mis incidencias de mantenimiento','Date / property':'Fecha / inmueble',
+  'Minutes':'Minutos','Review':'Revisión','Details':'Detalles',
+  'Open work visit':'Abrir registro de horas','No work visits recorded yet.':'Todavía no hay horas registradas.',
+  'Maintenance register':'Registro de mantenimiento','Property / report':'Inmueble / incidencia',
+  'Status':'Estado','Planning':'Planificación','Open report':'Abrir incidencia',
+  'No maintenance reports yet.':'Todavía no hay incidencias.',
+  'Not yet scheduled':'Sin programar','Time entry pages':'Páginas de horas',
+  'Maintenance pages':'Páginas de mantenimiento','← Previous':'← Anterior','Next →':'Siguiente →',
+  'Page':'Página','of':'de','records':'registros','Property':'Inmueble',
+  'Correction history':'Historial de correcciones','Review history':'Historial de revisiones',
+  'Not yet reviewed.':'Sin revisar.','No corrections requested.':'Sin correcciones solicitadas.',
+  'Work visit ·':'Visita ·','Originally:':'Originalmente:',
+  'minutes':'minutos','approved':'aprobado','rejected':'rechazado',
+  'Awaiting review':'Pendiente de revisión','Returned':'Devuelto','Approved':'Aprobado',
+  'Originally':'Originalmente','Explanation:':'Explicación:',
+  'Work performed':'Trabajo realizado','Related task':'Tarea relacionada',
+  'Latest':'Última actualización','Maintenance photos':'Fotos de mantenimiento'
+ }
+};
+
 type Data=Awaited<ReturnType<typeof loadRegisters>>;
-export default function WorkRegisters({data,params,properties,tasks=[],members=[],assignees=members,admin=false}:{data:Data;params:Params;properties:Property[];tasks?:PropertyTask[];members?:Member[];assignees?:Member[];admin?:boolean}){
- const {t:adminT,locale:adminLocale}=useAdminI18n();
+export default function WorkRegisters({data,params,properties,tasks=[],members=[],assignees=members,admin=false,staffLanguage}:{data:Data;params:Params;properties:Property[];tasks?:PropertyTask[];members?:Member[];assignees?:Member[];admin?:boolean;staffLanguage?:StaffLanguage}){
+ const {t:baseT,locale:adminLocale}=useAdminI18n();
+ // Staff language selection must not inherit the public-site locale.
+ const staffFallback=createAdminTranslator(staffLanguage==='es'?'es':'en');
+ const adminT:AdminTranslator=(source,values)=>{
+  if(admin||!staffLanguage)return baseT(source,values);
+  const literal=String(source??'');
+  const translated=staffLanguage==='en'?undefined:staffHistoryLabels[staffLanguage]?.[literal];
+  return translated&&!values?translated:staffFallback(source,values);
+ };
 
  const base=admin?'/admin/workspaces/estates/staff':'/staff';
  const url=(key:string,value:string,anchor='')=>{const q=new URLSearchParams();for(const k of ['property','vpage','tpage','visit','ticket','inbox','inboxPage','reportFrom','reportUntil','reportProperty','reportProfile','reportPage']){const v=one(params[k]);if(v)q.set(k,v);}q.set(key,value);return base+'?'+q.toString()+anchor;};

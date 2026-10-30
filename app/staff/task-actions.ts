@@ -14,8 +14,14 @@ export async function createMyPropertyTask(_prior:Result,form:FormData):Promise<
  const {db,user,properties}=await requirePropertyStaff();
  try{
   const payload=taskInput(form);
-  if(!properties.some(p=>p.id===payload.property_id)||payload.assigned_profile_id!==user.id)
-   return {status:'error',message:'Only your own assigned property and account can be used.'};
+  let allowed=payload.property_id!==null&&properties.some(p=>p.id===payload.property_id);
+  if(payload.work_area_id){
+   const {data,error}=await db.from('mzs_ops_staff_work_area_directory')
+    .select('id').eq('id',payload.work_area_id).maybeSingle();
+   allowed=!error&&!!data;
+  }
+  if(!allowed||payload.assigned_profile_id!==user.id)
+   return {status:'error',message:'Only your assigned work locations and own account can be used.'};
   const {data:created,error}=await db.from('mzs_ops_property_tasks')
     .insert(payload).select('id').single();
   if(error||!created)return {status:'error',message:'Task could not be created. Check the unit and access rights.'};
@@ -32,9 +38,16 @@ export async function updateMyTaskProgress(_prior:Result,form:FormData):Promise<
  try{
   const payload=taskUpdateInput(form);
   if(!['in_progress','blocked','done'].includes(payload.status))return {status:'error',message:'Select a valid task status.'};
-  const {data:task,error:readError}=await db.from('mzs_ops_property_tasks').select('id,property_id,assigned_profile_id').eq('id',payload.task_id).maybeSingle();
-  if(readError||!task||task.assigned_profile_id!==user.id||!properties.some(p=>p.id===task.property_id))
+  const {data:task,error:readError}=await db.from('mzs_ops_property_tasks')
+   .select('id,property_id,work_area_id,assigned_profile_id').eq('id',payload.task_id).maybeSingle();
+  if(readError||!task||task.assigned_profile_id!==user.id)
    return {status:'error',message:'Task access not available.'};
+  if(task.work_area_id){
+   const {data:area,error:areaError}=await db.from('mzs_ops_staff_work_area_directory')
+    .select('id').eq('id',task.work_area_id).maybeSingle();
+   if(areaError||!area)return {status:'error',message:'Work area access not available.'};
+  }else if(!properties.some(p=>p.id===task.property_id))
+   return {status:'error',message:'Property access not available.'};
   const {error}=await db.from('mzs_ops_property_task_updates').insert(payload);
   if(error)return {status:'error',message:'Progress not saved; refresh to view the latest status.'};
   refresh();return {status:'success',message:'Your task update was saved.'};
