@@ -3426,5 +3426,7 @@
   "Total exceeds the supported range.": "El total supera el intervalo admitido.",
   "Use a UTF-8 CSV file.": "Utilice un archivo CSV UTF-8.",
   "Invoice number": "Número de factura",
-  "Net amount": "Importe neto"
+  "Net amount": "Importe neto",
+  "Staff follow-up notes": "Notas de seguimiento del personal",
+  "No staff progress notes yet.": "Todavía no hay notas de seguimiento."
 }
