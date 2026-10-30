@@ -24,7 +24,7 @@ test('directory renders accessible bilingual controls and only navigational link
  new Function('exports','require',ts.transpileModule(readFileSync('app/admin/AdminDirectory.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText)(exports,n=>deps[n]);
  assert.equal(renderToStaticMarkup(React.createElement(exports.default)), '');
  const html=renderToStaticMarkup(React.createElement(exports.default,{expanded:true}));
- assert.equal((html.match(/<a /g)||[]).length,35);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
+ assert.equal((html.match(/<a /g)||[]).length,36);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
  assert.doesNotMatch(html,/<form|action=/);
  }
 });
