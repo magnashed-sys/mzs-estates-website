@@ -1,5 +1,5 @@
 'use client';
-import {useActionState,useState} from 'react';
+import {useActionState,useEffect,useState} from 'react';
 import {approveSelectedWeekVisits,closeStaffWeek,reopenStaffWeek,type WeekActionState} from './actions';
 import s from '../../../../staff/staff.module.css';
 const initial:WeekActionState={status:'idle',message:''};
@@ -12,6 +12,7 @@ export default function WeekControls({profile,week,rows,closed,canClose,labels,l
  const [approval,approve,pendingApprove]=useActionState(approveSelectedWeekVisits,initial);
  const [closure,close,pendingClose]=useActionState(closeStaffWeek,initial);
  const [reopenState,reopen,pendingReopen]=useActionState(reopenStaffWeek,initial);
+ useEffect(()=>{if(approval.status==='success')setSelected([]);},[approval]);
  const tr=(en:string,es:string)=>locale==='es'?es:en;
  const ready=rows.filter(r=>r.review_decision===null&&!r.correction_pending);
  const toggle=(id:string,checked:boolean)=>setSelected(prev=>checked?[...new Set([...prev,id])]:prev.filter(x=>x!==id));
@@ -22,11 +23,11 @@ export default function WeekControls({profile,week,rows,closed,canClose,labels,l
   {rows.length?<form action={approve} className={s.form}>
    <input type="hidden" name="profile" value={profile}/><input type="hidden" name="week" value={week}/>
    <div className={s.tableWrap}><table className={s.table}><thead><tr>
-    <th><input aria-label={tr('Select all pending visits','Seleccionar todas las visitas pendientes')} type="checkbox" checked={ready.length>0&&selected.length===ready.length} disabled={closed||!ready.length} onChange={e=>setSelected(e.target.checked?ready.map(x=>x.id):[])}/></th>
+    <th><input aria-label={tr('Select all pending visits','Seleccionar todas las visitas pendientes')} type="checkbox" checked={ready.length>0&&selected.length===ready.length} disabled={closed||!ready.length} onChange={e=>setSelected(e.target.checked?ready.slice(0,100).map(x=>x.id):[])}/></th>
     <th>{tr('Date / location','Fecha / lugar')}</th><th>{tr('Work and duration','Trabajo y duración')}</th><th>{tr('Status','Estado')}</th>
    </tr></thead><tbody>{rows.map(r=><tr key={r.id}>
     <td>{!closed&&r.review_decision===null&&!r.correction_pending?
-     <input type="checkbox" name="visit_id" value={r.id} checked={selected.includes(r.id)} onChange={e=>toggle(r.id,e.target.checked)} aria-label={tr('Select visit on ','Seleccionar visita del ')+r.worked_on}/>:null}</td>
+     <input type="checkbox" name="visit_id" value={r.id} checked={selected.includes(r.id)} disabled={selected.length>=100&&!selected.includes(r.id)} onChange={e=>toggle(r.id,e.target.checked)} aria-label={tr('Select visit on ','Seleccionar visita del ')+r.worked_on}/>:null}</td>
     <td>{r.worked_on}<br/><small>{r.work_area_id?labels['area:'+r.work_area_id]:labels['property:'+r.property_id]??tr('Property','Inmueble')}</small></td>
     <td>{duration(r.effective_minutes)}<br/><small>{r.description}</small></td>
     <td>{status(r)}</td>
