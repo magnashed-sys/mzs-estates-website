@@ -37,7 +37,14 @@ export function timeFilters(params:Record<string,string|string[]|undefined>,now=
   throw Error("Invalid report filter");
  };
  const today=operationsDay(now),from=read('from',today.slice(0,7)+'-01'),until=read('until',today);
- const property=read('property'),area=read('area'),profile=read('profile');
+ const location=read('location'),profile=read('profile');
+ let property=read('property'),area=read('area');
+ if(location){
+  if(property||area)throw Error("Do not combine location and property/area filters.");
+  if(location.startsWith('property:'))property=location.slice(9);
+  else if(location.startsWith('area:'))area=location.slice(5);
+  else throw Error("Invalid work location filter.");
+ }
  if(!validDate(from)||!validDate(until)||from>until||(Date.parse(until)-Date.parse(from))/86400000>365)
   throw Error("Choose a valid period of up to 366 days.");
  if((property&&!uuid.test(property))||(area&&!areaId.test(area))||(profile&&!uuid.test(profile))||(property&&area))
