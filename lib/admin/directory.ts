@@ -1,4 +1,5 @@
 export const adminDirectory = [
+ {group:"Accountancy",en:"Completeness center",es:"Centro de integridad documental",href:"/admin/workspaces/accountancy/completeness"},
   {
     "group": "Cockpit",
     "en": "Cockpit",
