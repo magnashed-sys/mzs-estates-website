@@ -7,12 +7,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  grant usage on schema auth to authenticated;
  create function public.is_admin() returns boolean language plpgsql stable security definer set search_path='' as $$begin return exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active);end$$;`);
  await db.exec(fs.readFileSync('tests/db/partner-schema.sql','utf8'));
+ await db.exec(fs.readFileSync('tests/db/partner-booking-schema.sql','utf8'));
  await db.exec(`create policy self_read on public.profiles for select to authenticated using(id=auth.uid());
  insert into public.profiles(id,role,is_active) values('${admin}','admin',true),('${partner}','client',true),('${stranger}','client',true);
  insert into public.mzs_lease_issuers(id,name) values('${entity}','Mase fixture'),('${other}','Other entity');`);
  await db.exec(fs.readFileSync('supabase/migrations/20261030164525_entity_partner_read_dashboard.sql','utf8'));
  await db.exec(`insert into public.mzs_entity_partners(profile_id,issuer_id) values('${partner}','${entity}');`);
  for(const [e,offset] of [[entity,100],[other,200]]){
+  await db.query('insert into public.projects(id,title) values($1,$2)',[id(offset+20),e===entity?'Own property':'SECRET PROPERTY']);
+  for(const n of [21,22,23])await db.query('insert into public.rental_bookings(id,project_id,is_test,check_in) values($1,$2,$3,$4)',[id(offset+n),id(offset+20),n===23,'2026-10-20']);
+  for(const n of [21,22,23])await db.query('insert into public.mzs_booking_receipts(id,booking_id,amount,received_on,receipt_type) values($1,$2,50,$3,$4)',[id(offset+n+10),id(offset+n),'2026-10-20','payment']);
   for(const [i,table] of ['mzs_lease_invoices','mzs_booking_invoices','mzs_ops_external_sales_invoices','mzs_service_invoices','mzs_invoice_archive','mzs_service_credit_notes'].entries())await db.query(`insert into public.${table}(id,issuer_id,number,issued_on) values($1,$2,$3,'2026-10-20')`,[id(offset+i),e,e===entity?'ALLOWED':'OTHER SECRET']);
   await db.query('insert into public.mzs_ops_expense_drafts(id,legal_entity_id,invoice_date,description) values($1,$2,$3,$4)',[id(offset+10),e,'2026-10-20',e===entity?'Own cost':'SECRET COST']);
   await db.query('insert into public.mzs_accountancy_documents(id,issuer_id,title,file_path) values($1,$2,$3,$4)',[id(offset+11),e,'Document','SECRET PATH']);
@@ -20,6 +24,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
   await db.query('insert into public.mzs_capital_instalments(id,deal_id,amount) values($1,$2,100)',[id(offset+13),id(offset+12)]);
   await db.query('insert into public.mzs_capital_payments(id,instalment_id,amount) values($1,$2,50)',[id(offset+14),id(offset+13)]);
  }
+ await db.exec(`update public.mzs_booking_invoices set booking_id='${id(122)}' where id='${id(101)}';update public.mzs_booking_invoices set booking_id='${id(222)}' where id='${id(201)}';update public.mzs_entity_partners set booking_project_id='${id(120)}';`);
  const actor=async who=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${who}',false);`);
  const source=async e=>(await db.query('select public.mzs_partner_finance($1) data',[e])).rows[0].data;
  await actor(partner);
@@ -27,6 +32,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  assert.deepEqual((await db.query('select public.mzs_partner_entities() data')).rows[0].data,[{id:entity,name:'Mase fixture'}]);
  const data=await source(entity);assert.equal(data.issuer.id,entity);
  for(const key of ['leases','bookings','external','services','imported','credit_notes','costs','documents','loans','loan_instalments','loan_payments'])assert.equal(data[key].length,1,key);
+ assert.equal(data.property_bookings.length,2);assert.equal(data.property_receipts.length,1);assert.equal(data.property_receipts[0].booking_id,id(121));assert.equal(data.guest_receipts.length,1);
  assert.equal(data.loan_instalments[0].currency,'GBP');assert.equal(data.loan_payments[0].currency,'GBP');
  assert(!JSON.stringify(data).includes('SECRET'));assert(!JSON.stringify(data).includes('file_path'));
  await assert.rejects(source(other),/access denied/);await assert.rejects(source(null),/access denied/);

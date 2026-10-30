@@ -15,7 +15,7 @@ export function integerCents(value:unknown):number{
 }
 export function inYear(row:Row,field:string,year:number):boolean{return typeof row[field]==='string'&&row[field].slice(0,4)===String(year);}
 export const invoiceKeys=['leases','bookings','external','services'] as const;
-export const receiptKeys=['rent_receipts','guest_receipts','external_receipts','imported_receipts','service_receipts'] as const;
+export const receiptKeys=['rent_receipts','guest_receipts','external_receipts','imported_receipts','service_receipts','property_receipts'] as const;
 export function partnerSummary(source:PartnerSource,year:number){
  let invoiced=0,received=0,paid=0,reviewedCosts=0;
  const numbers=new Set<string>();const bookings=new Set<string>();
@@ -36,7 +36,7 @@ export function partnerSummary(source:PartnerSource,year:number){
 export function availableYears(source:PartnerSource,currentYear:number):number[]{
  const years=new Set([currentYear]);
  for(const value of Object.values(source))if(Array.isArray(value))for(const row of value){
-  for(const key of ['issued_on','received_on','paid_on','invoice_date','due_date','document_date']){
+  for(const key of ['issued_on','received_on','paid_on','invoice_date','due_date','document_date','check_in']){
    const date=row[key];if(typeof date==='string'&&/^\d{4}-\d{2}-\d{2}/.test(date))years.add(Number(date.slice(0,4)));
   }
   if(Number.isInteger(row.fiscal_year))years.add(row.fiscal_year);

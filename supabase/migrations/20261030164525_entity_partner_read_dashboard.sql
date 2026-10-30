@@ -4,10 +4,12 @@ create table public.mzs_entity_partners (
  id uuid primary key default gen_random_uuid(),
  profile_id uuid not null references public.profiles(id) on delete restrict,
  issuer_id uuid not null references public.mzs_lease_issuers(id) on delete restrict,
+ booking_project_id uuid references public.projects(id) on delete restrict,
  is_active boolean not null default true,
  created_at timestamptz not null default now(),
  unique(profile_id,issuer_id)
 );
+create index entity_partner_booking_project on public.mzs_entity_partners(booking_project_id);
 create index entity_partner_issuer on public.mzs_entity_partners(issuer_id);
 alter table public.mzs_entity_partners enable row level security;
 revoke all on public.mzs_entity_partners from public,anon,authenticated,service_role;
@@ -61,6 +63,8 @@ begin
  'service_receipts',coalesce((select jsonb_agg(to_jsonb(x) order by x.id) from (select r.id,r.invoice_id,r.amount_cents::numeric/100 amount,r.received_on,r.reference,v.created_at reversed_at from public.mzs_service_invoice_receipts r join public.mzs_service_invoices i on i.id=r.invoice_id left join public.mzs_service_invoice_receipt_reversals v on v.receipt_id=r.id where i.issuer_id=p_entity) x),'[]'::jsonb),
  'credit_notes',coalesce((select jsonb_agg(to_jsonb(x) order by x.id) from (select id,invoice_id,issuer_id,customer_id,number,issued_on,net_cents,vat_cents,gross_cents,reason from public.mzs_service_credit_notes where issuer_id=p_entity) x),'[]'::jsonb),
  'snapshot_at',statement_timestamp()) into result;
+ if (select count(*) from public.rental_bookings b where b.is_test=false and exists(select 1 from public.mzs_entity_partners g where g.issuer_id=p_entity and g.is_active and g.booking_project_id=b.project_id and (g.profile_id=auth.uid() or public.is_admin())))>3000 or
+    (select count(*) from public.mzs_booking_receipts r join public.rental_bookings b on b.id=r.booking_id where b.is_test=false and exists(select 1 from public.mzs_entity_partners g where g.issuer_id=p_entity and g.is_active and g.booking_project_id=b.project_id and (g.profile_id=auth.uid() or public.is_admin())))>10000 then raise exception 'Property scope too large';end if;
  if (select count(*) from public.mzs_ops_expense_drafts where legal_entity_id=p_entity)>3000 or
     (select count(*) from public.mzs_accountancy_documents where issuer_id=p_entity)>3000 or
     (select count(*) from public.mzs_accountancy_supplier_payments where issuer_id=p_entity)>10000 or
@@ -70,6 +74,17 @@ begin
    raise exception 'Partner scope too large; contact administrator';
  end if;
  return result || jsonb_build_object(
+ 'property_bookings',coalesce((select jsonb_agg(to_jsonb(x) order by x.check_in desc,x.id) from (
+ select b.id,b.check_in,b.check_out,b.guest_count,b.status,b.quoted_total_eur,p.title property_name
+ from public.rental_bookings b join public.projects p on p.id=b.project_id
+ where b.is_test=false and exists(select 1 from public.mzs_entity_partners g where g.issuer_id=p_entity and g.is_active and g.booking_project_id=b.project_id and (g.profile_id=auth.uid() or public.is_admin()))
+ ) x),'[]'::jsonb),
+ 'property_receipts',coalesce((select jsonb_agg(to_jsonb(x) order by x.received_on desc,x.id) from (
+ select r.id,r.booking_id,r.amount,r.received_on,r.reference,r.receipt_type,r.reversed_at
+ from public.mzs_booking_receipts r join public.rental_bookings b on b.id=r.booking_id
+ where b.is_test=false and not exists(select 1 from public.mzs_booking_invoices i where i.booking_id=b.id)
+ and exists(select 1 from public.mzs_entity_partners g where g.issuer_id=p_entity and g.is_active and g.booking_project_id=b.project_id and (g.profile_id=auth.uid() or public.is_admin()))
+ ) x),'[]'::jsonb),
  'costs',coalesce((select jsonb_agg(to_jsonb(x) order by x.invoice_date desc,x.id) from (
   select d.id,d.invoice_date,d.supplier_invoice_number,d.description,d.category,d.currency,d.net_cents,d.vat_cents,d.gross_cents,d.status,
    p.name property_name,coalesce(v.review_status,'pending') review_status
