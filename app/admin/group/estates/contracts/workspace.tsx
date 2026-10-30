@@ -1,5 +1,5 @@
-import {billingSelection} from '../../../../../lib/relationships/overview';
 'use client';
+import {billingSelection} from '../../../../../lib/relationships/overview';
 import {useAdminI18n} from '../../../../../lib/admin/i18n';
 
 import { useState, useTransition } from 'react';
