@@ -51,7 +51,9 @@ export async function POST(request:NextRequest){
     .select('id,property_id').eq('id',unit_id).maybeSingle();
   if(error||!unit||unit.property_id!==property_id)return respond(400,'Unit does not belong to this property');
  }
- const photos=form.getAll('photos');
+ // An unselected optional <input type=file> may submit an empty File.
+ const photos=form.getAll('photos').filter(item=>
+  !(item instanceof File&&item.size===0&&item.name===''));
  if(photos.length>3)return respond(400,'A maximum of three photos is allowed');
  const processed:Buffer[]=[];
  try{
