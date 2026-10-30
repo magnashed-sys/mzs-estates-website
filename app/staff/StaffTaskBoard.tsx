@@ -255,7 +255,7 @@ export default function StaffTaskBoard({tasks,tickets,followups,properties,units
    <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · '+t('dueShort')+' '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
    {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
-   {<a className={s.taskInlineLink} href={'/staff?task='+encodeURIComponent(task.id)+'#hours'}>{t('logTimeForTask')}</a>}
+   <a className={s.taskInlineLink} href={'/staff?task='+encodeURIComponent(task.id)+'#hours'}>{t('logTimeForTask')}</a>
    {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>{t('progress')}</summary><Progress task={task} language={language}/></details>}
   </article>)}
   {!list.length&&!maintenance.length&&<p className={s.note}>{filter==='high'?t('noHighPriority'):t('noTasks')}</p>}</div>
