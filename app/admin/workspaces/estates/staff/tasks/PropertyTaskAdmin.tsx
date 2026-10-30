@@ -77,7 +77,7 @@ export default function PropertyTaskAdmin({properties,units,members,scopes,tasks
    {(['active','all','done'] as const).map(key=><button className={filter===key?s.taskTabActive:s.taskTab} type="button" key={key} onClick={()=>setFilter(key)}>{key==='active'?tr('Open','Abiertas'):key==='done'?tr('Completed','Completadas'):tr('All','Todas')}</button>)}
   </div>
   <div className={s.taskCardList}>
-   {visible.map(t=><article key={t.id} className={s.taskCard}>
+   {visible.map(t=><article id={'task-'+t.id} key={t.id} className={s.taskCard}>
     <div className={s.taskCardTop}><strong>{t.title}</strong><span className={s.taskChip}>{taskStatusName[t.status]}</span></div>
     <p className={s.taskMeta}>{t.work_area_id?areaName.get(t.work_area_id)??tr('Work area','Área de trabajo'):props.get(t.property_id??'')?.name??tr('Property','Inmueble')}{t.unit_id?' · '+(units.find(u=>u.id===t.unit_id)?.address??tr('Unit','Unidad')):''}</p>
     <p className={s.taskMeta}>{tr('Assigned to','Asignado a')}: {people.get(t.assigned_profile_id??'')?.full_name??tr('Unassigned','Sin asignar')} · {taskPriorityName[t.priority]}{t.due_on?' · '+t.due_on:''}</p>
