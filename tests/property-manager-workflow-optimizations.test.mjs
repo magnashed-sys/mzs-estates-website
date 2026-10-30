@@ -18,7 +18,7 @@ test('time prefill is scoped to assigned property tasks and clears on unit chang
  assert.ok(page.includes("tasks.some(t=>t.id===requestedTask)"));
  assert.ok(page.includes('initialTaskId={initialTaskId}'));
  assert.ok(form.includes('assignedTasks.find(task=>task.id===initialTaskId)'));
- assert.ok(form.includes("setPropertyId(selected.property_id);setUnitId(selected.unit_id??'')"));
+ assert.ok(form.includes("setLocation(selected.work_area_id?'area:'"));
  assert.ok(form.includes("setUnitId(e.target.value);setTaskId('')"));
  assert.ok(form.includes('name="task_id" value={taskId}'));
 });
