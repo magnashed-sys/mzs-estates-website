@@ -96,7 +96,7 @@ begin
  select id into v_issuer from public.mzs_lease_issuers
  where name='Magdy Nashed' and kind='person' order by id limit 1;
  if v_issuer is null then raise exception 'Private issuer not registered' using errcode='22023';end if;
- perform 1 from public.mzs_ops_staff_visits where id=any(p_visit_ids) order by id for update;
+ -- A unique visit_id on immutable invoice lines prevents concurrent double billing.
  select count(*),sum(invoiced_hours)::int,sum(net_cents)::bigint,
   min(worked_on),max(worked_on)
  into v_count,v_hours,v_net,v_start,v_end from public.mzs_ops_zorgbalans_billable_visits
