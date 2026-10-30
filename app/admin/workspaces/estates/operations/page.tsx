@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {notFound} from 'next/navigation';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {requireStaffEnvironment} from '../../../../../lib/security/property-staff';
 import {getAdminI18n} from '../../../../../lib/admin/i18n-server';
@@ -10,7 +11,7 @@ import s from './operations.module.css';
 export const dynamic='force-dynamic';
 export default async function OperationsCockpit(){
  requireStaffEnvironment();
- if(!staffTaskEnvironment())return null;
+ if(!staffTaskEnvironment())notFound();
  const {db}=await requireEstateAdmin();
  const {language}=await getAdminI18n();
  const tr=(en:string,es:string)=>language==='es'?es:en;
