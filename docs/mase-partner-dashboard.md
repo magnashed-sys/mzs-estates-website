@@ -1,0 +1,13 @@
+# Entity partner dashboard
+
+`/private/partner` provides personal, read-only financial visibility for explicitly assigned legal entities. A client does not become an administrator or receive access to another entity. Existing Owner Stays request/approval behavior remains intact and is linked in both directions.
+
+The dedicated grant is checked against the live active profile on every database request. Private SECURITY DEFINER readers return explicit financial columns, with PUBLIC/anonymous execution revoked; public wrappers are SECURITY INVOKER. Existing financial write policies and administrator-only functions are unchanged. Grants can only be provisioned/revoked through controlled database administration; there is no client grant editor. An inactive grant or profile immediately stops new reads.
+
+Invoices, credit notes, dated receipts, reviewed EUR costs and supplier payments have separate totals. Historical source snapshots are reference-only and undated settlements do not become cash receipts. Reversals are visible but excluded from totals. Loan terms, schedules and payments are separate. Matching receipts are scoped through the issuer of their source invoice; costs use explicit legal_entity_id. Financial sources are bounded and fail instead of silently truncating. Duplicate invoice numbers or ambiguous booking receipts fail closed. Uninvoiced property bookings/receipts use an explicit booking_project_id on the grant, separately from legal invoice attribution. Test bookings are excluded; receipts already attached to any issued booking invoice cannot be counted again through the property route. Document register entries are listed; file download is not part of this release.
+
+No percentage allocation, bank balance, tax return or final annual profit is inferred. No financial records, bookings or messages are created by visiting the dashboard. UI copy supports Dutch and English (English fallback for other interface languages).
+
+Validation: PGlite tests cover cross-entity reads with populated fixtures, unrelated/anonymous/inactive accounts, revocation, grant-write denial and financial-table write denial. Staging RPC checks pass inside a rolled-back transaction. Server-render tests cover Dutch/English, year controls, identity/foreign-entity rejection and Owner Stays links. No new security advisor finding concerns this module. Existing project-wide advisories are unchanged.
+
+Production provisioning must verify the existing Sebastiaan Zijlstra account and the Mase Estates SL issuer before inserting the single grant. Keep his existing account role and Owner Stays permissions. Revoke by setting only that grant's is_active to false; no source financial records need modification.
