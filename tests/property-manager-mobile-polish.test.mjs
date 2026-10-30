@@ -41,6 +41,12 @@ test('Beverwijk/private locations are separated from rental ownership with RLS a
  assert.match(form,/value=\{'area:'\+area\.id\}/);
  assert.match(form,/value=\{'property:'\+p\.id\}/);
  assert.match(form,/name="work_area_id"/);
+ assert.match(form,/className=\{s\.taskLocationGrid\}/);
+ assert.match(form,/type="radio" name="location_selection"/);
+ assert.match(form,/areas\.map\(area=>/);
+ assert.match(form,/properties\.filter\(p=>p\.name\.includes\('IJmuiden'\)\)/);
+ assert.doesNotMatch(form,/select value=\{location\}/);
+ assert.match(file('app/staff/staff.module.css'),/\.taskLocationGrid\{display:grid/);
 });
 test('photos are selected together then securely uploaded one-by-one below the serverless request limit',()=>{
  const create=file('app/api/staff/report-with-photos/route.ts');
