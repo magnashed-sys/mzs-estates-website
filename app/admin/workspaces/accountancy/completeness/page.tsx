@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import FollowupCreate from '../../../../components/FollowupCreate';
+import FollowupTasks from '../../../../components/FollowupTasks';
+import type {Followup,Assignee} from '../../../../../lib/accountancy/followups';
 import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
 import {getAdminI18n} from '../../../../../lib/admin/i18n-server';
 import {allRows} from '../../../../../lib/property-operations/staff-data';
@@ -10,12 +13,15 @@ import {completenessItems,completenessLabels} from '../../../../../lib/accountan
 import s from '../administrations/administration.module.css';
 export const dynamic='force-dynamic';
 export default async function Completeness({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const {db}=await requireEstateAdmin(),{language,t}=await getAdminI18n(),q=await searchParams,l=(en:string,es:string)=>language==='es'?es:en;
+ const {db,user}=await requireEstateAdmin(),{language,t}=await getAdminI18n(),q=await searchParams,l=(en:string,es:string)=>language==='es'?es:en;
  const [entities,years]=await Promise.all([archiveEntities(db),allRows<Year>((a,b)=>db.from('mzs_accountancy_years').select('*',{count:'exact'}).order('fiscal_year',{ascending:false}).order('id').range(a,b))]);
  const selected=years.find(y=>y.id===q.administration);
  let failed=false,items:ReturnType<typeof completenessItems>=[];
+ let tasks:Followup[]=[],people:Assignee[]=[];
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  if(selected)try{
   const [source,suppliers]=await Promise.all([annualSource(db,selected.id),allRows<SupplierIdentity>((a,b)=>db.from('mzs_lease_relationships').select('id,name,kind,company_details',{count:'exact'}).order('id').range(a,b))]);items=completenessItems(source,suppliers);
+  [tasks,people]=await Promise.all([allRows<Followup>((a,b)=>db.from('mzs_accountancy_followups').select('*',{count:'exact'}).eq('year_id',selected.id).order('due_on',{nullsFirst:false}).order('id').range(a,b)),allRows<Assignee>((a,b)=>db.from('mzs_accountancy_followup_assignees').select('id,full_name',{count:'exact'}).order('id').range(a,b))]);
  }catch{failed=true;}
  const group=typeof q.group==='string'&&['documents','review','suppliers'].includes(q.group)?q.group:'';
  const filtered=items.filter(i=>!group||i.group===group),pages=Math.max(1,Math.ceil(filtered.length/30)),page=Math.min(pages,typeof q.page==='string'&&/^[1-9]\d{0,5}$/.test(q.page)?Number(q.page):1);
@@ -26,8 +32,9 @@ export default async function Completeness({searchParams}:{searchParams:Promise<
  {failed?<p role="alert">{l('Checks could not be loaded completely. Please retry; no completeness result is available.','No se pudieron cargar todos los controles. Inténtelo de nuevo; no hay resultado disponible.')}</p>:selected&&<>
  <div className={s.metrics}><p>{l('Items needing attention','Elementos por revisar')}<strong>{items.length}</strong></p>{(['documents','review','suppliers'] as const).map(g=><p key={g}>{g==='documents'?l('Documents','Documentos'):g==='review'?l('Review','Revisión'):l('Suppliers','Proveedores')}<strong>{items.filter(i=>i.group===g).length}</strong></p>)}</div>
  <p>{filtered.length} {l('results in this filter','resultados en este filtro')} · {l('Page','Página')} {page}/{pages}</p>
- <div className={s.tableWrap}><table className={s.table}><thead><tr><th>{l('Record','Registro')}</th><th>{l('Check','Control')}</th><th>{l('Action','Acción')}</th></tr></thead><tbody>{filtered.slice((page-1)*30,page*30).map(i=><tr key={i.id}><td>{i.id.startsWith('check:')?t(i.label):i.label}</td><td>{i.issues.map(code=><div key={code}>{completenessLabels[code]?.[language==='es'?1:0]??code}</div>)}</td><td><Link href={i.href}>{l('Open source →','Abrir origen →')}</Link></td></tr>)}</tbody></table></div>
+ <FollowupCreate key={selected.id+':'+group+':'+page} items={filtered.slice((page-1)*30,page*30).map(i=>({...i,label:i.id.startsWith('check:')?t(i.label):i.label}))} year={selected.id} people={people} existing={tasks.map(task=>task.item_key)} language={language}/>
+
  {!filtered.length&&<p>{l('No outstanding items found within these checks and this filter. This is not a certification of complete accounts.','No hay incidencias en estos controles y filtro. No es una certificación de cuentas completas.')}</p>}
- <nav className={s.pagination} aria-label={l('Results pages','Páginas de resultados')}>{page>1&&<Link href={href(page-1)}>← {l('Previous','Anterior')}</Link>} {' '}{page<pages&&<Link href={href(page+1)}>{l('Next','Siguiente')} →</Link>}</nav></>}
+ <nav className={s.pagination} aria-label={l('Results pages','Páginas de resultados')}>{page>1&&<Link href={href(page-1)}>← {l('Previous','Anterior')}</Link>} {' '}{page<pages&&<Link href={href(page+1)}>{l('Next','Siguiente')} →</Link>}</nav><FollowupTasks tasks={tasks.map(task=>({...task,title:task.item_key.startsWith('check:')?t(task.title):task.title}))} people={people} admin userId={user.id} language={language} today={today} signals={items.map(i=>i.id)}/></>}
  <p className={s.notice}>{l('Read-only checks of registered records. Missing invoices not yet entered cannot be detected. Company overhead does not require a property. Duplicate signals require manual review. Bank reconciliation remains deferred; no payment, VAT, approval or completeness status is changed. Refresh after correcting a source.','Controles de solo lectura de registros existentes. No se detectan facturas aún no registradas. Los gastos generales no requieren inmueble. Los posibles duplicados requieren revisión manual. La conciliación bancaria queda aplazada; no se modifican pagos, IVA, aprobaciones ni estados de integridad. Actualice tras corregir el origen.')}</p></section>;
 }

@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import ts from 'typescript';
+function load(file){const exports={};new Function('exports','require',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(exports,n=>load(path.resolve(path.dirname(file),n+'.ts')));return exports;}
+const {followupInput,selectedFollowups,followupUpdate}=load('lib/accountancy/followups.ts');
+const year='11111111-1111-4111-8111-111111111111';
+const form=()=>{const f=new FormData();f.set('year_id',year);f.append('item_key','check:income');return f;};
+test('bulk selection rejects empty, duplicate, excessive and invalid-date input',()=>{const f=form();assert.equal(followupInput(f).assignee,null);f.set('due_on','2026-02-30');assert.throws(()=>followupInput(f));f.delete('due_on');f.append('item_key','check:income');assert.throws(()=>followupInput(f));f.delete('item_key');assert.throws(()=>followupInput(f));for(let i=0;i<51;i++)f.append('item_key','check:'+i);assert.throws(()=>followupInput(f));});
+test('only live scoped source keys produce task labels; caller labels cannot override source',()=>{assert.deepEqual(selectedFollowups(['check:income'],[{id:'check:income',label:'Real source',href:'/safe'}]),[{id:'check:income',label:'Real source'}]);assert.throws(()=>selectedFollowups(['cost:foreign'],[{id:'check:income',label:'Real source'}]));});
+test('progress requires safe revision, known status and meaningful note',()=>{const f=new FormData();f.set('id',year);f.set('revision','1');f.set('status','done');f.set('note','Reviewed source');assert.equal(followupUpdate(f).revision,1);f.set('revision','1.5');assert.throws(()=>followupUpdate(f));f.set('revision','1');f.set('note','x');assert.throws(()=>followupUpdate(f));});
+function actions({denied=false}={}){let writes=0;const exports={};const deps={
+ 'next/navigation':{notFound:()=>{throw Error('denied')},redirect:()=>{throw Error('login')}},'next/cache':{revalidatePath:()=>{}},
+ '../lib/security/estate-properties':{requireEstateAdmin:async()=>{if(denied)throw Error('denied');return {db:{rpc:async()=>{writes++;return {data:1}}}}}},
+ '../lib/security/property-staff':{requireStaffEnvironment:()=>{}},'../lib/supabase/server':{},
+ '../lib/accountancy/archive-data':{archiveEntities:async()=>[{id:'entity',name:'Test Entity'}]},'../lib/accountancy/administration-data':{annualSource:async()=>({administration:{issuer_id:'entity',fiscal_year:2026}})},'../lib/property-operations/staff-data':{allRows:async()=>[]},
+ '../lib/accountancy/completeness':{completenessItems:()=>[{id:'check:income',label:'Source'}]},
+ '../lib/accountancy/followups':{followupInput,selectedFollowups,followupUpdate},'../lib/property-operations/task-input':load('lib/property-operations/task-input.ts')};
+ new Function('exports','require',ts.transpileModule(fs.readFileSync('app/followup-actions.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(exports,n=>{assert.ok(n in deps,n);return deps[n]});return {...exports,writes:()=>writes};}
+test('create action blocks unauthorized callers before writes',async()=>{const a=actions({denied:true});await assert.rejects(a.createFollowups({},form()),/denied/);assert.equal(a.writes(),0);});
+test('create action rejects stale or foreign selection before atomic RPC',async()=>{const a=actions(),f=form();f.set('item_key','check:foreign');assert.equal((await a.createFollowups({},f)).status,'error');assert.equal(a.writes(),0);assert.equal((await a.createFollowups({},form())).count,1);assert.equal(a.writes(),1);});
