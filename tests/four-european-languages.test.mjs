@@ -117,10 +117,10 @@ test('New-language country labels and order remain stable even if the runtime IC
   assert.deepEqual(Array.from(options,x=>x.code).sort(),Array.from(contacts.countryCodes).sort());
  }
 });
-test('Production sitemap includes all 120 marketing routes and preview stays non-indexable',()=>{
+test('Production sitemap includes all 120 marketing routes and preview stays non-indexable',async()=>{
  for(const environment of ['production','preview']){
-  const exports={};vm.runInNewContext(ts.transpileModule(read('app/sitemap.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env:{VERCEL_ENV:environment}},require:()=>routing});
-  const entries=exports.default();assert.equal(entries.length,environment==='production'?120:0);
+  const exports={};vm.runInNewContext(ts.transpileModule(read('app/sitemap.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env:{VERCEL_ENV:environment}},require:n=>n.includes('public-routing')?routing:n.includes('model')?{INSIGHTS_DISCOVERABLE:false}:{sitemapInsights:()=>{throw Error('Hidden insights must not be queried')}}});
+  const entries=await exports.default();assert.equal(entries.length,environment==='production'?120:0);
   if(environment==='production')for(const l of codes)assert.ok(entries.some(e=>e.url===`https://www.mzsgroup.com/${l}/consultancy`));
  }
 });

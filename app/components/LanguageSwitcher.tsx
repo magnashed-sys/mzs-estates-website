@@ -7,7 +7,7 @@ import {createClient} from '../../lib/supabase/client';
 import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
 
-export default function LanguageSwitcher({account = false, inline = false}: {account?: boolean; inline?: boolean}) {
+export default function LanguageSwitcher({account = false, inline = false, languageLinks}: {account?: boolean; inline?: boolean; languageLinks?: Record<string,string>}) {
   const currentLocale = useLocale();
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -32,8 +32,9 @@ export default function LanguageSwitcher({account = false, inline = false}: {acc
     };
   }, [inline]);
   if (!route) return null;
-  const languageLinks = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}>
-    {(account ? memberLocales : locales).map(locale => <a key={locale} href={localizedPath(route.path, locale)}
+  const target = (locale: string) => languageLinks?.[locale] || localizedPath(route.path.startsWith('/insights/') ? '/insights' : route.path, locale);
+  const languagePanel = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}>
+    {(account ? memberLocales : locales).filter(locale => !languageLinks || locale in languageLinks).map(locale => <a key={locale} href={target(locale)}
       hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål', da: 'Dansk', uk: 'Українська', fi: 'Suomi', cs: 'Čeština', hu: 'Magyar', bg: 'Български', sk: 'Slovenčina', el: 'Ελληνικά'}[locale]}
       title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål', da: 'Dansk', uk: 'Українська', fi: 'Suomi', cs: 'Čeština', hu: 'Magyar', bg: 'Български', sk: 'Slovenčina', el: 'Ελληνικά'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
@@ -58,14 +59,14 @@ export default function LanguageSwitcher({account = false, inline = false}: {acc
           // A same-URL navigation with a fragment can skip the document reload.
           // Neutral account routes need a reload to apply the new server-side locale.
           if (isAccountPath(pathname)) location.reload();
-          else location.assign(localizedPath(route.path, locale) + location.search + location.hash);
+          else location.assign(target(locale) + location.search + location.hash);
         }
       }}><span className={styles.languageFlag} aria-hidden="true">{{en: '🇬🇧', nl: '🇳🇱', es: '🇪🇸', ru: '🇷🇺', de: '🇩🇪', it: '🇮🇹', fr: '🇫🇷', 'pt-BR': '🇧🇷', ar: '🇦🇪', tr: '🇹🇷', lt: '🇱🇹', pl: '🇵🇱', 'zh-CN': '🇨🇳', sv: '🇸🇪', ro: '🇷🇴', nb: '🇳🇴', da: '🇩🇰', uk: '🇺🇦', fi: '🇫🇮', cs: '🇨🇿', hu: '🇭🇺', bg: '🇧🇬', sk: '🇸🇰', el: '🇬🇷'}[locale]}</span>
         {route.locale === locale && <span aria-hidden="true">✓</span>}</a>)}
       {busy && <p role="status" className={styles.languageStatus}>{t("saving")}</p>}
       {saveError && <p role="alert" className={styles.languageStatus}>{t("save_failed")}</p>}
     </nav>);
-  if (inline) return languageLinks;
+  if (inline) return languagePanel;
   return <details className={styles.languages} ref={disclosure}
     onKeyDown={event => {
       if (event.key === 'Escape' && disclosure.current?.open) {
@@ -80,6 +81,6 @@ export default function LanguageSwitcher({account = false, inline = false}: {acc
         <path d="M3 12h18M5 6.5h14M5 17.5h14" />
       </svg>
     </summary>
-    {languageLinks}
+    {languagePanel}
   </details>;
 }
