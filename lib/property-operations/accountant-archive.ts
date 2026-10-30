@@ -5,10 +5,36 @@ export type ArchiveFile={name:string;bytes:Uint8Array};
 const encoder=new TextEncoder();
 const CAP=24*1024*1024;
 const checksum=(bytes:Uint8Array)=>createHash("sha256").update(bytes).digest("hex");
+type ZipLimits={maxFiles:number;maxBytes:number};
+const defaults:ZipLimits={maxFiles:150,maxBytes:CAP};
 
 /** ZIP32 archive with fixed DOS timestamps and bounded deflate. No zip-slip names. */
 export function buildAccountantZip(files:readonly ArchiveFile[]):Uint8Array {
- if(!Array.isArray(files)||files.length<1||files.length>150)
+ return new Uint8Array(Buffer.concat(prepareZip(files,defaults)));
+}
+
+/** Validate and compress everything before starting a download. Stream bounded chunks
+ * so a private annual package can exceed the hosting buffered-response limit. */
+export function accountantZipStream(files:readonly ArchiveFile[],limits:ZipLimits):ReadableStream<Uint8Array>{
+ const parts=prepareZip(files,limits);
+ let index=0,offset=0;
+ return new ReadableStream<Uint8Array>({
+  pull(controller){
+   if(index===parts.length){parts.length=0;controller.close();return;}
+   const part=parts[index],end=Math.min(part.length,offset+64*1024);
+   controller.enqueue(new Uint8Array(part.buffer,part.byteOffset+offset,end-offset));
+   offset=end;
+   if(offset===part.length){parts[index]=Buffer.alloc(0);index++;offset=0;}
+  },
+  cancel(){parts.length=0;}
+ });
+}
+
+function prepareZip(files:readonly ArchiveFile[],limits:ZipLimits):Buffer[]{
+ if(!Number.isSafeInteger(limits.maxFiles)||limits.maxFiles<1||limits.maxFiles>1024||
+  !Number.isSafeInteger(limits.maxBytes)||limits.maxBytes<1||limits.maxBytes>128*1024*1024)
+  throw new Error("Invalid export limits");
+ if(!Array.isArray(files)||files.length<1||files.length>limits.maxFiles)
   throw new Error("Invalid export file count");
  const seen=new Set<string>(),parts:Buffer[]=[],central:Buffer[]=[];
  let cursor=0,uncompressedTotal=0;
@@ -19,10 +45,10 @@ export function buildAccountantZip(files:readonly ArchiveFile[]):Uint8Array {
     name.includes("//")||name.startsWith("/")||name.endsWith("/")||seen.has(name))
    throw new Error("Unsafe or duplicate archive path");
   seen.add(name);
-  if(!(item.bytes instanceof Uint8Array) || item.bytes.length>CAP)
+  if(!(item.bytes instanceof Uint8Array) || item.bytes.length>limits.maxBytes)
    throw new Error("Invalid export file bytes");
   uncompressedTotal+=item.bytes.length;
-  if(uncompressedTotal>CAP)throw new Error("Accountant export exceeds the 24 MB limit");
+  if(uncompressedTotal>limits.maxBytes)throw new Error("Accountant export exceeds the size limit");
   const contents=Buffer.from(item.bytes);
   const compressed=deflateRawSync(contents,{level:6});
   const nameBytes=Buffer.from(name,"utf8");
@@ -58,7 +84,7 @@ export function buildAccountantZip(files:readonly ArchiveFile[]):Uint8Array {
  end.writeUInt16LE(files.length,8);end.writeUInt16LE(files.length,10);
  end.writeUInt32LE(centralSize,12);end.writeUInt32LE(cursor,16);
  end.writeUInt16LE(0,20);
- return new Uint8Array(Buffer.concat([...parts,...central,end]));
+ return [...parts,...central,end];
 }
 export function exportHash(contents:Uint8Array):string{return checksum(contents);}
 export function exportBytes(content:string):Uint8Array{return encoder.encode(content);}
