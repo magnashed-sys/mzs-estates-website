@@ -62,7 +62,7 @@ export function operationsSnapshot(input:{
   timePending:pending.length,timeCorrection:corrections.length,
   timeTotalMinutes:visits.reduce((total,row)=>total+row.effective_minutes,0)
  };
- const taskItems:OperationsItem[]=openTasks.map(t=>{
+ const taskItems:OperationsItem[]=openTasks.map<OperationsItem>(t=>{
   const late=!!t.due_on&&t.due_on<today;
   const blocked=t.status==='blocked';
   const priority:'normal'|'attention'|'urgent'=late||t.priority==='urgent'?'urgent':blocked||!t.assigned_profile_id||t.priority==='high'?'attention':'normal';
@@ -76,7 +76,7 @@ export function operationsSnapshot(input:{
   const rank=(v:OperationsItem)=>v.priority==='urgent'?0:v.priority==='attention'?1:2;
   return rank(a)-rank(b)||(a.date??'9999-12-31').localeCompare(b.date??'9999-12-31')||a.id.localeCompare(b.id);
  });
- const maintenanceItems:OperationsItem[]=openTickets.map(t=>{
+ const maintenanceItems:OperationsItem[]=openTickets.map<OperationsItem>(t=>{
   const last=byTicket.get(t.id),late=!!t.scheduled_for&&t.scheduled_for<today;
   const blocked=last?.note_kind==='blocked',ready=last?.note_kind==='ready_for_review';
   return {id:t.id,kind:'maintenance',title:t.title,location:location(t.property_id,null,t.unit_id),
