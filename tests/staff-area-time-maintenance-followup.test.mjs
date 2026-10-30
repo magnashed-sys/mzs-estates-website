@@ -49,3 +49,15 @@ test('task-linked work area time is prefilled, scoped and displayed in staff his
  const history=file('app/staff/WorkRegisters.tsx');
  assert.match(history,/property\(v\.property_id,v\.work_area_id\)/);
 });
+
+test('area time remains correctable and only not-billable for admin review',()=>{
+ const sql=file('supabase/migrations/20261030034500_staff_area_time_corrections.sql');
+ assert.match(sql,/ops_visit_correction_read/);
+ assert.match(sql,/ops_visit_correction_insert/);
+ assert.match(sql,/ops_visit_correction_decision_read/);
+ assert.match(sql,/ops_validate_visit_correction_request/);
+ assert.match(sql,/ops_visible_visit_reviews/);
+ assert.match(sql,/visit\.work_area_id is not null/);
+ assert.match(sql,/recharge_class is distinct from 'not_billable'/);
+ assert.match(sql,/new\.billable_minutes:=0/);
+});
