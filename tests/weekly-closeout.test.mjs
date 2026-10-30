@@ -32,10 +32,10 @@ test('releases require exact admin and completed approved data; no automatic cus
  assert.match(a,/ids\.length>100/);assert.match(a,/Set\(ids\)/);
  assert.match(ui,/v\.review_decision==='approved'&&!v\.correction_pending/);
  assert.match(ui,/sunday<today/);
- assert.match(ui,/mzs_ops_current_week_closures/);
+ assert.match(ui,/mzs_ops_week_events/);
  assert.match(route,/requireEstateAdmin/);assert.match(route,/event\.action!=='closed'/);
  assert.match(route,/entries\.reduce/);assert.match(route,/visit_count/);
- assert.doesNotMatch(a+/route/,/nodemailer|mzs_ops_prepare_zorgbalans_invoice/);
+ assert.doesNotMatch(a+route,/nodemailer|mzs_ops_prepare_zorgbalans_invoice/);
 });
 test('genuine xlsx contains reconciled frozen minutes and safe escaped strings',()=>{
  const js=ts.transpileModule(read('lib/property-operations/week-export.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
