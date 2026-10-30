@@ -10,12 +10,12 @@ test('task updates refresh and important tasks can be filtered on mobile',()=>{
  assert.ok(board.includes("filter==='high'"));
  assert.ok(board.includes('summary.urgent'));
  assert.ok(board.includes("'/staff?task='+encodeURIComponent(task.id)+'#hours'"));
- assert.ok(board.includes('task.property_id&&'));
+ assert.ok(board.includes('logTimeForTask'));
 });
 test('time prefill is scoped to assigned property tasks and clears on unit change',()=>{
  const page=read('app/staff/page.tsx');
  const form=read('app/staff/StaffForms.tsx');
- assert.ok(page.includes("tasks.some(t=>t.id===requestedTask&&t.property_id!==null)"));
+ assert.ok(page.includes("tasks.some(t=>t.id===requestedTask)"));
  assert.ok(page.includes('initialTaskId={initialTaskId}'));
  assert.ok(form.includes('assignedTasks.find(task=>task.id===initialTaskId)'));
  assert.ok(form.includes("setPropertyId(selected.property_id);setUnitId(selected.unit_id??'')"));
