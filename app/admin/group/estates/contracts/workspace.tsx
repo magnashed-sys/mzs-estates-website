@@ -1,4 +1,5 @@
 'use client';
+import {billingSelection} from '../../../../../lib/relationships/overview';
 import {useAdminI18n} from '../../../../../lib/admin/i18n';
 
 import { useState, useTransition } from 'react';
@@ -49,6 +50,7 @@ export default function ContractWorkspace({relationships,properties,units,member
  const contractIds=new Set(scopedContracts.map(c=>c.id));
  const scopedInvoices=profileFilter?invoices.filter(i=>contractIds.has(i.contract_id)):invoices;
  const scopedIssued=profileFilter?issued.filter(i=>contractIds.has(i.contract_id)):issued;
+ const billingIssued=billingSelection(scopedIssued,searchParams.get('contract'),searchParams.get('invoice'));
  const issuedIds=new Set(scopedIssued.map(i=>i.id));
  const scopedPayments=profileFilter?payments.filter(p=>issuedIds.has(p.invoice_id)):payments;
  const selectedContract=scopedContracts.find(c=>c.id===selected);
@@ -62,7 +64,7 @@ export default function ContractWorkspace({relationships,properties,units,member
   {profileFilter&&<p className={s.notice}>{adminT("Showing contracts and invoices for")} {members.find(m=>m.id===profileFilter)?.full_name || adminT("the selected account")}. <Link href="/admin/group/estates/contracts">{adminT("Show all relationships →")}</Link></p>}
   <div className={s.tabs}><button className={s.secondary} aria-pressed={tab==='contracts'} onClick={()=>setTab('contracts')}>{adminT("Contracts")}</button><button className={s.secondary} aria-pressed={tab==='invoices'} onClick={()=>setTab('invoices')}>{adminT("Invoice drafts")}</button><button className={s.secondary} aria-pressed={tab==='issuers'} onClick={()=>setTab('issuers')}>{adminT("Issuing entities")}</button><button className={s.secondary} aria-pressed={tab==='billing'} onClick={()=>setTab('billing')}>{adminT("Invoices & cashflow")}</button></div>
   {error&&<p role="alert" className={s.error}>{adminT(error)}</p>}{notice&&<p role="status" className={s.notice}>{adminT(notice)}</p>}
-  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies} members={members}/>:tab==='billing'?<Billing issued={scopedIssued} payments={scopedPayments}/>:tab==='contracts'?<>
+  {tab==='issuers'?<Issuers issuers={issuers} relationships={relationships} companies={companies} members={members}/>:tab==='billing'?<><p>{(searchParams.get('contract')||searchParams.get('invoice'))&&<Link href={'?view=billing'+(profileFilter?'&profile='+encodeURIComponent(profileFilter):'')}>{adminT('Show all invoices →')}</Link>}</p><Billing issued={billingIssued} payments={scopedPayments.filter(p=>billingIssued.some(i=>i.id===p.invoice_id))}/></>:tab==='contracts'?<>
    <div className={s.toolbar}><button className={s.button} onClick={()=>{setEditing(null);setSelected(null);setError('');setNotice('')}}>{adminT("New contract")}</button></div>
    {editing!==undefined&&<ContractForm key={editing?.id || 'new'} contract={editing} properties={properties} units={units} members={members} relationships={relationships} issuers={issuers} pending={pending} onCancel={()=>setEditing(undefined)} onSave={payload=>run(async()=>{const r=await saveContract(payload,editing?.id,editing?.version);if(r.error)return r;setEditing(undefined);setSelected(r.id || null);return {message:'Contract saved as a draft. Review the agreement before activating monthly billing.'};})}/>}
    <p className={s.help}>{adminT("Manage clients, companies and tenant roles in")} <Link href="/admin/relationships">{adminT("Relationships")}</Link>.</p><div className={s.grid}><Field label={adminT("Search contracts")}><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder={adminT("Contract or tenant")}/></Field><Field label={adminT("Property")}><select value={propertyFilter} onChange={e=>setPropertyFilter(e.target.value)}><option value="">{adminT("All properties")}</option>{properties.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field></div>
