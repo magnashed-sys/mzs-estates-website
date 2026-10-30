@@ -15,3 +15,16 @@ test('directory search matches multiple words, Spanish accents and workspace fil
  assert.equal(api.findAdminModules('  ').length,api.adminDirectory.length);
  for(const key of ['batch upload','bulk review','accountant packages'])assert.ok(api.findAdminModules(key).length);
 });
+import * as React from 'react';
+import * as jsx from 'react/jsx-runtime';
+import {renderToStaticMarkup} from 'react-dom/server';
+test('directory renders accessible bilingual controls and only navigational links',()=>{
+ for(const language of ['en','es']){
+ const exports={};const deps={react:React,'react/jsx-runtime':jsx,'next/link':{default:({prefetch,...p})=>React.createElement('a',p)},'next/navigation':{usePathname:()=>'/admin/workspaces/group'},'../../lib/admin/i18n':{useAdminI18n:()=>({language,t:s=>s})},'../../lib/admin/directory':api,'./directory.module.css':{default:{}}};
+ new Function('exports','require',ts.transpileModule(readFileSync('app/admin/AdminDirectory.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText)(exports,n=>deps[n]);
+ assert.equal(renderToStaticMarkup(React.createElement(exports.default)), '');
+ const html=renderToStaticMarkup(React.createElement(exports.default,{expanded:true}));
+ assert.equal((html.match(/<a /g)||[]).length,33);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
+ assert.doesNotMatch(html,/<form|action=/);
+ }
+});
