@@ -63,3 +63,10 @@ test('photos are selected together then securely uploaded one-by-one below the s
  assert.match(page,/mzs_ops_maintenance_photo_holds/);
  assert.match(page,/\/api\/staff\/maintenance-photo\//);
 });
+
+test('staff history language follows its own selection rather than the public-site locale',()=>{
+ const history=file('app/staff/WorkRegisters.tsx');
+ assert.match(history,/createAdminTranslator\(staffLanguage==='es'\?'es':'en'\)/);
+ assert.match(history,/if\(admin\|\|!staffLanguage\)return baseT\(source,values\)/);
+ assert.match(history,/staffHistoryLabels\[staffLanguage\]/);
+});
