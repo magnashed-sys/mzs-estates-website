@@ -27,7 +27,7 @@ export type TimeReport={
  generatedAt:string;filters:TimeFilters;properties:Option[];areas:Option[];units:UnitOption[];
  people:Option[];visits:TimeVisit[];total:TimeTotals;
  byPerson:[string,TimeTotals][];byProperty:[string,TimeTotals][];byLocation:[string,TimeTotals][];
- byUnit:[string,TimeTotals][];byWeek:[string,TimeTotals][];byMonth:[string,TimeTotals][]
+ byUnit:[string,TimeTotals][];byWeek:[string,TimeTotals][];byPersonWeek:[string,TimeTotals][];byMonth:[string,TimeTotals][]
 };
 export function timeFilters(params:Record<string,string|string[]|undefined>,now=new Date()):TimeFilters{
  const read=(key:string,fallback=''):string=>{
@@ -138,7 +138,7 @@ export function normalizeTimeReport(source:unknown,filters:TimeFilters):TimeRepo
  if(!Array.isArray(s.visits)||s.visits.length>10000||s.record_count!==s.visits.length)return fail();
  const seen=new Set<string>(),total=totals(),byPerson=new Map<string,TimeTotals>(),
   byProperty=new Map<string,TimeTotals>(),byLocation=new Map<string,TimeTotals>(),
-  byUnit=new Map<string,TimeTotals>(),byWeek=new Map<string,TimeTotals>(),
+  byUnit=new Map<string,TimeTotals>(),byWeek=new Map<string,TimeTotals>(),byPersonWeek=new Map<string,TimeTotals>(),
   byMonth=new Map<string,TimeTotals>();
  const visits:TimeVisit[]=s.visits.map((row:SourceVisit)=>{
   if(!row||typeof row.id!=='string'||!uuid.test(row.id)||seen.has(row.id)||
@@ -179,12 +179,13 @@ export function normalizeTimeReport(source:unknown,filters:TimeFilters):TimeRepo
   grouped(byLocation,location_key,visit);
   grouped(byMonth,row.worked_on.slice(0,7),visit);
   grouped(byWeek,visit.week_start,visit);
+  grouped(byPersonWeek,row.profile_id+':'+visit.week_start,visit);
   return visit;
  }).sort((a,b)=>a.worked_on.localeCompare(b.worked_on)||a.id.localeCompare(b.id));
  const sorted=(map:Map<string,TimeTotals>)=>[...map].sort(([a],[b])=>a.localeCompare(b));
  return {generatedAt:s.generated_at as string,filters,properties,areas,units,people,visits,total,
   byPerson:sorted(byPerson),byProperty:sorted(byProperty),byLocation:sorted(byLocation),
-  byUnit:sorted(byUnit),byWeek:sorted(byWeek),byMonth:sorted(byMonth)};
+  byUnit:sorted(byUnit),byWeek:sorted(byWeek),byPersonWeek:sorted(byPersonWeek),byMonth:sorted(byMonth)};
 }
 export async function loadTimeReport(db:Awaited<ReturnType<typeof createClient>>,filters:TimeFilters){
  const {data,error}=await db.rpc('mzs_ops_staff_time_report_v2',{
