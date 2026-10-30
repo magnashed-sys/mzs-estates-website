@@ -111,6 +111,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
   const [items, setItems] = useState<Opportunity[]>([]);
   const [capitalDossierCount, setCapitalDossierCount] = useState<number | null>(null);
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const [entityAccess,setEntityAccess] = useState(false);
   const [staffAccess,setStaffAccess] = useState(false);
   const [pilotAccess,setPilotAccess] = useState<PilotAccess|null>(null);
   const [active, setActive] = useState<Category>("rentals");
@@ -151,6 +152,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
 
         setRole(profile.role);
         void supabase.from("mzs_property_partners").select("id").eq("profile_id",auth.user.id).eq("is_active",true).eq("complimentary_owner_stays",true).limit(1).then(result=>{if(mounted&&!result.error)setOwnerAccess((result.data||[]).length>0);});
+        void supabase.from("mzs_entity_partners").select("id").eq("profile_id",auth.user.id).eq("is_active",true).limit(1).then(result=>{if(mounted&&!result.error)setEntityAccess((result.data||[]).length>0);});
         setName(profile.full_name?.trim().split(/\s+/)[0] || "");
         if (profile.is_active !== true) {
           setViewState("pending");
@@ -286,6 +288,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
                 <Link className={styles.headerLink} href="/private/profile">
                   {t("profile")} <span aria-hidden="true"><ArrowUpRightIcon /></span>
                 </Link>
+                {entityAccess&&<Link className={styles.headerLink} href="/private/partner">{locale==='nl'?'Partneromgeving':'Partner overview'} <span aria-hidden="true"><ArrowUpRightIcon /></span></Link>}
                 {ownerAccess&&<Link className={styles.headerLink} href="/private/owner-stays">Owner stays <span aria-hidden="true"><ArrowUpRightIcon /></span></Link>}
                 <Link className={styles.headerLink} href="/private/reservations">
                   {t("reservations")} <span aria-hidden="true"><ArrowUpRightIcon /></span>

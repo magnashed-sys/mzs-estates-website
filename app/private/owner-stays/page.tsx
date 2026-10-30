@@ -16,6 +16,7 @@ export default async function OwnerStays(){
  const input={padding:10,background:'#24221f',border:'1px solid #665a45',color:'#f4f0e8'} as const;
  return <main style={{minHeight:'100vh',background:'#0e0e0d',color:'#eee6d9',padding:'45px clamp(20px,6vw,90px)'}}>
  <Link href='/private' style={{color:'#d5c09a'}}>← Private access</Link>
+ <Link href='/private/partner' style={{color:'#d5c09a',marginLeft:20}}>Partner overview →</Link>
  <p style={{letterSpacing:3,color:'#c6ae84'}}>MZS GROUP / PROPERTY PARTNERS</p><h1 style={{fontFamily:'Georgia,serif',fontWeight:400}}>My owner stays</h1>
  <p>Request complimentary stays at properties where you have owner-use rights. All requests require MZS administrator approval. A request does not reserve dates until approved.</p>
  {(grants.data||[]).map(g=><section key={g.id} style={{border:'1px solid #5b503e',padding:24,marginTop:22}}>
