@@ -1,5 +1,5 @@
 'use client';
-import {useActionState,useState} from 'react';
+import {useActionState,useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {createMyPropertyTask,updateMyTaskProgress} from './task-actions';
 import {taskOverview,taskOrder,taskPriorityName,taskStatusName,type PropertyTask} from '../../lib/property-operations/property-tasks';
@@ -8,12 +8,14 @@ import {staffText,type StaffLanguage} from '../../lib/property-operations/staff-
 type Property={id:string;name:string;address:string};
 type Unit={id:string;property_id:string;address:string};
 type WorkArea={id:string;name:string};
-type Result={status:'idle'|'success'|'error';message:string};
+type Result={status:'idle'|'success'|'error'|'warning';message:string};
 const initial:Result={status:'idle',message:''};
-function Message({state}:{state:Result}){return state.message&&<p role="status" className={state.status==='error'?s.error:s.confirm}>{state.message}</p>;}
+function Message({state}:{state:Result}){return state.message&&<p role="status" className={state.status==='error'?s.error:state.status==='warning'?s.noticeWarning:s.confirm}>{state.message}</p>;}
 function Progress({task,language}:{task:PropertyTask;language:StaffLanguage}){
+ const router=useRouter();
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [state,action,pending]=useActionState(updateMyTaskProgress,initial);
+ useEffect(()=>{if(state.status==='success')router.refresh();},[state.status,router]);
  return <form className={s.taskProgressForm} action={action}>
   <input type="hidden" name="task_id" value={task.id}/>
   <label>{t('progress')}
@@ -30,7 +32,9 @@ type EntryKind='task'|'maintenance';
 function NewWorkItem({properties,units,areas,profileId,language}:{properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;language:StaffLanguage}){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
  const [taskState,taskAction,taskPending]=useActionState(createMyPropertyTask,initial);
+ const [photoProgress,setPhotoProgress]=useState('');
  const router=useRouter();
+ useEffect(()=>{if(taskState.status==='success')router.refresh();},[taskState.status,router]);
  const [lastTicketId,setLastTicketId]=useState<string|null>(null);
  const [maintenanceState,setMaintenanceState]=useState<Result>(initial);
  const [maintenancePending,setMaintenancePending]=useState(false);
@@ -47,7 +51,7 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
    return;
   }
   formData.delete('photos');
-  setMaintenancePending(true);setMaintenanceState(initial);setLastTicketId(null);
+  setMaintenancePending(true);setMaintenanceState(initial);setLastTicketId(null);setPhotoProgress('');
   try{
    const response=await fetch('/api/staff/report-with-photos',{
     method:'POST',body:formData,credentials:'same-origin'
@@ -65,6 +69,7 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
    setLastTicketId(ticketId);
    let uploaded=0;
    for(const file of files){
+    setPhotoProgress(t('photoProgress')+' '+(uploaded+1)+' / '+files.length);
     const upload=new FormData();
     upload.set('ticket_id',ticketId);
     upload.set('file',file);
@@ -76,13 +81,14 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
      uploaded+=1;
     }catch{break;}
    }
-   setMaintenanceState({status:'success',message:uploaded===files.length
+   setPhotoProgress('');
+   setMaintenanceState({status:uploaded===files.length?'success':'warning',message:uploaded===files.length
     ?t('reportSaved')+(files.length?' '+uploaded+' '+t('photosUploaded'):'')
-    :t('uploadPartial')});
+    :t('uploadPartial')+' ('+uploaded+' / '+files.length+')'});
    form.reset();router.refresh();
   }catch{
    setMaintenanceState({status:'error',message:'Could not confirm submission. Check the maintenance register before trying again.'});
-  }finally{setMaintenancePending(false);}
+  }finally{setMaintenancePending(false);setPhotoProgress('');}
  }
  const [kind,setKind]=useState<EntryKind>('task');
  const [location,setLocation]=useState(properties[0]?'property:'+properties[0].id:'');
@@ -178,6 +184,7 @@ function NewWorkItem({properties,units,areas,profileId,language}:{properties:Pro
    </>}
    <button disabled={pending||(!propertyId&&!workAreaId)} type="submit">{pending?t('saving'):t(isMaintenance?'sendReport':'createTask')}</button>
    <Message state={result}/>
+   {isMaintenance&&photoProgress&&<p role="status" className={s.taskMeta}>{photoProgress}</p>}
    {isMaintenance&&lastTicketId&&<a className={s.taskSecondary}
      href={'/staff?ticket='+encodeURIComponent(lastTicketId)+'#ticket'}>{t('viewReport')}</a>}
   </form>
@@ -187,10 +194,12 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
  tasks:PropertyTask[];properties:Property[];units:Unit[];areas:WorkArea[];profileId:string;today:string;language:StaffLanguage;
 }){
  const t=(key:Parameters<typeof staffText>[1])=>staffText(language,key);
- const [showAll,setShowAll]=useState(false);
+ const [filter,setFilter]=useState<'open'|'high'|'all'>('open');
  const [showNew,setShowNew]=useState(false);
  const summary=taskOverview(tasks,today);
- const list=taskOrder(tasks).filter(t=>showAll||!['done','cancelled'].includes(t.status));
+ const list=taskOrder(tasks).filter(task=>
+  filter==='all'||(filter==='open'?!['done','cancelled'].includes(task.status):
+    !['done','cancelled'].includes(task.status)&&['high','urgent'].includes(task.priority)));
  const prop=new Map(properties.map(p=>[p.id,p.name]));
  const areaName=new Map(areas.map(area=>[area.id,area.name]));
  const unit=new Map(units.map(u=>[u.id,u.address]));
@@ -212,8 +221,9 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
   </div>
   {showNew&&<NewWorkItem properties={properties} units={units} areas={areas} profileId={profileId} language={language}/>} 
   <div className={s.taskTabs} role="group" aria-label="Task status filter">
-   <button type="button" className={!showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(false)} >{t('taskOpen')} ({summary.open})</button>
-   <button type="button" className={showAll?s.taskTabActive:s.taskTab} onClick={()=>setShowAll(true)}>{t('allTasks')}</button>
+   <button type="button" className={filter==='open'?s.taskTabActive:s.taskTab} onClick={()=>setFilter('open')}>{t('taskOpen')} ({summary.open})</button>
+   <button type="button" className={filter==='high'?s.taskTabActive:s.taskTab} onClick={()=>setFilter('high')}>{t('priorityHigh')} ({summary.urgent})</button>
+   <button type="button" className={filter==='all'?s.taskTabActive:s.taskTab} onClick={()=>setFilter('all')}>{t('allTasks')}</button>
   </div>
   <div className={s.taskCardList}>{list.map(task=><article className={s.taskCard} key={task.id}>
    <div className={s.taskCardTop}><strong>{task.title}</strong><span className={s.taskChip}>{t(task.status==='open'?'taskOpen':task.status==='in_progress'?'taskProgress':task.status==='blocked'?'taskBlocked':task.status==='done'?'taskDone':'taskCancelled')}</span></div>
@@ -221,9 +231,10 @@ export default function StaffTaskBoard({tasks,properties,units,areas,profileId,t
    <p className={s.taskMeta}>{taskPriorityName[task.priority]}{task.due_on?' · '+t('dueShort')+' '+task.due_on:''}</p>
    {task.description&&<p>{task.description}</p>}
    {task.latest_note&&<p className={s.taskMeta}>{t('currentTask')}: {task.latest_note}</p>}
+   {task.property_id&&<a className={s.taskInlineLink} href={'/staff?task='+encodeURIComponent(task.id)+'#hours'}>{t('logTimeForTask')}</a>}
    {task.status!=='done'&&task.status!=='cancelled'&&<details className={s.taskDetails}><summary>{t('progress')}</summary><Progress task={task} language={language}/></details>}
   </article>)}
-  {!list.length&&<p className={s.note}>{t('noTasks')}</p>}</div>
+  {!list.length&&<p className={s.note}>{filter==='high'?t('noHighPriority'):t('noTasks')}</p>}</div>
   <p className={s.taskDisclaimer}>{t('note')}</p>
  </section>;
 }
