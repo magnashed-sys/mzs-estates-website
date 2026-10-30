@@ -38,8 +38,8 @@ test('Beverwijk/private locations are separated from rental ownership with RLS a
  assert.match(sql,/ops_can_work_on_area/);
  assert.doesNotMatch(sql,/insert into public\.mzs_estate_properties/i);
  const form=file('app/staff/StaffTaskBoard.tsx');
- assert.match(form,/value=\{'area:'\+area\.id\}/);
- assert.match(form,/value=\{'property:'\+p\.id\}/);
+ assert.match(form,/const value='area:'\+area\.id/);
+ assert.match(form,/const value='property:'\+p\.id/);
  assert.match(form,/name="work_area_id"/);
  assert.match(form,/className=\{s\.taskLocationGrid\}/);
  assert.match(form,/type="radio" name="location_selection"/);
