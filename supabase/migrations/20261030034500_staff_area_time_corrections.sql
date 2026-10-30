@@ -87,7 +87,7 @@ begin
   raise exception 'Revision already reviewed';end if;
  new.reviewed_minutes:=coalesce(effective_minutes,visit.actual_minutes);
  if visit.work_area_id is not null and
-  (new.recharge_class is distinct from 'internal_only'
+  (new.recharge_class is distinct from 'not_billable'
    or new.minimum_minutes is not null or new.increment_minutes is not null) then
   raise exception 'Operational location is internal-only time, not a recharge' using errcode='22023';end if;
  if new.decision='approved' and new.recharge_class='review_candidate' then
