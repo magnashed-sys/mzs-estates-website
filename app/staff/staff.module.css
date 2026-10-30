@@ -125,3 +125,20 @@
  .timeDate input{width:165px!important}
  .timeButtons{grid-template-columns:42px 52px 42px}
 }
+
+/* All four assignable locations are always visible, not hidden in a native select.
+   Radio inputs retain native keyboard and screen-reader behavior. */
+.taskLocations{border:0;padding:0;margin:0;min-width:0}
+.taskLocations legend{font:12px/1.45 Arial,sans-serif;color:#e6d8c3;margin-bottom:9px;padding:0}
+.taskLocationGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.taskLocationChoice,.taskLocationActive{display:flex!important;flex-direction:row!important;align-items:center;gap:11px!important;cursor:pointer;border:1px solid #65543d;background:#1f1c17;border-radius:7px;padding:13px;min-height:70px;min-width:0}
+.taskLocationActive{border-color:#d8bc8b;background:#352b1f;box-shadow:inset 0 0 0 1px #d8bc8b}
+.form .taskLocationChoice input[type="radio"],.form .taskLocationActive input[type="radio"]{
+ width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
+ margin:0;accent-color:#d8bc8b;flex-shrink:0
+}
+.taskLocationChoice span,.taskLocationActive span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.taskLocationChoice strong,.taskLocationActive strong{font:600 13px/1.35 Arial,sans-serif;color:#f0e1c9;overflow-wrap:anywhere}
+.taskLocationChoice small,.taskLocationActive small{font:11px Arial,sans-serif;color:#bdad94}
+.taskLocationChoice:focus-within,.taskLocationActive:focus-within{outline:2px solid #e8cb91;outline-offset:2px}
+@media(max-width:600px){.taskLocationGrid{grid-template-columns:1fr;gap:8px}.taskLocationChoice,.taskLocationActive{min-height:55px;padding:11px 12px}}
