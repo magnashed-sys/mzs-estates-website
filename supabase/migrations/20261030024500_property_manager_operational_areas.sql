@@ -55,7 +55,7 @@ create policy ops_work_area_read on public.mzs_ops_staff_work_areas
   (select public.is_admin()) or mzs_private.ops_can_work_on_area(id)
  );
 create view public.mzs_ops_staff_work_area_directory with
- (security_barrier=true) as
+ (security_barrier=true,security_invoker=true) as
  select id,name from public.mzs_ops_staff_work_areas
  where mzs_private.ops_can_work_on_area(id);
 revoke all on public.mzs_ops_staff_work_area_directory from public,anon,authenticated,service_role;
