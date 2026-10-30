@@ -23,7 +23,7 @@ function harness({enabled=true,rate=true,duplicate=false,application=true}={}) {
 }
 const valid={full_name:'Local Tester',email:'test@example.invalid',password:'local-password',confirm_password:'local-password',interests:['investment']};
 test('Registration stores only an allowlisted language alongside the existing signup metadata',async()=>{
- for(const [input,expected] of [['nl','nl'],['ru','ru'],['es','es'],['en','en'],['de','de'],['it','it'],['fr','fr'],['pt-BR','pt-BR'],['ar','ar'],['tr','tr'],['lt','lt'],['pl','pl'],['zh-CN','zh-CN'],['sv','sv'],['ro','ro'],['nb','nb'],['da','da'],['uk','uk'],['fi','fi'],['cs','cs'],['pt','en'],['xx','en'],[undefined,'en'],[{role:'admin'},'en']]) {
+ for(const [input,expected] of [['nl','nl'],['ru','ru'],['es','es'],['en','en'],['de','de'],['it','it'],['fr','fr'],['pt-BR','pt-BR'],['ar','ar'],['tr','tr'],['lt','lt'],['pl','pl'],['zh-CN','zh-CN'],['sv','sv'],['ro','ro'],['nb','nb'],['da','da'],['uk','uk'],['fi','fi'],['cs','cs'],['hu','hu'],['bg','bg'],['sk','sk'],['el','el'],['pt','en'],['xx','en'],[undefined,'en'],[{role:'admin'},'en']]) {
   const h=harness();assert.equal((await h.post({...valid,preferred_language:input,role:'admin',is_active:true})).status,201);
   const signup=h.signups[0];assert.equal(signup.options.data.preferred_language,expected);
   assert.equal(signup.options.data.mzs_access_request,'v2');assert.equal(signup.options.data.role,undefined);assert.equal(signup.options.data.is_active,undefined);

@@ -3,6 +3,47 @@ import {getLocale} from 'next-intl/server';
 import styles from './CaseStudies.module.css';
 
 const captions: Record<string, readonly string[]> = {
+  "hu": [
+    "Fejlesztés",
+    "Átalakítás",
+    "Vásárlás",
+    "Több bérlős ingatlan",
+    "Jachtkikötő",
+    "Többegységes ingatlan",
+    "Hollandia",
+    "Spanyolország"
+  ],
+  "bg": [
+    "Развитие",
+    "Преобразуване",
+    "Придобиване",
+    "Имот с множество наематели",
+    "Яхтено пристанище",
+    "Имот с множество обекти",
+    "Нидерландия",
+    "Испания"
+  ],
+  "sk": [
+    "Výstavba",
+    "Transformácia",
+    "Kúpa",
+    "Nehnuteľnosť s viacerými nájomcami",
+    "Jachtový prístav",
+    "Nehnuteľnosť s viacerými jednotkami",
+    "Holandsko",
+    "Španielsko"
+  ],
+  "el": [
+    "Ανάπτυξη",
+    "Μετατροπή",
+    "Απόκτηση",
+    "Ακίνητο με πολλούς μισθωτές",
+    "Μαρίνα",
+    "Ακίνητο με πολλές μονάδες",
+    "Ολλανδία",
+    "Ισπανία"
+  ],
+
 
   "da": [
     "Udvikling",
@@ -65,6 +106,11 @@ const captions: Record<string, readonly string[]> = {
  lt: ['Plėtra', 'Pertvarkymas', 'Įsigijimas', 'Kelių nuomininkų turtas', 'Jachtų prieplauka', 'Kelių vienetų turtas', 'Nyderlandai', 'Ispanija'],
 };
 const units: Record<string,string> = {
+  "hu": "egység",
+  "bg": "обекта",
+  "sk": "jednotiek",
+  "el": "μονάδες",
+
 
   "da": "enheder",
   "uk": "одиниць",
@@ -80,6 +126,11 @@ const units: Record<string,string> = {
 nl:'units',en:'units',es:'unidades',de:'Einheiten',fr:'unités',it:'unità',pt:'unidades',ru:'объектов',ar:'وحدة',tr:'birim',lt:'vienetų'};
 
 const financing: Record<string,string> = {
+  "hu": "Finanszírozás · Üzleti központ építése",
+  "bg": "Финансиране · Изграждане на бизнес център",
+  "sk": "Financovanie · Výstavba podnikateľského centra",
+  "el": "Χρηματοδότηση · Κατασκευή επιχειρηματικού κέντρου",
+
 
   "da": "Finansiering · Opførelse af erhvervscenter",
   "uk": "Фінансування · Будівництво бізнес-центру",
@@ -106,6 +157,11 @@ const financing: Record<string,string> = {
  lt:'Finansavimas · Verslo centro statyba',
 };
 const introductions: Record<string,string> = {
+  "hu": "Ez projektjeink egy válogatása. Személyes beszélgetés során szívesen bemutatunk további, az Ön érdeklődéséhez és terveihez illő projekteket.",
+  "bg": "Това е подбор от нашите проекти. В личен разговор с удоволствие ще представим други проекти, подходящи за Вашите интереси и планове.",
+  "sk": "Toto je výber našich projektov. Pri osobnom rozhovore radi predstavíme ďalšie projekty zodpovedajúce vašim záujmom a plánom.",
+  "el": "Αυτή είναι μια επιλογή από τα έργα μας. Σε μια προσωπική συζήτηση θα χαρούμε να παρουσιάσουμε επιπλέον έργα σχετικά με τα ενδιαφέροντα και τα σχέδιά σας.",
+
 
   "da": "Dette er et udvalg af vores projekter. I en personlig samtale fortæller vi gerne om flere projekter, der passer til dine interesser og planer.",
   "uk": "Це добірка наших проєктів. В особистій розмові ми радо розповімо про інші проєкти, що відповідають вашим інтересам і планам.",
@@ -133,6 +189,11 @@ const introductions: Record<string,string> = {
 };
 
 const management: Record<string,string> = {
+  "hu": "Ingatlankezelés és üzemeltetés",
+  "bg": "Управление и експлоатация на имоти",
+  "sk": "Správa a prevádzka nehnuteľností",
+  "el": "Διαχείριση και λειτουργία ακινήτων",
+
 
   "da": "Ejendomsforvaltning og drift",
   "uk": "Управління та експлуатація нерухомості",
@@ -160,7 +221,7 @@ export default async function CaseStudies({sectionNumber = '04'}: {sectionNumber
   {image:'heiloo-bedrijfsverzamelgebouw', title:financing[locale] ?? financing.en, location:'Heiloo, '+c[6], width:1280, height:720},
  ];
  return <section className={styles.section} id="case-studies" aria-labelledby="case-studies-title">
-  <div className={styles.heading}><span aria-hidden="true">{sectionNumber}</span><h2 id="case-studies-title">{({da:'Projekteksempler',uk:'Приклади проєктів',fi:'Hanke-esimerkit',cs:'Případové studie'} as Record<string,string>)[locale] ?? 'Case Studies'}</h2></div>
+  <div className={styles.heading}><span aria-hidden="true">{sectionNumber}</span><h2 id="case-studies-title">{({da:'Projekteksempler',uk:'Приклади проєктів',fi:'Hanke-esimerkit',cs:'Případové studie',hu:'Esettanulmányok',bg:'Примери за проекти',sk:'Prípadové štúdie',el:'Μελέτες περιπτώσεων'} as Record<string,string>)[locale] ?? 'Case Studies'}</h2></div>
   <p className={styles.introduction}>{introductions[locale] ?? introductions.en}</p>
   <div className={styles.grid}>{projects.map(project=><figure className={styles.card} key={project.image}>
    <div className={['amsterdam-85-units', 'ijmuiden-transformatie', 'ibiza-20-units'].includes(project.image) ? `${styles.visual} ${styles.unfiltered}` : styles.visual}><Image src={'/images/case-studies/'+project.image+'.webp'} alt={project.title+' — '+project.location} width={project.width} height={project.height} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" /></div>

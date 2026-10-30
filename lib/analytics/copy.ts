@@ -1,5 +1,38 @@
 /** title, purpose, accept, reject, reopen, detail */
 export const analyticsCopy: Record<string, readonly string[]> = {
+  "hu": [
+    "Webhelystatisztikák",
+    "Használhat az MZS Group Google Analytics-sütiket a nyilvános oldalak látogatásainak és a sikeres megkereséseknek a mérésére?",
+    "Statisztikák elfogadása",
+    "Statisztikák elutasítása",
+    "Sütibeállítások",
+    "Opcionális. Az űrlapok tartalmát nem továbbítjuk. Nincs személyre szabott hirdetés. Választását itt bármikor módosíthatja. Választását 180 napig tároljuk. Kérdések: info@mzsgroup.eu."
+  ],
+  "bg": [
+    "Статистика на сайта",
+    "Може ли MZS Group да използва бисквитки на Google Analytics за измерване на посещенията на публични страници и успешно получени запитвания?",
+    "Приемам статистиката",
+    "Отказвам статистиката",
+    "Настройки на бисквитките",
+    "По избор. Съдържанието на формулярите не се изпраща. Без персонализирана реклама. Можете да промените избора си тук по всяко време. Изборът се пази 180 дни. Въпроси: info@mzsgroup.eu."
+  ],
+  "sk": [
+    "Štatistiky webu",
+    "Môže MZS Group používať súbory cookie Google Analytics na meranie návštev verejných stránok a úspešne prijatých dopytov?",
+    "Prijať štatistiky",
+    "Odmietnuť štatistiky",
+    "Nastavenia súborov cookie",
+    "Voliteľné. Obsah formulárov sa neodosiela. Bez personalizácie reklamy. Svoju voľbu tu môžete kedykoľvek zmeniť. Ukladá sa na 180 dní. Otázky: info@mzsgroup.eu."
+  ],
+  "el": [
+    "Στατιστικά ιστοτόπου",
+    "Μπορεί η MZS Group να χρησιμοποιεί cookie Google Analytics για τη μέτρηση επισκέψεων σε δημόσιες σελίδες και επιτυχώς ληφθέντων αιτημάτων;",
+    "Αποδοχή στατιστικών",
+    "Απόρριψη στατιστικών",
+    "Ρυθμίσεις cookie",
+    "Προαιρετικό. Δεν αποστέλλεται το περιεχόμενο των φορμών. Χωρίς εξατομίκευση διαφημίσεων. Μπορείτε να αλλάξετε την επιλογή σας εδώ οποιαδήποτε στιγμή. Η επιλογή αποθηκεύεται για 180 ημέρες. Ερωτήσεις: info@mzsgroup.eu."
+  ],
+
 
   "da": [
     "Websitestatistik",

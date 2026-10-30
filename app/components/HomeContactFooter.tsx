@@ -5,6 +5,11 @@ import styles from "./HomeContactFooter.module.css";
 
 /** Keep Amsterdam as a city; show Spain and UAE in each available language. */
 const spainLabels: Record<string, string> = {
+  "hu": "SPANYOLORSZÁG",
+  "bg": "ИСПАНИЯ",
+  "sk": "ŠPANIELSKO",
+  "el": "ΙΣΠΑΝΙΑ",
+
 
   "da": "SPANIEN",
   "uk": "ІСПАНІЯ",
@@ -27,6 +32,11 @@ const spainLabels: Record<string, string> = {
 };
 
 const uaeLabels: Record<string, string> = {
+  "hu": "EGYESÜLT ARAB EMÍRSÉGEK",
+  "bg": "ОАЕ",
+  "sk": "SAE",
+  "el": "ΗΑΕ",
+
 
   "da": "DE FORENEDE ARABISKE EMIRATER",
   "uk": "ОАЕ",

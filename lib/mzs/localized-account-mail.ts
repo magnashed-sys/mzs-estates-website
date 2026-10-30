@@ -1,5 +1,138 @@
 /** Client-facing copy only. Authorization, claiming and delivery stay in notifications.ts. */
 const copy = {
+  "hu": {
+    "member": "ügyfél",
+    "dear": "Kedves",
+    "confidential": "Ez a személyes üzenet a megnevezett címzettnek szól. A fiókbiztonsági üzeneteket ne továbbítsa.",
+    "motto": "PRIVÁT · FÜGGETLEN · NEMZETKÖZI",
+    "projects": "Önhöz rendelt projektek",
+    "login": "BELÉPÉS",
+    "collection": "KOLLEKCIÓM MEGTEKINTÉSE",
+    "capital": "PRIVÁT TŐKE MEGNYITÁSA",
+    "access": "PRIVÁT HOZZÁFÉRÉS",
+    "invitation": "CSAK MEGHÍVÁSRA",
+    "account_activated": [
+      "MZS Group-fiókja már aktív",
+      "Üdvözöljük privát kollekciójában.",
+      "MZS Group-fiókját jóváhagytuk és aktiváltuk. Most megtekintheti az Ön számára kiválasztott lehetőségeket."
+    ],
+    "new_project_access": [
+      "Új hozzáférés privát projektekhez | MZS Group",
+      "Új lehetőségek kollekciójában.",
+      "MZS Group-fiókja további privát projektekhez kapott hozzáférést."
+    ],
+    "capital_access_granted": [
+      "Privát tőke hozzáférése | MZS Group",
+      "Privát dossziéja elérhető.",
+      "MZS Group-fiókja hozzáférést kapott egy privát tőke dossziéhoz. Jelentkezzen be áttekintése biztonságos megtekintéséhez."
+    ],
+    "types": {
+      "investment": "Befektetés",
+      "financing": "Finanszírozás",
+      "sale": "Privát értékesítés",
+      "rental": "Privát bérbeadás"
+    }
+  },
+  "bg": {
+    "member": "клиент",
+    "dear": "Здравейте,",
+    "confidential": "Това лично съобщение е предназначено за посочения получател. Не препращайте съобщения за сигурността на акаунта.",
+    "motto": "ЧАСТЕН · НЕЗАВИСИМ · МЕЖДУНАРОДЕН",
+    "projects": "Вашите възложени проекти",
+    "login": "ВХОД",
+    "collection": "ПРЕГЛЕД НА МОЯТА КОЛЕКЦИЯ",
+    "capital": "ОТВОРИ ЧАСТЕН КАПИТАЛ",
+    "access": "ЧАСТЕН ДОСТЪП",
+    "invitation": "САМО С ПОКАНА",
+    "account_activated": [
+      "Вашият MZS Group акаунт вече е активен",
+      "Добре дошли във Вашата частна колекция.",
+      "Вашият MZS Group акаунт е одобрен и активиран. Вече можете да разгледате избраните за Вас възможности."
+    ],
+    "new_project_access": [
+      "Нов достъп до частни проекти | MZS Group",
+      "Нови възможности във Вашата колекция.",
+      "Вашият MZS Group акаунт получи допълнителен достъп до частни проекти."
+    ],
+    "capital_access_granted": [
+      "Вашият достъп до частен капитал | MZS Group",
+      "Вашето частно досие е достъпно.",
+      "Вашият MZS Group акаунт получи достъп до досие за частен капитал. Влезте, за да разгледате прегледа си сигурно."
+    ],
+    "types": {
+      "investment": "Инвестиция",
+      "financing": "Финансиране",
+      "sale": "Частна продажба",
+      "rental": "Частно отдаване под наем"
+    }
+  },
+  "sk": {
+    "member": "klient",
+    "dear": "Dobrý deň,",
+    "confidential": "Táto osobná správa je určená uvedenému príjemcovi. Správy o zabezpečení účtu nepreposielajte.",
+    "motto": "SÚKROMNÉ · NEZÁVISLÉ · MEDZINÁRODNÉ",
+    "projects": "Vaše priradené projekty",
+    "login": "PRIHLÁSIŤ SA",
+    "collection": "ZOBRAZIŤ MOJU KOLEKCIU",
+    "capital": "OTVORIŤ SÚKROMNÝ KAPITÁL",
+    "access": "SÚKROMNÝ PRÍSTUP",
+    "invitation": "LEN NA POZVANIE",
+    "account_activated": [
+      "Váš účet MZS Group je aktívny",
+      "Vitajte vo svojej súkromnej kolekcii.",
+      "Váš účet MZS Group bol schválený a aktivovaný. Teraz si môžete prezrieť príležitosti vybrané pre vás."
+    ],
+    "new_project_access": [
+      "Nový prístup k súkromným projektom | MZS Group",
+      "Nové príležitosti vo vašej kolekcii.",
+      "Váš účet MZS Group získal ďalší prístup k súkromným projektom."
+    ],
+    "capital_access_granted": [
+      "Váš prístup k súkromnému kapitálu | MZS Group",
+      "Váš súkromný spis je dostupný.",
+      "Váš účet MZS Group získal prístup k spisu súkromného kapitálu. Prihláste sa a bezpečne si zobrazte prehľad."
+    ],
+    "types": {
+      "investment": "Investícia",
+      "financing": "Financovanie",
+      "sale": "Súkromný predaj",
+      "rental": "Súkromný prenájom"
+    }
+  },
+  "el": {
+    "member": "πελάτη",
+    "dear": "Αγαπητέ/ή",
+    "confidential": "Αυτό το προσωπικό μήνυμα προορίζεται για τον αναφερόμενο παραλήπτη. Μην προωθείτε μηνύματα ασφάλειας λογαριασμού.",
+    "motto": "ΙΔΙΩΤΙΚΟ · ΑΝΕΞΑΡΤΗΤΟ · ΔΙΕΘΝΕΣ",
+    "projects": "Τα έργα που σας έχουν ανατεθεί",
+    "login": "ΣΥΝΔΕΣΗ",
+    "collection": "ΠΡΟΒΟΛΗ ΤΗΣ ΣΥΛΛΟΓΗΣ ΜΟΥ",
+    "capital": "ΑΝΟΙΓΜΑ ΙΔΙΩΤΙΚΟΥ ΚΕΦΑΛΑΙΟΥ",
+    "access": "ΙΔΙΩΤΙΚΗ ΠΡΟΣΒΑΣΗ",
+    "invitation": "ΜΟΝΟ ΜΕ ΠΡΟΣΚΛΗΣΗ",
+    "account_activated": [
+      "Ο λογαριασμός σας MZS Group είναι πλέον ενεργός",
+      "Καλώς ήρθατε στην ιδιωτική συλλογή σας.",
+      "Ο λογαριασμός σας MZS Group εγκρίθηκε και ενεργοποιήθηκε. Μπορείτε πλέον να δείτε τις ευκαιρίες που επιλέχθηκαν για εσάς."
+    ],
+    "new_project_access": [
+      "Νέα πρόσβαση σε ιδιωτικά έργα | MZS Group",
+      "Νέες ευκαιρίες στη συλλογή σας.",
+      "Ο λογαριασμός σας MZS Group απέκτησε επιπλέον πρόσβαση σε ιδιωτικά έργα."
+    ],
+    "capital_access_granted": [
+      "Η πρόσβασή σας στο ιδιωτικό κεφάλαιο | MZS Group",
+      "Ο ιδιωτικός σας φάκελος είναι διαθέσιμος.",
+      "Ο λογαριασμός σας MZS Group απέκτησε πρόσβαση σε φάκελο ιδιωτικού κεφαλαίου. Συνδεθείτε για να δείτε με ασφάλεια την επισκόπησή σας."
+    ],
+    "types": {
+      "investment": "Επένδυση",
+      "financing": "Χρηματοδότηση",
+      "sale": "Ιδιωτική πώληση",
+      "rental": "Ιδιωτική μίσθωση"
+    }
+  },
+
 
   "da": {
     "member": "kunde",

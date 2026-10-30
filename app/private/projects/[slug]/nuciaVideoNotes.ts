@@ -1,4 +1,9 @@
 export const nuciaVideoNotes: Record<string, string> = {
+  "hu": "A videó 2025-ben készült. Az ingatlan elülső részét azóta felújították.",
+  "bg": "Видеото е заснето през 2025 г. Оттогава предната част на имота е обновена.",
+  "sk": "Video bolo natočené v roku 2025. Predná časť nehnuteľnosti bola odvtedy zrekonštruovaná.",
+  "el": "Το βίντεο γυρίστηκε το 2025. Η μπροστινή όψη του ακινήτου έχει έκτοτε ανακαινιστεί.",
+
 
   "da": "Video optaget i 2025. Ejendommens forside er siden blevet renoveret.",
   "uk": "Відео знято у 2025 році. Відтоді передню частину будинку відремонтовано.",
