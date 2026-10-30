@@ -15,9 +15,9 @@ function load(path,deps={}) {
  return exports;
 }
 const routing=load('i18n/public-routing.ts');
-const codes=['da','uk','fi','cs'];
-const order=['en','nl','de','fr','es','it','da','nb','sv','fi','cs','pl','lt','uk','ro','ru','tr','zh-CN','ar','pt-BR'];
-const expectedNames=['English','Nederlands','Deutsch','Français','Español','Italiano','Dansk','Norsk bokmål','Svenska','Suomi','Čeština','Polski','Lietuvių','Українська','Română','Русский','Türkçe','简体中文','العربية','Português (Brasil)'];
+const codes=['da','uk','fi','cs','hu','bg','sk','el'];
+const order=['en','nl','de','fr','es','it','da','nb','sv','fi','cs','sk','pl','hu','lt','uk','ro','bg','el','ru','tr','zh-CN','ar','pt-BR'];
+const expectedNames=['English','Nederlands','Deutsch','Français','Español','Italiano','Dansk','Norsk bokmål','Svenska','Suomi','Čeština','Slovenčina','Polski','Magyar','Lietuvių','Українська','Română','Български','Ελληνικά','Русский','Türkçe','简体中文','العربية','Português (Brasil)'];
 const mail=load('lib/mzs/localized-account-mail.ts');
 const contacts=load('lib/contact-inputs.ts',{'libphonenumber-js':phone,'./european-country-names.json':{default:JSON.parse(read('lib/european-country-names.json'))}});
 const visits=load('lib/mzs/visitor-report.ts');
@@ -30,7 +30,7 @@ const neighbourhood=load('app/private/projects/[slug]/nuciaNeighbourhoodCopy.ts'
 const plan=load('app/private/projects/[slug]/sitePlanCopy.ts').sitePlanCopy;
 const video=load('app/private/projects/[slug]/nuciaVideoNotes.ts').nuciaVideoNotes;
 
-test('All public, inline and account flag menus render the requested twenty-language order',()=>{
+test('All public, inline and account flag menus render the requested twenty-four-language order',()=>{
  assert.deepEqual(Array.from(routing.locales),order);
  for(const locale of ['en',...codes,'ar'])for(const account of [false,true])for(const inline of [false,true]){
   const messages=JSON.parse(read(`messages/${locale}.json`));
@@ -44,7 +44,7 @@ test('All public, inline and account flag menus render the requested twenty-lang
   assert.deepEqual([...html.matchAll(/hrefLang="([^"]+)"/gi)].map(m=>m[1]),order);
   assert.deepEqual([...html.matchAll(/<a[^>]+aria-label="([^"]+)"/g)].map(m=>m[1]),expectedNames);
   assert.equal((html.match(/aria-current="page"/g)||[]).length,1);
-  if(account)assert.equal((html.match(/href="\/private\/profile"/g)||[]).length,20);
+  if(account)assert.equal((html.match(/href="\/private\/profile"/g)||[]).length,24);
  }
 });
 for(const code of codes){
@@ -63,7 +63,7 @@ for(const code of codes){
   assert.notEqual(work.getWorkCopy(code).careerTitle,work.getWorkCopy('en').careerTitle);
   assert.equal(Object.keys(extra.nuciaExtraCopy(code)).length,8);
   assert.equal(neighbourhood[code].length,8);assert.equal(plan[code].length,7);assert.ok(video[code].includes('2025'));
-  for(const region of ['NL','DK','UA','FI','CZ'])assert.equal(contacts.countryCode(contacts.countryName(region,code)),region);
+  for(const region of ['NL','DK','UA','FI','CZ','HU','BG','SK','GR'])assert.equal(contacts.countryCode(contacts.countryName(region,code)),region);
   for(const section of ['title','intro','status','labels'])assert.deepEqual(Object.keys(rental[code][section]).sort(),Object.keys(rental.lt[section]).sort());
   assert.notEqual(rental[code].intro.requested,rental[code].intro.confirmed);
   assert.notEqual(rental[code].status.cancelled,rental[code].status.confirmed);
@@ -84,15 +84,15 @@ for(const code of codes){
  });
 }
 test('Danish, Ukrainian, Finnish and Czech quantities use native singular, plural and fractional forms',()=>{
- const cases={da:[[1,'1 nat'],[2,'2 nætter']],uk:[[1,'1 ніч'],[2,'2 ночі'],[5,'5 ночей'],[11,'11 ночей'],[21,'21 ніч'],[22,'22 ночі'],[1.5,'1,5 ночі']],fi:[[1,'1 yö'],[2,'2 yötä']],cs:[[1,'1 noc'],[2,'2 noci'],[5,'5 nocí'],[21,'21 nocí'],[1.5,'1,5 noci']]};
+ const cases={hu:[[1,'1 éjszaka'],[2,'2 éjszaka']],bg:[[1,'1 нощ'],[2,'2 нощи']],sk:[[1,'1 noc'],[2,'2 noci'],[5,'5 nocí'],[1.5,'1,5 noci']],el:[[1,'1 νύχτα'],[2,'2 νύχτες']],da:[[1,'1 nat'],[2,'2 nætter']],uk:[[1,'1 ніч'],[2,'2 ночі'],[5,'5 ночей'],[11,'11 ночей'],[21,'21 ніч'],[22,'22 ночі'],[1.5,'1,5 ночі']],fi:[[1,'1 yö'],[2,'2 yötä']],cs:[[1,'1 noc'],[2,'2 noci'],[5,'5 nocí'],[21,'21 nocí'],[1.5,'1,5 noci']]};
  for(const[locale,rows]of Object.entries(cases)){
   const t=createTranslator({locale,messages:JSON.parse(read(`messages/${locale}.json`))});
   for(const[count,expected]of rows)assert.ok(t('ProjectUI.nightlyCalculation',{count,price:'€400'}).startsWith(expected));
  }
 });
-test('Consolidated Auth review templates cover twenty languages with exact links and unchanged English fallback',()=>{
+test('Consolidated Auth review templates cover twenty-four languages with exact links and unchanged English fallback',()=>{
  for(const stem of ['mzs-confirm-signup-email-template','mzs-staging-reset-password-email-template']){
-  const original=read(`docs/${stem}.html`),all=read(`docs/${stem}-twenty-languages.html`);
+  const original=read(`docs/${stem}.html`),all=read(`docs/${stem}-twenty-four-languages.html`);
   const[prefix,fallback]=all.split('{{ else }}\n');assert.equal(fallback,original+'{{ end }}\n');
   assert.deepEqual([...prefix.matchAll(/eq .Data.preferred_language "([^"]+)"/g)].map(m=>m[1]),order.slice(1));
   const hrefs=s=>[...s.matchAll(/href="([^"]+)"/g)].map(m=>m[1]);
@@ -117,10 +117,10 @@ test('New-language country labels and order remain stable even if the runtime IC
   assert.deepEqual(Array.from(options,x=>x.code).sort(),Array.from(contacts.countryCodes).sort());
  }
 });
-test('Production sitemap includes all 100 marketing routes and preview stays non-indexable',()=>{
+test('Production sitemap includes all 120 marketing routes and preview stays non-indexable',()=>{
  for(const environment of ['production','preview']){
   const exports={};vm.runInNewContext(ts.transpileModule(read('app/sitemap.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env:{VERCEL_ENV:environment}},require:()=>routing});
-  const entries=exports.default();assert.equal(entries.length,environment==='production'?100:0);
+  const entries=exports.default();assert.equal(entries.length,environment==='production'?120:0);
   if(environment==='production')for(const l of codes)assert.ok(entries.some(e=>e.url===`https://www.mzsgroup.com/${l}/consultancy`));
  }
 });

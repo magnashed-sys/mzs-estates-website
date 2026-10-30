@@ -1,4 +1,85 @@
 const workCopy = {
+  "hu": {
+    "sectionLabel": "Munka az MZS-szel és az MZS-nél",
+    "partnerEyebrow": "Partnerek és együttműködés",
+    "partnerTitle": "Együttműködés az MZS-szel",
+    "partnerLead": "Az erős kapcsolatok egy bemutatkozással kezdődnek.",
+    "partnerBody": "Folyamatosan bővítjük hálózatunkat olyan partnerekkel, akik osztoznak személyes megközelítésünkben és nemzetközi törekvéseinkben. Ingatlanközvetítőktől, közjegyzőktől és építészektől más szakértőkig együtt ötvözzük a helyi ismereteket és az egymást kiegészítő szaktudást.",
+    "partnerInvitation": "Lát együttműködési lehetőséget az MZS-szel? Kérjen partnerfiókot, és röviden mutassa be szakterületét és az elképzelt együttműködést.",
+    "partnerAction": "Partnerfiók kérése",
+    "careerEyebrow": "Karrier és nemzetközi növekedés",
+    "careerTitle": "Munka az MZS-nél",
+    "careerLead": "Vegyen részt nemzetközi növekedésünkben.",
+    "careerBody": "Bővülő ügyfélkörünk és nemzetközi üzleti modellünk új kollégák számára teremt lehetőséget. Ezért olyan ügyfélkapcsolati munkatársakat keresünk, akik a következő nyelveken tudják támogatni ügyfeleinket:",
+    "languages": [
+      "Spanyol",
+      "Olasz",
+      "Orosz"
+    ],
+    "careerInvitation": "Jól épít kapcsolatokat, és otthonosan mozog nemzetközi környezetben? Szívesen megbeszéljük, hogyan illeszkedhet tapasztalata és ambíciója az MZS-hez. Megkeresésében említse meg nyelvtudását és releváns tapasztalatait.",
+    "careerAction": "Érdekli? Ismerkedjünk meg"
+  },
+  "bg": {
+    "sectionLabel": "Работа с и за MZS",
+    "partnerEyebrow": "Партньори и сътрудничество",
+    "partnerTitle": "Сътрудничество с MZS",
+    "partnerLead": "Силните връзки започват със запознанство.",
+    "partnerBody": "Постоянно разширяваме мрежата си с партньори, които споделят личния ни подход и международните ни амбиции. От брокери, нотариуси и архитекти до други специалисти — заедно съчетаваме местни знания и допълваща се експертиза.",
+    "partnerInvitation": "Виждате възможности за сътрудничество с MZS? Заявете партньорски акаунт и разкажете накратко за своята експертиза и желаното сътрудничество.",
+    "partnerAction": "Заявете партньорски акаунт",
+    "careerEyebrow": "Кариера и международен растеж",
+    "careerTitle": "Работа за MZS",
+    "careerLead": "Участвайте в международния ни растеж.",
+    "careerBody": "Растящата ни клиентска база и международният ни бизнес модел създават възможности за нови колеги. Затова търсим мениджъри за връзки с клиенти, които могат да обслужват клиентите ни на следните езици:",
+    "languages": [
+      "Испански",
+      "Италиански",
+      "Руски"
+    ],
+    "careerInvitation": "Умеете да изграждате връзки и се чувствате добре в международна среда? С удоволствие ще обсъдим как Вашият опит и амбиции могат да се впишат в MZS. Посочете езиковите си умения и подходящия опит в запитването.",
+    "careerAction": "Интересувате се? Нека се запознаем"
+  },
+  "sk": {
+    "sectionLabel": "Spolupráca a práca pre MZS",
+    "partnerEyebrow": "Partneri a spolupráca",
+    "partnerTitle": "Spolupracujte s MZS",
+    "partnerLead": "Pevné vzťahy sa začínajú zoznámením.",
+    "partnerBody": "Neustále rozširujeme sieť o partnerov, ktorí zdieľajú náš osobný prístup a medzinárodné ambície. Od realitných maklérov, notárov a architektov po ďalších odborníkov spájame miestne znalosti a dopĺňajúcu sa odbornosť.",
+    "partnerInvitation": "Vidíte možnosti spolupráce s MZS? Požiadajte o partnerský účet a stručne predstavte svoju odbornosť a zamýšľanú spoluprácu.",
+    "partnerAction": "Požiadať o partnerský účet",
+    "careerEyebrow": "Kariéra a medzinárodný rast",
+    "careerTitle": "Pracujte pre MZS",
+    "careerLead": "Podieľajte sa na našom medzinárodnom raste.",
+    "careerBody": "Rastúca klientská základňa a medzinárodný obchodný model vytvárajú priestor pre nových kolegov. Hľadáme preto klientskych manažérov, ktorí môžu podporovať našich klientov v týchto jazykoch:",
+    "languages": [
+      "Španielčina",
+      "Taliančina",
+      "Ruština"
+    ],
+    "careerInvitation": "Viete budovať vzťahy a cítite sa dobre v medzinárodnom prostredí? Radi prediskutujeme, ako vaše skúsenosti a ambície zapadnú do MZS. V dopyte uveďte jazykové znalosti a relevantné skúsenosti.",
+    "careerAction": "Máte záujem? Zoznámme sa"
+  },
+  "el": {
+    "sectionLabel": "Συνεργασία και εργασία με την MZS",
+    "partnerEyebrow": "Συνεργάτες και συνεργασία",
+    "partnerTitle": "Συνεργαστείτε με την MZS",
+    "partnerLead": "Οι ισχυρές σχέσεις ξεκινούν με μια γνωριμία.",
+    "partnerBody": "Διευρύνουμε συνεχώς το δίκτυό μας με συνεργάτες που μοιράζονται την προσωπική μας προσέγγιση και τις διεθνείς φιλοδοξίες μας. Από μεσίτες, συμβολαιογράφους και αρχιτέκτονες έως άλλους ειδικούς, συνδυάζουμε τοπική γνώση και συμπληρωματική τεχνογνωσία.",
+    "partnerInvitation": "Βλέπετε δυνατότητες συνεργασίας με την MZS; Ζητήστε λογαριασμό συνεργάτη και παρουσιάστε σύντομα την εξειδίκευσή σας και τη συνεργασία που επιθυμείτε.",
+    "partnerAction": "Αίτημα λογαριασμού συνεργάτη",
+    "careerEyebrow": "Καριέρα και διεθνής ανάπτυξη",
+    "careerTitle": "Εργαστείτε στην MZS",
+    "careerLead": "Συμβάλετε στη διεθνή ανάπτυξή μας.",
+    "careerBody": "Η αυξανόμενη πελατειακή μας βάση και το διεθνές επιχειρηματικό μας μοντέλο δημιουργούν ευκαιρίες για νέους συναδέλφους. Αναζητούμε υπευθύνους πελατών που μπορούν να εξυπηρετούν τους πελάτες μας στις ακόλουθες γλώσσες:",
+    "languages": [
+      "Ισπανικά",
+      "Ιταλικά",
+      "Ρωσικά"
+    ],
+    "careerInvitation": "Είστε ικανοί στη δημιουργία σχέσεων και αισθάνεστε άνετα σε διεθνές περιβάλλον; Θα χαρούμε να συζητήσουμε πώς η εμπειρία και οι φιλοδοξίες σας ταιριάζουν στην MZS. Αναφέρετε τις γλωσσικές σας δεξιότητες και τη σχετική εμπειρία στην επικοινωνία σας.",
+    "careerAction": "Ενδιαφέρεστε; Ας γνωριστούμε"
+  },
+
 
   "da": {
     "sectionLabel": "Arbejd med og for MZS",

@@ -1,5 +1,30 @@
 /** Concise purpose, accept, reject, disclosure label. Full information stays in analyticsCopy. */
 export const analyticsCompactCopy: Record<string, readonly [string, string, string, string]> = {
+  "hu": [
+    "Használhatunk Google Analytics-sütiket webhelystatisztikákhoz?",
+    "Elfogadás",
+    "Elutasítás",
+    "További információ"
+  ],
+  "bg": [
+    "Може ли да използваме бисквитки на Google Analytics за статистика на сайта?",
+    "Приемам",
+    "Отказвам",
+    "Повече информация"
+  ],
+  "sk": [
+    "Môžeme používať súbory cookie Google Analytics na štatistiky webu?",
+    "Prijať",
+    "Odmietnuť",
+    "Viac informácií"
+  ],
+  "el": [
+    "Μπορούμε να χρησιμοποιήσουμε cookie Google Analytics για στατιστικά ιστοτόπου;",
+    "Αποδοχή",
+    "Απόρριψη",
+    "Περισσότερες πληροφορίες"
+  ],
+
 
   "da": [
     "Må vi bruge Google Analytics-cookies til websitestatistik?",

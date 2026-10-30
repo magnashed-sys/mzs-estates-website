@@ -1,4 +1,41 @@
 export const sitePlanCopy: Record<string, readonly string[]> = {
+  "hu": [
+    "Fedezze fel az ingatlant",
+    "Sematikus áttekintés · nem méretarányos",
+    "Elülső vendégszállás",
+    "Hátsó vendégszállás",
+    "Főépület",
+    "3 parkolóhely",
+    "Válasszon egy területet a fotói megtekintéséhez."
+  ],
+  "bg": [
+    "Разгледайте имота",
+    "Схематичен преглед · не е в мащаб",
+    "Предно помещение за гости",
+    "Задно помещение за гости",
+    "Основна резиденция",
+    "3 паркоместа",
+    "Изберете зона, за да видите снимките ѝ."
+  ],
+  "sk": [
+    "Preskúmajte nehnuteľnosť",
+    "Schematický prehľad · nie je v mierke",
+    "Predné ubytovanie pre hostí",
+    "Zadné ubytovanie pre hostí",
+    "Hlavná rezidencia",
+    "3 parkovacie miesta",
+    "Vyberte oblasť a zobrazte jej fotografie."
+  ],
+  "el": [
+    "Εξερευνήστε το ακίνητο",
+    "Σχηματική επισκόπηση · χωρίς κλίμακα",
+    "Μπροστινός ξενώνας",
+    "Πίσω ξενώνας",
+    "Κύρια κατοικία",
+    "3 θέσεις στάθμευσης",
+    "Επιλέξτε μια περιοχή για να δείτε τις φωτογραφίες της."
+  ],
+
 
   "da": [
     "Udforsk ejendommen",

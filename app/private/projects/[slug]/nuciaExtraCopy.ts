@@ -1,4 +1,45 @@
 const copy: Record<string, readonly string[]> = {
+  "hu": [
+    "Mosókonyha",
+    "Külön mosókonyha két mosógéppel és két szárítógéppel.",
+    "A villa éjszaka",
+    "Meleg kültéri világítás a villa, a medence és a kert körül.",
+    "Terasz alkonyatkor",
+    "Kivilágított medence",
+    "Villa és medence éjszaka",
+    "Kerti világítás"
+  ],
+  "bg": [
+    "Перално помещение",
+    "Отделно перално помещение с две перални и две сушилни.",
+    "Вилата през нощта",
+    "Топло външно осветление около вилата, басейна и градината.",
+    "Тераса по здрач",
+    "Осветен басейн",
+    "Вила и басейн през нощта",
+    "Градинско осветление"
+  ],
+  "sk": [
+    "Práčovňa",
+    "Samostatná práčovňa s dvoma práčkami a dvoma sušičkami.",
+    "Vila v noci",
+    "Teplé vonkajšie osvetlenie okolo vily, bazéna a záhrady.",
+    "Terasa za súmraku",
+    "Osvetlený bazén",
+    "Vila a bazén v noci",
+    "Záhradné osvetlenie"
+  ],
+  "el": [
+    "Χώρος πλυντηρίου",
+    "Ξεχωριστός χώρος πλυντηρίου με δύο πλυντήρια και δύο στεγνωτήρια.",
+    "Η βίλα τη νύχτα",
+    "Ζεστός εξωτερικός φωτισμός γύρω από τη βίλα, την πισίνα και τον κήπο.",
+    "Βεράντα το σούρουπο",
+    "Φωτισμένη πισίνα",
+    "Βίλα και πισίνα τη νύχτα",
+    "Φωτισμός κήπου"
+  ],
+
 
   "da": [
     "Vaskerum",
