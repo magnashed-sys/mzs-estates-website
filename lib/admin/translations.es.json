@@ -3428,5 +3428,8 @@
   "Invoice number": "Número de factura",
   "Net amount": "Importe neto",
   "Staff follow-up notes": "Notas de seguimiento del personal",
-  "No staff progress notes yet.": "Todavía no hay notas de seguimiento."
+  "No staff progress notes yet.": "Todavía no hay notas de seguimiento.",
+  "Operations": "Operaciones",
+  "Open tasks, maintenance, pending time reviews and corrections in one central control panel.": "Gestione tareas abiertas, mantenimiento, revisiones de horas y correcciones desde un único panel.",
+  "Open operational action center →": "Abrir centro de acciones operativas →"
 }
