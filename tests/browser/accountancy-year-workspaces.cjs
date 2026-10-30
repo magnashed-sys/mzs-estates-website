@@ -6,11 +6,16 @@ const pdf=Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF\n');
 let role='admin',language='en',failed=false;const files=new Map();
 const docs=[{id:docid,issuer_id:entity,fiscal_year:2023,title:'Synthetic balance 2023',original_name:'synthetic.pdf',category:'balance_sheet',period_label:'2023',document_date:'2024-09-13',review_status:'pending_review',notes:'Synthetic test only',file_path:`${entity}/2023/${docid}.pdf`,file_size_bytes:pdf.length,sha256:crypto.createHash('sha256').update(pdf).digest('hex'),created_at:now,updated_at:now,revision:1}];files.set(docs[0].file_path,pdf);
 const events=[];const user={id:admin,aud:'authenticated',role:'authenticated',email:'archive@example.invalid',email_confirmed_at:now,created_at:now,app_metadata:{provider:'email'},user_metadata:{}};
+// A deliberately incompressible original exercises an actual streamed Next response
+// above the hosting buffered-response limit. This stays in the local fake service.
+const annualPdf=Buffer.concat([pdf,crypto.randomBytes(5*1024*1024)]);
+const annualDoc={...docs[0],id:'77777777-7777-4777-8777-777777777777',fiscal_year:2026,title:'Synthetic annual original',original_name:'annual-original.pdf',mime_type:'application/pdf',file_size_bytes:annualPdf.length,sha256:crypto.createHash('sha256').update(annualPdf).digest('hex')};
+annualDoc.file_path=`${entity}/2026/${annualDoc.id}.pdf`;docs.push(annualDoc);files.set(annualDoc.file_path,annualPdf);
 const token=[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),Buffer.from(JSON.stringify({sub:admin,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'synthetic-signature'].join('.');
 const yearId='55555555-5555-4555-8555-555555555555',supplierId='66666666-6666-4666-8666-666666666666';
 const years=[{id:yearId,issuer_id:entity,fiscal_year:2026,purpose:'current',vat_treatment:'pending',vat_effective_from:null,vat_evidence:'',notes:'Synthetic annual notes',checks:{income:false,costs:false,bank:false,assets:false,financing:false,tax:false,documents:false},revision:1,updated_at:now}];
 const costs=[],reviews=[],projects=[];
-function source(){return {administration:years[0],snapshot_at:now,sales:{issuer:{id:entity,name:'Synthetic Estates'},snapshot_at:now,leases:[],bookings:[],external:[],services:[],credit_notes:[],rent_receipts:[],guest_receipts:[],external_receipts:[],service_receipts:[],imported_receipts:[],imported:[]},costs,reviews,projects,documents:[],capital_references:[]};}
+function source(){return {administration:years[0],snapshot_at:now,sales:{issuer:{id:entity,name:'Synthetic Estates'},snapshot_at:now,leases:[],bookings:[],external:[],services:[],credit_notes:[],rent_receipts:[],guest_receipts:[],external_receipts:[],service_receipts:[],imported_receipts:[],imported:[]},costs,reviews,projects,documents:docs.filter(d=>d.issuer_id===entity&&d.fiscal_year===2026),capital_references:[]};}
 const server=http.createServer(async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Headers','*');res.setHeader('Access-Control-Allow-Methods','GET,POST,PATCH,PUT,DELETE,OPTIONS');res.setHeader('Access-Control-Expose-Headers','Content-Range');res.setHeader('Content-Type','application/json');
  if(req.method==='OPTIONS'){res.end();return;}const chunks=[];for await(const b of req)chunks.push(b);const body=Buffer.concat(chunks);let data={};try{data=JSON.parse(body.toString()||'{}')}catch{}
@@ -27,13 +32,14 @@ const server=http.createServer(async(req,res)=>{
    if(docs.some(d=>d.issuer_id===data.issuer_id&&d.fiscal_year===data.fiscal_year&&d.sha256===data.sha256))return send({code:'23505',message:'Duplicate'},409);
    const d={...data,created_at:now,updated_at:now,revision:1};docs.push(d);events.push({id:crypto.randomUUID(),document_id:d.id,actor_id:admin,occurred_at:now,event_type:'created',after_data:{...d}});return send(null,201);
   }
-  let a=docs.filter(d=>['id','issuer_id','fiscal_year','category','review_status','revision'].every(k=>!url.searchParams.has(k)||'eq.'+d[k]===url.searchParams.get(k)));
+  let a=docs.filter(d=>['id','issuer_id','fiscal_year','category','review_status','revision'].every(k=>!url.searchParams.has(k)||'eq.'+d[k]===url.searchParams.get(k)||(k==='id'&&url.searchParams.get(k).startsWith('in.(')&&url.searchParams.get(k).includes(d.id))));
   if(req.method==='PATCH'){for(const d of a){Object.assign(d,data,{revision:d.revision+1});events.push({id:crypto.randomUUID(),document_id:d.id,actor_id:admin,occurred_at:now,event_type:'updated',after_data:{...d}});}return rows(a);}
   if(url.searchParams.has('title')){const q=url.searchParams.get('title').slice(7,-1);a=a.filter(d=>d.title.toLowerCase().includes(q.toLowerCase()));}return rows(a);
  }
  const storage='/storage/v1/object/';
  if(path.startsWith(storage+'sign/')){const key=decodeURIComponent(path.slice((storage+'sign/'+bucket+'/').length));if(!files.has(key))return send({},404);return send({signedURL:'/object/sign/'+bucket+'/'+key+'?token=synthetic-only'});}
  if(path.startsWith(storage+'authenticated/')){const key=decodeURIComponent(path.slice((storage+'authenticated/'+bucket+'/').length));res.setHeader('Content-Type','application/pdf');res.end(files.get(key)||Buffer.alloc(0));return;}
+ if(path.startsWith(storage+bucket+'/')&&req.method==='GET'){const key=decodeURIComponent(path.slice((storage+bucket+'/').length));if(!files.has(key))return send({message:'Missing synthetic original'},404);res.setHeader('Content-Type','application/pdf');res.end(files.get(key));return;}
  if(path===storage+bucket&&req.method==='DELETE'){for(const p of data.prefixes??[])if(!docs.some(d=>d.file_path===p))files.delete(p);return send([]);}
  if(path.startsWith(storage+bucket+'/')&&req.method==='POST'){
   const key=decodeURIComponent(path.slice((storage+bucket+'/').length));if(files.has(key))return send({message:'Exists'},409);
@@ -75,10 +81,13 @@ const server=http.createServer(async(req,res)=>{
   result=await action('saveCostReview',{year_id:yearId,draft_id:costs[0].id,revision:0,category:'advice',project_id:projects[0].id,review_status:'reviewed',evidence_reference:'Synthetic invoice reference',note:''});assert.match(result,/"ok":true/);assert.equal(reviews.length,1);
   language='es';r=await request(detail+'/import');assert.equal(r.status,200);assert.match(await r.text(),/Preparar una importación de costes/);r=await request(detail);html=await r.text();assert.equal(r.status,200);assert.match(html,/<html[^>]+lang="es"/);assert.match(html,/Administraciones anuales/);assert.match(html,/Asesoramiento profesional/);assert.match(html,/Synthetic saved notes/);assert.match(html,/TEST-ONLY-1/);assert.match(html,/121,00/);fs.writeFileSync('/tmp/annual-render-es.html',html);
   r=await request(detail+'?status=excluded');assert.match(await r.text(),/Ningún coste de proveedor coincide/);
-  r=await request(detail+'/export');assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);const zip=Buffer.from(await r.arrayBuffer());assert.equal(zip.readUInt32LE(0),0x04034b50);assert.ok(zip.length>1000);
+  r=await request(detail+'/export');assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.match(r.headers.get('content-disposition'),/attachment/);const zip=Buffer.from(await r.arrayBuffer());assert.equal(zip.readUInt32LE(0),0x04034b50);assert.ok(zip.length>4.5*1024*1024);
+  const entries=new Map();let cursor=0;while(zip.readUInt32LE(cursor)===0x04034b50){const n=zip.readUInt16LE(cursor+26),size=zip.readUInt32LE(cursor+18);entries.set(zip.subarray(cursor+30,cursor+30+n).toString(),require('node:zlib').inflateRawSync(zip.subarray(cursor+30+n,cursor+30+n+size)));cursor+=30+n+size;}
+  assert.deepEqual(entries.get('documents/'+annualDoc.id+'.pdf'),annualPdf);assert.equal(entries.has('documents/'+docid+'.pdf'),false);const annualManifest=JSON.parse(entries.get('manifest.json'));assert.equal(annualManifest.original_pdfs,1);for(const entry of annualManifest.files){assert.equal(crypto.createHash('sha256').update(entries.get(entry.name)).digest('hex'),entry.sha256);}
+  files.set(annualDoc.file_path,Buffer.alloc(annualPdf.length));r=await request(detail+'/export');assert.equal(r.status,503);assert.match(await r.text(),/No partial download/);files.set(annualDoc.file_path,annualPdf);
   failed=true;r=await request(detail+'/export');assert.equal(r.status,503);failed=false;
   role='client';assert.equal((await request(detail+'/import')).status,404);assert.equal((await request(detail)).status,404);assert.equal((await request(detail+'/export')).status,404);
   role='admin';assert.equal((await request(detail+'/import',false)).status,307);assert.equal((await request(detail,false)).status,307);assert.equal((await request(detail+'/export',false)).status,307);
-  console.log('Annual administration HTTP integration passed: authenticated EN/ES screens; real Next save-year, stale-revision, create-cost, duplicate and review server actions; amounts and filters; real ZIP serialization; fail-closed export; client denial and anonymous redirects.');
+  console.log('Annual administration HTTP integration passed: authenticated EN/ES screens; real Next actions; >5 MiB streamed ZIP with byte-identical original and manifest; other-year exclusion; corrupt-source and outage fail-closed export; client denial and anonymous redirects.');
  }finally{app.kill('SIGTERM');server.close();fs.closeSync(log);}
 })().catch(e=>{console.error(e);process.exitCode=1});
