@@ -26,7 +26,7 @@ test('reports keep exact source minutes and mutually exclusive correction/review
  const report=lib.normalizeTimeReport(fixture(),filters());
  assert.equal(report.total.count,6);assert.equal(report.total.minutes,296);assert.equal(report.total.originalMinutes,270);
  assert.deepEqual(clean(report.total.approved),{count:1,minutes:71});assert.deepEqual(clean(report.total.correction),{count:1,minutes:45});assert.equal(report.total.pending.minutes,135);assert.equal(report.total.returned.minutes,45);
- assert.equal(report.byPerson.length,2);assert.equal(report.byWeek.length,1);assert.equal(report.byWeek[0][0],'2026-09-28');assert.equal(report.byPerson.find(([key])=>key===id(201))[1].minutes,251);
+ assert.equal(report.byPerson.length,2);assert.equal(report.byWeek.length,1);assert.equal(report.byWeek[0][0],'2026-09-28');assert.equal(report.byPersonWeek.length,2);assert.equal(report.byPerson.find(([key])=>key===id(201))[1].minutes,251);
  assert.equal(report.byLocation.find(([key])=>key==='property:'+id(102))[1].minutes,90);assert.equal(report.byProperty.find(([key])=>key===id(102))[1].minutes,90);assert.equal(report.byMonth.find(([key])=>key==='2026-09')[1].minutes,45);
  assert.equal(lib.workDuration(93),'1:33');assert.equal(lib.workDuration(96000),'1600:00');assert.throws(()=>lib.workDuration(1.5));
 });
@@ -94,6 +94,7 @@ test('Time Report 2.0 separates operational work areas, units, ISO weeks and saf
  assert.equal(report.byProperty.reduce((n,[,v])=>n+v.count,0),5);
  assert.equal(report.byUnit.find(([key])=>key===id(101)+':'+id(401))[1].count,1);
  assert.deepEqual(report.byWeek.map(([key])=>key),['2026-09-28','2026-10-05']);
+ assert.equal(report.byPersonWeek.find(([key])=>key===id(201)+':2026-10-05')[1].minutes,45);
  const area=report.visits.find(v=>v.work_area_id==='private-magdy');
  assert.equal(area.property_id,null);assert.equal(area.location_name,'Prive Magdy');
  assert.equal(area.location_kind,'area');assert.equal(area.week_start,'2026-09-28');
