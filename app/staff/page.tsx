@@ -29,5 +29,19 @@ export default async function StaffPage({searchParams}:{searchParams:Promise<Par
  </header>
  {taskEnabled?<StaffTaskBoard tasks={tasks} properties={properties} units={units} areas={areas} profileId={user.id} today={today} language={language}/>:<><h2>Werkbezoeken &amp; onderhoud</h2><p>Registreer je werkzaamheden en volg de beoordeling en opvolging. Alleen jouw toegewezen objecten zijn beschikbaar.</p></>}
  <section id="hours" className={s.staffHours}><div className={s.mobileHead}><h2>{taskEnabled?staffText(language,'workingTime'):'Werkbezoeken & onderhoud'}</h2><p>{taskEnabled?staffText(language,'recordActual'):'Registreer je werkzaamheden en volg de beoordeling en opvolging.'}</p></div><StaffForms properties={properties} units={units} tasks={tasks} today={today} showMaintenanceForm={!taskEnabled} language={language} initialTaskId={initialTaskId}/></section>
- {taskEnabled?<details className={s.staffHistory}><summary>{staffText(language,'history')}</summary><WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/></details>:<WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/>}</main>;
+ {taskEnabled&&<section className={s.recentMaintenance} aria-labelledby="recent-maintenance-heading">
+  <div className={s.recentMaintenanceHead}><h2 id="recent-maintenance-heading">{staffText(language,'recentReports')}</h2>
+   <a href="#work-history">{staffText(language,'viewAllReports')}</a></div>
+  {data.tickets.rows.length?<div className={s.recentMaintenanceList}>
+   {data.tickets.rows.slice(0,3).map(ticket=><a key={ticket.id}
+    href={'/staff?ticket='+encodeURIComponent(ticket.id)+'#ticket'} className={s.recentMaintenanceItem}>
+    <span><strong>{ticket.title}</strong>
+     <small>{properties.find(p=>p.id===ticket.property_id)?.name??staffText(language,'property')} · {ticket.created_at.slice(0,10)}</small></span>
+    <span aria-hidden="true">›</span>
+   </a>)}
+  </div>:<p className={s.description}>{staffText(language,'noRecentReports')}</p>}
+ </section>}
+ {taskEnabled?<details id="work-history" open={!!data.ticket||!!data.visit} className={s.staffHistory}>
+ <summary>{staffText(language,'history')}</summary>
+ <WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/></details>:<WorkRegisters data={data} params={params} properties={properties} tasks={tasks} staffLanguage={language}/>}</main>;
 }
