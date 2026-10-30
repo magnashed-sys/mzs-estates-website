@@ -43,7 +43,7 @@ export async function GET(_request:Request,{params}:{params:Promise<{id:string}>
   const page=pdf.addPage([595.28,841.89]);page.drawLine({start:{x:42,y:780},end:{x:553,y:780},color:gold,thickness:1.5});
   txt(page,'MAGDY NASHED',43,804,19,true);
   txt(page,title,43,746,21,true);
-  txt(page,'Privé-administratie · geen MZS-factuur',43,729,8,false,muted);
+  txt(page,'Particuliere dienstverlening',43,729,8,false,muted);
   return page;
  }
  const p=base(source.status==='concept'?'CONCEPTFACTUUR - NIET VERZONDEN':'FACTUUR');
