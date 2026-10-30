@@ -26,6 +26,8 @@ await pg.exec(`
 const ticketStates=[['reported',null,null,'routine'],['reported',null,null,'urgent'],['reopened',null,null,'routine'],['triaged',null,null,'routine'],['triaged','2026-10-29',id(200),'routine'],['scheduled','2026-10-27',id(200),'urgent'],['in_progress','2026-10-27',null,'routine'],['resolved','2026-10-26',id(200),'routine'],['closed','2026-10-26',id(200),'routine'],['scheduled',today,id(200),'routine'],['triaged',today,null,'routine'],['in_progress',null,id(200),'routine']];
 for(const [i,[status,date,actor,priority]] of ticketStates.entries())await pg.query('insert into mzs_ops_current_tickets values($1,$2,$3,$4,$5,$6,$7,$8)',[id(i+1),id(100),actor,date,priority,'Fictieve melding '+(i+1),'2026-10-01',status]);
 for(const [i,[review,pending]] of [[null,false],['approved',false],['rejected',false],['approved',true],[null,true],[null,false],...Array.from({length:60},()=>[null,false])].entries())await pg.query('insert into mzs_ops_current_visits values($1,$2,$3,$4,$5,$6,$7,$8)',[id(300+i),id(100),id(200),'2026-10-20',45,'Fictief bezoek',review,pending]);
+// The live visit view includes optional non-property work areas.
+await pg.exec("alter table mzs_ops_current_visits add column work_area_id text; create table mzs_ops_staff_work_areas(id text primary key,name text); insert into mzs_ops_staff_work_areas values('private-magdy','Prive Magdy');");
 for(const [i,decision] of ['draft','authorized_internally','cancelled'].entries())await pg.query('insert into mzs_ops_current_work_orders values($1,$2,$3,$4,$5,$6)',[id(400+i),id(6),'Fictieve offerte','Fictieve werkzaamheden','2026-10-20',decision]);
 // Execute the real Supabase JS builder against an in-memory SQL fixture. The adapter
 // implements only ordinary PostgREST filters/order/paging, not the queue business rules.
@@ -115,5 +117,15 @@ test('action page checks environment and active administrator before reading que
 test('successful operation invalidation refreshes both dashboards and the complete queue',()=>{
  const paths=[],exports={};vm.runInNewContext(compile('lib/property-operations/revalidate.ts'),{exports,require:()=>({revalidatePath:path=>paths.push(path)})});
  exports.revalidateOperations();assert.deepEqual(paths,['/staff','/admin/workspaces/estates/staff','/admin/workspaces/estates/actions','/admin/workspaces/estates/time-report','/admin/workspaces/estates','/admin/workspaces/group']);
+});
+test('time action queues support work-area visits without inventing a property dossier',async()=>{
+ await pg.query('insert into mzs_ops_current_visits(id,property_id,profile_id,worked_on,effective_minutes,description,review_decision,correction_pending,work_area_id) values($1,null,$2,$3,$4,$5,null,false,$6)',[
+  id(899),id(200),'2026-10-19',45,'Private work area review','private-magdy'
+ ]);
+ const {db}=database();
+ const page=await lib.loadQueuePage(db,'visits',1,today);
+ const result=page.items.find(x=>x.id===id(899));
+ assert.ok(result);assert.equal(result.property,'Prive Magdy');assert.equal(result.person,'Fictieve medewerker');
+ assert.ok(result.href.includes('visit='+id(899)));
 });
 test.after(async()=>{await pg.close();});
