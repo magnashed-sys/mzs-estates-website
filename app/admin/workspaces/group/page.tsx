@@ -4,6 +4,7 @@ import {Suspense} from "react";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
 import OperationsActionCenter from "../../OperationsActionCenter";
 import DailyOperations from "../../DailyOperations";
+import AdminDirectory from '../../AdminDirectory';
 import FinancialCockpit from "../../FinancialCockpit";
 import GroupActionCenter from "../../GroupActionCenter";
 import styles from "../workspace.module.css";
@@ -15,6 +16,7 @@ export default async function GroupWorkspace(){
  return <>
   <h1 className={styles.cockpitHeading}>{adminT("Cockpit")}</h1>
   <p className={styles.actions}><a href="/admin/workspaces/estates/operations">{adminT("Operations")} · {adminT("Open operational action center →")}</a></p>
+  <AdminDirectory expanded/>
   <FinancialCockpit refreshVersion={0}/>
   <GroupActionCenter refreshVersion={0}/>
   <Suspense fallback={<p role="status">{adminT("Loading action list…")}</p>}><OperationsActionCenter db={db}/></Suspense>
