@@ -42,17 +42,22 @@ test('Beverwijk/private locations are separated from rental ownership with RLS a
  assert.match(form,/value=\{'property:'\+p\.id\}/);
  assert.match(form,/name="work_area_id"/);
 });
-test('photo reports use private normalized storage; unit dossier links rather than duplicates',()=>{
- const api=file('app/api/staff/report-with-photos/route.ts');
- assert.match(api,/MAX_PHOTO_BYTES/);
- assert.match(api,/photos\.length>3/);
- assert.match(api,/normalizeMaintenancePhoto/);
- assert.match(api,/mzs_ops_maintenance_tickets/);
- assert.match(api,/mzs_ops_maintenance_photos/);
- assert.match(api,/same-origin/);
- assert.match(api,/partial\?207:201/);
- assert.match(api,/ticketId:ticket\.id/);
- assert.doesNotMatch(api,/service_role|SUPABASE_SERVICE_ROLE_KEY/);
+test('photos are selected together then securely uploaded one-by-one below the serverless request limit',()=>{
+ const create=file('app/api/staff/report-with-photos/route.ts');
+ const photo=file('app/api/staff/maintenance-photo/route.ts');
+ const board=file('app/staff/StaffTaskBoard.tsx');
+ assert.match(create,/mzs_ops_maintenance_tickets/);
+ assert.match(create,/form\.has\('photos'\)/);
+ assert.match(create,/size>32000/);
+ assert.match(create,/ticketId:ticket\.id/);
+ assert.match(photo,/normalizeMaintenancePhoto/);
+ assert.match(photo,/MAX_PHOTO_BYTES/);
+ assert.match(photo,/mzs_ops_maintenance_photos/);
+ assert.match(board,/formData\.delete\('photos'\)/);
+ assert.match(board,/files\.length>3/);
+ assert.match(board,/fetch\('\/api\/staff\/maintenance-photo'/);
+ assert.match(board,/for\(const file of files\)/);
+ assert.doesNotMatch(create,/SUPABASE_SERVICE_ROLE_KEY/);
  const page=file('app/admin/group/estates/units/[id]/page.tsx');
  assert.match(page,/\.eq\('unit_id',id\)/);
  assert.match(page,/mzs_ops_maintenance_photo_holds/);
