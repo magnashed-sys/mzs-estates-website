@@ -94,5 +94,7 @@ test('central admin page is guarded, dynamic, exact and links to existing scoped
  assert.match(page,/queueHref\('corrections'\)/);
  assert.match(q,/visits:'id,property_id,work_area_id/);
  assert.match(q,/const areaNames=new Map/);
- assert.match(nav,/href:"\/admin\/workspaces\/estates\/operations"/);
+ assert.ok(nav.includes('if(matches("/admin/workspaces/estates/operations"))return "Staff"'));
+ const staff=readFileSync('app/admin/workspaces/staff/page.tsx','utf8');
+ assert.ok(staff.includes('href="/admin/workspaces/estates/operations"'));
 });
