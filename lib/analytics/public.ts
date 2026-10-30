@@ -1,11 +1,11 @@
-import {publicRoute, publicPaths} from '../../i18n/public-routing';
+import {publicRoute, publicPaths, isInsightPath} from '../../i18n/public-routing';
 export const consentKey = 'mzs-analytics-consent-v1';
 export const productionHosts = new Set(['www.mzsgroup.com', 'mzsgroup.com', 'www.mzsgroup.eu', 'mzsgroup.eu']);
 export function analyticsPage(path: string) {
   const normalized = path === '/' ? path : path.replace(/\/$/, '');
   if (normalized === '/request-access') return {locale: 'en', path: normalized};
   const route = publicRoute(normalized);
-  return route && (publicPaths as readonly string[]).includes(route.path) ? route : null;
+  return route && ((publicPaths as readonly string[]).includes(route.path) || isInsightPath(route.path)) ? route : null;
 }
 export function cleanLocation(href: string) {
   try {

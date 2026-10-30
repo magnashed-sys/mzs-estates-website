@@ -25,7 +25,7 @@ test('directory renders accessible bilingual controls and only navigational link
  const collapsed=renderToStaticMarkup(React.createElement(exports.default));
  assert.match(collapsed,/<details>/);assert.doesNotMatch(collapsed,/<details[^>]* open/);assert.match(collapsed,/Administration directory|Directorio de administración/);
  const html=renderToStaticMarkup(React.createElement(exports.default,{expanded:true}));
- assert.equal((html.match(/<a /g)||[]).length,36);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
+ assert.equal((html.match(/<a /g)||[]).length,api.adminDirectory.length);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
  assert.doesNotMatch(html,/<form|action=/);
  }
 });

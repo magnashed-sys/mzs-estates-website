@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {publicRoute, isLocale, localizedPath, isAccountPath, publicPaths} from "./i18n/public-routing";
+import {publicRoute, isLocale, localizedPath, isAccountPath, publicPaths, isInsightPath} from "./i18n/public-routing";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
   // Only anonymous marketing GET/HEAD requests skip session refresh.
   // Account, private, API and authenticated requests retain the existing flow.
-  const marketing = publicPage && (publicPaths as readonly string[]).includes(publicPage.path);
+  const marketing = publicPage && ((publicPaths as readonly string[]).includes(publicPage.path) || isInsightPath(publicPage.path));
   const hasAuthCookie = request.cookies.getAll().some(({name}) => /^sb-.*-auth-token(?:\.\d+)?$/.test(name));
   if (marketing && (request.method === "GET" || request.method === "HEAD") && !hasAuthCookie) return response;
 

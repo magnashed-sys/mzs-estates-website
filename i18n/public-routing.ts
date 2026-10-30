@@ -12,14 +12,17 @@ export const localizedPaths = [...publicPaths, '/login'] as const;
 export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && locales.includes(value as Locale);
 }
+export function isInsightPath(path: string) {
+  try { return /^\/insights(?:\/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*)?$/u.test(decodeURIComponent(path)); } catch { return false; }
+}
 export function publicRoute(pathname: string): {locale: Locale; path: string} | null {
   const match = pathname.match(/^\/(nl|es|ru|de|it|fr|pt-BR|ar|tr|lt|pl|zh-CN|sv|ro|nb|da|uk|fi|cs|hu|bg|sk|el)(\/.*)?$/);
   const path = match ? match[2] || '/' : pathname;
-  if (!localizedPaths.includes(path as typeof localizedPaths[number])) return null;
+  if (!localizedPaths.includes(path as typeof localizedPaths[number]) && !isInsightPath(path)) return null;
   return {locale: match ? match[1] as Locale : 'en', path};
 }
 export function localizedPath(path: string, locale: string) {
-  return localizedPaths.includes(path as typeof localizedPaths[number]) && isLocale(locale) && locale !== 'en'
+  return (localizedPaths.includes(path as typeof localizedPaths[number]) || isInsightPath(path)) && isLocale(locale) && locale !== 'en'
     ? `/${locale}${path === '/' ? '' : path}` : path;
 }
 export function languageAlternates(path: string) {

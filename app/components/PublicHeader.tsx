@@ -17,7 +17,7 @@ type DashboardHref = "/admin" | "/private" | null;
  * Shows a dashboard shortcut only for active, authenticated MZS accounts.
  * The dashboard pages themselves remain protected by their own access checks.
  */
-export default function PublicHeader() {
+export default function PublicHeader({languageLinks}: {languageLinks?: Record<string,string>} = {}) {
   const t = useTranslations('Header');
   const locale = useLocale();
 const publicNavigation = [
@@ -133,7 +133,7 @@ const publicNavigation = [
             )}
           </nav>
         </details>
-        <LanguageSwitcher />
+        <LanguageSwitcher languageLinks={languageLinks} />
       </div>
     </header>
   );

@@ -1,4 +1,5 @@
 export const adminDirectory = [
+ {group:"System",en:"MZS Insights · articles & translations",es:"MZS Insights · artículos y traducciones",href:"/admin/insights"},
  {group:"Accountancy",en:"Completeness center",es:"Centro de integridad documental",href:"/admin/workspaces/accountancy/completeness"},
   {
     "group": "Cockpit",
