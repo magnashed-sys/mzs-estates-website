@@ -18,7 +18,7 @@ const items=[
 export function activeWorkspace(path:string,queue:string|null=null){
  const matches=(prefix:string)=>path===prefix||path.startsWith(prefix+"/");
  if(matches("/admin/workspaces/estates/operations"))return "Staff";
- if(["/admin/workspaces/staff","/admin/workspaces/estates/staff","/admin/workspaces/estates/time-report"].some(matches)|| (matches("/admin/workspaces/estates/actions")&&["visits","corrections"].includes(queue??"")))return "Staff";
+ if(["/admin/workspaces/staff","/admin/workspaces/estates/staff","/admin/workspaces/estates/time-report","/admin/workspaces/estates/weekly","/admin/workspaces/estates/zorgbalans"].some(matches)|| (matches("/admin/workspaces/estates/actions")&&["visits","corrections"].includes(queue??"")))return "Staff";
  if(["/admin/workspaces/accountancy","/admin/workspaces/estates/expenses","/admin/workspaces/estates/reports","/admin/workspaces/estates/history"].some(matches))return "Accountancy";
  if(["/admin/bookings","/admin/unified-bookings","/admin/owner-stays"].some(matches))return "Bookings";
  if(["/admin/workspaces/capital","/admin/group/capital","/admin/group/capital-access","/admin/capital-requests","/admin/intro-calls"].some(matches))return "Capital";
