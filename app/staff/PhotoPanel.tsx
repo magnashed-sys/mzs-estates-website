@@ -1,5 +1,5 @@
-import Image from 'next/image';
 'use client';
+import Image from 'next/image';
 import {useAdminI18n} from '../../lib/admin/i18n';
 
 import {useState,useActionState} from 'react';
