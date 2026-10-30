@@ -9,7 +9,7 @@ export async function GET(request:NextRequest){
  if(!staffEnvironmentAvailable())return new Response(null,{status:404,headers});
  const {db}=await requireEstateAdmin();const query=new URL(request.url).searchParams;
  let filters:TimeFilters;try{
-  const params:Record<string,string|string[]>={};for(const key of ['from','until','property','profile']){const values=query.getAll(key);if(values.length)params[key]=values.length===1?values[0]:values;}
+  const params:Record<string,string|string[]>={};for(const key of ['from','until','property','area','location','profile']){const values=query.getAll(key);if(values.length)params[key]=values.length===1?values[0]:values;}
   filters=timeFilters(params);
  }catch{return new Response("Choose valid filters and a period of up to 366 days.",{status:400,headers});}
  try{
