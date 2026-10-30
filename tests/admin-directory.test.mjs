@@ -22,7 +22,8 @@ test('directory renders accessible bilingual controls and only navigational link
  for(const language of ['en','es']){
  const exports={};const deps={react:React,'react/jsx-runtime':jsx,'next/link':{default:({prefetch,...p})=>React.createElement('a',p)},'next/navigation':{usePathname:()=>'/admin/workspaces/group'},'../../lib/admin/i18n':{useAdminI18n:()=>({language,t:s=>s})},'../../lib/admin/directory':api,'./directory.module.css':{default:{}}};
  new Function('exports','require',ts.transpileModule(readFileSync('app/admin/AdminDirectory.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText)(exports,n=>deps[n]);
- assert.equal(renderToStaticMarkup(React.createElement(exports.default)), '');
+ const collapsed=renderToStaticMarkup(React.createElement(exports.default));
+ assert.match(collapsed,/<details>/);assert.doesNotMatch(collapsed,/<details[^>]* open/);assert.match(collapsed,/Administration directory|Directorio de administración/);
  const html=renderToStaticMarkup(React.createElement(exports.default,{expanded:true}));
  assert.equal((html.match(/<a /g)||[]).length,36);assert.match(html,/role="status"/);assert.match(html,/type="search"/);assert.ok(html.includes(language==='es'?'Buscar módulos':'Search modules'));
  assert.doesNotMatch(html,/<form|action=/);

@@ -1,5 +1,4 @@
 'use client';
-import {usePathname} from 'next/navigation';
 import {useState,useId} from 'react';
 import Link from 'next/link';
 import {useAdminI18n} from '../../lib/admin/i18n';
@@ -7,9 +6,7 @@ import {adminDirectory,findAdminModules} from '../../lib/admin/directory';
 import s from './directory.module.css';
 export default function AdminDirectory({expanded=false}:{expanded?:boolean}){
  const {language,t}=useAdminI18n();const es=language==='es';const id=useId();const [query,setQuery]=useState('');const [group,setGroup]=useState('');
- const pathname=usePathname();
  const items=findAdminModules(query,group);
- if(!expanded&&pathname==='/admin/workspaces/group')return null;
  return <details className={s.directory} open={expanded||undefined}>
  <summary>{es?'Buscar y abrir un módulo':'Find & open a module'} <span>{es?'Todos los módulos y acciones frecuentes':'All modules & frequent actions'}</span></summary>
  <div className={s.body}>

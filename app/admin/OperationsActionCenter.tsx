@@ -6,7 +6,7 @@ import {staffEnvironmentAvailable} from '../../lib/security/property-staff';
 import {loadQueueCounts,operationsDay,queueHref} from '../../lib/property-operations/action-queues';
 import s from './operations-actions.module.css';
 
-export default async function OperationsActionCenter({db,scope="all"}:{db:Awaited<ReturnType<typeof createClient>>;scope?:"all"|"maintenance"}){
+export default async function OperationsActionCenter({db,scope="all",cockpitView}:{db:Awaited<ReturnType<typeof createClient>>;scope?:"all"|"maintenance";cockpitView?:"actions"}){
  const {t:adminT,locale:adminLocale}=await getAdminI18n();
 
  if(!staffEnvironmentAvailable())return null;
@@ -15,7 +15,7 @@ export default async function OperationsActionCenter({db,scope="all"}:{db:Awaite
   <p className={s.kicker}>{adminT("DAILY PROPERTY OPERATIONS")}</p><h2 id="operations-actions-heading">{adminT("Staff & maintenance actions")}</h2>
   <p>{adminT("Open the action list to follow up on time entries, maintenance and budgets. Planning is assessed as of")} {today}  {adminT("(Europe/Madrid).")}</p>
   {scope==="all"&&<p><Link href="/admin/workspaces/estates/time-report" prefetch={false}>{adminT("Time report by period →")}</Link></p>}
-  <form method="get" className={s.refresh}><button>{adminT("Refresh")}</button></form>
+  <form method="get" className={s.refresh}>{cockpitView&&<input type="hidden" name="view" value={cockpitView}/>}<button>{adminT("Refresh")}</button></form>
   <div className={s.cards}>{counts.map(q=><Link className={s.card} key={q.key} href={queueHref(q.key)} prefetch={false}><strong>{q.count===null?adminT("Unavailable"):q.count}</strong><span>{adminT(q.label)}</span></Link>)}</div>
   {counts.some(q=>q.count===null)&&<p role="alert">{adminT("Some counts could not be loaded. Unknown counts are not displayed as zero.")}</p>}
  </section>;
