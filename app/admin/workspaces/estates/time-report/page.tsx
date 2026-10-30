@@ -26,6 +26,10 @@ export default async function StaffTimeReport({searchParams}:{searchParams:Promi
   ...report.properties.map(p=>[p.id+':all',p.name+' · '+tr('Whole property / common areas','Inmueble completo / zonas comunes')] as [string,string]),
   ...report.units.map(u=>[u.property_id+':'+u.id,(properties.get(u.property_id)??'')+' · '+u.name] as [string,string])
  ]);
+ const personWeeks=new Map<string,string>(report.byPersonWeek.map(([key])=>{
+  const week=key.slice(-10),profile=key.slice(0,-11);
+  return [key,(people.get(profile)??profile)+' · '+week];
+ }));
  const selectedLocation=filters.property?'property:'+filters.property:filters.area?'area:'+filters.area:'';
  const states=Object.keys(timeStates) as (keyof typeof timeStates)[];
  const groups=(title:string,rows:[string,TimeTotals][],names?:Map<string,string>,column?:string)=><section className={s.panel}><h2>{title}</h2>{!rows.length?<p>{adminT("No work visits match this selection.")}</p>:<div className={s.tableWrap}><table className={s.table}><thead><tr><th>{column??(title==="By staff member"?adminT("Staff member"):title==="By property"?adminT("Property"):adminT("Month"))}</th><th>{adminT("Visits")}</th><th>{adminT("Current duration")}</th>{states.map(key=><th key={key}>{timeStates[key]}</th>)}</tr></thead><tbody>{rows.map(([id,total])=><tr key={id}><td>{names?.get(id)??id}</td><td>{total.count}</td><td>{workDuration(total.minutes)}</td>{states.map(key=><td key={key}>{workDuration(total[key].minutes)}</td>)}</tr>)}</tbody></table></div>}</section>;
@@ -56,6 +60,7 @@ export default async function StaffTimeReport({searchParams}:{searchParams:Promi
   {groups(tr("By work location","Por lugar de trabajo"),report.byLocation,locations,tr("Location","Lugar"))}
   {groups(tr("By unit / common area","Por unidad / zona común"),report.byUnit,unitGroups,tr("Unit","Unidad"))}
   {groups(tr("By week (starting Monday)","Por semana (desde lunes)"),report.byWeek,undefined,tr("Week starting","Inicio de semana"))}
+  {groups(tr("Weekly totals by staff member","Totales semanales por empleado"),report.byPersonWeek,personWeeks,tr("Staff member · week","Empleado · semana"))}
   {groups("By property",report.byProperty,properties)}
   {groups("By month",report.byMonth)}
   <section className={s.panel} id="visits"><h2>{adminT("Work visits")}</h2><div className={s.tableWrap}><table className={s.table}><thead><tr><th>{adminT("Work date / property")}</th><th>{adminT("Staff member")}</th><th>{adminT("Original")}</th><th>{adminT("Current")}</th><th>{adminT("Status")}</th><th>{adminT("Dossier")}</th></tr></thead><tbody>{report.visits.slice((filters.page-1)*25,filters.page*25).map(v=><tr key={v.id}><td>{v.worked_on}<br/>{v.location_name}{v.unit_name&&<small> · {v.unit_name}</small>}<small> · {tr('Week','Semana')}: {v.week_start}</small></td><td>{v.person_name}</td><td>{workDuration(v.actual_minutes)}</td><td>{workDuration(v.effective_minutes)}</td><td>{timeStates[v.state]}</td><td><Link href={timeDossierHref(filters,v.id)} prefetch={false}>{adminT("Open work visit →")}</Link></td></tr>)}</tbody></table></div>{!report.visits.length&&<p>{adminT("No work visits match this selection.")}</p>}
