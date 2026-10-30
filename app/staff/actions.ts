@@ -34,7 +34,7 @@ export async function saveActualStaffVisit(_previous:StaffActionState,form:FormD
  const description=String(form.get("description")??"").trim();
  if((!!propertyId)===(!!workAreaId) ||
    (propertyId&&(!uuid.test(propertyId)||!properties.some(p=>p.id===propertyId))) ||
-   (workAreaId&&!['maintenance-beverwijk','private-magdy'].includes(workAreaId)) ||
+   (workAreaId&&!['maintenance-beverwijk','private-magdy','zorgbalans'].includes(workAreaId)) ||
    !dateValid(on)||!Number.isSafeInteger(minutes)||minutes<1||minutes>960||
    !["cleaning","inspection","maintenance","gardening","guest_service","other"].includes(category)||
    description.length<3||description.length>1500){

@@ -10,6 +10,7 @@ export default async function Workspace(){
  await requireEstateAdmin();
  return <><section className={styles.intro}><h1 className={styles.heading}>{adminT("Staff")}</h1><p className={styles.lead}>{adminT("All staff matters in one place: access, work visits, time entries, reviews and corrections.")}</p></section>
  <section className={styles.grid} aria-label={adminT("Staff workflows")}>
+ <Link className={styles.card} href="/admin/workspaces/estates/zorgbalans"><strong>Zorgbalans · Privéfacturatie</strong><p>Catherine's approved working time and the separate private invoice concepts for Stichting Zorgbalans.</p><span>Open →</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/operations"><strong>{adminT("Operations")}</strong><p>{adminT("Open tasks, maintenance, pending time reviews and corrections in one central control panel.")}</p><span>{adminT("Open →")}</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/staff#staff-access"><strong>{adminT("Staff & property access")}</strong><p>{adminT("Assign properties and review recorded access by staff member.")}</p><span>{adminT("Open →")}</span></Link>
    <Link className={styles.card} href="/admin/workspaces/estates/staff"><strong>{adminT("Work visits & time register")}</strong><p>{adminT("Review recorded work, decisions and history by staff member and property.")}</p><span>{adminT("Open →")}</span></Link>

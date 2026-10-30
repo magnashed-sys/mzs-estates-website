@@ -79,7 +79,7 @@ export async function loadQueuePage(db:DB,key:QueueKey,requestedPage:number,toda
  }
  const tickets=key==='budgets'?await lookup<{id:string;property_id:string;title:string}>('mzs_ops_current_tickets','id,property_id,title',source.map(x=>x.ticket_id)):new Map<string,{id:string;property_id:string;title:string}>();
  const areaIds=[...new Set(source.map(x=>x.work_area_id).filter((id):id is string=>typeof id==='string'))];
- if(areaIds.some(id=>!['maintenance-beverwijk','private-magdy'].includes(id)))throw Error('Invalid work-area reference');
+ if(areaIds.some(id=>!['maintenance-beverwijk','private-magdy','zorgbalans'].includes(id)))throw Error('Invalid work-area reference');
  const [properties,people,areas]=await Promise.all([
   lookup<{id:string;name:string}>('mzs_estate_properties','id,name',source.map(x=>x.property_id??tickets.get(x.ticket_id??'')?.property_id)),
   lookup<{id:string;full_name:string|null}>('profiles','id,full_name',source.map(x=>isVisit(key)?x.profile_id:x.responsible_profile_id)),
