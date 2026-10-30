@@ -34,7 +34,7 @@ export default async function WeeklyStaff({searchParams}:{searchParams:Promise<P
     .eq('profile_id',selected.id).gte('worked_on',week).lt('worked_on',until).order('worked_on').order('id').range(a,b)),
   allRows<Event>((a,b)=>db.from('mzs_ops_week_events')
     .select('id,week_start,action,visit_count,approved_minutes,note,created_at',{count:'exact'})
-    .eq('profile_id',selected.id).order('created_at',{ascending:false}).order('id',{ascending:false}).range(a,b)),
+    .eq('profile_id',selected.id).order('sequence_no',{ascending:false}).range(a,b)),
   allRows<{id:string;name:string}>((a,b)=>db.from('mzs_estate_properties').select('id,name',{count:'exact'}).order('id').range(a,b)),
   allRows<{id:string;name:string}>((a,b)=>db.from('mzs_ops_staff_work_areas').select('id,name',{count:'exact'}).order('id').range(a,b))
  ]);
