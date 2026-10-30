@@ -11,23 +11,23 @@ const compile=path=>ts.transpileModule(readFileSync(path,'utf8'),{compilerOption
 const modules={};for(const name of ['staff-work','finance','action-queues','time-report']){const exports={};vm.runInNewContext(compile('lib/property-operations/'+name+'.ts'),{exports,Date,Intl,URLSearchParams,require:n=>modules[n.replace('./','')]});modules[name]=exports;}
 const lib=modules['time-report'],id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 const filters=()=>lib.timeFilters({from:'2026-09-01',until:'2026-10-31'});
-const row=(n,fields={})=>({id:id(n),property_id:id(101),profile_id:id(201),worked_on:'2026-10-01',actual_minutes:45,effective_minutes:45,task_category:'cleaning',description:'Synthetic visit',correction_id:null,review_decision:null,reviewed_at:null,correction_pending:false,...fields});
-const fixture=()=>({from:'2026-09-01',until:'2026-10-31',property:null,profile:null,generated_at:'2026-10-28T19:00:00Z',record_count:6,properties:[{id:id(101),name:'Object A'},{id:id(102),name:'Object B'}],people:[{id:id(201),full_name:'Same name'},{id:id(202),full_name:'Same name'}],visits:[row(1),row(2,{review_decision:'approved',reviewed_at:'2026-10-02T00:00:00Z',correction_pending:true}),row(3,{effective_minutes:71,correction_id:id(301),review_decision:'approved',reviewed_at:'2026-10-02T00:00:00Z'}),row(4,{review_decision:'rejected',reviewed_at:'2026-10-02T00:00:00Z'}),row(5,{property_id:id(102),worked_on:'2026-09-30'}),row(6,{property_id:id(102),profile_id:id(202)})]});
+const row=(n,fields={})=>({id:id(n),property_id:id(101),work_area_id:null,unit_id:null,task_id:null,profile_id:id(201),worked_on:'2026-10-01',actual_minutes:45,effective_minutes:45,task_category:'cleaning',description:'Synthetic visit',correction_id:null,review_decision:null,reviewed_at:null,correction_pending:false,...fields});
+const fixture=()=>({schema_version:2,from:'2026-09-01',until:'2026-10-31',property:null,area:null,profile:null,generated_at:'2026-10-28T19:00:00Z',record_count:6,properties:[{id:id(101),name:'Object A'},{id:id(102),name:'Object B'}],areas:[{id:'private-magdy',name:'Prive Magdy'},{id:'maintenance-beverwijk',name:'Onderhoud Beverwijk'}],units:[{id:id(401),property_id:id(101),address:'Unit A'}],people:[{id:id(201),full_name:'Same name'},{id:id(202),full_name:'Same name'}],visits:[row(1),row(2,{review_decision:'approved',reviewed_at:'2026-10-02T00:00:00Z',correction_pending:true}),row(3,{effective_minutes:71,correction_id:id(301),review_decision:'approved',reviewed_at:'2026-10-02T00:00:00Z'}),row(4,{review_decision:'rejected',reviewed_at:'2026-10-02T00:00:00Z'}),row(5,{property_id:id(102),worked_on:'2026-09-30'}),row(6,{property_id:id(102),profile_id:id(202)})]});
 const clean=x=>JSON.parse(JSON.stringify(x));
 
 test('time filters use Madrid month boundaries, validate real dates and allow at most 366 inclusive days',()=>{
- assert.deepEqual(clean(lib.timeFilters({},new Date('2026-10-31T23:30:00Z'))),{from:'2026-11-01',until:'2026-11-01',property:'',profile:'',page:1});
+ assert.deepEqual(clean(lib.timeFilters({},new Date('2026-10-31T23:30:00Z'))),{from:'2026-11-01',until:'2026-11-01',property:'',area:'',profile:'',page:1});
  assert.equal(lib.timeFilters({},new Date('2026-06-30T22:30:00Z')).from,'2026-07-01');
  assert.equal(lib.timeFilters({from:'2024-01-01',until:'2024-12-31'}).until,'2024-12-31');
- for(const params of [{from:'2026-02-29'},{from:'2024-01-01',until:'2025-01-01'},{from:'2026-10-02',until:'2026-10-01'},{from:['2026-01-01','2026-02-01']},{property:['']},{profile:'not-a-uuid'},{from:'1999-01-01'},{until:''}])assert.throws(()=>lib.timeFilters(params));
+ for(const params of [{from:'2026-02-29'},{from:'2024-01-01',until:'2025-01-01'},{from:'2026-10-02',until:'2026-10-01'},{from:['2026-01-01','2026-02-01']},{property:['']},{area:['']},{area:'../../private'},{location:'area:private-magdy',property:id(101)},{property:id(101),area:'private-magdy'},{profile:'not-a-uuid'},{from:'1999-01-01'},{until:''}])assert.throws(()=>lib.timeFilters(params));
  assert.equal(lib.timeFilters({page:'-1'}).page,1);
 });
 test('reports keep exact source minutes and mutually exclusive correction/review totals across all groups',()=>{
  const report=lib.normalizeTimeReport(fixture(),filters());
  assert.equal(report.total.count,6);assert.equal(report.total.minutes,296);assert.equal(report.total.originalMinutes,270);
  assert.deepEqual(clean(report.total.approved),{count:1,minutes:71});assert.deepEqual(clean(report.total.correction),{count:1,minutes:45});assert.equal(report.total.pending.minutes,135);assert.equal(report.total.returned.minutes,45);
- assert.equal(report.byPerson.length,2);assert.equal(report.byPerson.find(([key])=>key===id(201))[1].minutes,251);
- assert.equal(report.byProperty.find(([key])=>key===id(102))[1].minutes,90);assert.equal(report.byMonth.find(([key])=>key==='2026-09')[1].minutes,45);
+ assert.equal(report.byPerson.length,2);assert.equal(report.byWeek.length,1);assert.equal(report.byWeek[0][0],'2026-09-28');assert.equal(report.byPersonWeek.length,2);assert.equal(report.byPerson.find(([key])=>key===id(201))[1].minutes,251);
+ assert.equal(report.byLocation.find(([key])=>key==='property:'+id(102))[1].minutes,90);assert.equal(report.byProperty.find(([key])=>key===id(102))[1].minutes,90);assert.equal(report.byMonth.find(([key])=>key==='2026-09')[1].minutes,45);
  assert.equal(lib.workDuration(93),'1:33');assert.equal(lib.workDuration(96000),'1600:00');assert.throws(()=>lib.workDuration(1.5));
 });
 test('incomplete or contradictory snapshots fail as a whole instead of generating plausible partial totals',()=>{
@@ -83,6 +83,52 @@ test('report pagination retains complete totals while showing only the chosen 25
  assert.equal(elements.filter(e=>e.props?.href?.includes('/staff?visit=')).length,11);
  const serialized=JSON.stringify(tree);assert.match(serialized,/45:45/);assert.match(serialized,/totals above cover all/);
  await assert.rejects(p.render({page:'999'}),/redirect:.*from=2026-09-01&until=2026-10-31&page=3/);
+});
+test('Time Report 2.0 separates operational work areas, units, ISO weeks and safe CSV values',()=>{
+ const source=fixture();
+ source.visits[0]={...source.visits[0],property_id:null,work_area_id:'private-magdy',task_id:id(501),description:'=HYPERLINK("bad")'};
+ source.visits[1]={...source.visits[1],unit_id:id(401),worked_on:'2026-10-05'};
+ const report=lib.normalizeTimeReport(source,filters());
+ assert.equal(report.total.count,6);
+ assert.equal(report.byLocation.find(([key])=>key==='area:private-magdy')[1].minutes,45);
+ assert.equal(report.byProperty.reduce((n,[,v])=>n+v.count,0),5);
+ assert.equal(report.byUnit.find(([key])=>key===id(101)+':'+id(401))[1].count,1);
+ assert.deepEqual(clean(report.byWeek.map(([key])=>key)),['2026-09-28','2026-10-05']);
+ assert.equal(report.byPersonWeek.find(([key])=>key===id(201)+':2026-10-05')[1].minutes,45);
+ const area=report.visits.find(v=>v.work_area_id==='private-magdy');
+ assert.equal(area.property_id,null);assert.equal(area.location_name,'Prive Magdy');
+ assert.equal(area.location_kind,'area');assert.equal(area.week_start,'2026-09-28');
+ const csv=lib.timeReportCsv(report);
+ const [header,...body]=parseCsv(csv);
+ const records=body.map(row=>Object.fromEntries(header.map((key,i)=>[key,row[i]])));
+ const areaExport=records.find(v=>v.visit_id===area.id);
+ assert.equal(areaExport.work_area_id,'private-magdy');
+ assert.equal(areaExport.location_type,'area');
+ assert.equal(areaExport.property_id,'');
+ assert.equal(areaExport.week_start,'2026-09-28');
+ assert.equal(areaExport.task_id,id(501));
+ assert.equal(areaExport.description,"'=HYPERLINK(\"bad\")");
+ const unitRecord=records.find(v=>v.visit_id===id(2));
+ assert.equal(unitRecord.unit_id,id(401));assert.equal(unitRecord.unit,'Unit A');
+});
+test('operational filters preserve safe links and reject invalid or incomplete snapshots',()=>{
+ const source=fixture();source.visits=[row(1,{property_id:null,work_area_id:'private-magdy'})];source.record_count=1;source.area='private-magdy';
+ const f=lib.timeFilters({from:'2026-09-01',until:'2026-10-31',location:'area:private-magdy'});
+ const report=lib.normalizeTimeReport(source,f);
+ assert.equal(report.total.minutes,45);
+ assert.ok(lib.timeReportHref(f,1,true).includes('area=private-magdy'));
+ const href=lib.timeDossierHref(f,id(1));
+ const params=Object.fromEntries(new URL(href,'https://test.invalid').searchParams);
+ assert.equal(lib.timeReturnHref(params),lib.timeReportHref(f)+'#visits');
+ for(const mutation of [
+  s=>s.visits[0].property_id=id(101),
+  s=>s.visits[0].work_area_id='unregistered-area',
+  s=>s.visits[0].unit_id=id(401),
+  s=>s.areas=[],
+  s=>s.schema_version=1,
+  s=>s.area=null
+ ]){const clone=clean(source);mutation(clone);assert.throws(()=>lib.normalizeTimeReport(clone,f),/incomplete/);}
+ assert.equal(lib.weekStart('2026-01-01'),'2025-12-29');
 });
 test('time snapshot RPC enforces real PostgreSQL access, revisions, filters and capacity limits',()=>{
  const result=spawnSync(process.execPath,['tests/db/staff-time-report.cjs'],{encoding:'utf8',timeout:120000});assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
