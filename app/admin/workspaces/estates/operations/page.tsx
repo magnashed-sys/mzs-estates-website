@@ -99,7 +99,8 @@ export default async function OperationsCockpit(){
   {block('corrections',tr('Time corrections','Correcciones de horas'),
    tr('Review correction requests without overwriting the original time record.','Revisar solicitudes sin sobrescribir el registro de horas original.'),
    data.corrections,queueHref('corrections'),tr('All corrections','Todas las correcciones'))}
-  <footer className={s.footer}><Link href="/admin/workspaces/estates/time-report">{tr('Time Reporting 2.0','Informe de horas 2.0')}</Link>
+  <footer className={s.footer}>   <Link href="/admin/workspaces/estates/zorgbalans">{tr('Zorgbalans private invoices','Facturas privadas Zorgbalans')}</Link>
+   <Link href="/admin/workspaces/estates/time-report">{tr('Time Reporting 2.0','Informe de horas 2.0')}</Link>
    <Link href="/admin/workspaces/estates/staff">{tr('Staff and maintenance register','Registro de personal y mantenimiento')}</Link>
    <p>{tr('Time is not payroll or invoicing. Maintenance notes are not supplier work orders or approval decisions.','Las horas no equivalen a nóminas ni facturación. Las notas de mantenimiento no son órdenes o aprobaciones de proveedores.')}</p>
   </footer>
