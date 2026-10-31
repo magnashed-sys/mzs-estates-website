@@ -19,6 +19,9 @@ export default function VillaSitePlan() {
     {id:"pool", number:"5", label:t("p455"), x:350,y:130,w:250,h:115},
     {id:"outdoor", number:"6", label:t("p524"), x:285,y:270,w:415,h:65},
   ];
+  const parking = dutchReview
+    ? [{x:55,y:425},{x:55,y:320},{x:465,y:550}]
+    : [{x:55,y:165},{x:55,y:275},{x:465,y:550}];
   function select(id:string) {
     window.dispatchEvent(new CustomEvent("mzs-photo-chapter", {detail:id}));
   }
@@ -26,7 +29,7 @@ export default function VillaSitePlan() {
     <div className={styles.header}><div><p className={styles.kicker}>VILLA LA NUCIA</p><h2 id="site-plan-title">{copy[0]}</h2></div><p>{copy[6]}</p></div>
     <div className={styles.layout}>
       <div className={styles.map}>
-        <svg viewBox="0 0 800 610" role="group" aria-label={copy[0]}>
+        <svg viewBox={dutchReview ? "0 0 800 650" : "0 0 800 610"} role="group" aria-label={copy[0]}>
           {dutchReview && <defs>
             <linearGradient id="nucia-water" x1="0" y1="0" x2="1" y2="1">
               <stop stopColor="#79bcc7"/><stop offset="1" stopColor="#3f8e9c"/>
@@ -40,7 +43,7 @@ export default function VillaSitePlan() {
               <path d="M0 12H12" stroke="#e3d8c4" strokeWidth="1"/>
             </pattern>
           </defs>}
-          <rect x="10" y="20" width="780" height="575" rx="28" fill="#e9e7db"/>
+          <rect x="10" y="20" width="780" height={dutchReview ? 615 : 575} rx="28" fill="#e9e7db"/>
           <path d="M280 70H720V520H750" fill="none" stroke="#d4d5c3" strokeWidth="22" strokeLinecap="round"/>
           {dutchReview && <g aria-hidden="true" pointerEvents="none">
             <rect x="270" y="63" width="435" height="282" rx="8" fill="url(#nucia-paving)"/>
@@ -60,7 +63,7 @@ export default function VillaSitePlan() {
               <circle cx={p.x-5} cy={p.y-4} r="10" fill="#c2cbae"/>
             </g>)}
           </g>}
-          {[{x:55,y:165},{x:55,y:275},{x:465,y:550}].map((p,i)=><g key={i} aria-hidden="true"><rect x={p.x-24} y={p.y-25} width="48" height="50" rx="10" fill="#d1d5c5"/><text x={p.x} y={p.y+8} textAnchor="middle" fill="#485440" fontSize="24">P</text></g>)}
+          {parking.map((p,i)=><g key={i} aria-hidden="true"><rect x={p.x-24} y={p.y-25} width="48" height="50" rx="10" fill="#d1d5c5"/><text x={p.x} y={p.y+8} textAnchor="middle" fill="#485440" fontSize="24">P</text></g>)}
           {zones.map(z=><a key={z.id} href={`#tour-${z.id}`} onClick={()=>select(z.id)} aria-label={z.label} className={styles.zone}>
             <title>{z.label}</title>
             <rect x={z.x} y={z.y} width={z.w} height={z.h} rx={dutchReview?2:5} fill={z.id==="pool"?(dutchReview?"url(#nucia-water)":"#91c3c7"):z.id==="outdoor"?(dutchReview?"url(#nucia-paving)":"#d4bc96"):(dutchReview?"url(#nucia-roof)":"#faf7ed")} stroke={z.id==="pool"?"#628e93":"#8f927e"} strokeWidth={dutchReview?3:2}/>
@@ -82,6 +85,25 @@ export default function VillaSitePlan() {
             <circle cx={z.x+z.w/2} cy={z.y+z.h/2+(z.id==="pool"?15:0)} r="21" fill="#283c32"/>
             <text x={z.x+z.w/2} y={z.y+z.h/2+7+(z.id==="pool"?15:0)} textAnchor="middle" fill="#fff" fontSize="20">{z.number}</text>
           </a>)}
+          {dutchReview && <>
+            <path d="M14 580H22M104 580H666M702 580H786" stroke="#faf7ed" strokeWidth="8" aria-hidden="true"/>
+            <a href="#tour-arrival" onClick={()=>select("arrival")} aria-label="Elektrisch hek links van de entree · bekijk de foto's" className={styles.entrance}>
+              <title>Elektrisch hek</title>
+              <rect x="18" y="563" width="133" height="64" rx="4" fill="transparent"/>
+              <path d="M22 587H143" stroke="#8f927e" strokeWidth="2" aria-hidden="true"/>
+              <rect x="24" y="574" width="76" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
+              <path d="M30 580H94M110 574H139L134 570M139 574L134 578" fill="none" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
+              <text x="84" y="613" textAnchor="middle" fill="#485440" fontSize="20">Elektrisch hek</text>
+            </a>
+            <a href="#tour-arrival" onClick={()=>select("arrival")} aria-label="Loopdeur rechts van de entree · bekijk de foto's" className={styles.entrance}>
+              <title>Loopdeur</title>
+              <rect x="646" y="563" width="76" height="64" rx="4" fill="transparent"/>
+              <rect x="668" y="574" width="32" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
+              <path d="M674 580H694" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
+              <text x="684" y="613" textAnchor="middle" fill="#485440" fontSize="20">Loopdeur</text>
+            </a>
+            <text x="395" y="613" textAnchor="middle" fill="#667065" fontSize="18" aria-hidden="true">STRAATZIJDE · ENTREE</text>
+          </>}
         </svg>
         <div className={styles.caption}><span>{copy[1]}</span><span>P · {copy[5]}</span></div>
       </div>
