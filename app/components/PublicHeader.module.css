@@ -68,6 +68,18 @@
 .header .navLink:hover,.header .dashboardLink:hover {color:#e4cfaa;border-color:rgba(213,192,154,.7);}
 .header .navArrow {color:#d5c09a;font-size:14px;line-height:1;}
 .header .dashboardLink {color:#d5c09a;}
+.accountActions {display:flex;flex-direction:column;align-items:flex-end;}
+.header .signOutButton {
+  display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:6px 12px;border:1px solid rgba(213,192,154,.4);border-radius:2px;
+  background:transparent;color:#e0d9cd;cursor:pointer;
+  font:500 10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;
+}
+.header .signOutButton:hover {color:#e4cfaa;border-color:#d5c09a;}
+.header .signOutButton:focus-visible {outline:2px solid #d5c09a;outline-offset:4px;}
+.header .signOutButton:disabled {opacity:.65;cursor:wait;}
+.header .mobileLink.signOutButton {justify-content:flex-start;border:0;border-top:1px solid rgba(213,192,154,.18);border-radius:0;}
+.signOutError {position:absolute;top:100%;inset-inline-end:0;z-index:30;max-width:min(340px,100%);padding:12px 16px;border:1px solid #c49c67;background:#17130f;color:#f1dfc6;font:13px/1.5 Arial,sans-serif;}
 .header .navLink:focus-visible,.header .dashboardLink:focus-visible,
 .menuToggle:focus-visible,.mobileLink:focus-visible {outline:2px solid #d5c09a;outline-offset:4px;}
 .mobileNavigation{display:none;position:relative;margin:0;}
