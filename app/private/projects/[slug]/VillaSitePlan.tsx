@@ -2,6 +2,7 @@
 import {useLocale, useTranslations} from "next-intl";
 import {nuciaExtraCopy} from "./nuciaExtraCopy";
 import {sitePlanCopy} from "./sitePlanCopy";
+import VillaInteriorPlan, {interiorBadges, interiorDescriptions, roomKey} from "./VillaInteriorPlan";
 import styles from "./villaSitePlan.module.css";
 
 export default function VillaSitePlan() {
@@ -64,11 +65,14 @@ export default function VillaSitePlan() {
             </g>)}
           </g>}
           {parking.map((p,i)=><g key={i} aria-hidden="true"><rect x={p.x-24} y={p.y-25} width="48" height="50" rx="10" fill="#d1d5c5"/><text x={p.x} y={p.y+8} textAnchor="middle" fill="#485440" fontSize="24">P</text></g>)}
-          {zones.map(z=><a key={z.id} href={`#tour-${z.id}`} onClick={()=>select(z.id)} aria-label={z.label} className={styles.zone}>
+          {zones.map(z=>{
+            const interiorBadge = dutchReview ? interiorBadges[z.id] : undefined;
+            const badge = interiorBadge || {x:z.x+z.w/2,y:z.y+z.h/2+(z.id==="pool"?15:0)};
+            return <a key={z.id} href={`#tour-${z.id}`} onClick={()=>select(z.id)} aria-label={dutchReview && interiorDescriptions[z.id] ? `${z.label}. ${interiorDescriptions[z.id]}` : z.label} className={styles.zone}>
             <title>{z.label}</title>
             <rect x={z.x} y={z.y} width={z.w} height={z.h} rx={dutchReview?2:5} fill={z.id==="pool"?(dutchReview?"url(#nucia-water)":"#91c3c7"):z.id==="outdoor"?(dutchReview?"url(#nucia-paving)":"#d4bc96"):(dutchReview?"url(#nucia-roof)":"#faf7ed")} stroke={z.id==="pool"?"#628e93":"#8f927e"} strokeWidth={dutchReview?3:2}/>
             {dutchReview && <g aria-hidden="true" pointerEvents="none">
-              {!["pool","outdoor"].includes(z.id) && <rect x={z.x+7} y={z.y+7} width={z.w-14} height={z.h-14} fill="none" stroke="#fffaf0" strokeWidth="3"/>}
+              <VillaInteriorPlan zone={z.id}/>
               {z.id==="pool" && <>
                 <path d="M356 136H594M356 141H594M356 146H594" stroke="#d9eff0" strokeOpacity=".55" fill="none"/>
                 <path d="M372 218q18-7 36 0t36 0t36 0t36 0t36 0" fill="none" stroke="#d9eff0" strokeOpacity=".35"/>
@@ -82,9 +86,9 @@ export default function VillaSitePlan() {
               </>}
             </g>}
             {z.id==="pool" && <path d="M380 170q15-10 30 0t30 0t30 0t30 0t30 0" fill="none" stroke="#d9eff0" strokeWidth="3" aria-hidden="true"/>}
-            <circle cx={z.x+z.w/2} cy={z.y+z.h/2+(z.id==="pool"?15:0)} r="21" fill="#283c32"/>
-            <text x={z.x+z.w/2} y={z.y+z.h/2+7+(z.id==="pool"?15:0)} textAnchor="middle" fill="#fff" fontSize="20">{z.number}</text>
-          </a>)}
+            <circle cx={badge.x} cy={badge.y} r={interiorBadge?13:21} fill="#283c32" className={interiorBadge?styles.interiorNumber:undefined}/>
+            <text x={badge.x} y={badge.y+(interiorBadge?5:7)} textAnchor="middle" fill="#fff" fontSize={interiorBadge?14:20} className={interiorBadge?styles.interiorNumber:undefined}>{z.number}</text>
+          </a>;})}
           {dutchReview && <>
             <path d="M14 580H145M227 580H492M528 580H786" stroke="#faf7ed" strokeWidth="8" aria-hidden="true"/>
             <a href="#tour-arrival" onClick={()=>select("arrival")} aria-label="Elektrisch hek links van de entree · bekijk de foto's" className={styles.entrance}>
@@ -105,7 +109,11 @@ export default function VillaSitePlan() {
             <text x="395" y="645" textAnchor="middle" fill="#667065" fontSize="18" aria-hidden="true">STRAATZIJDE · ENTREE</text>
           </>}
         </svg>
-        <div className={styles.caption}><span>{copy[1]}</span><span>P · {copy[5]}</span></div>
+        <div className={styles.caption}>{!dutchReview && <span>{copy[1]}</span>}<span>P · {copy[5]}</span></div>
+        {dutchReview && <ul className={styles.roomKey} aria-label="Legenda binnenruimtes">
+          {roomKey.map(item=><li key={item.label}><span className={styles.swatch} style={{backgroundColor:item.color}} aria-hidden="true"/>{item.label}</li>)}
+          <li><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 19V3M3 3A16 16 0 0 1 19 19" fill="none" stroke="#737c67" strokeWidth="1.5"/></svg>Deuren</li>
+        </ul>}
       </div>
       <nav className={styles.legend} aria-label={copy[0]}>
         {zones.map(z=><a key={z.id} href={`#tour-${z.id}`} onClick={()=>select(z.id)}><span>{z.number}</span><strong>{z.label}</strong><span aria-hidden="true">↗</span></a>)}
