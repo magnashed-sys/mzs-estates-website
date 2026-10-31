@@ -29,7 +29,7 @@ export default function VillaSitePlan() {
     <div className={styles.header}><div><p className={styles.kicker}>VILLA LA NUCIA</p><h2 id="site-plan-title">{copy[0]}</h2></div><p>{copy[6]}</p></div>
     <div className={styles.layout}>
       <div className={styles.map}>
-        <svg viewBox={dutchReview ? "0 0 800 650" : "0 0 800 610"} role="group" aria-label={copy[0]}>
+        <svg viewBox={dutchReview ? "0 0 800 670" : "0 0 800 610"} role="group" aria-label={copy[0]}>
           {dutchReview && <defs>
             <linearGradient id="nucia-water" x1="0" y1="0" x2="1" y2="1">
               <stop stopColor="#79bcc7"/><stop offset="1" stopColor="#3f8e9c"/>
@@ -43,7 +43,7 @@ export default function VillaSitePlan() {
               <path d="M0 12H12" stroke="#e3d8c4" strokeWidth="1"/>
             </pattern>
           </defs>}
-          <rect x="10" y="20" width="780" height={dutchReview ? 615 : 575} rx="28" fill="#e9e7db"/>
+          <rect x="10" y="20" width="780" height={dutchReview ? 640 : 575} rx="28" fill="#e9e7db"/>
           <path d="M280 70H720V520H750" fill="none" stroke="#d4d5c3" strokeWidth="22" strokeLinecap="round"/>
           {dutchReview && <g aria-hidden="true" pointerEvents="none">
             <rect x="270" y="63" width="435" height="282" rx="8" fill="url(#nucia-paving)"/>
@@ -86,23 +86,23 @@ export default function VillaSitePlan() {
             <text x={z.x+z.w/2} y={z.y+z.h/2+7+(z.id==="pool"?15:0)} textAnchor="middle" fill="#fff" fontSize="20">{z.number}</text>
           </a>)}
           {dutchReview && <>
-            <path d="M14 580H22M104 580H666M702 580H786" stroke="#faf7ed" strokeWidth="8" aria-hidden="true"/>
+            <path d="M14 580H145M227 580H492M528 580H786" stroke="#faf7ed" strokeWidth="8" aria-hidden="true"/>
             <a href="#tour-arrival" onClick={()=>select("arrival")} aria-label="Elektrisch hek links van de entree · bekijk de foto's" className={styles.entrance}>
               <title>Elektrisch hek</title>
-              <rect x="18" y="563" width="133" height="64" rx="4" fill="transparent"/>
-              <path d="M22 587H143" stroke="#8f927e" strokeWidth="2" aria-hidden="true"/>
-              <rect x="24" y="574" width="76" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
-              <path d="M30 580H94M110 574H139L134 570M139 574L134 578" fill="none" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
-              <text x="84" y="613" textAnchor="middle" fill="#485440" fontSize="20">Elektrisch hek</text>
+              <rect x="118" y="563" width="152" height="64" rx="4" fill="transparent"/>
+              <path d="M145 587H266" stroke="#8f927e" strokeWidth="2" aria-hidden="true"/>
+              <rect x="147" y="574" width="76" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
+              <path d="M153 580H217M233 574H262L257 570M262 574L257 578" fill="none" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
+              <text x="185" y="613" textAnchor="middle" fill="#485440" fontSize="20">Elektrisch hek</text>
             </a>
             <a href="#tour-arrival" onClick={()=>select("arrival")} aria-label="Loopdeur rechts van de entree · bekijk de foto's" className={styles.entrance}>
               <title>Loopdeur</title>
-              <rect x="646" y="563" width="76" height="64" rx="4" fill="transparent"/>
-              <rect x="668" y="574" width="32" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
-              <path d="M674 580H694" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
-              <text x="684" y="613" textAnchor="middle" fill="#485440" fontSize="20">Loopdeur</text>
+              <rect x="460" y="563" width="100" height="64" rx="4" fill="transparent"/>
+              <rect x="494" y="574" width="32" height="12" rx="2" fill="#faf7ed" stroke="#667065" strokeWidth="2"/>
+              <path d="M500 580H520" stroke="#667065" strokeWidth="1.5" aria-hidden="true"/>
+              <text x="510" y="613" textAnchor="middle" fill="#485440" fontSize="20">Loopdeur</text>
             </a>
-            <text x="395" y="613" textAnchor="middle" fill="#667065" fontSize="18" aria-hidden="true">STRAATZIJDE · ENTREE</text>
+            <text x="395" y="645" textAnchor="middle" fill="#667065" fontSize="18" aria-hidden="true">STRAATZIJDE · ENTREE</text>
           </>}
         </svg>
         <div className={styles.caption}><span>{copy[1]}</span><span>P · {copy[5]}</span></div>

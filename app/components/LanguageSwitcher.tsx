@@ -1,5 +1,5 @@
 "use client";
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, type CSSProperties} from 'react';
 import {useLocale, useTranslations} from 'next-intl';
 import {usePathname} from 'next/navigation';
 import {locales, memberLocales, publicRoute, localizedPath, isAccountPath} from '../../i18n/public-routing';
@@ -33,8 +33,10 @@ export default function LanguageSwitcher({account = false, inline = false, langu
   }, [inline]);
   if (!route) return null;
   const target = (locale: string) => languageLinks?.[locale] || localizedPath(route.path.startsWith('/insights/') ? '/insights' : route.path, locale);
-  const languagePanel = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}>
-    {(account ? memberLocales : locales).filter(locale => !languageLinks || locale in languageLinks).map(locale => <a key={locale} href={target(locale)}
+  const visibleLocales = (account ? memberLocales : locales).filter(locale => !languageLinks || locale in languageLinks);
+  const languagePanel = (<nav className={inline ? styles.languageInline : styles.languagePanel} aria-label={t('choose')}
+    style={inline ? {"--language-columns": Math.max(1, Math.ceil(visibleLocales.length / 2))} as CSSProperties : undefined}>
+    {visibleLocales.map(locale => <a key={locale} href={target(locale)}
       hrefLang={locale} lang={locale} dir="ltr" aria-label={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål', da: 'Dansk', uk: 'Українська', fi: 'Suomi', cs: 'Čeština', hu: 'Magyar', bg: 'Български', sk: 'Slovenčina', el: 'Ελληνικά'}[locale]}
       title={{en: 'English', nl: 'Nederlands', es: 'Español', ru: 'Русский', de: 'Deutsch', it: 'Italiano', fr: 'Français', 'pt-BR': 'Português (Brasil)', ar: 'العربية', tr: 'Türkçe', lt: 'Lietuvių', pl: 'Polski', 'zh-CN': '简体中文', sv: 'Svenska', ro: 'Română', nb: 'Norsk bokmål', da: 'Dansk', uk: 'Українська', fi: 'Suomi', cs: 'Čeština', hu: 'Magyar', bg: 'Български', sk: 'Slovenčina', el: 'Ελληνικά'}[locale]}
       aria-current={route.locale === locale ? 'page' : undefined}
