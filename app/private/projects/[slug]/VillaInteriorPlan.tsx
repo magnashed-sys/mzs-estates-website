@@ -118,7 +118,7 @@ export default function VillaInteriorPlan({zone}:{zone:string}) {
     <rect x="629" y="438" width="26" height="25" rx="3" fill="#c9b07c" stroke="#a08b60"/>
     <rect x="570" y="408" width="5" height="27" rx="1" fill="#6c705f"/>
     <Door x={342} y={393} rotate={90} flip/><Door x={342} y={455} rotate={90} flip/>
-    <Door x={388} y={425}/><Door x={446} y={408} size={18}/><Door x={512} y={425}/>
+    <Door x={364} y={425}/><Door x={446} y={408} size={18}/><Door x={512} y={425}/>
     <Door x={476} y={350} size={20} flip/><Door x={665} y={350} size={24} flip/>
     <Door x={496} y={500} size={14}/><Door x={524} y={500} size={14} rotate={180} flip/>
     {/* Open archway from the entrance hall to the living room. */}
