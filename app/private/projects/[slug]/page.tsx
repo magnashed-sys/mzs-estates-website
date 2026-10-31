@@ -11,6 +11,7 @@ import ProjectResources from "./ProjectResources";
 import PropertyWalkthrough from "./PropertyWalkthrough";
 import VillaSitePlan from "./VillaSitePlan";
 import VillaNeighbourhood from "./VillaNeighbourhood";
+import {nuciaExtraCopy} from "./nuciaExtraCopy";
 import {nuciaVideoNotes} from "./nuciaVideoNotes";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
@@ -71,6 +72,7 @@ export default async function PrivateProjectPage({ params }: Props) {
   const mapT = await getTranslations("MarinaMap");
   const locale = await getLocale();
   const villaPhotoChapters = localizedPhotoChapters(t, locale);
+  const villaExtra = nuciaExtraCopy(locale);
   const villaBase = "/properties/villa-la-nucia";
   const marinaBase = "/properties/marina-botafoch-apartment";
 
@@ -78,10 +80,7 @@ export default async function PrivateProjectPage({ params }: Props) {
   // filename. This allows the existing media files to remain untouched.
   const villaPhotos = Array.from(new Map(
     villaPhotoChapters.flatMap((chapter) => chapter.photos).map((photo) => [photo.src, photo]),
-  ).values()).map((photo) => ({
-    ...photo,
-    caption: photo.retouched ? t("retouchedCaption", {caption: photo.caption}) : photo.caption,
-  }));
+  ).values());
   const villaHighlights = ["6883", "6845", "6852", "6865", "6877"];
   const villaGallery: PropertyPhoto[] = [
     ...villaHighlights.map((id) => villaPhotos.find((photo) => photo.src.endsWith(`/${id}.webp`))!),
@@ -104,7 +103,7 @@ export default async function PrivateProjectPage({ params }: Props) {
     "villa-la-nucia": {
       label: t("p333"),
       destination: t("p334"),
-      title: "Villa La Nucia",
+      title: "Villa La Nucía",
       introduction: t("p336"),
       hero: `${villaBase}/2026-10/6883.webp`,
       heroAlt: t("p337"),
@@ -123,9 +122,10 @@ export default async function PrivateProjectPage({ params }: Props) {
       ],
       featuresTitle: t("p346"),
       features: [
-        { number: "01", title: t("p347"), description: t("p348") },
-        { number: "02", title: t("p349"), description: t("p350") },
-        { number: "03", title: t("p351"), description: t("p352") },
+        { number: "1", title: t("p347"), description: t("p348") },
+        { number: "2", title: t("p349"), description: t("p350") },
+        { number: "3", title: t("p351"), description: t("p352") },
+        { number: "4", title: villaExtra["Laundry room"], description: villaExtra["Separate laundry room with two washing machines and two tumble dryers."] },
       ],
       bookingKicker: t("p353"),
       bookingTitle: t("p354"),
@@ -245,6 +245,49 @@ export default async function PrivateProjectPage({ params }: Props) {
     };
   }).filter(row => row.heading && row.body);
 
+  const narrative = presentation ? (
+    <>
+      <section id="experience" className={styles.storySection}>
+        <div className={styles.storyCopy}>
+          <p className={styles.kicker}>{presentation.storyKicker}</p>
+          <h2>{presentation.storyTitle}</h2>
+          {presentation.storyParagraphs.map((text) => (
+            <p className={styles.bodyCopy} key={text}>{text}</p>
+          ))}
+          {slug === "villa-la-nucia" && (
+            <p className={styles.disclaimer}>{t("p401")}</p>
+          )}
+        </div>
+        <div className={styles.storyVisual}>
+          <Image
+            src={slug === "villa-la-nucia" ? `${villaBase}/2026-10/6845.webp` : `${marinaBase}/residence-pool.webp`}
+            alt={slug === "villa-la-nucia" ? t("p402") : t("p403")}
+            fill
+            sizes="(max-width: 900px) 100vw, 44vw"
+            className={styles.storyPhoto}
+          />
+          <span className={styles.photoCredit}>{slug === "villa-la-nucia" ? t("p404") : t("p405")}</span>
+        </div>
+      </section>
+
+      <section className={styles.experienceSection}>
+        <div className={styles.experienceHeading}>
+          <p className={styles.kicker}>{t("p406")}</p>
+          <h2>{presentation.featuresTitle}</h2>
+        </div>
+        <div className={`${styles.experienceGrid} ${slug === "villa-la-nucia" ? styles.villaExperienceGrid : ""}`}>
+          {presentation.features.map((feature) => (
+            <article className={styles.experienceItem} key={feature.number}>
+              <span className={styles.featureNumber}>{feature.number}</span>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  ) : null;
+
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -283,9 +326,10 @@ export default async function PrivateProjectPage({ params }: Props) {
           <nav className={styles.anchorNav} aria-label={t("p392")}>
             <span className={styles.anchorName}>{presentation.title}</span>
             <div className={styles.anchorLinks}>
+              {slug === "villa-la-nucia" && <a href="#experience">{t("p342")}</a>}
               <a href="#gallery">{t("p393")}</a>
               {slug === "villa-la-nucia" && <a href="#walkthrough">{t("p394")}</a>}
-              <a href="#experience">{t("p365")}</a>
+              {slug !== "villa-la-nucia" && <a href="#experience">{t("p365")}</a>}
               <a href="#stay">{t("p395")}</a>
               <a href="#availability" className={styles.anchorBook}>{t("p396")}</a>
             </div>
@@ -299,6 +343,8 @@ export default async function PrivateProjectPage({ params }: Props) {
               </div>
             ))}
           </section>
+
+          {slug === "villa-la-nucia" && narrative}
 
           {slug === "villa-la-nucia" && <VillaSitePlan />}
 
@@ -341,7 +387,7 @@ export default async function PrivateProjectPage({ params }: Props) {
             <section id="villa-video" className={styles.marinaVideoSection} aria-labelledby="villa-video-heading">
               <div className={styles.marinaVideoIntro}>
                 <p className={styles.kicker}>MZS GROUP / 4K</p>
-                <h2 id="villa-video-heading">Villa La Nucia</h2>
+                <h2 id="villa-video-heading">Villa La Nucía</h2>
               </div>
               <div className={styles.marinaVideoPlayer}>
                 <iframe
@@ -364,44 +410,7 @@ export default async function PrivateProjectPage({ params }: Props) {
 
           {slug === "villa-la-nucia" && <PropertyWalkthrough />}
 
-          <section id="experience" className={styles.storySection}>
-            <div className={styles.storyCopy}>
-              <p className={styles.kicker}>{presentation.storyKicker}</p>
-              <h2>{presentation.storyTitle}</h2>
-              {presentation.storyParagraphs.map((text) => (
-                <p className={styles.bodyCopy} key={text}>{text}</p>
-              ))}
-              {slug === "villa-la-nucia" && (
-                <p className={styles.disclaimer}>{t("p401")}</p>
-              )}
-            </div>
-            <div className={styles.storyVisual}>
-              <Image
-                src={slug === "villa-la-nucia" ? `${villaBase}/2026-10/6845.webp` : `${marinaBase}/residence-pool.webp`}
-                alt={slug === "villa-la-nucia" ? t("p402") : t("p403")}
-                fill
-                sizes="(max-width: 900px) 100vw, 44vw"
-                className={styles.storyPhoto}
-              />
-              <span className={styles.photoCredit}>{slug === "villa-la-nucia" ? t("p404") : t("p405")}</span>
-            </div>
-          </section>
-
-          <section className={styles.experienceSection}>
-            <div className={styles.experienceHeading}>
-              <p className={styles.kicker}>{t("p406")}</p>
-              <h2>{presentation.featuresTitle}</h2>
-            </div>
-            <div className={styles.experienceGrid}>
-              {presentation.features.map((feature) => (
-                <article className={styles.experienceItem} key={feature.number}>
-                  <span className={styles.featureNumber}>{feature.number}</span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
+          {slug !== "villa-la-nucia" && narrative}
 
           <section id="stay" className={styles.staySection}>
             <div className={styles.stayTop}>
