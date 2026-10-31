@@ -16,6 +16,12 @@ There are still no links from the existing public menus, homepage or footer to I
 
 The existing consent-based Google Analytics integration records public article URLs/language and successful introductory-call conversions. The existing public Vercel pageview integration includes article routes. There is no new analytics service or separate reporting dashboard.
 
+## Editorial images
+
+The editor offers the reviewed image collection in `lib/insights/images.ts`, with a required alternative description in the article's language. `cover_image` and `cover_alt` are stored and audited with the article. The responsive overview cards, article header and text preview display the selected image without a visible caption, as requested by the owner. Article Open Graph, Twitter and structured metadata use the same approved asset. Unlisted paths and arbitrary external images are not rendered. The first three assets are optimized WebP editorial images created specifically for these articles; their original files remain in the content package.
+
+Apply `20261031004357_insights_cover_images.sql` before releasing the image-enabled application. This additive change keeps existing drafts and audit records intact. The source URL filter also accepts the official Generalitat Valenciana procedure URL with its single numeric `id_proc` identifier; credentials, additional parameters and signed/private links remain rejected.
+
 ## Verification and deployment
 
 Migration: `20261030234137_mzs_insights.sql`. Apply to staging first, then production before deployment. The schema is additive. Public reads use a cookie-free publishable-key client, so even signed-in administrators cannot expose drafts through public pages. The ordinary authenticated Supabase client and active-admin checks protect administration and writes. No service-role key is needed.

@@ -10,6 +10,8 @@ import {getInsight,translations,relatedInsights} from '../../../lib/insights/dat
 import {insightPath,INSIGHTS_DISCOVERABLE,safeSource} from '../../../lib/insights/model';
 import {insightsCopy} from '../../../lib/insights/copy';
 import Content from '../Content';
+import Cover from '../Cover';
+import {insightImage} from '../../../lib/insights/images';
 import Cards from '../Cards';
 import s from '../insights.module.css';
 export const dynamic='force-dynamic';
@@ -18,10 +20,11 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
  const locale=await getLocale(),{slug}=await params,a=await getInsight(locale,slug);
  if(!a) return {title:'MZS Insights',robots:{index:false,follow:false},alternates:{canonical:insightPath(locale)}};
  const variants=await translations(a.article_id),title=a.seo_title||a.title,description=a.seo_description||a.summary,url=insightPath(locale,a.slug);
+ const cover=insightImage(a.cover_image),images=cover?[{url:'https://www.mzsgroup.com'+cover.src,width:1672,height:941,alt:a.cover_alt}]:undefined;
  return {title,description,alternates:{canonical:url,languages:Object.fromEntries(variants.map(v=>[v.locale,insightPath(v.locale,v.slug)]))},
   robots:{index:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production',follow:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production'},
-  openGraph:{type:'article',title,description,url,publishedTime:a.publish_at!,modifiedTime:a.content_updated_on,authors:[a.author],locale},
-  twitter:{title,description}};
+  openGraph:{type:'article',title,description,url,publishedTime:a.publish_at!,modifiedTime:a.content_updated_on,authors:[a.author],locale,...(images?{images}:{})},
+  twitter:{title,description,...(images?{card:'summary_large_image',images}:{})}};
 }
 export default async function ArticlePage({params}:Props){
  const [locale,t,{slug}]=await Promise.all([getLocale(),getTranslations('Header'),params]);
@@ -30,11 +33,13 @@ export default async function ArticlePage({params}:Props){
  const labels={'real-estate':t('real_estate'),'private-capital':t('private_capital'),consultancy:t('consultancy')};
  const languageLinks=Object.fromEntries(locales.flatMap(l=>variants.filter(v=>v.locale===l).map(v=>[v.locale,insightPath(v.locale,v.slug)])));
  const schema={'@context':'https://schema.org','@type':'Article',headline:a.title,description:a.summary,inLanguage:a.locale,
-  datePublished:a.publish_at,dateModified:a.content_updated_on,author:{'@type':'Person',name:a.author},publisher:{'@type':'Organization',name:'MZS Group'},mainEntityOfPage:'https://www.mzsgroup.com'+insightPath(locale,a.slug)};
+  datePublished:a.publish_at,dateModified:a.content_updated_on,author:{'@type':a.author==='MZS Group'?'Organization':'Person',name:a.author},publisher:{'@type':'Organization',name:'MZS Group'},mainEntityOfPage:'https://www.mzsgroup.com'+insightPath(locale,a.slug),
+  ...(insightImage(a.cover_image)?{image:'https://www.mzsgroup.com'+a.cover_image}:{})};
  return <main className={s.page}><div className={s.header}><PublicHeader languageLinks={languageLinks}/></div><div className={s.wrap}>
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
+   <Cover src={a.cover_image} alt={a.cover_alt} priority/>
    <div className={s.prose}><Content body={a.body}/></div>
    {!!a.sources.length&&<section className={s.sources}><h2>{c.sources}</h2><ul>{a.sources.filter(u=>safeSource(u)).map(u=><li key={u}><a href={u} rel="noopener noreferrer" target="_blank">{u}</a></li>)}</ul></section>}
    <div className={s.cta}><Link href={localizedPath('/'+a.category,locale)}>{labels[a.category]} ↗</Link><a href="#introductory-call">{c.contact} ↗</a></div>

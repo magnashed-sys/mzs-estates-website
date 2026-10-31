@@ -2,6 +2,22 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 const require=createRequire(import.meta.url),cache=new Map();
 function load(file,overrides={},environment='production'){if(!Object.keys(overrides).length&&cache.has(file))return cache.get(file);const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,Date,URL,FormData,Number,Math,Error,Intl,JSON,process:{env:{VERCEL_ENV:environment}},require:n=>overrides[n]||(n.startsWith('.')?load(path.join(path.dirname(file),n+'.ts')):require(n))});if(!Object.keys(overrides).length)cache.set(file,exports);return exports;}
 const m=load('lib/insights/model.ts'),routing=load('i18n/public-routing.ts');
+test('cover selection accepts only reviewed assets and requires localized alt text',()=>{
+ const f=form();f.set('cover_image','/images/insights/vastgoed-spanje.webp');assert.throws(()=>m.insightInput(f),/accessibility/);
+ f.set('cover_alt','Mediterrane woning');assert.equal(m.insightInput(f).data.cover_alt,'Mediterrane woning');
+ for(const src of ['https://example.com/image.webp','/images/insights/unknown.webp','/images/insights/../private.webp','data:image/svg+xml,script']){f.set('cover_image',src);assert.throws(()=>m.insightInput(f),/available article image/);}
+ f.set('cover_image','');assert.equal(m.insightInput(f).data.cover_alt,'');
+ assert.equal(m.safeSource('https://sede.gva.es/es/detall-tramit?id_proc=19207'),'https://sede.gva.es/es/detall-tramit?id_proc=19207');
+ for(const u of ['https://sede.gva.es/es/detall-tramit?id_proc=19207&token=private','https://sede.gva.es/es/detall-tramit?id_proc=secret','https://evil.test/es/detall-tramit?id_proc=19207'])assert.equal(m.safeSource(u),null);
+});
+test('covers render responsive accessible images without visible captions or arbitrary URLs',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+ const Cover=load('app/insights/Cover.tsx',{'next/image':{default:({priority,...props})=>React.createElement('img',props)},'./insights.module.css':{default:{cover:'cover',cardImage:'card-image'}}}).default;
+ const html=renderToStaticMarkup(React.createElement(Cover,{src:'/images/insights/vastgoed-spanje.webp',alt:'Woning <aan zee>',priority:true}));
+ assert.match(html,/alt="Woning &lt;aan zee&gt;"/);assert.match(html,/sizes=/);assert.doesNotMatch(html,/figcaption|Illustratief beeld|gemaakt met AI/);
+ assert.equal(renderToStaticMarkup(React.createElement(Cover,{src:'https://private.test/image',alt:'Secret'})),'');
+ const {insightImages}=load('lib/insights/images.ts');for(const a of insightImages)assert.ok(fs.statSync('public'+a.src).size<500000);
+});
 function form(){const f=new FormData();for(const [k,v] of Object.entries({id:'00000000-0000-4000-8000-000000000001',article_id:'00000000-0000-4000-8000-000000000002',revision:'0',locale:'nl',slug:'vastgoed-spanje',title:'Synthetic article',summary:'Summary',body:'## Heading\n\nText',author:'Tester',category:'real-estate',format:'guide',status:'draft',content_updated_on:'2026-10-31',publish_at:'2026-11-01T09:00:00.000Z'}))f.set(k,v);return f;}
 test('insights input validates publication, bounds, languages, dates and source URLs',()=>{
  assert.equal(m.insightInput(form()).data.locale,'nl');
@@ -33,10 +49,11 @@ test('search discovery leaves existing public navigation untouched',()=>{
  for(const file of ['app/components/PublicHeader.tsx','app/components/HomeContactFooter.tsx','app/page.tsx'])assert.doesNotMatch(fs.readFileSync(file,'utf8'),/href=["']\/?insights|href:\s*["']\/insights/);
 });
 test('article metadata indexes published translations only in production',async()=>{
- const article={article_id:'group',title:'Synthetic',summary:'Summary',seo_title:'Custom title',seo_description:'Custom summary',locale:'nl',slug:'nederlands',author:'Tester',publish_at:'2026-10-30T10:00:00Z',content_updated_on:'2026-10-31'};
+ const article={article_id:'group',title:'Synthetic',summary:'Summary',seo_title:'Custom title',seo_description:'Custom summary',locale:'nl',slug:'nederlands',author:'Tester',publish_at:'2026-10-30T10:00:00Z',content_updated_on:'2026-10-31',cover_image:'/images/insights/vastgoed-spanje.webp',cover_alt:'Mediterranean property'};
  for(const environment of ['production','preview']){
- const meta=load('app/insights/[slug]/page.tsx',{'next/link':()=>null,'next/navigation':{notFound(){throw Error('404')}},'next-intl/server':{getLocale:async()=>'nl'},'../../../i18n/public-routing':routing,'../../components/PublicHeader':{},'../../components/HomeContactFooter':{},'../../private-capital/IntroCallForm':{},'../../../lib/insights/data':{getInsight:async()=>article,translations:async()=>[{locale:'nl',slug:'nederlands'},{locale:'en',slug:'english'}]},'../../../lib/insights/model':m,'../../../lib/insights/copy':{},'../Content':{},'../Cards':{},'../insights.module.css':{}},environment);
+ const meta=load('app/insights/[slug]/page.tsx',{'next/link':()=>null,'next/navigation':{notFound(){throw Error('404')}},'next-intl/server':{getLocale:async()=>'nl'},'../../../i18n/public-routing':routing,'../../components/PublicHeader':{},'../../components/HomeContactFooter':{},'../../private-capital/IntroCallForm':{},'../../../lib/insights/data':{getInsight:async()=>article,translations:async()=>[{locale:'nl',slug:'nederlands'},{locale:'en',slug:'english'}]},'../../../lib/insights/model':m,'../../../lib/insights/copy':{},'../Content':{},'../Cover':{},'../Cards':{},'../insights.module.css':{}},environment);
  const result=await meta.generateMetadata({params:Promise.resolve({slug:'nederlands'})});assert.equal(result.title,'Custom title');assert.equal(result.robots.index,environment==='production');assert.equal(result.robots.follow,environment==='production');assert.equal(result.alternates.canonical,'/nl/insights/nederlands');assert.equal(result.alternates.languages.en,'/insights/english');assert.equal(Object.keys(result.alternates.languages).length,2);
+ assert.equal(result.openGraph.images[0].url,'https://www.mzsgroup.com/images/insights/vastgoed-spanje.webp');assert.equal(result.openGraph.images[0].alt,article.cover_alt);assert.equal(result.twitter.card,'summary_large_image');
  }
 });
 test('production sitemap exposes overview languages and only available article alternatives',async()=>{
