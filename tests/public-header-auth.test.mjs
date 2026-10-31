@@ -38,6 +38,7 @@ function fixture({locale='nl',user={id:'synthetic-user'},profile={role:'client',
 function nodes(tree,predicate){if(!tree||typeof tree!=='object')return[];if(Array.isArray(tree))return tree.flatMap(n=>nodes(n,predicate));return[...(predicate(tree)?[tree]:[]),...nodes(tree.props?.children,predicate)];}
 const buttons=tree=>nodes(tree,n=>n.type==='button');
 const dashboards=tree=>nodes(tree,n=>n.type==='a'&&['/private','/admin'].includes(n.props.href));
+const textContent=tree=>Array.isArray(tree)?tree.map(textContent).join(''):typeof tree==='string'?tree:textContent(tree?.props?.children??[]);
 
 test('anonymous header has Login and no account actions; inactive/unknown profiles get no dashboard',async()=>{
  for(const options of [{user:null},{profile:{role:'client',is_active:false}},{profile:{role:'unknown',is_active:true}},{profile:null}]){
@@ -47,13 +48,17 @@ test('anonymous header has Login and no account actions; inactive/unknown profil
   if(options.user===null)assert.equal(f.profileCalls,0);
  }
 });
-test('every supported locale shows translated logout under the correct desktop/mobile dashboard',async()=>{
+test('every supported locale shows translated logout after the correct desktop/mobile dashboard',async()=>{
  for(const file of readdirSync('messages').filter(x=>x.endsWith('.json')))for(const role of ['admin','client','partner']){
   const f=fixture({locale:file.slice(0,-5),profile:{role,is_active:true}});f.render();await f.settle();const tree=f.render();
-  const actions=buttons(tree);assert.equal(actions.length,2);assert.ok(actions.every(b=>b.props.children===f.messages.Private.signout&&b.props.type==='button'));
+  const actions=buttons(tree);assert.equal(actions.length,2);assert.ok(actions.every(b=>textContent(b)===f.messages.Private.signout&&b.props.type==='button'));
   assert.ok(dashboards(tree).every(a=>a.props.href===(role==='admin'?'/admin':'/private')));
   assert.equal(nodes(tree,n=>n.type==='a'&&/\/login$/.test(n.props.href)).length,0);
-  const group=nodes(tree,n=>n.props?.className==='accountActions')[0];assert.equal(group.props.children[0].type,'a');assert.equal(group.props.children[1].type,'button');
+  for(const nav of nodes(tree,n=>n.type==='nav')){
+   const items=nodes(nav,n=>n.type==='a'||n.type==='button');
+   const dashboardIndex=items.findIndex(n=>['/private','/admin'].includes(n.props.href));
+   assert.ok(dashboardIndex>=0);assert.equal(items[dashboardIndex+1].type,'button');
+  }
  }
 });
 test('logout disables both buttons, submits once for this browser, and returns to the localized home',async()=>{

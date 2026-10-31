@@ -135,13 +135,14 @@ const publicNavigation = [
             </a>
           ))}
           {dashboardHref && (
-            <div className={styles.accountActions}>
+            <>
               <a href={dashboardHref} className={styles.dashboardLink}> {t('my_dashboard')} <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
               </a>
-              <button type="button" className={styles.signOutButton} onClick={signOut} disabled={signingOut}>
+              <button type="button" className={`${styles.navLink} ${styles.signOutButton}`} onClick={signOut} disabled={signingOut}>
                 {signingOut ? accountT('signing_out') : accountT('signout')}
+                <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
               </button>
-            </div>
+            </>
           )}
         </nav>
 
@@ -162,6 +163,7 @@ const publicNavigation = [
                 </a>
                 <button type="button" className={`${styles.mobileLink} ${styles.signOutButton}`} onClick={signOut} disabled={signingOut}>
                   {signingOut ? accountT('signing_out') : accountT('signout')}
+                  <span className={styles.navArrow} aria-hidden="true"><ArrowUpRightIcon /></span>
                 </button>
               </>
             )}
