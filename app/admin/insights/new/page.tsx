@@ -17,6 +17,6 @@ export default async function NewInsight({searchParams}:{searchParams:Promise<{a
   const existing=data.find(a=>a.locale===locale);if(existing)redirect('/admin/insights/'+existing.id);
   base=data[0];
  }
- const article:Insight={id:randomUUID(),article_id:q.article||randomUUID(),locale,slug:'',title:'',summary:'',body:'',category:base.category||'real-estate',format:base.format||'article',region:base.region||'',author:base.author||'',sources:base.sources||[],seo_title:'',seo_description:'',status:'draft',publish_at:null,content_updated_on:new Date().toISOString().slice(0,10),updated_at:'',revision:0};
+ const article:Insight={id:randomUUID(),article_id:q.article||randomUUID(),locale,slug:'',title:'',summary:'',body:'',category:base.category||'real-estate',format:base.format||'article',region:base.region||'',author:base.author||'',sources:base.sources||[],cover_image:'',cover_alt:'',seo_title:'',seo_description:'',status:'draft',publish_at:null,content_updated_on:new Date().toISOString().slice(0,10),updated_at:'',revision:0};
  return <main className={s.page}><Link href="/admin/insights">← MZS Insights</Link><h1>{language==='es'?'Nuevo artículo':'New article'}</h1><Editor article={article} es={language==='es'}/></main>;
 }

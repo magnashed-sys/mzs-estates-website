@@ -8,6 +8,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  create function public.is_admin() returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active)$$;
  insert into profiles values('${id(1)}','admin',true),('${id(2)}','client',true),('${id(3)}','admin',false);`);
  await db.exec(fs.readFileSync('supabase/migrations/20261030234137_mzs_insights.sql','utf8'));
+ await db.exec(fs.readFileSync('supabase/migrations/20261031004357_insights_cover_images.sql','utf8'));
  const actor=async(n,role='authenticated')=>db.exec(`reset role;set role ${role};select set_config('request.jwt.claim.sub','${n?id(n):''}',false)`);
  const insert=async(n,status='draft',date=null,locale='en',group=10,slug='synthetic-'+n)=>db.query("insert into mzs_insights(id,article_id,locale,slug,title,summary,body,author,category,status,publish_at) values($1,$2,$3,$4,'Synthetic test only','Summary','## Heading\n\nTest only','Test author','real-estate',$5,$6)",[id(n),id(group),locale,slug,status,date]);
  const rows=async()=>(await db.query('select id from mzs_insights order by id')).rows.map(r=>r.id);
@@ -41,5 +42,13 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{PGlite}=requir
  await actor(null,'anon');assert.deepEqual(await rows(),[id(13),id(15),id(16)]);
  await actor(1);await db.query("update mzs_insights set status='archived' where id=$1",[id(13)]);
  await actor(null,'anon');assert.deepEqual(await rows(),[id(15),id(16)]);
+ await actor(1);
+ await assert.rejects(db.query("update mzs_insights set cover_image='https://private.test/signed',cover_alt='Private' where id=$1",[id(15)]),/check constraint/);
+ await assert.rejects(db.query("update mzs_insights set cover_image='/images/insights/vastgoed-spanje.webp',cover_alt='' where id=$1",[id(15)]),/check constraint/);
+ await db.query("update mzs_insights set cover_image='/images/insights/vastgoed-spanje.webp',cover_alt='Accessible description' where id=$1",[id(15)]);
+ const imageAudit=(await db.query('select after_data from mzs_insights_audit where insight_id=$1 order by changed_at desc limit 1',[id(15)])).rows[0];
+ assert.equal(imageAudit.after_data.cover_alt,'Accessible description');
+ await actor(2);assert.equal((await db.query("update mzs_insights set cover_alt='Unauthorized' where id=$1 returning id",[id(15)])).rows.length,0);
+ await actor(null,'anon');assert.equal((await db.query('select cover_image,cover_alt from mzs_insights where id=$1',[id(15)])).rows[0].cover_alt,'Accessible description');
  await db.close();console.log('Insights checks passed: drafts, schedule boundaries, archive, roles, Unicode, revisions, immutable URLs and audit.');
 })().catch(e=>{console.error(e);process.exit(1)});

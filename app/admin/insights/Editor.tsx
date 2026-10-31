@@ -5,6 +5,8 @@ import {locales,localeDirection} from '../../../i18n/public-routing';
 import {categories,formats,insightPath,publicationState,type Insight} from '../../../lib/insights/model';
 import {saveInsight,type SaveState} from './actions';
 import Content from '../../insights/Content';
+import Cover from '../../insights/Cover';
+import {insightImages} from '../../../lib/insights/images';
 import s from './admin.module.css';
 import articleStyle from '../../insights/insights.module.css';
 function localInput(value:string){const date=new Date(value);return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);}
@@ -12,6 +14,7 @@ export default function Editor({article,es}:{article:Insight & {slug_locked?:boo
  const tr=(en:string,sp:string)=>es?sp:en,router=useRouter();
  const [state,action,pending]=useActionState<SaveState,FormData>(saveInsight,{status:'idle',message:''});
  const [title,setTitle]=useState(article.title),[summary,setSummary]=useState(article.summary),[body,setBody]=useState(article.body);
+ const [coverImage,setCoverImage]=useState(article.cover_image||''),[coverAlt,setCoverAlt]=useState(article.cover_alt||'');
  const [locale,setLocale]=useState(article.locale),[status,setStatus]=useState(article.status),[preview,setPreview]=useState(false);
  const [time,setTime]=useState(''),[timezone,setTimezone]=useState(''),[dirty,setDirty]=useState(false);
  useEffect(()=>{setTime(localInput(article.publish_at||new Date().toISOString()));setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);},[article.id,article.publish_at]);
@@ -29,7 +32,13 @@ export default function Editor({article,es}:{article:Insight & {slug_locked?:boo
  <label>{tr('Article text','Texto del artículo')}<textarea name="body" maxLength={60000} rows={20} value={body} onChange={e=>setBody(e.target.value)} lang={locale} dir={localeDirection(locale)}/></label>
  <p className={s.help}>{tr('Separate paragraphs with a blank line. Use ## Heading, ### Subheading and - for lists. Add public source links below. HTML is displayed as text.','Separe los párrafos con una línea en blanco. Use ## Título, ### Subtítulo y - para listas. Añada enlaces públicos a las fuentes debajo. El HTML se muestra como texto.')}</p>
  </div>
- {preview&&<section className={articleStyle.article} lang={locale} dir={localeDirection(locale)} aria-label={tr('Draft preview','Vista previa del borrador')}><h1>{title}</h1><p className={articleStyle.lead}>{summary}</p><div className={articleStyle.prose}><Content body={body}/></div></section>}
+ {preview&&<section className={articleStyle.article} lang={locale} dir={localeDirection(locale)} aria-label={tr('Draft preview','Vista previa del borrador')}><h1>{title}</h1><p className={articleStyle.lead}>{summary}</p><Cover src={coverImage} alt={coverAlt}/><div className={articleStyle.prose}><Content body={body}/></div></section>}
+ </section>
+ <section className={s.panel}><h2>{tr('Main image','Imagen principal')}</h2>
+ <label>{tr('Image','Imagen')}<select name="cover_image" value={coverImage} onChange={e=>setCoverImage(e.target.value)}><option value="">{tr('No image','Sin imagen')}</option>{insightImages.map(image=><option key={image.src} value={image.src}>{es?image.es:image.en}</option>)}</select></label>
+ <label>{tr('Image description for accessibility','Descripción de la imagen para accesibilidad')}<input name="cover_alt" value={coverAlt} onChange={e=>setCoverAlt(e.target.value)} maxLength={300} required={!!coverImage}/></label>
+ <small>{tr('Describe the image in the language of this article. This is used as alternative text, not as a visible caption.','Describa la imagen en el idioma del artículo. Se utiliza como texto alternativo, no como pie de foto visible.')}</small>
+ {coverImage&&<Cover src={coverImage} alt={coverAlt}/>}
  </section>
  <section className={s.panel}><h2>{tr('Classification & attribution','Clasificación y autoría')}</h2><div className={s.fields}>
  <label>{tr('Subject / related service','Tema / servicio relacionado')}<select name="category" defaultValue={article.category}>{categories.map(c=><option key={c}>{c}</option>)}</select></label>

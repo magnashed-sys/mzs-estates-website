@@ -1,4 +1,5 @@
 import {isLocale, type Locale} from '../../i18n/public-routing';
+import {insightImage} from './images';
 
 // Search discovery is enabled separately from public navigation links.
 export const INSIGHTS_DISCOVERABLE = true;
@@ -9,10 +10,11 @@ export type Insight = {
   summary: string; body: string; category: typeof categories[number];
   format: typeof formats[number]; region: string; author: string;
   sources: string[]; seo_title: string; seo_description: string;
+  cover_image: string; cover_alt: string;
   status: 'draft' | 'published' | 'archived'; publish_at: string | null;
   content_updated_on: string; updated_at: string; revision: number;
 };
-export const cardFields = 'id,article_id,locale,slug,title,summary,category,format,region,author,publish_at,content_updated_on';
+export const cardFields = 'id,article_id,locale,slug,title,summary,category,format,region,author,publish_at,content_updated_on,cover_image,cover_alt';
 export function insightPath(locale: string, slug?: string) {
   return `${locale === 'en' ? '' : '/' + locale}/insights${slug ? '/' + slug : ''}`;
 }
@@ -20,7 +22,12 @@ export function validInsightSlug(value: string) {
   return value.length <= 120 && /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u.test(value);
 }
 export function safeSource(value: string) {
-  try {const u = new URL(value); return u.protocol === 'https:' && !u.username && !u.password && !u.search && !u.hash ? u.href : null;} catch {return null;}
+  try {
+    const u = new URL(value);
+    // This official procedure is identified by a public numeric parameter, never a credential.
+    const publicProcedure=u.origin==='https://sede.gva.es'&&u.pathname==='/es/detall-tramit'&&/^\?id_proc=\d{1,10}$/.test(u.search);
+    return u.protocol === 'https:' && !u.username && !u.password && (!u.search||publicProcedure) && !u.hash ? u.href : null;
+  } catch {return null;}
 }
 export function publicationState(article: Pick<Insight, 'status' | 'publish_at'>, now = Date.now()) {
   if (article.status !== 'published') return article.status;
@@ -48,10 +55,13 @@ export function insightInput(form: FormData) {
   if (date && (!/Z$/.test(date) || !Number.isFinite(Date.parse(date)))) throw new Error('Choose a valid publication time.');
   if (status === 'published' && (!summary || !body || !author || !date)) throw new Error('Publishing requires a summary, article text, author and publication time.');
   const sources = text('sources', 6000).split('\n').map(s => s.trim()).filter(Boolean);
-  if (sources.length > 10 || sources.some(s => s.length > 500 || !safeSource(s))) throw new Error('Use up to 10 public HTTPS source URLs, without query strings or fragments.');
+  if (sources.length > 10 || sources.some(s => s.length > 500 || !safeSource(s))) throw new Error('Use up to 10 public HTTPS source URLs without credentials or private parameters.');
+  const cover_image=text('cover_image',200),cover_alt=text('cover_alt',300);
+  if(cover_image&&!insightImage(cover_image))throw new Error('Choose an available article image.');
+  if(cover_image&&!cover_alt)throw new Error('Describe the article image for accessibility.');
   return {id, revision, data: {article_id, locale, slug, title, summary, body, category, format, status,
     region: text('region', 80), author, sources, seo_title: text('seo_title', 180), seo_description: text('seo_description', 320),
-    publish_at: date ? new Date(date).toISOString() : null, content_updated_on}};
+    cover_image,cover_alt:cover_image?cover_alt:'',publish_at: date ? new Date(date).toISOString() : null, content_updated_on}};
 }
 
 export type ContentBlock = {type: 'h2'|'h3'|'p'|'list'; text?: string; items?: string[]};
