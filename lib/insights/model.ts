@@ -1,7 +1,7 @@
 import {isLocale, type Locale} from '../../i18n/public-routing';
 
-// Soft launch: direct URLs work, but no navigation or sitemap discovery yet.
-export const INSIGHTS_DISCOVERABLE = false;
+// Search discovery is enabled separately from public navigation links.
+export const INSIGHTS_DISCOVERABLE = true;
 export const categories = ['real-estate', 'private-capital', 'consultancy'] as const;
 export const formats = ['article', 'guide', 'case'] as const;
 export type Insight = {

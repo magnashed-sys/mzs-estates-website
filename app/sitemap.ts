@@ -11,9 +11,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: {languages: Object.fromEntries(Object.entries(languageAlternates(path)).map(([language, url]) => [language, origin + url]))},
   })));
  if(!INSIGHTS_DISCOVERABLE) return pages;
+ for(const locale of locales)pages.push({url:origin+insightPath(locale),alternates:{languages:Object.fromEntries(Object.entries(languageAlternates('/insights')).map(([language,url])=>[language,origin+url]))}});
  const articles=await sitemapInsights();
- const languages=[...new Set(articles.map(a=>a.locale))];
- for(const locale of languages)pages.push({url:origin+insightPath(locale)});
  for(const a of articles)pages.push({url:origin+insightPath(a.locale,a.slug),lastModified:a.content_updated_on,alternates:{languages:Object.fromEntries(articles.filter(b=>b.article_id===a.article_id).map(b=>[b.locale,origin+insightPath(b.locale,b.slug)]))}});
  return pages;
 }

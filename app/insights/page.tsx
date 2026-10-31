@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {getLocale,getTranslations} from 'next-intl/server';
+import {languageAlternates} from '../../i18n/public-routing';
 import PublicHeader from '../components/PublicHeader';
 import HomeContactFooter from '../components/HomeContactFooter';
 import {categories,INSIGHTS_DISCOVERABLE,insightPath} from '../../lib/insights/model';
@@ -12,8 +13,8 @@ export const dynamic='force-dynamic';
 type Props={searchParams:Promise<Record<string,string|string[]|undefined>>};
 export async function generateMetadata({searchParams}:Props):Promise<Metadata>{
  const locale=await getLocale(),q=await searchParams;
- return {title:'MZS Insights',description:insightsCopy(locale).intro,alternates:{canonical:insightPath(locale)},
-  robots:{index:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production'&&!Object.keys(q).length,follow:INSIGHTS_DISCOVERABLE},
+ return {title:'MZS Insights',description:insightsCopy(locale).intro,alternates:{canonical:insightPath(locale),languages:languageAlternates('/insights')},
+  robots:{index:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production'&&!Object.keys(q).length,follow:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production'},
   openGraph:{title:'MZS Insights',description:insightsCopy(locale).intro,url:insightPath(locale)},twitter:{title:'MZS Insights',description:insightsCopy(locale).intro}};
 }
 export default async function InsightsPage({searchParams}:Props){

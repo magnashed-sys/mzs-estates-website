@@ -8,11 +8,11 @@ Each translation has its own title, summary, body, author, SEO fields and public
 
 **Published / scheduled** makes the version public at its publication timestamp. The editor displays the browser timezone and sends UTC. The list displays Madrid time. Reads always evaluate the database clock and do not depend on cron or a rebuild. Saving edits to an already published version changes it immediately. Draft and archived versions are private; archived versions can be restored through the editor. Concurrent changes are rejected using the stored revision. Every write records an admin-only audit snapshot.
 
-## Initial release
+## Search discovery and navigation
 
-`INSIGHTS_DISCOVERABLE` in `lib/insights/model.ts` is deliberately false. There are no links from existing public menus, homepage or footer, no Insights sitemap entries, and Insights pages are noindex. Published article URLs remain accessible directly. This is a visibility preference, not access control: only drafts, future publications and archived versions are private.
+The owner has enabled search discovery. `INSIGHTS_DISCOVERABLE` in `lib/insights/model.ts` is true: the 24 localized overview pages and published articles are included in the production sitemap and are eligible for search indexing. Filtered overview URLs and previews remain noindex. Drafts, future publications and archived versions remain private and excluded from the sitemap.
 
-When the owner authorizes discovery, enable the flag, review actual articles and their translations, and add the desired public navigation separately. The sitemap includes only published versions and their available translated URLs. Article canonical URLs and hreflang work independently of the visibility flag.
+There are still no links from the existing public menus, homepage or footer to Insights. Adding public navigation requires a separate owner request. Article canonical URLs and hreflang include only available published translations; localized overview pages link their equivalent language versions in metadata. Enabling indexing permits search engines to discover content; it does not guarantee inclusion or ranking.
 
 The existing consent-based Google Analytics integration records public article URLs/language and successful introductory-call conversions. The existing public Vercel pageview integration includes article routes. There is no new analytics service or separate reporting dashboard.
 
