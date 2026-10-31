@@ -21,6 +21,13 @@ export function insightPath(locale: string, slug?: string) {
 export function validInsightSlug(value: string) {
   return value.length <= 120 && /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u.test(value);
 }
+/** Next may pass percent-encoded route params; database slugs are native text. */
+export function insightRouteSlug(value: string): string | null {
+  try {
+    const slug = decodeURIComponent(value);
+    return validInsightSlug(slug) ? slug : null;
+  } catch { return null; }
+}
 export function safeSource(value: string) {
   try {
     const u = new URL(value);

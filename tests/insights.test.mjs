@@ -2,6 +2,27 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 const require=createRequire(import.meta.url),cache=new Map();
 function load(file,overrides={},environment='production'){if(!Object.keys(overrides).length&&cache.has(file))return cache.get(file);const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,Date,URL,FormData,Number,Math,Error,Intl,JSON,process:{env:{VERCEL_ENV:environment}},require:n=>overrides[n]||(n.startsWith('.')?load(path.join(path.dirname(file),n+'.ts')):require(n))});if(!Object.keys(overrides).length)cache.set(file,exports);return exports;}
 const m=load('lib/insights/model.ts'),routing=load('i18n/public-routing.ts');
+test('article lookup decodes Unicode route params once and rejects malformed paths before querying',async()=>{
+ const {getDynamicParam}=require('next/dist/shared/lib/router/utils/get-dynamic-param');
+ let calls=0,filters={},stored;
+ const chain={select(){return this},eq(key,value){filters[key]=value;return this},lte(){return this},async maybeSingle(){return {data:filters.slug===stored.slug?stored:null,error:null}}};
+ const {getInsight}=load('lib/insights/data.ts',{
+  react:{cache:fn=>fn},'@supabase/supabase-js':{createClient:()=>({from:()=>{calls++;filters={};return chain}})},
+  'next/navigation':{notFound(){throw Error('404')}},'../security/phase3a-preview-isolation':{isPhase3aPreviewIsolated:()=>true},'./model':m,
+ });
+ for(const [locale,slug] of [['en','example'],['el','επιχειρηματίες'],['zh-CN','企业家的定制解决方案'],['ar','التمويل-العقاري'],['cs','nákup-bytu']]){
+  stored={locale,slug};
+  const routeParam=getDynamicParam({slug},'slug','d','/[locale]/insights/[slug]').value;
+  for(const value of [slug,routeParam]){
+   assert.equal(await getInsight(locale,value),stored);
+   assert.equal(filters.slug,slug);assert.equal(filters.locale,locale);assert.equal(filters.status,'published');
+  }
+  assert.equal(routing.publicRoute(m.insightPath(locale,routeParam)).locale,locale);
+ }
+ const before=calls;
+ for(const slug of ['%ZZ','%E0%A4%A','%2Fadmin','%2e%2e','%252Fadmin','%25CE%25B5','foo/bar','x'.repeat(121)])assert.equal(await getInsight('el',slug),null);
+ assert.equal(calls,before);
+});
 test('cover selection accepts only reviewed assets and requires localized alt text',()=>{
  const f=form();f.set('cover_image','/images/insights/vastgoed-spanje.webp');assert.throws(()=>m.insightInput(f),/accessibility/);
  f.set('cover_alt','Mediterrane woning');assert.equal(m.insightInput(f).data.cover_alt,'Mediterrane woning');
