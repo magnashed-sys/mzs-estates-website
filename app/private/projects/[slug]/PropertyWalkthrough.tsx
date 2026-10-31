@@ -79,7 +79,6 @@ export default function PropertyWalkthrough() {
               </button>
             ))}
           </div>
-          {photo.retouched ? <p className={styles.note}>{t("p152")}</p> : null}
         </div>
       </div>
     </section>
