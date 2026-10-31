@@ -4,8 +4,10 @@
 .languages {margin-left:auto;min-width:0;max-width:100%;}
 .languages > nav {justify-content:flex-end;flex-wrap:wrap;row-gap:6px;}
 @media(max-width:760px) {
- .footer {flex-direction:column;flex-wrap:nowrap;gap:12px;padding-top:16px;padding-bottom:8px;text-align:center;}
+ .footer {flex-direction:column;flex-wrap:nowrap;gap:8px;padding-top:12px;padding-bottom:4px;text-align:center;}
  .locations {flex:none;width:100%;text-align:center;}
- .languages {width:100%;max-width:360px;margin-inline:auto;}
- .languages > nav {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));justify-content:center;gap:6px 2px;}
+ .languages {width:calc(100% + 16px);max-width:min(400px,calc(100vw - 24px));margin-inline:0;}
+ .languages > nav {display:grid;grid-template-columns:repeat(var(--language-columns,12),minmax(0,1fr));justify-content:center;gap:2px 0;container-type:inline-size;}
+ .languages > nav > a {min-width:0;min-height:32px;padding:0;}
+ .languages > nav > a > span:first-child {font-size:clamp(12px,calc(78cqi / var(--language-columns,12)),24px);}
 }
