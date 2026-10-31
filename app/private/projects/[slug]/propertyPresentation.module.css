@@ -161,6 +161,8 @@
   text-wrap: balance;
 }
 .sectionAside { max-width: 315px; color: var(--muted); font-size: 14px; line-height: 1.8; margin: 0; }
+.villaGalleryHeader { flex-wrap: wrap; }
+.villaGalleryHeader .sectionAside { max-width: none; }
 .galleryMosaic {
   display: grid;
   grid-template-columns: 1.55fr 1fr 1fr;
