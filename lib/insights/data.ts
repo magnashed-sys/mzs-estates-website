@@ -2,7 +2,7 @@ import {cache} from 'react';
 import {createClient} from '@supabase/supabase-js';
 import {notFound} from 'next/navigation';
 import {isPhase3aPreviewIsolated} from '../security/phase3a-preview-isolation';
-import {cardFields, type Insight} from './model';
+import {cardFields, insightRouteSlug, type Insight} from './model';
 
 // Public reads never inherit an administrator's cookies or ability to see drafts.
 function publicDb() {
@@ -22,7 +22,9 @@ export async function listInsights(locale: string, page = 1, category = '', regi
   return {items:(data||[]) as unknown as Insight[], count:count||0};
 }
 export const getInsight = cache(async(locale:string,slug:string)=>{
-  const {data,error}=await publicDb().from('mzs_insights').select('*').eq('locale',locale).eq('slug',slug)
+  const decodedSlug=insightRouteSlug(slug);
+  if(decodedSlug===null) return null;
+  const {data,error}=await publicDb().from('mzs_insights').select('*').eq('locale',locale).eq('slug',decodedSlug)
     .eq('status','published').lte('publish_at',new Date().toISOString()).maybeSingle();
   if(error) throw new Error('The article could not be loaded. Please try again.');
   return data as Insight|null;
