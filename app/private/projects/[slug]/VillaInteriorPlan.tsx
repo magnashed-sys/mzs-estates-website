@@ -1,4 +1,4 @@
-// Room positions follow the owner's annotated plan of 31 October 2026.
+// Room positions follow the owner's annotated plan and review of 31 October 2026.
 // Door openings and furnishings are a visual interpretation of the property photos.
 export const roomKey = [
   {label:"Slaapkamers", color:"#ddd2ec"},
@@ -8,12 +8,12 @@ export const roomKey = [
   {label:"Woon- en eetkamer", color:"#f1e1ad"},
 ];
 export const interiorBadges: Record<string, {x:number;y:number}> = {
-  "guest-white": {x:126,y:484}, "guest-green": {x:126,y:146}, living: {x:548,y:482},
+  "guest-white": {x:126,y:484}, "guest-green": {x:126,y:146}, living: {x:557,y:480},
 };
 export const interiorDescriptions: Record<string,string> = {
-  "guest-white": "Slaapkamer aan de voorzijde; badkamer met toilet aan de achterzijde.",
-  "guest-green": "Slaapkamer aan de achterzijde; badkamer met toilet aan de voorzijde.",
-  living: "Twee slaapkamers links, badkamer linksvoor, apart toilet en keuken in het midden, woon- en eetkamer rechts.",
+  "guest-white": "Slaapkamer aan de voorzijde met het hoofdeinde tegen de linkerwand; badkamer met toilet aan de achterzijde.",
+  "guest-green": "Slaapkamer aan de achterzijde; badkamer met toilet en een schuifdeur in de wand aan de voorzijde.",
+  living: "Twee slaapkamers links met deuren naast elkaar en bedden tegen de linker- en rechterwand, badkamer linksvoor, langwerpige keuken met toilet linksonder en een centrale terrasdeur. Rechts de zithoek aan de terraszijde, eettafel aan de voorzijde en dubbele terrasdeuren in het midden.",
 };
 const wall = "#858773";
 const bedroom = roomKey[0].color, bathroom = roomKey[1].color;
@@ -59,6 +59,14 @@ function Door({x,y,rotate=0,flip=false,size=22}:{x:number;y:number;rotate?:numbe
     <path d={`M${size} 0A${size} ${size} 0 0 0 0 ${-size}`} fill="none" stroke="#8c917c" strokeWidth="1"/>
   </g>;
 }
+function PocketDoor({x,y,size=24}:{x:number;y:number;size?:number}) {
+  return <g transform={`translate(${x} ${y})`} data-plan-pocket-door="true">
+    <title>Schuifdeur die naar links in de wand verdwijnt</title>
+    <path d={`M0 0H${size}`} stroke="#f7f2e8" strokeWidth="6"/>
+    <rect x={-size-3} y="-3" width={size+3} height="6" fill="#f7f2e8" stroke={wall} strokeWidth="1"/>
+    <path d={`M${-size} 0H-1M${size-2} -10H3L7 -14M3 -10L7 -6`} fill="none" stroke="#626858" strokeWidth="1.4"/>
+  </g>;
+}
 
 export default function VillaInteriorPlan({zone}:{zone:string}) {
   if (zone === "guest-white") return <g>
@@ -67,9 +75,11 @@ export default function VillaInteriorPlan({zone}:{zone:string}) {
     <rect x="112" y="400" width="146" height="98" fill={bedroom}/>
     <path d="M110 400H260" stroke={wall} strokeWidth="2.5"/>
     <Shower x={121} y={359} w={34} h={32}/><Basin x={166} y={359} w={32}/><Toilet x={228} y={360}/>
-    <Bed x={158} y={421} w={48} h={61}/>
-    <rect x="149" y="422" width="7" height="10" rx="1" fill="#baa9cc"/>
-    <rect x="208" y="422" width="7" height="10" rx="1" fill="#baa9cc"/>
+    <g transform="translate(117 460) rotate(-90)">
+      <Bed x={0} y={0} w={48} h={61}/>
+      <rect x="-9" y="1" width="7" height="10" rx="1" fill="#baa9cc"/>
+      <rect x="50" y="1" width="7" height="10" rx="1" fill="#baa9cc"/>
+    </g>
     <Door x={178} y={400}/><Door x={220} y={500}/>
   </g>;
   if (zone === "guest-green") return <g>
@@ -81,7 +91,7 @@ export default function VillaInteriorPlan({zone}:{zone:string}) {
     <rect x="142" y="152" width="7" height="10" rx="1" fill="#baa9cc"/>
     <rect x="201" y="152" width="7" height="10" rx="1" fill="#baa9cc"/>
     <Toilet x={122} y={252}/><Basin x={158} y={271}/><Shower x={203} y={240} w={28} h={39}/>
-    <Door x={202} y={230} rotate={180}/><Door x={240} y={197} rotate={90} flip/>
+    <PocketDoor x={178} y={230}/><Door x={240} y={197} rotate={90} flip/>
   </g>;
   if (zone === "laundry") return <g>
     <title>Waskamer met toegang vanaf het terras</title>
@@ -91,38 +101,42 @@ export default function VillaInteriorPlan({zone}:{zone:string}) {
   return <g>
     <title>Twee slaapkamers, badkamer, apart toilet, keuken, hal en woon- en eetkamer</title>
     <rect x="262" y="352" width="436" height="146" fill="#f5efe0"/>
-    <rect x="262" y="352" width="80" height="73" fill={bedroom}/>
+    <rect x="262" y="352" width="98" height="73" fill={bedroom}/>
     <rect x="360" y="352" width="80" height="73" fill={bedroom}/>
     <rect x="262" y="425" width="80" height="73" fill={bathroom}/>
-    <rect x="440" y="352" width="30" height="56" fill="#f2d2ca"/>
-    <rect x="470" y="352" width="95" height="73" fill={roomKey[3].color}/>
-    <rect x="565" y="352" width="133" height="146" fill={roomKey[4].color}/>
-    <path d="M342 350V500M260 425H342M360 350V425H440V350M440 408H470M470 350V425H565M565 350V500" fill="none" stroke={wall} strokeWidth="2.5"/>
-    <Bed x={280} y={364} w={38} h={45}/><Bed x={380} y={364} w={40} h={45}/>
+    <rect x="440" y="352" width="100" height="48" fill={roomKey[3].color}/>
+    <rect x="440" y="385" width="37" height="40" fill="#f2d2ca"/>
+    <rect x="540" y="352" width="158" height="146" fill={roomKey[4].color}/>
+    <path d="M342 425V500M260 425H477M477 400H540M360 350V425M440 350V425M440 385H477V425M540 350V500" fill="none" stroke={wall} strokeWidth="2.5"/>
+    <g transform="translate(267 402) rotate(-90)"><Bed x={0} y={0} w={38} h={45}/></g>
+    <g transform="translate(433 363) rotate(90)"><Bed x={0} y={0} w={40} h={45}/></g>
     <Shower x={270} y={433} w={30} h={30}/><Basin x={275} y={480} w={34}/>
-    <Toilet x={446} y={360}/>
-    {/* L-shaped kitchen, sink, hob and fridge. */}
-    <path d="M503 357H557V411H546V368H503Z" fill="#f9fbf3" stroke="#91a47b" strokeWidth="1.2"/>
-    <rect x="507" y="359" width="16" height="7" rx="2" fill="#c9dfde" stroke="#91a47b"/>
-    <rect x="530" y="358" width="19" height="9" rx="1" fill="#737d68"/>
-    {[534,544].flatMap(x=>[361,364].map(y=><circle key={`${x}-${y}`} cx={x} cy={y} r="1.4" fill="#dde7d0"/>))}
-    <rect x="477" y="392" width="15" height="26" rx="1" fill="#f9fbf3" stroke="#91a47b"/>
-    <path d="M477 400H492" stroke="#91a47b"/>
-    {/* Dining table and the corner sofa visible in the living-room photos. */}
+    <Toilet x={449} y={390}/>
+    {/* Kitchen counters leave the central terrace doorway clear. */}
+    <path d="M510 357H532V389H521V368H510Z" fill="#f9fbf3" stroke="#91a47b" strokeWidth="1.2"/>
+    <rect x="447" y="357" width="23" height="11" rx="1" fill="#f9fbf3" stroke="#91a47b" strokeWidth="1.2"/>
+    <rect x="523" y="373" width="7" height="12" rx="2" fill="#c9dfde" stroke="#91a47b"/>
+    <rect x="515" y="358" width="15" height="9" rx="1" fill="#737d68"/>
+    {[519,526].flatMap(x=>[361,364].map(y=><circle key={`${x}-${y}`} cx={x} cy={y} r="1.4" fill="#dde7d0"/>))}
+    {/* Dining table at the front; seating area towards the pool terrace. */}
     <g fill="#c5b185" stroke="#a08b60" strokeWidth="1">
-      {[592,613,634].map(x=><g key={x}><rect x={x} y="364" width="12" height="6" rx="1"/><rect x={x} y="399" width="12" height="6" rx="1"/></g>)}
-      <rect x="587" y="373" width="63" height="23" rx="4" fill="#ddc899"/>
+      {[592,613,634].map(x=><g key={x}><rect x={x} y="449" width="12" height="6" rx="1"/><rect x={x} y="484" width="12" height="6" rx="1"/></g>)}
+      <rect x="587" y="458" width="63" height="23" rx="4" fill="#ddc899"/>
     </g>
-    <path d="M671 423H688V491H607V476H671Z" fill="#fcf7e7" stroke="#ad9c79" strokeWidth="1.3"/>
-    <path d="M675 426V479H610M674 443H688M674 460H688M635 479V491M655 479V491" fill="none" stroke="#d0c0a0"/>
-    <rect x="629" y="438" width="26" height="25" rx="3" fill="#c9b07c" stroke="#a08b60"/>
-    <rect x="570" y="408" width="5" height="27" rx="1" fill="#6c705f"/>
-    <Door x={342} y={393} rotate={90} flip/><Door x={342} y={455} rotate={90} flip/>
-    <Door x={364} y={425}/><Door x={446} y={408} size={18}/><Door x={512} y={425}/>
-    <Door x={476} y={350} size={20} flip/><Door x={665} y={350} size={24} flip/>
+    <path d="M671 363H688V431H607V416H671Z" fill="#fcf7e7" stroke="#ad9c79" strokeWidth="1.3"/>
+    <path d="M675 366V419H610M674 383H688M674 400H688M635 419V431M655 419V431" fill="none" stroke="#d0c0a0"/>
+    <rect x="629" y="378" width="26" height="25" rx="3" fill="#c9b07c" stroke="#a08b60"/>
+    <rect x="545" y="381" width="5" height="27" rx="1" fill="#6c705f"/>
+    <Door x={356} y={425} rotate={180} flip/><Door x={342} y={455} rotate={90} flip/>
+    <Door x={364} y={425}/><Door x={449} y={425} size={20} flip/>
+    {/* Open internal kitchen access; centered exterior door opens onto the terrace. */}
+    <path d="M490 400H514" stroke="#f5efe0" strokeWidth="5.5"/>
+    <path d="M490 397V403M514 397V403" stroke={wall} strokeWidth="1.5"/>
+    <Door x={478} y={350} size={24} flip/>
+    <Door x={598} y={350} size={22} flip/><Door x={642} y={350} size={22} rotate={180}/>
     <Door x={496} y={500} size={14}/><Door x={524} y={500} size={14} rotate={180} flip/>
     {/* Open archway from the entrance hall to the living room. */}
-    <path d="M565 447V477" stroke="#f5efe0" strokeWidth="5.5"/>
-    <path d="M562 447H568M562 477H568" stroke={wall} strokeWidth="1.5"/>
+    <path d="M540 447V477" stroke="#f5efe0" strokeWidth="5.5"/>
+    <path d="M537 447H543M537 477H543" stroke={wall} strokeWidth="1.5"/>
   </g>;
 }

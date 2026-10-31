@@ -217,6 +217,34 @@
     "id": "guest-green"
   },
   {
+    "id": "rooftop",
+    "locales": [
+      "nl"
+    ],
+    "title": "Private roof terrace",
+    "description": "Above the rear guest accommodation, with two sun loungers, a seating area and views over the villa and its surroundings. Access is via the outdoor staircase.",
+    "photos": [
+      {
+        "src": "/properties/villa-la-nucia/2026-10-rooftop/roof-terrace.webp",
+        "alt": "Private roof terrace with two sun loungers, two chairs and a small table at Villa La Nucia",
+        "caption": "Private roof terrace with loungers and seating",
+        "retouched": false
+      },
+      {
+        "src": "/properties/villa-la-nucia/2026-10-rooftop/roof-access.webp",
+        "alt": "Curved outdoor staircase beside the rear guest accommodation leading to the roof terrace at Villa La Nucia",
+        "caption": "Access via the outdoor staircase",
+        "retouched": false
+      },
+      {
+        "src": "/properties/villa-la-nucia/2026-10-rooftop/roof-view.webp",
+        "alt": "View from the roof terrace over the pool, terraces, palm trees and main residence at Villa La Nucia",
+        "caption": "View over the pool and villa",
+        "retouched": false
+      }
+    ]
+  },
+  {
     "title": "Outdoor living",
     "description": "Relax by the pool, gather on the terrace and enjoy the barbecue area.",
     "photos": [

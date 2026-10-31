@@ -76,10 +76,26 @@ const copyKeys: Record<string, string> = {
   "Relax by the pool, gather on the terrace and enjoy the barbecue area.": "p525"
 };
 
+// The new roof-terrace chapter joins the Dutch review first.
+const dutchRoofCopy: Record<string, string> = {
+  "Private roof terrace": "Privédakterras",
+  "Above the rear guest accommodation, with two sun loungers, a seating area and views over the villa and its surroundings. Access is via the outdoor staircase.": "Boven het achterste gastenverblijf, met twee ligbedden, een zitje en uitzicht over de villa en de omgeving. Bereikbaar via de buitentrap.",
+  "Private roof terrace with two sun loungers, two chairs and a small table at Villa La Nucia": "Privédakterras met twee ligbedden, twee stoelen en een bijzettafel bij Villa La Nucía",
+  "Private roof terrace with loungers and seating": "Privédakterras met ligbedden en zitje",
+  "Curved outdoor staircase beside the rear guest accommodation leading to the roof terrace at Villa La Nucia": "Gebogen buitentrap naast het achterste gastenverblijf naar het dakterras van Villa La Nucía",
+  "Access via the outdoor staircase": "Toegang via de buitentrap",
+  "View from the roof terrace over the pool, terraces, palm trees and main residence at Villa La Nucia": "Uitzicht vanaf het dakterras over het zwembad, de terrassen, palmbomen en de hoofdwoning van Villa La Nucía",
+  "View over the pool and villa": "Uitzicht over zwembad en villa",
+};
+
+export function sourcePhotoChapters(locale = "en") {
+  return chapters.filter(chapter => !chapter.locales || chapter.locales.includes(locale));
+}
+
 export function localizedPhotoChapters(t: (key: string) => string, locale = "en") {
   const extra = nuciaExtraCopy(locale);
-  const copy = (text: string) => copyKeys[text] ? t(copyKeys[text]) : extra[text] || text;
-  return chapters.map(chapter => ({
+  const copy = (text: string) => copyKeys[text] ? t(copyKeys[text]) : (locale === "nl" ? dutchRoofCopy[text] : undefined) || extra[text] || text;
+  return sourcePhotoChapters(locale).map(chapter => ({
     ...chapter, title: copy(chapter.title), description: copy(chapter.description),
     photos: chapter.photos.map(photo => ({...photo, alt: copy(photo.alt), caption: copy(photo.caption)})),
   }));
