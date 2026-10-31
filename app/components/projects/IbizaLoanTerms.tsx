@@ -12,11 +12,14 @@ export default function IbizaLoanTerms() {
     [t("p443"), t("loanMinimum")],
   ];
 
-  return <section className={styles.section} aria-label={t("p444")}>
+  return <section className={`${styles.section}${dutch ? ` ${styles.business}` : ""}`} aria-label={t("p444")}>
     <p className={styles.eyebrow}>{t("p445")}</p>
     <h2 className={styles.heading}>{t("p446")}</h2>
     <p className={styles.introduction}>{t("p447")}</p>
-    <dl className={styles.terms}>{terms.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    <dl className={styles.terms}>{terms.map(([label, value]) => {
+      const [amount, detail] = dutch ? value.split(" · ") : [value];
+      return <div key={label}><dt>{label}</dt><dd>{amount}{detail && <small>{detail}</small>}</dd></div>;
+    })}</dl>
     <aside className={styles.valuation}><p className={styles.eyebrow}>{t("p448")}</p><p className={styles.valuationAmount}>{dutch ? '€6.200.000' : '€6,200,000'}</p><p>{t("p449")}</p></aside>
     <div className={styles.details}>
       <article><h3>{t("p450")}</h3><p>{t("p451")}</p></article>

@@ -21,3 +21,36 @@
 @media(prefers-reduced-motion:no-preference){.marker{transition:background .2s ease}}
 
 .valuation{padding:28px;border:1px solid #647064;margin:0 0 32px;max-width:850px}.valuationAmount{font-family:Georgia,serif;font-size:clamp(32px,5vw,56px);margin:10px 0 18px;color:#e4d1a8}.valuation>p:last-child{font-size:14px;line-height:1.8;color:#bbc7bd}
+
+/* Dutch Can Juan financing: a restrained term sheet within the property presentation. */
+.business{background:#131412;border-top:1px solid #3b3d35;padding:clamp(32px,4vw,64px) clamp(24px,3vw,64px)}
+.business>.eyebrow{font-size:10px;letter-spacing:.16em;color:#c4b28d;margin:0 0 14px}
+.business .heading{font:500 clamp(24px,2.4vw,34px)/1.25 Arial,Helvetica,sans-serif;letter-spacing:-.02em;max-width:none;margin:0 0 12px;color:#f1eee6}
+.business .introduction{max-width:none;font-size:clamp(13px,1.55vw,16px);line-height:1.65;color:#c4c7bd;margin:0}
+.business .terms{grid-template-columns:repeat(4,minmax(0,1fr));margin:28px 0 20px;border:1px solid #3b3d35;background:#1a1c17}
+.business .terms>div{min-width:0;padding:20px 18px;border-inline-start:1px solid #3b3d35}
+.business .terms>div:first-child{border-inline-start:0}
+.business .terms dt{font-size:11px;line-height:1.5;color:#bfc3b6}
+.business .terms dd{font:500 clamp(22px,2vw,28px)/1.25 Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:12px 0 0;color:#f1eee6}
+.business .terms dd small{display:block;font:400 12px/1.5 Arial,Helvetica,sans-serif;letter-spacing:0;color:#bfc3b6;margin-top:7px}
+.business .valuation{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,.8fr) minmax(0,1.6fr);gap:20px;align-items:center;max-width:none;margin:0 0 28px;padding:20px 24px;border:1px solid #3b3d35;border-inline-start:3px solid #a99570;background:transparent}
+.business .valuation>.eyebrow{font-size:10px;line-height:1.6;letter-spacing:.12em;margin:0;color:#c4b28d}
+.business .valuationAmount{font:500 clamp(24px,2.3vw,30px)/1.25 Arial,Helvetica,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:0;color:#eeeae2}
+.business .valuation>p:last-child{font-size:13px;line-height:1.65;color:#bfc3b6;margin:0}
+.business .details{gap:28px}
+.business .details article{min-width:0;border-top:1px solid #3b3d35;padding-top:18px}
+.business .details h3{font:600 16px/1.4 Arial,Helvetica,sans-serif;letter-spacing:0;margin:0 0 10px;color:#eeeae2}
+.business .details p{font-size:13px;line-height:1.75;color:#bfc3b6;margin:0}
+.business .note{max-width:none;border-top:1px solid #3b3d35;padding-top:18px;margin:28px 0 0;font-size:12px;line-height:1.7;color:#a8aea0}
+@media(min-width:768px){.business .heading,.business .introduction{white-space:nowrap}}
+@media(max-width:767px){
+  .business .heading{font-size:26px}
+  .business .introduction{font-size:15px}
+  .business .terms{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .business .terms>div{padding:18px 14px}
+  .business .terms>div:nth-child(odd){border-inline-start:0}
+  .business .terms>div:nth-child(n+3){border-top:1px solid #3b3d35}
+  .business .terms dd{font-size:clamp(18px,4.8vw,24px)}
+  .business .valuation{grid-template-columns:1fr;gap:9px;padding:20px}
+  .business .details{grid-template-columns:1fr;gap:22px}
+}
