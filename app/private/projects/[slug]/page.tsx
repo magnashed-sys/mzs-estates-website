@@ -175,6 +175,8 @@ export default async function PrivateProjectPage({ params }: Props) {
 
 
   const { slug } = await params;
+  // Review the La Nucía refinements in Dutch before rolling out to other locales.
+  const dutchVillaReview = slug === "villa-la-nucia" && locale === "nl";
   const supabase = await createClient();
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) redirect("/login?role=client");
@@ -349,7 +351,7 @@ export default async function PrivateProjectPage({ params }: Props) {
           {slug === "villa-la-nucia" && <VillaSitePlan />}
 
           <section id="gallery" className={styles.gallerySection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${dutchVillaReview ? styles.villaGalleryHeader : ""}`}>
               <div>
                 <p className={styles.kicker}>{t("p398")}</p>
                 <h2>{t("p399")}</h2>
@@ -422,7 +424,7 @@ export default async function PrivateProjectPage({ params }: Props) {
               <div className={styles.stayPrice}>
                 <span>{t("p407")}</span>
                 <strong>€400</strong>
-                <small>{t("p408")}</small>
+                <small>{dutchVillaReview ? "PER NACHT · Kort & lang verblijf mogelijk" : t("p408")}</small>
                 <a href="#availability">{t("p409")}</a>
               </div>
             </div>
