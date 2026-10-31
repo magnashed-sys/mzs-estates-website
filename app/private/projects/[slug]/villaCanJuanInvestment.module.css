@@ -4,3 +4,8 @@
 .investment{overflow-wrap:anywhere}
 .optionGrid article{min-width:0}
 .optionGrid article>*{max-width:100%}
+.intro,.anchorTarget{scroll-margin-top:85px}
+.areaMap{margin-top:28px;min-width:0}
+.areaMap iframe{display:block;width:100%;height:340px;border:1px solid var(--edge);background:#171510}
+.areaMap>p{margin:12px 0 18px;line-height:1.6}
+@media(max-width:560px){.areaMap iframe{height:280px}}
