@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import ts from 'typescript';
+import {PDFDocument} from 'pdf-lib';
 const require=createRequire(import.meta.url);
 const compile=file=>ts.transpileModule(readFileSync(file,'utf8'),{
  compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}
@@ -18,7 +19,9 @@ const token='a'.repeat(40)+'.'+'b'.repeat(40)+'.'+'c'.repeat(40);
 const draft='00000000-0000-4000-8000-000000000008';
 const issuer='00000000-0000-4000-8000-000000000003';
 const actor='00000000-0000-4000-8000-000000000001';
-const original=Buffer.from('%PDF-1.7\n'+'synthetic untrusted invoice content; no real vendor or customer. '.repeat(3)+'\n%%EOF');
+const syntheticPdf=await PDFDocument.create();
+syntheticPdf.addPage().drawText('SYNTHETIC MZS STAGING TEST - no real invoice, customer or payment');
+const original=Buffer.from(await syntheticPdf.save({useObjectStreams:false}));
 const sha=createHash('sha256').update(original).digest('hex');
 const url='https://preview.mzs-group.vercel.app/api/admin/assistant-originals';
 function request(extra={},bytes=original){
