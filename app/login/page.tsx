@@ -109,7 +109,20 @@ export default function LoginPage() {
           } catch {
             // A temporary staff service error must not block normal sign-in.
           }
-          window.location.replace(propertyManager ? "/staff" : "/private");
+          if (propertyManager) {
+            window.location.replace("/staff");
+            break;
+          }
+          // The server checks the active profile and explicit entity grant.
+          let partnerAccess = false;
+          try {
+            const response = await fetch("/api/private/partner-access", {cache: "no-store", credentials: "same-origin"});
+            if (response.ok) {
+              const access: unknown = await response.json();
+              partnerAccess = !!access && typeof access === "object" && "available" in access && access.available === true;
+            }
+          } catch { /* Preserve normal client access when the partner service is unavailable. */ }
+          window.location.replace(partnerAccess ? "/private/partner" : "/private");
           break;
         }
         default:

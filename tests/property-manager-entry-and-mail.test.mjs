@@ -8,7 +8,7 @@ test('login keeps capital precedence and routes only scoped staff into the work 
  const login=file('app/login/page.tsx');
  assert.match(login,/capitalScope === true/);
  assert.match(login,/fetch\("\/api\/private\/staff-access"/);
- assert.match(login,/propertyManager\s*\?\s*"\/staff"\s*:\s*"\/private"/);
+ assert.match(login,/if \(propertyManager\) \{\s*window.location.replace\("\/staff"\)/);
  assert.doesNotMatch(login,/email\.trim\(\)\s*===\s*["']magdy@mzsgroup\.eu/);
 });
 
