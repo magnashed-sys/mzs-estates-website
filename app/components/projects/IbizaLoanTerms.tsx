@@ -4,7 +4,8 @@ import styles from './projectInvestment.module.css';
 // Owner-confirmed draft terms. Attach to a project only after its identity is confirmed.
 export default function IbizaLoanTerms() {
   const t = useTranslations("ProjectUI");
-  const dutch = useLocale() === "nl";
+  const locale = useLocale();
+  const dutch = locale === "nl";
   const terms = [
     [t("p440"), dutch ? '€1.000.000' : '€1,000,000'],
     [t("p441"), '10%'],
@@ -12,26 +13,26 @@ export default function IbizaLoanTerms() {
     [t("p443"), t("loanMinimum")],
   ];
 
-  return <section className={`${styles.section}${dutch ? ` ${styles.business}` : ""}`} aria-label={t("p444")}>
+  return <section className={`${styles.section} ${styles.business}`} data-locale={locale} aria-label={t("p444")}>
     <p className={styles.eyebrow}>{t("p445")}</p>
     <h2 className={styles.heading}>{t("p446")}</h2>
     <p className={styles.introduction}>{t("p447")}</p>
     <dl className={styles.terms}>{terms.map(([label, value]) => {
-      const [amount, detail] = dutch ? value.split(" · ") : [value];
+      const [amount, detail] = value.split(" · ");
       return <div key={label}><dt>{label}</dt><dd>{amount}{detail && <small>{detail}</small>}</dd></div>;
     })}</dl>
     <aside className={styles.valuation}><p className={styles.eyebrow}>{t("p448")}</p><p className={styles.valuationAmount}>{dutch ? '€6.200.000' : '€6,200,000'}</p><p>{t("p449")}</p></aside>
     <div className={styles.details}>
       <article><h3>{t("p450")}</h3><p>{t("p451")}</p></article>
       <article><h3>{t("p452")}</h3><p>{t("p453")}</p>
-        {dutch && <>
+        <>
           <ul className={styles.securityList}>
-            <li>Persoonlijke garantie van de twee lokale notarissen.</li>
-            <li>Verpanding van de aandelen van de vennootschap waarin het project is ondergebracht.</li>
-            <li>Officiële hypotheekinschrijving.</li>
+            <li>{t("canJuanPersonalGuarantee")}</li>
+            <li>{t("canJuanSharePledge")}</li>
+            <li>{t("canJuanMortgage")}</li>
           </ul>
-          <p>Deze zekerheden kunnen afzonderlijk of in combinatie worden overeengekomen.</p>
-        </>}
+          <p>{t("canJuanSecurityCombination")}</p>
+        </>
       </article>
     </div>
     <p className={styles.note}>{t("p454")}</p>

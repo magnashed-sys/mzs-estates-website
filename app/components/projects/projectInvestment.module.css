@@ -22,7 +22,7 @@
 
 .valuation{padding:28px;border:1px solid #647064;margin:0 0 32px;max-width:850px}.valuationAmount{font-family:Georgia,serif;font-size:clamp(32px,5vw,56px);margin:10px 0 18px;color:#e4d1a8}.valuation>p:last-child{font-size:14px;line-height:1.8;color:#bbc7bd}
 
-/* Dutch Can Juan financing: a restrained term sheet within the property presentation. */
+/* Can Juan financing: a restrained term sheet within the property presentation. */
 .business{background:#131412;border-top:1px solid #3b3d35;padding:clamp(32px,4vw,64px) clamp(24px,3vw,64px)}
 .business>.eyebrow{font-size:10px;letter-spacing:.16em;color:#c4b28d;margin:0 0 14px}
 .business .heading{font:500 clamp(24px,2.4vw,34px)/1.25 Arial,Helvetica,sans-serif;letter-spacing:-.02em;max-width:none;margin:0 0 12px;color:#f1eee6}
@@ -45,7 +45,7 @@
 .business .securityList li+li{margin-top:8px}
 .business .securityList li::marker{color:#c4b28d}
 .business .note{max-width:none;border-top:1px solid #3b3d35;padding-top:18px;margin:28px 0 0;font-size:12px;line-height:1.7;color:#a8aea0}
-@media(min-width:768px){.business .heading,.business .introduction{white-space:nowrap}}
+@media(min-width:768px){.business[data-locale=nl] .heading,.business[data-locale=nl] .introduction{white-space:nowrap}}
 @media(max-width:767px){
   .business .heading{font-size:26px}
   .business .introduction{font-size:15px}
