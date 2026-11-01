@@ -20,6 +20,6 @@ export default async function GroupWorkspace({searchParams}:{searchParams:Promis
   {view==='finance'&&<FinancialCockpit refreshVersion={0}/>}
   {view==='actions'&&<><GroupActionCenter refreshVersion={0}/><Suspense fallback={<p role="status">{adminT("Loading action list…")}</p>}><OperationsActionCenter db={db} cockpitView="actions"/></Suspense></>}
   {view==='planning'&&<DailyOperations/>}
-  <p className={styles.note}>{adminT("The central overview reports recorded and forecast figures separately. Booked rent and scheduled loan interest do not prove cash receipt. Account approvals and administrative settings are available from Relationships and System.")}</p>
+  {view==='finance'&&<p className={styles.note}>{adminT("The central overview reports recorded and forecast figures separately. Booked rent and scheduled loan interest do not prove cash receipt. Account approvals and administrative settings are available from Relationships and System.")}</p>}
  </>;
 }
