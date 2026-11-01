@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Reac
 import Link from "next/link";
 import RentalSchedule from "./RentalSchedule";
 import RentalNotificationStatus from "./RentalNotificationStatus";
+import summaryStyles from "./BookingSummary.module.css";
 import { liveArrivals, matchesSearch, todayInMadrid } from "./admin-model";
 import { createClient } from "../../lib/supabase/client";
 type Booking = {
@@ -408,22 +409,43 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
     });
     const locked = loading || busy !== null || Boolean(error);
     const arrivals = liveArrivals(bookings, todayInMadrid());
-    if (mode === "summary") return <section className="admin-rental-summary">
-      <div className="admin-section-heading"><div><p className="eyebrow">{adminT("Private rental")}</p><h2>{adminT("Reservations at a glance.")}</h2></div><ActionButton disabled={locked} onClick={() => void reload()}>{adminT("Refresh reservations")}</ActionButton></div>
-      {loading && <p role="status" className="admin-help">{adminT("Loading reservations…")}</p>}
-      {error && <div className="admin-notice" role="alert">{adminT(error)} <ActionButton onClick={() => void reload()} disabled={loading}>{adminT("Try again")}</ActionButton></div>}
+    if (mode === "summary") return <section className={summaryStyles.summary} aria-labelledby="booking-summary-heading" aria-busy={loading}>
+      <div className={summaryStyles.heading}>
+        <div><p className={summaryStyles.eyebrow}>{adminT("Private rental")}</p><h2 id="booking-summary-heading">{adminT("Reservations at a glance.")}</h2></div>
+        <button type="button" className={summaryStyles.refresh} disabled={loading || busy !== null} onClick={() => void reload()} aria-label={adminT("Refresh reservations")}>
+          <span aria-hidden="true">↻</span> {adminT("Refresh")}
+        </button>
+      </div>
+      {loading && <p role="status" className={summaryStyles.help}>{adminT("Loading reservations…")}</p>}
+      {error && <div className={summaryStyles.notice} role="alert">{adminT(error)} <button type="button" className={summaryStyles.refresh} onClick={() => void reload()} disabled={loading}>{adminT("Try again")}</button></div>}
       {!loading && !error && snapshot && <>
-        <div className="admin-metrics">
-          <button onClick={() => onNavigate?.("bookings")}><span>{adminT("Live booking requests")}</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>{adminT("Review reservations →")}</small></button>
-          <button onClick={() => onNavigate?.("cancellations")}><span>{adminT("Live cancellations")}</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>{adminT("Review requests →")}</small></button>
+        <div className={summaryStyles.metrics}>
+          <button type="button" onClick={() => onNavigate?.("bookings")}><span>{adminT("Live booking requests")}</span><strong>{bookings.filter(b => !b.is_test && b.status === "requested").length}</strong><small>{adminT("Review reservations →")}</small></button>
+          <button type="button" onClick={() => onNavigate?.("cancellations")}><span>{adminT("Live cancellations")}</span><strong>{cancellations.filter(r => r.status === "pending" && bookingMap.get(r.booking_id)?.is_test === false).length}</strong><small>{adminT("Review requests →")}</small></button>
           <div><span>{adminT("Upcoming arrivals")}</span><strong>{arrivals.length}</strong><small>{adminT("Next 3 months, including today")}</small></div>
           <div><span>{adminT("Current stays")}</span><strong>{bookings.filter(b => !b.is_test && b.status === "confirmed" && b.check_in <= todayInMadrid() && todayInMadrid() < b.check_out).length}</strong><small>{adminT("Confirmed live reservations")}</small></div>
         </div>
-        <p className="admin-help">{adminT("Updated")} {updated}  {adminT("· Madrid time. Test bookings are excluded.")} {bookings.filter(b => b.is_test).length}  {adminT("test records are available under Bookings → Test.")}</p>
-        <div className="admin-panel"><h3 className="admin-subtitle">{adminT("Next arrivals.")}</h3>
-          {!arrivals.length && <p className="admin-help">{adminT("No confirmed arrivals in the next 3 months.")}</p>}
-          {arrivals.map(booking => <Link key={booking.id} className="admin-action-row" href={"/admin/bookings/"+booking.id} style={{textDecoration:"none",color:"inherit"}} onClick={event=>{if(locked)event.preventDefault()}}><span><strong>{properties.get(booking.project_id)?.title ?? adminT("Property unavailable")}</strong><small>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || adminT("Guest") : adminT("Guest")}</small></span><span>{formatDate(booking.check_in, adminLocale)}  {adminT("· Open dossier →")}</span></Link>)}
-        </div>
+        <p className={summaryStyles.help}>{adminT("Updated")} {updated} {adminT("· Madrid time. Test bookings are excluded.")}
+          {bookings.some(b => b.is_test) && <> {bookings.filter(b => b.is_test).length} {adminT("test records are available under Bookings → Test.")}</>}
+        </p>
+        <section className={summaryStyles.arrivals} aria-labelledby="next-arrivals-heading">
+          <h3 id="next-arrivals-heading">{adminT("Next arrivals.")}</h3>
+          {!arrivals.length && <p className={summaryStyles.empty}>{adminT("No confirmed arrivals in the next 3 months.")}</p>}
+          <ul className={summaryStyles.arrivalList}>
+            {arrivals.map(booking => <li key={booking.id}>
+              <Link className={summaryStyles.arrival} href={"/admin/bookings/"+booking.id} onClick={event=>{if(locked)event.preventDefault()}}>
+                <span className={summaryStyles.guest}>
+                  <strong>{properties.get(booking.project_id)?.title ?? adminT("Property unavailable")}</strong>
+                  <span>{booking.user_id ? people.get(booking.user_id)?.full_name || people.get(booking.user_id)?.email || adminT("Guest") : adminT("Guest")}</span>
+                </span>
+                <span className={summaryStyles.arrivalDetails}>
+                  <time dateTime={booking.check_in}>{formatDate(booking.check_in, adminLocale)}</time>
+                  <span className={summaryStyles.dossier}>{adminT("Open dossier →")}</span>
+                </span>
+              </Link>
+            </li>)}
+          </ul>
+        </section>
       </>}
     </section>;
     return (<div className="admin-bookings" style={{ color: "#eeeae2" }}>
