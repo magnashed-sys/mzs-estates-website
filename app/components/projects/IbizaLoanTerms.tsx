@@ -23,7 +23,16 @@ export default function IbizaLoanTerms() {
     <aside className={styles.valuation}><p className={styles.eyebrow}>{t("p448")}</p><p className={styles.valuationAmount}>{dutch ? '€6.200.000' : '€6,200,000'}</p><p>{t("p449")}</p></aside>
     <div className={styles.details}>
       <article><h3>{t("p450")}</h3><p>{t("p451")}</p></article>
-      <article><h3>{t("p452")}</h3><p>{t("p453")}</p></article>
+      <article><h3>{t("p452")}</h3><p>{t("p453")}</p>
+        {dutch && <>
+          <ul className={styles.securityList}>
+            <li>Persoonlijke garantie van de twee lokale notarissen.</li>
+            <li>Verpanding van de aandelen van de vennootschap waarin het project is ondergebracht.</li>
+            <li>Officiële hypotheekinschrijving.</li>
+          </ul>
+          <p>Deze zekerheden kunnen afzonderlijk of in combinatie worden overeengekomen.</p>
+        </>}
+      </article>
     </div>
     <p className={styles.note}>{t("p454")}</p>
   </section>;

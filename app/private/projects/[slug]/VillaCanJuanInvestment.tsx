@@ -99,10 +99,10 @@ export default function VillaCanJuanInvestment({ allowInvestment, allowAcquisiti
         <div><p className={styles.eyebrow}>{t("p236")}</p><h2>Santa Gertrudis, <em>Ibiza.</em></h2></div>
         <div><p>{t("p239")}</p><p>{t("p240")}</p><p className={styles.fine}>{t("p241")}</p>
           {dutch && <div className={styles.areaMap}>
-            <iframe src={`https://maps.google.com/maps?q=${encodeURIComponent(canJuanAreaQuery)}&z=12&output=embed`}
-              title="Omgeving Santa Gertrudis · indicatieve locatie Villa Can Juan" loading="lazy"
+            <iframe src={`https://maps.google.com/maps?q=${encodeURIComponent(canJuanAreaQuery)}&z=9&output=embed`}
+              title="Ibiza · globale locatie Villa Can Juan bij Santa Gertrudis" loading="lazy"
               referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
-            <p className={styles.fine}>Indicatieve omgeving · geen exacte objectlocatie.</p>
+            <p className={styles.fine}>Ibiza · de kaartmarkering toont de omgeving van Santa Gertrudis, niet de exacte objectlocatie.</p>
             <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(canJuanAreaQuery)}`}
               target="_blank" rel="noopener noreferrer" className={styles.outlineButton}>BEKIJK DE OMGEVING ↗</a>
           </div>}
