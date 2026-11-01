@@ -41,6 +41,9 @@
 .business .details article{min-width:0;border-top:1px solid #3b3d35;padding-top:18px}
 .business .details h3{font:600 16px/1.4 Arial,Helvetica,sans-serif;letter-spacing:0;margin:0 0 10px;color:#eeeae2}
 .business .details p{font-size:13px;line-height:1.75;color:#bfc3b6;margin:0}
+.business .securityList{margin:12px 0;padding-inline-start:20px;color:#bfc3b6;font-size:13px;line-height:1.75}
+.business .securityList li+li{margin-top:8px}
+.business .securityList li::marker{color:#c4b28d}
 .business .note{max-width:none;border-top:1px solid #3b3d35;padding-top:18px;margin:28px 0 0;font-size:12px;line-height:1.7;color:#a8aea0}
 @media(min-width:768px){.business .heading,.business .introduction{white-space:nowrap}}
 @media(max-width:767px){
