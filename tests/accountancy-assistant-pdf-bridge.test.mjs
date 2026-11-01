@@ -11,7 +11,7 @@ const compile=file=>ts.transpileModule(readFileSync(file,'utf8'),{
 }).outputText;
 const helper={};
 vm.runInNewContext(compile('lib/accountancy/assistant-bridge.ts'),{
- exports:helper,process:{env:{}},TextDecoder,Uint8Array,Error,Number
+ exports:helper,process:{env:{}},TextDecoder,Uint8Array,Error,Number,URL
 });
 const preview={VERCEL_ENV:'preview',NEXT_PUBLIC_SUPABASE_URL:'https://senonkpxdtlhyhrubicg.supabase.co',MZS_ASSISTANT_PDF_BRIDGE_ENABLED:'true'};
 const token='a'.repeat(40)+'.'+'b'.repeat(40)+'.'+'c'.repeat(40);
@@ -52,7 +52,7 @@ test('PDF bytes are bounded even without trusted content-length and checked for 
  await assert.rejects(()=>helper.boundedPdf(request({},Buffer.alloc(200))),/invalid_pdf/);
  await assert.rejects(()=>helper.boundedPdf(request({},Buffer.from('%PDF-1.7'))),/invalid_pdf/);
 });
-function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=false,duplicate=false,brokenStorage=false}={}){
+function fixture({disabled=false,admin=true,active=true,verified=true,scan='clean',scannerEnabled=true,linkFail=false,duplicate=false,brokenStorage=false,missingDraft=false}={}){
  const events=[],documents=[],links=[],storage=new Map();
  const previous={id:'00000000-0000-4000-8000-000000000009',issuer_id:issuer,fiscal_year:2026,file_path:issuer+'/2026/00000000-0000-4000-8000-000000000009.pdf',
   sha256:sha,file_size_bytes:original.length,review_status:'pending_review'};
@@ -84,8 +84,8 @@ function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=
     throw Error('Unexpected insert '+table);
    }
    let data;
-   if(table==='profiles')data=[{id:actor,role:admin?'admin':'client',is_active:true}];
-   else if(table==='mzs_ops_expense_drafts')data=[{id:draft,legal_entity_id:issuer,
+   if(table==='profiles')data=[{id:actor,role:admin?'admin':'client',is_active:active}];
+   else if(table==='mzs_ops_expense_drafts')data=missingDraft?[]:[{id:draft,legal_entity_id:issuer,
     invoice_date:'2026-02-04',supplier_invoice_number:'SYNTH-01',status:'draft'}];
    else if(table==='mzs_accountancy_documents')data=documents;
    else if(table==='mzs_accountancy_document_links')data=links;
@@ -107,9 +107,10 @@ function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=
  const route={};
  const env=disabled?{...preview,MZS_ASSISTANT_PDF_BRIDGE_ENABLED:'false'}:{...preview,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_synthetic'};
  vm.runInNewContext(compile('app/api/admin/assistant-originals/route.ts'),{
-  exports:route,Buffer,Request,Response,Blob,TextDecoder,TextEncoder,Uint8Array,FormData,URL,process:{env},
+  exports:route,Buffer,Request,Response,Blob,TextDecoder,TextEncoder,Uint8Array,FormData,URL,Error,process:{env},
   require(name){
    if(name==='node:crypto')return require(name);
+   if(name.endsWith('lib/supabase/server'))return {createClient:async()=>{events.push(['session-client']);return db;}};
    if(name==='@supabase/supabase-js')return {createClient:(_url,_key,options)=>{
     assert.equal(_url,preview.NEXT_PUBLIC_SUPABASE_URL);
     assert.equal(options.auth.persistSession,false);
@@ -123,7 +124,7 @@ function fixture({disabled=false,admin=true,verified=true,scan='clean',linkFail=
    if(name.endsWith('accountancy/assistant-bridge'))return {...helper,isAssistantBridgeStaging:()=>helper.isAssistantBridgeStaging(env)};
    if(name.endsWith('accountancy/pdf/server'))return {scannerOptions:()=>({environment:env.VERCEL_ENV,supabaseUrl:env.NEXT_PUBLIC_SUPABASE_URL,enabled:'true',processorApproved:'true',apiKey:'synthetic-fake-key-1234567890'})};
    if(name.endsWith('cloudmersive-advanced'))return {
-    scannerIsExplicitlyEnabled:()=>true,
+    scannerIsExplicitlyEnabled:()=>scannerEnabled,
     scanStagingPdfWithCloudmersive:async()=>{events.push(['scan']);return {verdict:scan,reason:scan==='malicious'?'threat':'clean'};}
    };
    throw Error('Unexpected import '+name);
@@ -179,4 +180,56 @@ test('corrupt storage readback cannot create a false verified archive entry',asy
  const f=fixture({brokenStorage:true}),r=await f.route.POST(request()),body=await r.json();
  assert.equal(r.status,503);assert.equal(body.error,'original_not_verified');
  assert.equal(f.documents.length,0);assert.equal(f.links.length,0);
+});
+
+function browserRequest(extra={}){
+ const req=request({origin:new URL(url).origin,'sec-fetch-site':'same-origin',...extra});
+ req.headers.delete('authorization');return req;
+}
+test('same-origin browser sender uses verified server session and retains exact bytes with existing draft link',async()=>{
+ const f=fixture(),r=await f.route.POST(browserRequest());
+ assert.equal(r.status,201);const result=await r.json();
+ assert.equal(result.archive_verified,true);assert.equal(result.linked,true);
+ assert.equal(result.draft_id,draft);assert.equal(result.payment_recorded,false);
+ assert.ok(f.events.some(x=>x[0]==='session-client'));
+ assert.ok(!f.events.some(x=>x[0]==='client'));
+ assert.equal(f.documents[0].issuer_id,issuer);assert.equal(f.documents[0].fiscal_year,2026);
+ assert.deepEqual(f.storage.get(f.documents[0].file_path),original);
+ assert.deepEqual([...new Set(f.events.filter(x=>x[0]==='insert').map(x=>x[1]))].sort(),
+ ['mzs_accountancy_document_links','mzs_accountancy_documents']);
+ const again=await f.route.POST(browserRequest());assert.equal(again.status,200);
+ assert.equal((await again.json()).document_id,result.document_id);
+ assert.equal(f.documents.length,1);assert.equal(f.storage.size,1);
+});
+test('browser CSRF, mixed credentials and absent session fail before scanning or storage',async()=>{
+ for(const extra of [{origin:'https://attacker.example'},{origin:'null'},{'sec-fetch-site':'same-site'}, {'sec-fetch-site':'cross-site'}]){
+  const f=fixture(),r=await f.route.POST(browserRequest(extra));
+  assert.equal(r.status,403);assert.equal(f.events.length,0);
+ }
+ const mixed=fixture(),r=await mixed.route.POST(request({origin:new URL(url).origin,'sec-fetch-site':'same-origin'}));
+ assert.equal(r.status,403);assert.equal(mixed.events.length,0);
+ for(const options of [{verified:false},{admin:false},{active:false}]){
+  const f=fixture(options),r=await f.route.POST(browserRequest());
+  assert.ok([401,403].includes(r.status));
+  assert.ok(!f.events.some(x=>['scan','upload','insert'].includes(x[0])));
+ }
+ const noOrigin=fixture(),anon=request();anon.headers.delete('authorization');
+ assert.equal((await noOrigin.route.POST(anon)).status,401);assert.equal(noOrigin.events.length,0);
+});
+test('browser sender fails closed without scanner approval, wrong draft, bad SHA or malware',async()=>{
+ const unavailable=fixture({scannerEnabled:false});
+ assert.equal((await unavailable.route.POST(browserRequest())).status,503);
+ assert.equal(unavailable.events.length,0);
+ const missing=fixture({missingDraft:true});assert.equal((await missing.route.POST(browserRequest())).status,404);
+ assert.ok(!missing.events.some(x=>x[0]==='scan'));
+ const checksum=fixture();assert.equal((await checksum.route.POST(browserRequest({'x-mzs-file-sha256':'0'.repeat(64)}))).status,422);
+ assert.ok(!checksum.events.some(x=>x[0]==='scan'));
+ for(const scan of ['malicious','unscannable']){
+  const f=fixture({scan}),r=await f.route.POST(browserRequest());
+  assert.ok([422,503].includes(r.status));assert.equal(f.storage.size,0);assert.equal(f.documents.length,0);
+ }
+});
+test('same-origin requests cannot open the production receiver',async()=>{
+ const f=fixture({disabled:true});assert.equal((await f.route.POST(browserRequest())).status,404);
+ assert.equal(f.events.length,0);
 });
