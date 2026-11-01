@@ -1017,7 +1017,14 @@
       "legal": "Juridisch",
       "photo": "Foto",
       "other": "Overig"
-    }
+    },
+    "canJuanPersonalGuarantee": "Persoonlijke garantie van de twee lokale notarissen.",
+    "canJuanSharePledge": "Verpanding van de aandelen van de vennootschap waarin het project is ondergebracht.",
+    "canJuanMortgage": "Officiële hypotheekinschrijving.",
+    "canJuanSecurityCombination": "Deze zekerheden kunnen afzonderlijk of in combinatie worden overeengekomen.",
+    "canJuanMapTitle": "Ibiza · globale locatie Villa Can Juan bij Santa Gertrudis",
+    "canJuanMapCaption": "Ibiza · de kaartmarkering toont de omgeving van Santa Gertrudis, niet de exacte objectlocatie.",
+    "canJuanMapLink": "BEKIJK DE OMGEVING ↗"
   },
   "AccountUI": {
     "a000": "Als er een geschikt MZS-account voor dit e-mailadres bestaat, ontvangt u binnenkort instructies om uw wachtwoord te herstellen. Controleer uw inbox en spammap.",
