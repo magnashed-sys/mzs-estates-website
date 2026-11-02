@@ -2,7 +2,7 @@ import {createClient} from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import {reportWindow,visitorReport, type VisitorSummary} from './visitor-report';
 
-/** One durable claim per day. SMTP ambiguity is never automatically retried. */
+/** One durable claim per week (keyed by Sunday). SMTP ambiguity is never automatically retried. */
 export async function deliverVisitorReport(now=new Date()) {
   const env=process.env;
   if(env.VERCEL_ENV!=='production'||env.NEXT_PUBLIC_SUPABASE_URL!=='https://ptrnjzmcehrhbsfxntgw.supabase.co')return 'disabled';
@@ -23,7 +23,7 @@ export async function deliverVisitorReport(now=new Date()) {
   // Fetch and render before claiming: a read error can be safely retried.
   const {data:rows,error:summaryError}=await db.rpc('mzs_visitor_summary',{p_start:window.start,p_end:window.end});
   if(summaryError)throw new Error('Visitor report unavailable');
-  const message=visitorReport(window.day,(rows??[]) as VisitorSummary[],settings.started_at);
+  const message=visitorReport(window.day,(rows??[]) as VisitorSummary[],settings.started_at,window.week);
   const {error:claimError}=await db.from('mzs_visitor_reports').insert({report_day:window.day,recipient_user_id:settings.recipient_user_id,status:'sending'});
   if(claimError?.code==='23505')return 'already_claimed';
   if(claimError)throw new Error('Visitor report claim failed');
