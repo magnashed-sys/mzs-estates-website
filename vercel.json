@@ -15,7 +15,11 @@
     },
     {
       "path": "/api/visitor-report",
-      "schedule": "0 22,23 * * *"
+      "schedule": "0 5,6 * * 1"
+    },
+    {
+      "path": "/api/weekly-hours-report",
+      "schedule": "0 5,6 * * 1"
     }
   ]
 }

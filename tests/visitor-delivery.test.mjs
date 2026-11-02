@@ -13,10 +13,10 @@ function harness({environment='production',role='admin',active=true,email='owner
  const nodemailer={createTransport:()=>({sendMail:async message=>{sent.push(message);if(smtp==='unknown')throw Error('socket');return {accepted:smtp==='ok'?[email]:[]}},close(){}})};
  const env={VERCEL_ENV:environment,NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'synthetic',SMTP_HOST:'example.invalid',SMTP_USER:'smtp@example.invalid',SMTP_PASSWORD:'synthetic'};
  const {deliverVisitorReport}=load('lib/mzs/visitor-delivery.ts',{'@supabase/supabase-js':{createClient:()=>db},nodemailer,'./visitor-report':report},{process:{env}});
- return {run:()=>deliverVisitorReport(new Date('2026-10-24T22:00:00Z')),sent,get status(){return status},get claims(){return claims}};
+ return {run:()=>deliverVisitorReport(new Date('2026-11-09T06:00:00Z')),sent,get status(){return status},get claims(){return claims}};
 }
 test('Scheduled delivery uses only the verified active admin and cannot send twice',async()=>{
- const h=harness();assert.equal(await h.run(),'accepted');assert.equal(h.sent[0].to,'owner@example.invalid');assert.match(h.sent[0].subject,/2026-10-24/);assert.equal(await h.run(),'already_claimed');assert.equal(h.sent.length,1);
+ const h=harness();assert.equal(await h.run(),'accepted');assert.equal(h.sent[0].to,'owner@example.invalid');assert.match(h.sent[0].subject,/2026-11-02 t\/m 2026-11-08/);assert.equal(await h.run(),'already_claimed');assert.equal(h.sent.length,1);
 });
 test('Preview, inactive accounts and non-admin recipients never receive visitor reports',async()=>{
  for(const config of [{environment:'preview'},{active:false},{role:'client'}]){const h=harness(config);await h.run();assert.equal(h.sent.length,0);assert.equal(h.claims,0);}

@@ -1,3 +1,7 @@
+# Weekly visitor report (updated 2 November 2026)
+
+Owner requested weekly delivery alongside hours on Monday 07:00 Europe/Madrid. The report now covers the previous Monday through Sunday. Existing recipient and SMTP configuration are retained. Both 05:00 and 06:00 UTC cron invocations run on Monday; only local 07:00 sends. The ledger key remains the period-ending Sunday. See weekly-hours-digest.md for cutover. Below is the historical daily implementation record.
+
 # Daily visitor report
 
 The owner requested daily visitor email, selected info@mzsestates.com, and changed dispatch from 23:30 to **00:00 Europe/Madrid**. Report covers the entire preceding local calendar day. DST boundary days correctly contain 23 or 25 hours.
