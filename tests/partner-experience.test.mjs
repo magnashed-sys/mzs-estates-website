@@ -52,3 +52,27 @@ test('all dashboard views render NL/EN/ES, searchable documents and separate can
  const history=renderToStaticMarkup(await page({searchParams:Promise.resolve({view:'stays',year:'2030',status:'history'})}));assert.match(history,/CANCELLED RECORD/);
  }
 });
+
+test('record pages bound oversized or invalid page requests without changing source rows',()=>{
+ const records=Array.from({length:51},(_,id)=>({id}));
+ for(const value of [undefined,'0','-2','1.5','1e2',['2']])assert.equal(presentation.recordPage(records,value).page,1);
+ const page=presentation.recordPage(records,'2');assert.equal(page.records.length,25);assert.equal(page.records[0].id,25);assert.equal(page.start,26);assert.equal(page.end,50);
+ const last=presentation.recordPage(records,'999');assert.equal(last.page,3);assert.equal(last.records[0].id,50);assert.equal(records.length,51);
+ const emptyPage=presentation.recordPage([],'2');assert.equal(emptyPage.start,0);assert.equal(emptyPage.pages,1);
+});
+
+test('partner pagination retains filters, complete financial totals and labelled mobile amounts',async()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+ const source={...empty(),issuer:{id:'entity-a',name:'Synthetic company'},snapshot_at:'2026-11-06T12:00:00Z'};
+ source.leases=Array.from({length:30},(_,i)=>({id:'invoice-'+i,number:'SYNTH-'+String(i).padStart(2,'0'),issued_on:'2030-02-01',total:100,status:'issued'}));
+ source.documents=Array.from({length:30},(_,i)=>({id:'doc-'+i,title:'Findable document '+String(i).padStart(2,'0'),category:'supplier_invoice',fiscal_year:2030,document_date:'2030-02-01',review_status:'pending_review'}));
+ const db={auth:{getUser:async()=>({data:{user:{id:'partner'}}})},rpc:async n=>({data:n==='mzs_partner_entities'?[source.issuer]:source}),from:()=>({select(){return this},eq(){return this},single:async()=>({data:{full_name:'Synthetic Partner'}})})};
+ const page=load('app/private/partner/page.tsx',{'next/link':{default:({children,...props})=>React.createElement('a',props,children)},'next/navigation':{notFound:()=>{throw Error('not found')},redirect:()=>{throw Error('redirect')}},'next-intl/server':{getLocale:async()=>'en'},'../../../lib/supabase/server':{createClient:async()=>db},'../../../lib/security/phase3a-preview-isolation':{isPhase3aPreviewIsolated:()=>true},'../../../lib/partner/finance':finance,'../../../lib/partner/presentation':presentation,'../../../lib/partner/spanish':load('lib/partner/spanish.ts'),'./PartnerHeader':{default:()=>null},'./partner.module.css':{default:new Proxy({},{get:(_,key)=>key})}}).default;
+ const html=renderToStaticMarkup(await page({searchParams:Promise.resolve({view:'finance',entity:'entity-a',year:'2030',month:'2',page_invoices:'2'})}));
+ assert.match(html,/€3,000\.00/);assert.match(html,/SYNTH-25/);assert.doesNotMatch(html,/SYNTH-00/);assert.match(html,/26–30 of 30/);assert.match(html,/page_invoices=1#invoices/);
+ const summary=html.match(/<summary><span class="recordLead">[\s\S]*?<\/summary>/)?.[0];assert.match(summary,/1 Feb 2030/);assert.match(summary,/<small>Total<\/small><strong>€100\.00<\/strong>/);
+ const docs=renderToStaticMarkup(await page({searchParams:Promise.resolve({view:'documents',entity:'entity-a',year:'2030',month:'2',q:'Findable',category:'supplier_invoice',page_documents:'2'})}));
+ assert.doesNotMatch(docs,/Findable document 00/);assert.match(docs,/Findable document 25/);
+ assert.match(docs,/entity=entity-a&amp;year=2030&amp;month=2&amp;view=documents&amp;q=Findable&amp;category=supplier_invoice&amp;page_documents=1#documents/);
+ assert.equal(source.leases.length,30);
+});
