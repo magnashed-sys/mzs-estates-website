@@ -44,3 +44,14 @@ export async function createCost(f:FormData):Promise<Result>{
  fields={property_id:property||null,cost_scope:property?'property':'entity',legal_entity_id:y.issuer_id,supplier_relationship_id:identifier(f,'supplier_relationship_id'),supplier_invoice_number:textField(f,'supplier_invoice_number',100,1),invoice_date:date,category,description:textField(f,'description',500,2),net_cents:net,vat_cents:vat,allocations:[{unit_id:null,net_cents:net,vat_cents:vat}]};}catch{return invalid;}
  const {error}=await db.from('mzs_ops_expense_drafts').insert(fields);if(error)return {ok:false,code:error.code==='23505'?'duplicate':error.message.includes('paying entity')?'payer':'failed'};refresh(year);return {ok:true};
 }
+
+export async function saveIncomeAllocation(f:FormData):Promise<Result>{
+ const {db}=await requireEstateAdmin();let year,invoice,source,revision,fields;
+ try{year=identifier(f,'year_id');invoice=identifier(f,'invoice_id');source=textField(f,'source',20);revision=Number(textField(f,'revision',10,1));
+  const property=textField(f,'property_id',36),project=textField(f,'project_id',36);
+  if(!['leases','bookings','external','services'].includes(source)||!Number.isSafeInteger(revision)||revision<0||(property&&!uuid.test(property))||(project&&!uuid.test(project)))throw Error();
+  fields={property_id:property||null,project_id:project||null,evidence_reference:textField(f,'evidence_reference',1000,5)};
+ }catch{return invalid;}
+ const q=revision===0?db.from('mzs_accountancy_income_allocations').insert({...fields,year_id:year,source,invoice_id:invoice}):db.from('mzs_accountancy_income_allocations').update(fields).eq('year_id',year).eq('source',source).eq('invoice_id',invoice).eq('revision',revision);
+ const {data,error}=await q.select('invoice_id').maybeSingle();if(error)return error.code==='23505'?{ok:false,code:'stale'}:failure(error.code);if(!data)return {ok:false,code:'stale'};refresh(year);return {ok:true};
+}

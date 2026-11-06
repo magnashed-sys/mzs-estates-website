@@ -23,5 +23,20 @@
   "Operations": "Operations",
   "Open tasks, maintenance, pending time reviews and corrections in one central control panel.": "Open tasks, maintenance, pending time reviews and corrections in one central control panel.",
   "Open operational action center →": "Open operational action center →",
-  "Zorgbalans hours are recharged through the separate private billing workflow after approval.": "Zorgbalans hours are recharged through the separate private billing workflow after approval."
+  "Zorgbalans hours are recharged through the separate private billing workflow after approval.": "Zorgbalans hours are recharged through the separate private billing workflow after approval.",
+  "Pricing basis": "Pricing basis",
+  "Basic rent and separate advances": "Basic rent and separate advances",
+  "All-in without separate advances": "All-in without separate advances",
+  "Classification pending": "Classification pending",
+  "All-in amounts already include the agreed services. Review every line before saving; never add an extra advance for included services.": "All-in amounts already include the agreed services. Review every line before saving; never add an extra advance for included services.",
+  "Line type": "Line type",
+  "Basic rent": "Basic rent",
+  "Service advance": "Service advance",
+  "Other fixed amount": "Other fixed amount",
+  "Template version": "Template version",
+  "Next indexation review date (first of month)": "Next indexation review date (first of month)",
+  "Indexation clause / reference": "Indexation clause / reference",
+  "After activation, calculate and review indexations and advances in the contract dossier. All-in prices are excluded from these automatic calculations.": "After activation, calculate and review indexations and advances in the contract dossier. All-in prices are excluded from these automatic calculations.",
+  "Activated terms are retained for the audit history. Use the pricing review below for future indexations and advances. Other contract changes require a replacement schedule and review of existing drafts.": "Activated terms are retained for the audit history. Use the pricing review below for future indexations and advances. Other contract changes require a replacement schedule and review of existing drafts.",
+  "Link existing managed units, record the agreement and prepare monthly invoice drafts for review.": "Link existing managed units, record the agreement and prepare monthly invoice drafts for review."
 }

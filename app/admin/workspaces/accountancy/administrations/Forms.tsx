@@ -3,9 +3,22 @@ import {useRef,useState,type ReactNode,type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
 import {useAdminI18n} from '../../../../../lib/admin/i18n';
 import {ADMINISTRATION_ROOT,costCategories,checkLabels,annualCategory,type Year,type Cost,type Project,type Review} from '../../../../../lib/accountancy/administration';
-import {createYear,saveYear,createProject,saveCostReview,createCost,type Result} from './actions';
+import {createYear,saveYear,createProject,saveCostReview,createCost,saveIncomeAllocation,type Result} from './actions';
+import type {IncomeAllocation,IncomeSource} from '../../../../../lib/accountancy/cost-centers';
 import s from './administration.module.css';
 type Option={id:string;name:string};
+
+export function IncomeAllocationForm({yearId,invoiceId,source,allocation,properties,projects}:{yearId:string;invoiceId:string;source:IncomeSource;allocation?:IncomeAllocation;properties:Option[];projects:Project[]}){
+ const {language}=useAdminI18n(),l=(en:string,es:string)=>language==='es'?es:en;
+ const [scope,setScope]=useState(allocation?.project_id?'project:'+allocation.project_id:allocation?.property_id?'property:'+allocation.property_id:'entity');
+ const project=scope.startsWith('project:')?projects.find(p=>p.id===scope.slice(8)):null,property=project?project.property_id:scope.startsWith('property:')?scope.slice(9):null;
+ return <details><summary>{l('Allocate issued income','Asignar ingreso facturado')}</summary><Form action={saveIncomeAllocation}>
+  <input type="hidden" name="year_id" value={yearId}/><input type="hidden" name="invoice_id" value={invoiceId}/><input type="hidden" name="source" value={source}/><input type="hidden" name="revision" value={allocation?.revision??0}/><input type="hidden" name="property_id" value={property??''}/><input type="hidden" name="project_id" value={project?.id??''}/>
+  <label>{l('Property or project','Inmueble o proyecto')}<select value={scope} onChange={e=>setScope(e.target.value)}><option value="entity">{l('Company-level','General de la empresa')}</option>{properties.map(p=><option key={p.id} value={'property:'+p.id}>{p.name}</option>)}{projects.map(p=><option key={p.id} value={'project:'+p.id}>{p.name}</option>)}</select></label>
+  <label>{l('Source reference','Referencia justificativa')}<input name="evidence_reference" required minLength={5} maxLength={1000} defaultValue={allocation?.evidence_reference??''}/></label>
+  <p>{l('The existing invoice stays unchanged. This records its allocation only.','La factura existente no cambia. Solo se registra su asignación.')}</p>
+ </Form></details>;
+}
 function Form({action,children,openYear=false,reset=false}:{action:(f:FormData)=>Promise<Result>;children:ReactNode;openYear?:boolean;reset?:boolean}){
  const {t}=useAdminI18n(),router=useRouter(),lock=useRef(false);const [busy,setBusy]=useState(false),[result,setResult]=useState<Result|null>(null);
  async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(lock.current)return;lock.current=true;setBusy(true);setResult(null);const form=e.currentTarget;

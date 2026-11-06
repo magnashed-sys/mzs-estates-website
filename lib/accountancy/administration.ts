@@ -7,7 +7,7 @@ export type Year={id:string;issuer_id:string;fiscal_year:number;purpose:'current
 export type Project={id:string;year_id:string;name:string;kind:'renovation'|'improvements';property_id:string|null;source_reference:string};
 export type Cost={id:string;legal_entity_id:string;invoice_date:string;supplier_relationship_id:string;supplier_name:string;supplier_invoice_number:string;property_id:string|null;property_name:string|null;cost_scope:'entity'|'property';category:string;description:string;net_cents:number;vat_cents:number;gross_cents:number;created_at:string;allocations:unknown;source_document_status:string;source_pdf_id?:string;source_pdf_sha256?:string;archive_documents?:{id:string;title:string;sha256:string;review_status:string;category?:string;document_date?:string|null}[]};
 export type Review={draft_id:string;year_id:string;category:CostCategory;project_id:string|null;review_status:'pending'|'reviewed'|'excluded';evidence_reference:string;note:string;revision:number;updated_at:string};
-export type YearSource={administration:Year;sales:Record<string,any>;costs:Cost[];reviews:Review[];projects:Project[];documents:Record<string,any>[];capital_references:Record<string,any>[];snapshot_at:string};
+export type YearSource={administration:Year;sales:Record<string,any>;costs:Cost[];reviews:Review[];projects:Project[];documents:Record<string,any>[];capital_references:Record<string,any>[];snapshot_at:string;income_allocations?:import('./cost-centers').IncomeAllocation[]};
 export function annualCategory(value:string):CostCategory{
  if(value in costCategories)return value as CostCategory;
  if(['electricity','gas','water','internet'].includes(value))return 'utilities';

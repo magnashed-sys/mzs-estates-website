@@ -22,10 +22,11 @@ export default async function ContractsPage({searchParams}:{searchParams:Promise
     readRegister(db,'mzs_lease_invoices').then(data=>({data,error:null})).catch(error=>({data:[],error})),
     readRegister(db,'mzs_lease_payments').then(data=>({data,error:null})).catch(error=>({data:[],error})),
     db.from('mzs_member_companies').select('id,legal_name,trading_name,registration_number,country,user_id').order('legal_name'),
+    readRegister(db,'mzs_lease_adjustments').then(data=>({data,error:null})).catch(error=>({data:[],error})),
   ]);
   if(results.some(r=>r.error)) return <><h1>{adminT("Contracts")}</h1><p role="alert">{adminT("The contract register could not be loaded. Please try again later.")}</p></>;
   return <><p className="mzsEyebrow">{adminT("MZS ESTATES / LONG-TERM RENTAL")}</p><h1>{adminT("Contracts & invoices.")}</h1>
-    <p className="mzsIntro">{adminT("Link your rental units, record the agreement and prepare monthly invoice drafts for review.")}</p>
-    <ContractWorkspace companies={results[9].data || []} properties={results[0].data || []} units={results[1].data || []} members={results[2].data || []} contracts={results[3].data || []} relationships={results[4].data || []} invoices={results[5].data || []} issuers={results[6].data || []} issued={results[7].data || []} payments={results[8].data || []}/>
+    <p className="mzsIntro">{adminT("Link existing managed units, record the agreement and prepare monthly invoice drafts for review.")}</p>
+    <ContractWorkspace adjustments={results[10].data || []} companies={results[9].data || []} properties={results[0].data || []} units={results[1].data || []} members={results[2].data || []} contracts={results[3].data || []} relationships={results[4].data || []} invoices={results[5].data || []} issuers={results[6].data || []} issued={results[7].data || []} payments={results[8].data || []}/>
     <Link href="/admin?tab=contracts">{adminT("← Rental Contracts overview")}</Link></>;
 }
