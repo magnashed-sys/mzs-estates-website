@@ -1,5 +1,5 @@
 import {NextRequest} from 'next/server';
-import {requireEstateAdmin} from '../../../../../lib/security/estate-properties';
+import {requireContractAdminApi} from '../../../../../lib/security/contract-admin-api';
 import {staffEnvironmentAvailable} from '../../../../../lib/security/property-staff';
 import {allRows} from '../../../../../lib/property-operations/staff-data';
 import {weekPdf,weekWorkbook,type FrozenVisit,type ClosedWeekReport} from '../../../../../lib/property-operations/week-export';
@@ -9,7 +9,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Entry={visit_id:string;worked_on:string;property_id:string|null;unit_id:string|null;work_area_id:string|null;actual_minutes:number;approved_minutes:number;category:string;description:string};
 export async function GET(request:NextRequest){
  if(!staffEnvironmentAvailable())return new Response(null,{status:404,headers});
- const {db}=await requireEstateAdmin(),q=new URL(request.url).searchParams;
+ const actor=await requireContractAdminApi();if('response' in actor)return actor.response;const {db}=actor,q=new URL(request.url).searchParams;
  if([...q.keys()].some(k=>!['profile','week','format'].includes(k)))return new Response('Invalid export options',{status:400,headers});
  const validOne=(key:string)=>q.getAll(key).length===1?q.get(key)!:'';
  const profile=validOne('profile'),week=validOne('week'),format=validOne('format');

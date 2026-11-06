@@ -34,7 +34,7 @@ function pdfFixture({mismatch=false,status='concept',lines=2}={}){
  const data=Array.from({length:lines},(_,i)=>({id:String(i),worked_on:'2026-11-01',actual_minutes:25,invoiced_hours:1,net_cents:2500,description:i===0?description:'Normal synthetic visit '+i}));
  const invoice={id,invoice_number:'9999',issued_on:'2026-11-06',due_on:'2026-11-20',period_from:'2026-11-01',period_until:'2026-11-01',customer_name:'Stichting Zorgbalans',customer_reference:'KOSTENPLAATS 652001 Prettig Thuis IJmuiden',hours:lines,net_cents:2500*lines,vat_cents:525*lines,gross_cents:3025*lines+(mismatch?1:0),status,issuer_id:id};
  const db={from(table){const q={select(){return q},eq(){return q},order(){return q},limit:async()=>({data,error:null}),maybeSingle:async()=>({data:table==='mzs_ops_zorgbalans_invoices'?invoice:{name:'Magdy Nashed',kind:'person',iban:'TEST IBAN - NOT FOR PAYMENT',tax_id:'TEST TAX ID'},error:null})};return q}};
- return load('app/api/admin/zorgbalans/invoices/[id]/pdf/route.ts',{'../../../../../../../lib/security/estate-properties':{requireEstateAdmin:async()=>({db})},'../../../../../../../lib/security/property-staff':{requireStaffEnvironment(){}}}).GET(new Request('https://example.invalid'),{params:Promise.resolve({id})});
+ return load('app/api/admin/zorgbalans/invoices/[id]/pdf/route.ts',{'../../../../../../../lib/security/contract-admin-api':{requireContractAdminApi:async()=>({db})},'../../../../../../../lib/security/property-staff':{requireStaffEnvironment(){}}}).GET(new Request('https://example.invalid'),{params:Promise.resolve({id})});
 }
 test('PDF keeps complete long descriptions, supports 100 lines and withholds mismatched totals',async()=>{
  const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');

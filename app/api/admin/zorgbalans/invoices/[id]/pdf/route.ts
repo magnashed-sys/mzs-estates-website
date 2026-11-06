@@ -1,6 +1,5 @@
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
-import {requireEstateAdmin} from '../../../../../../../lib/security/estate-properties';
-import {requireStaffEnvironment} from '../../../../../../../lib/security/property-staff';
+import {requireContractAdminApi} from '../../../../../../../lib/security/contract-admin-api';
 export const runtime='nodejs';export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -9,7 +8,7 @@ type Invoice={id:string;invoice_number:string;issued_on:string;due_on:string;per
  status:'concept'|'externally_issued';issuer_id:string};
 type Line={id:string;worked_on:string;actual_minutes:number;invoiced_hours:number;net_cents:number;description:string};
 export async function GET(_request:Request,{params}:{params:Promise<{id:string}>}){
- requireStaffEnvironment();const {db}=await requireEstateAdmin();
+ const actor=await requireContractAdminApi();if('response' in actor)return actor.response;const {db}=actor;
  const {id}=await params;if(!uuid.test(id))return new Response('Invalid private invoice.',{status:400,headers});
  const {data:invoice,error}=await db.from('mzs_ops_zorgbalans_invoices')
   .select('id,invoice_number,issued_on,due_on,period_from,period_until,customer_name,customer_reference,hours,net_cents,vat_cents,gross_cents,status,issuer_id')

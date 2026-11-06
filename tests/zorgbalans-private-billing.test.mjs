@@ -32,7 +32,7 @@ test('each approved visit has exactly one admin-only private billing link',()=>{
 });
 test('invoice PDF uses the private issuer, provides specification and does not send mail',()=>{
  const pdf=source('app/api/admin/zorgbalans/invoices/[id]/pdf/route.ts');
- assert.ok(pdf.includes('requireEstateAdmin()'));
+ assert.ok(pdf.includes('requireContractAdminApi()'));
  assert.ok(pdf.includes('CONCEPTFACTUUR'));
  assert.ok(pdf.includes('URENSPECIFICATIE'));
  assert.ok(pdf.includes('issuer.iban'));
