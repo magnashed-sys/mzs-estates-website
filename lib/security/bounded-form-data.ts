@@ -3,7 +3,7 @@ export class RequestBodyTooLarge extends Error {
 }
 
 /** Bound actual bytes before parsing, even without Content-Length. */
-async function boundedBytes(request:Request,maxBytes:number):Promise<Uint8Array>{
+async function boundedBytes(request:Request,maxBytes:number):Promise<Uint8Array<ArrayBuffer>>{
  if(!Number.isSafeInteger(maxBytes)||maxBytes<1)throw new Error('Invalid body limit');
  const declared=request.headers.get('content-length');
  if(declared!==null){
