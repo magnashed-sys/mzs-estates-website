@@ -2,8 +2,8 @@ export class RequestBodyTooLarge extends Error {
  constructor(){super('Request body too large');this.name='RequestBodyTooLarge';}
 }
 
-/** Bound actual bytes before multipart parsing, even without Content-Length. */
-export async function boundedFormData(request:Request,maxBytes:number):Promise<FormData>{
+/** Bound actual bytes before parsing, even without Content-Length. */
+async function boundedBytes(request:Request,maxBytes:number):Promise<Uint8Array>{
  if(!Number.isSafeInteger(maxBytes)||maxBytes<1)throw new Error('Invalid body limit');
  const declared=request.headers.get('content-length');
  if(declared!==null){
@@ -26,5 +26,14 @@ export async function boundedFormData(request:Request,maxBytes:number):Promise<F
  }finally{reader.releaseLock();}
  const bytes=new Uint8Array(total);let offset=0;
  for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+ return bytes;
+}
+
+export async function boundedFormData(request:Request,maxBytes:number):Promise<FormData>{
+ const bytes=await boundedBytes(request,maxBytes);
  return new Response(bytes,{headers:{'Content-Type':request.headers.get('content-type')??''}}).formData();
+}
+
+export async function boundedText(request:Request,maxBytes:number):Promise<string>{
+ return new TextDecoder().decode(await boundedBytes(request,maxBytes));
 }

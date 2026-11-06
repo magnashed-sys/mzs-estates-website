@@ -5,12 +5,14 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import {createHmac} from 'node:crypto';
 const compile=p=>ts.transpileModule(readFileSync(new URL(p,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const bounded={};vm.runInNewContext(compile('../lib/security/bounded-form-data.ts'),{exports:bounded,Response,TextDecoder});
 const route=compile('../app/api/account/register/route.ts');
 const routing={};vm.runInNewContext(compile('../i18n/public-routing.ts'),{exports:routing});
 function harness({enabled=true,rate=true,duplicate=false,application=true}={}) {
  const signups=[],exports={};
  const admin={rpc:async()=>({data:rate}),from(table){const q={select(){return q},eq(){return q},ilike(){return q},is(){return q},in(){return q},like(){return q},order(){return q},limit:async()=>({data:table==='profiles'&&duplicate?[{id:'existing'}]:[]}),maybeSingle:async()=>({data:application?{id:'request'}:null})};return q;}};
  vm.runInNewContext(route,{exports,console:{error(){}},process:{env:{VERCEL_ENV:'production',MZS_ACCOUNT_REGISTRATION_ENABLED:String(enabled),NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co',NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'public-test',SUPABASE_SERVICE_ROLE_KEY:'secret-test'}},require(name){
+  if(name.endsWith('/bounded-form-data'))return bounded;
   if(name==='node:crypto')return {createHmac};
   if(name==='next/server')return {NextResponse:{json:(body,options)=>({body,...options})}};
   if(name.endsWith('/public-routing'))return routing;

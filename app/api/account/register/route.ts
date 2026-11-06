@@ -1,3 +1,4 @@
+import {boundedText,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import {isLocale} from "../../../../i18n/public-routing";
 import { createHmac } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -51,12 +52,13 @@ export async function POST(request: NextRequest) {
 
   let input: Record<string, unknown>;
   try {
-    const raw = await request.text();
+    const raw = await boundedText(request, 36000);
     if (raw.length > 9000) return response(413, { error: "Submission is too large." });
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw Error("Invalid body");
     input = parsed as Record<string, unknown>;
-  } catch {
+  } catch (error) {
+    if (error instanceof RequestBodyTooLarge) return response(413, { error: "Submission is too large." });
     return response(400, { error: "Please complete the registration form." });
   }
 

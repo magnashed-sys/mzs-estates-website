@@ -1,3 +1,4 @@
+import {boundedText,RequestBodyTooLarge} from "../../../../../lib/security/bounded-form-data";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerClient } from "../../../../../lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
@@ -30,14 +31,15 @@ export async function POST(request: NextRequest) {
 
   let input: Record<string, unknown>;
   try {
-    const raw = await request.text();
+    const raw = await boundedText(request, 44000);
     if (raw.length > 11000) return reply(413, { error: "Request too large." });
     const payload: unknown = JSON.parse(raw);
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       return reply(400, { error: "Invalid request." });
     }
     input = payload as Record<string, unknown>;
-  } catch {
+  } catch (error) {
+    if (error instanceof RequestBodyTooLarge) return reply(413, { error: "Request too large." });
     return reply(400, { error: "Invalid request." });
   }
   const userId = input.user_id;
