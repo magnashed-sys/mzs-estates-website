@@ -21,3 +21,9 @@ const labels:Record<string,[string,string,string]>={
 export function partnerLabel(value:unknown,locale:string){const key=String(value||'');const entry=labels[key];return entry?entry[locale==='nl'?0:locale==='es'?2:1]:key?key.replaceAll('_',' '):'—';}
 export function recordStatus(row:Row,locale:string){return row.reversed_at||row.is_void?partnerLabel('reversed',locale):partnerLabel(row.review_status||row.status,locale);}
 export function upcomingBookings(data:Row[],today:string){return data.filter(r=>r.status==='confirmed'&&String(r.check_out)>today).sort((a,b)=>String(a.check_in).localeCompare(String(b.check_in)));}
+/** Pagination changes the rendered rows only; financial totals use the full filtered source. */
+export function recordPage<T>(records:T[],requested:unknown){
+ const pages=Math.max(1,Math.ceil(records.length/25));
+ const page=Math.min(pages,typeof requested==='string'&&/^[1-9]\d{0,5}$/.test(requested)?Number(requested):1);
+ return {page,pages,total:records.length,start:records.length?(page-1)*25+1:0,end:Math.min(page*25,records.length),records:records.slice((page-1)*25,page*25)};
+}
