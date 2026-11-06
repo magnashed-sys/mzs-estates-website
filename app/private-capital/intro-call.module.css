@@ -45,6 +45,7 @@
 .memberAccess a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 10px; color: #d5c09a !important; letter-spacing: .07em; text-transform: uppercase; }
 .memberAccess a:hover { color: #fff !important; }
 .disclaimer { color: #aba293; font-size: 11px; line-height: 1.8; max-width: 650px; margin: 32px auto 0; text-align: center; }
+.capitalDisclaimer { max-width: none; margin-top: 20px; }
 .confirmation { min-height: 474px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; outline: none; }
 .confirmationMark { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid #bba37b; border-radius: 50%; color: #d5c09a; font-size: 20px; margin-bottom: 29px; }
 .confirmation h3 { margin: 16px 0 10px; font-size: 40px; }

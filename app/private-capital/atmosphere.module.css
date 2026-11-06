@@ -12,7 +12,7 @@
 .approachCopy {align-self:center;padding:clamp(45px,6vw,95px);}
 .page .approachCopy h2 {font-size:clamp(36px,4vw,60px);margin-top:30px;}
 .page .approachCopy p {max-width:480px;}
-.imageNote {margin:0;padding:0 max(var(--mzs-public-inset),calc((100vw - 1200px)/2)) 22px;color:#938c7e;font:10px/1.6 Arial,sans-serif;}
+p.disclaimer {max-width:none;margin-top:32px;}
 @media(max-width:850px){
  .page .approach {grid-template-columns:1fr;}
  .conversationImage {min-height:0;aspect-ratio:3/2;}
