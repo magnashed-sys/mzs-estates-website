@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {createClient as serviceClient} from '@supabase/supabase-js';
 import {createClient} from '../../../lib/supabase/server';
 import {visitorPath} from '../../../lib/mzs/visitor-report';
+import {boundedText,RequestBodyTooLarge} from '../../../lib/security/bounded-form-data';
 export const runtime='nodejs';
 const reply=(status:number)=>new NextResponse(null,{status,headers:{'Cache-Control':'no-store'}});
 export async function POST(request:NextRequest) {
@@ -9,9 +10,9 @@ export async function POST(request:NextRequest) {
   const expected = process.env.VERCEL_ENV==='production'?'https://ptrnjzmcehrhbsfxntgw.supabase.co':process.env.VERCEL_ENV==='preview'?'https://senonkpxdtlhyhrubicg.supabase.co':null;
   if(!expected || process.env.NEXT_PUBLIC_SUPABASE_URL!==expected || !process.env.SUPABASE_SERVICE_ROLE_KEY) return reply(503);
   try {
-    const raw=await request.text(); if(raw.length>1000) return reply(413);
+    const raw=await boundedText(request,4000); if(raw.length>1000) return reply(413);
     const body=JSON.parse(raw);
-    if(!['login','page'].includes(body.kind) || !/^[0-9a-f-]{36}$/i.test(body.event_id)) return reply(400);
+    if(!body || typeof body!=='object' || Array.isArray(body) || !['login','page'].includes(body.kind) || typeof body.event_id!=='string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.event_id)) return reply(400);
     const path=body.kind==='login'?'/login':visitorPath(body.path); if(!path)return reply(400);
     const db=await createClient();
     const {data:auth,error:authError}=await db.auth.getUser(); if(authError||!auth.user) return reply(401);
@@ -34,5 +35,5 @@ export async function POST(request:NextRequest) {
     const service=serviceClient(expected,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
     const {error}=await service.rpc('mzs_record_visitor_activity',{p_user:auth.user.id,p_session:session,p_event:body.event_id,p_kind:body.kind,p_path:path});
     return reply(error?503:204);
-  } catch {return reply(400);}
+  } catch(error) {return reply(error instanceof RequestBodyTooLarge?413:400);}
 }
