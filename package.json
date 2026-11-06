@@ -16,14 +16,14 @@
     "@supabase/supabase-js": "2.118.0",
     "@vercel/analytics": "2.0.1",
     "libphonenumber-js": "1.13.15",
-    "next": "15.5.18",
-    "next-intl": "4.8.3",
-    "nodemailer": "7.0.13",
+    "next": "15.5.29",
+    "next-intl": "4.14.9",
+    "nodemailer": "10.3.1",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.4.299",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "sharp": "0.34.5"
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
@@ -32,5 +32,8 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "postcss": "8.5.32"
   }
 }
