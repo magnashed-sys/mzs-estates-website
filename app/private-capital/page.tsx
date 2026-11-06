@@ -149,9 +149,8 @@ const focus = [
           <a className={styles.primaryAction} href="/login">{t('client_partner_login')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
           <a className={styles.quietAction} href="/request-access">{t('request_access')} <span aria-hidden="true"><ArrowUpRightIcon /></span></a>
         </div>
-        <p className={styles.disclaimer}> {t('information_on_this_page_is_introductory')} </p>
+        <p className={`${styles.disclaimer} ${atmosphere.disclaimer}`}> {t('information_on_this_page_is_introductory')} </p>
       </section>}
-      {atmosphereEnabled && <p className={atmosphere.imageNote}>{t('illustrative_atmosphere_imagery')}</p>}
       <div className={styles.bottomNavigation}>
         <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
         <Link href={localizedPath("/real-estate", locale)}>{t('explore_real_estate')}</Link>
