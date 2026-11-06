@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../../lib/security/bounded-form-data";
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -5,7 +6,7 @@ import { deliverForRecipient, deliverOnce } from "../../../../../lib/mzs/notific
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TYPES = new Set(["application_received", "account_activated", "new_project_access"]);
 const json = (status: number, data: Record<string, unknown>) =>
   NextResponse.json(data, { status, headers: { "Cache-Control": "no-store" } });
@@ -41,12 +42,14 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   if (origin && origin !== request.nextUrl.origin) return json(403, { error: "Origin rejected" });
   if (!(await verifyOperator(request))) return json(403, { error: "Administrator required" });
+  let input: Record<string, unknown>;
+  try { input = await boundedJsonObject(request, 4000); }
+  catch (error) {
+    return error instanceof RequestBodyTooLarge
+      ? json(413, { error: "Request too large." })
+      : json(400, { error: "Invalid request" });
+  }
   try {
-    const body: unknown = await request.json();
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return json(400, { error: "Invalid request" });
-    }
-    const input = body as Record<string, unknown>;
     if (typeof input.event_id === "string" && UUID.test(input.event_id)) {
       const result = await deliverOnce(input.event_id);
       return json(result.status === "sent" ? 200 : 202, result);
