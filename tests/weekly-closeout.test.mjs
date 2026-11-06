@@ -33,7 +33,7 @@ test('releases require exact admin and completed approved data; no automatic cus
  assert.match(ui,/v\.review_decision==='approved'&&!v\.correction_pending/);
  assert.match(ui,/sunday<today/);
  assert.match(ui,/mzs_ops_week_events/);
- assert.match(route,/requireEstateAdmin/);assert.match(route,/event\.action!=='closed'/);
+ assert.match(route,/requireContractAdminApi/);assert.match(route,/event\.action!=='closed'/);
  assert.match(route,/entries\.reduce/);assert.match(route,/visit_count/);
  assert.doesNotMatch(a+route,/nodemailer|mzs_ops_prepare_zorgbalans_invoice/);
 });

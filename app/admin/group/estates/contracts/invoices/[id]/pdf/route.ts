@@ -1,8 +1,8 @@
-import {requireContractAdmin} from '../../../../../../../../lib/security/estate-contracts';
+import {requireContractAdminApi} from '../../../../../../../../lib/security/contract-admin-api';
 import {invoicePdf} from '../../../../../../../../lib/estates/invoice-pdf';
 export const runtime='nodejs';export const dynamic='force-dynamic';
 export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
- const {db}=await requireContractAdmin();const {id}=await params;
+ const actor=await requireContractAdminApi();if('response' in actor)return actor.response;const {db}=actor;const {id}=await params;
  if(!/^[0-9a-f-]{36}$/i.test(id))return new Response('Not found',{status:404});
  const {data,error}=await db.from('mzs_lease_invoices').select('*').eq('id',id).maybeSingle();
  if(error||!data)return new Response('Not found',{status:404});
