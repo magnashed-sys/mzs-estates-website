@@ -1,3 +1,4 @@
+import {boundedFormData,RequestBodyTooLarge} from '../../../../lib/security/bounded-form-data';
 import {createHash,randomUUID} from 'node:crypto';
 import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '../../../../lib/supabase/server';
@@ -14,8 +15,7 @@ export async function POST(req:NextRequest){
  if(!origin||origin!==new URL(req.url).origin||(site&&site!=='same-origin'&&site!=='none'))return fail("Invalid request origin",403);
  const db=await createClient();const {data:{user},error:authError}=await db.auth.getUser();
  if(authError||!user)return fail('Aanmelden vereist',401);
- const size=Number(req.headers.get('content-length')??0);if(size>MAX_PHOTO_BYTES+100000)return fail("Photo is too large",413);
- let form:FormData;try{form=await req.formData();}catch{return fail("Invalid upload form",400);}
+ let form:FormData;try{form=await boundedFormData(req,MAX_PHOTO_BYTES+100000);}catch(error){return error instanceof RequestBodyTooLarge?fail("Photo is too large",413):fail("Invalid upload form",400);}
  const ticketId=String(form.get('ticket_id')??''),file=form.get('file');
  if(!uuid.test(ticketId)||!(file instanceof File)||file.size<1||file.size>MAX_PHOTO_BYTES)return fail("Choose a photo of up to 4 MB",400);
  const [ticket,existing,profile]=await Promise.all([

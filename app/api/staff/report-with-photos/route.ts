@@ -1,3 +1,4 @@
+import {boundedFormData,RequestBodyTooLarge} from '../../../../lib/security/bounded-form-data';
 import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '../../../../lib/supabase/server';
 import {staffEnvironmentAvailable} from '../../../../lib/security/property-staff';
@@ -20,8 +21,6 @@ export async function POST(request:NextRequest){
  const origin=request.headers.get('origin'),site=request.headers.get('sec-fetch-site');
  if(!origin||origin!==new URL(request.url).origin||
     (site&&site!=='same-origin'&&site!=='none'))return respond(403,'Invalid request origin');
- const size=Number(request.headers.get('content-length')??0);
- if(!Number.isFinite(size)||size>32000)return respond(413,'Report form too large');
  const db=await createClient();
  const {data:{user},error:authError}=await db.auth.getUser();
  if(authError||!user)return respond(401,'Sign in required');
@@ -32,7 +31,7 @@ export async function POST(request:NextRequest){
  if(profileError||!profile?.is_active||!['client','partner'].includes(profile.role)||
     scopeError||!properties?.length)return respond(403,'Staff property access required');
  let form:FormData;
- try{form=await request.formData();}catch{return respond(400,'Invalid form');}
+ try{form=await boundedFormData(request,32000);}catch(error){return error instanceof RequestBodyTooLarge?respond(413,'Report form too large'):respond(400,'Invalid form');}
  if(form.has('photos'))return respond(400,'Upload photos separately after the report is created');
  const property_id=String(form.get('property_id')??'');
  const unit_id=String(form.get('unit_id')??'')||null;
