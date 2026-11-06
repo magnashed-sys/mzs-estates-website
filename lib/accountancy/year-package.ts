@@ -1,3 +1,5 @@
+import {bankAccountantFiles} from './bank/export';
+import type {BankSnapshot} from './bank/model';
 import {accountantCsv} from '../property-operations/finance';
 import {exportBytes,exportHash,type ArchiveFile} from '../property-operations/accountant-archive';
 import {costCenters,yearIncome} from './cost-centers';
@@ -9,7 +11,7 @@ import {paymentOverview,type SupplierPaymentRecord,type SupplierPaymentMode} fro
 import {supplierCostIntegrity,type SupplierIdentity} from './supplier-integrity';
 import {originalArchivePath,validateYearOriginals,type YearOriginal} from './year-originals';
 /** A collection package, not an automatically posted annual ledger or tax computation. */
-export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:readonly SupplierIdentity[],supplierPayments?:readonly SupplierPaymentRecord[],paymentMode?:SupplierPaymentMode,originals:readonly YearOriginal[]=[]):ArchiveFile[]{
+export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:readonly SupplierIdentity[],supplierPayments?:readonly SupplierPaymentRecord[],paymentMode?:SupplierPaymentMode,originals:readonly YearOriginal[]=[],bank?:BankSnapshot):ArchiveFile[]{
  const s=validateYearSource(input,id),y=s.administration,summary=annualSummary(s),evidence=annualEvidenceReadiness(s),invoiceControl=annualInvoiceControl(s),reviews=new Map(s.reviews.map(r=>[r.draft_id,r]));
  validateYearOriginals(s,originals);
  const files=salesAccountantFiles(s.sales,y.issuer_id,y.fiscal_year).map(f=>({...f,name:'sales/'+f.name}));
@@ -121,7 +123,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   {source:'supplier_invoice_control',scope:'entity and supplier invoice year; header vs linked PDF metadata',limitation:'date and classification warnings are metadata-only, NOT PDF text validation; purchase payment status depends on separately scoped ledger events when available, NOT independently bank-reconciled; never infer overdue'},
   ...(supplierPayments?[{source:'supplier_payment_records',scope:paymentMode==='synthetic'?'STAGING SYNTHETIC ONLY: fictitious payment entries and reversals':'ADMIN-ATTESTED REAL TRANSFER RECORDS: payment entries and reversals, scoped by invoice and legal entity',limitation:paymentMode==='synthetic'?'TEST DATA; no actual bank or cash transfers; never use as real accounts':'User-attested prior payment references only, NOT independently reconciled with bank; no automatic credit/advance allocation, VAT adjustment or statutory posting'}]:[]),
   {source:'capital',scope:'all current register references for entity, all periods',limitation:'context only; not annual balances, interest accruals, repayments or confirmations'},
-  {source:'bank_assets_staff_and_tax_adjustments',scope:'manual collection checklist',limitation:'not a bank ledger or asset register; staff statements without verified entity attribution, unissued bookings, opening balances and fiscal adjustments are not added to annual amounts'}
+  {source:'bank_assets_staff_and_tax_adjustments',scope:bank?'bank evidence files and separate manual collection checklist':'manual collection checklist',limitation:bank?'bank/ contains imported originals, allocations, current accounts and unresolved items; reconcile with existing payment registers, verify full statement coverage; no statutory posting or asset register':'not a bank ledger or asset register; staff statements without verified entity attribution, unissued bookings, opening balances and fiscal adjustments are not added to annual amounts'}
  ]);
  files.push({name:'administration-settings.json',bytes:exportBytes(JSON.stringify(y,null,2)+'\n')});
  files.push({name:'README.txt',bytes:exportBytes([
@@ -142,6 +144,7 @@ export function yearAccountantFiles(input:YearSource,id:string,supplierMaster?:r
   'ES: Los avisos de proveedores comparan únicamente las relaciones de empresas existentes; nunca crean, fusionan, bloquean ni modifican proveedores ni instrucciones de pago. Los identificadores fiscales ausentes son avisos para revisar cuando corresponda.',
   'Machine column identifiers are stable English. Original names and descriptions are preserved. / Los identificadores de columnas son estables en inglés; se conservan los nombres y descripciones originales.'
  ].join('\n')+'\n')});
+ if(bank)files.push(...bankAccountantFiles(bank,y.issuer_id,y.fiscal_year));
  files.push({name:'manifest.json',bytes:exportBytes(JSON.stringify({kind:'annual-administration-collection',entity:y.issuer_id,year:y.fiscal_year,snapshot_at:s.snapshot_at,statutory_complete:false,purchase_costs:s.costs.length,review_exceptions:exceptions.length,original_pdfs:originals.length,original_pdf_bytes:originals.reduce((n,f)=>n+f.bytes.length,0),files:files.map(f=>({name:f.name,bytes:f.bytes.length,sha256:exportHash(f.bytes)}))},null,2)+'\n')});
  return files;
 }
