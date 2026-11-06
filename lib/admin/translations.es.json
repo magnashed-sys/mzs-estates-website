@@ -3448,5 +3448,14 @@
   "Indexation clause / reference": "Cláusula de actualización / referencia",
   "After activation, calculate and review indexations and advances in the contract dossier. All-in prices are excluded from these automatic calculations.": "Después de activar, calcule y revise las actualizaciones y anticipos en el expediente. Los precios todo incluido quedan fuera de estos cálculos automáticos.",
   "Activated terms are retained for the audit history. Use the pricing review below for future indexations and advances. Other contract changes require a replacement schedule and review of existing drafts.": "Se conserva el historial de las condiciones activadas. Utilice la revisión de precios para futuras actualizaciones y anticipos. Otros cambios requieren un calendario de sustitución y revisar los borradores existentes.",
-  "Link existing managed units, record the agreement and prepare monthly invoice drafts for review.": "Vincule unidades que ya estén en gestión, registre el contrato y prepare borradores mensuales para su revisión."
+  "Link existing managed units, record the agreement and prepare monthly invoice drafts for review.": "Vincule unidades que ya estén en gestión, registre el contrato y prepare borradores mensuales para su revisión.",
+  "Monthly all-in price for this unit": "Precio mensual con todo incluido para esta unidad",
+  "Monthly rent for this unit": "Alquiler mensual de esta unidad",
+  "Monthly utilities advance for this unit": "Anticipo mensual de suministros de esta unidad",
+  "Other charges for this unit": "Otros cargos de esta unidad",
+  "VAT for this unit": "IVA de esta unidad",
+  "Monthly total for this unit": "Total mensual de esta unidad",
+  "Per-unit allocation": "Distribución por unidad",
+  "Allocation from {p0}": "Distribución desde {p0}",
+  "One invoice for the full agreement.": "Una sola factura para todo el contrato."
 }
