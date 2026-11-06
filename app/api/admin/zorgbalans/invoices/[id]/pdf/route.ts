@@ -33,7 +33,7 @@ export async function GET(_request:Request,{params}:{params:Promise<{id:string}>
  pdf.setAuthor('Magdy Nashed');pdf.setCreator('Magdy Nashed');pdf.setSubject('Zorgbalans dienstverlening');
  const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const ink=rgb(.13,.15,.18),muted=rgb(.39,.42,.45),gold=rgb(.60,.47,.29),line=rgb(.84,.84,.84);
- const safe=(value:string)=>String(value).normalize('NFKD').replace(/[^\x20-\x7e]/g,'?');
+ const safe=(value:string)=>String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7e]/g,'?');
  const date=(value:string)=>value.slice(8,10)+'-'+value.slice(5,7)+'-'+value.slice(0,4);
  const money=(value:number)=>'EUR '+(value/100).toFixed(2).replace('.',',');
  function txt(page:ReturnType<typeof pdf.addPage>,value:string,x:number,y:number,size=10,strong=false,color=ink){
@@ -72,19 +72,38 @@ export async function GET(_request:Request,{params}:{params:Promise<{id:string}>
  if(source.status==='concept')txt(p,'CONCEPT - Nog niet extern verzonden. Controleer voor verzending.',43,107,11,true,gold);
  else txt(p,'De registratie van externe verzending wordt afzonderlijk in de administratie bijgehouden.',43,107,9,false,muted);
  let pageIndex=0;
- for(let offset=0;offset<lines.length;offset+=22){
+ function specificationPage(){
   const page=base('BIJLAGE - URENSPECIFICATIE');pageIndex++;
-  txt(page,'Factuurnummer '+source.invoice_number+' · pagina '+pageIndex,43,708,9);
+  txt(page,'Factuurnummer '+source.invoice_number+' - pagina '+pageIndex,43,708,9);
   txt(page,'Datum',43,680,10,true);txt(page,'Omschrijving',113,680,10,true);
   txt(page,'Minuten',420,680,9,true);txt(page,'Uren',500,680,9,true);
   page.drawLine({start:{x:42,y:668},end:{x:553,y:668},color:line,thickness:1});
-  for(let i=0;i<Math.min(22,lines.length-offset);i++){
-   const row=lines[offset+i],y=645-i*24;
-   txt(page,date(row.worked_on),43,y,9);
-   txt(page,row.description.slice(0,56),113,y,9);
-   txt(page,String(row.actual_minutes),430,y,9);txt(page,String(row.invoiced_hours),507,y,9,true);
-  }
   txt(page,'Werkelijk geregistreerde minuten blijven behouden; factuururen zijn per bezoek afgerond.',43,80,8,false,muted);
+  return page;
+ }
+ function wrapDescription(value:string){
+  const result:string[]=[];let current='';
+  for(const char of safe(value.replace(/\s+/g,' ').trim())){
+   if(regular.widthOfTextAtSize(current+char,9)>290){
+    const space=current.lastIndexOf(' ');
+    if(space>0){result.push(current.slice(0,space));current=current.slice(space+1);}
+    else{result.push(current);current='';}
+   }
+   current+=char;
+  }
+  if(current)result.push(current);return result;
+ }
+ let specification=specificationPage(),y=645;
+ for(const row of lines){
+  const description=wrapDescription(row.description);
+  if(y-24<110){specification=specificationPage();y=645;}
+  txt(specification,date(row.worked_on),43,y,9);
+  txt(specification,String(row.actual_minutes),430,y,9);txt(specification,String(row.invoiced_hours),507,y,9,true);
+  for(const text of description){
+   if(y<110){specification=specificationPage();y=645;txt(specification,'(vervolg)',43,y,8,false,muted);}
+   txt(specification,text,113,y,9);y-=12;
+  }
+  y-=12;
  }
  const bytes=await pdf.save();
  return new Response(new Uint8Array(bytes),{status:200,headers:{
