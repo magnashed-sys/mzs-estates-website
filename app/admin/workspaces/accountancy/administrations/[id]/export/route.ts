@@ -1,3 +1,4 @@
+import {bankSource} from '../../../../../../../lib/accountancy/bank/data';
 import {requireEstateAdmin} from '../../../../../../../lib/security/estate-properties';
 import {annualSource} from '../../../../../../../lib/accountancy/administration-data';
 import {supplierPaymentMode,supplierPaymentRows} from '../../../../../../../lib/accountancy/supplier-payments';
@@ -15,9 +16,9 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const signal=AbortSignal.any([request.signal,AbortSignal.timeout(240_000)]);
   const [source,suppliers]=await Promise.all([annualSource(db,id),allRows<SupplierIdentity>((a,b)=>db.from('mzs_lease_relationships').select('id,name,kind,company_details',{count:'exact'}).order('id').range(a,b))]);
   const paymentMode=supplierPaymentMode();
-  const [payments,originals]=await Promise.all([paymentMode?supplierPaymentRows(db,source.costs):undefined,loadYearOriginals(db,source,signal)]);
+  const [payments,originals,bank]=await Promise.all([paymentMode?supplierPaymentRows(db,source.costs):undefined,loadYearOriginals(db,source,signal),bankSource(db,id,true)]);
   signal.throwIfAborted();
-  const zip=accountantZipStream(yearAccountantFiles(source,id,suppliers,payments,paymentMode??undefined,originals),{maxFiles:MAX_YEAR_PDFS+150,maxBytes:MAX_YEAR_PDF_BYTES+24*1024*1024});
+  const zip=accountantZipStream(yearAccountantFiles(source,id,suppliers,payments,paymentMode??undefined,originals,bank),{maxFiles:1024,maxBytes:MAX_YEAR_PDF_BYTES+40*1024*1024});
   return new Response(zip,{headers:{...headers,'Content-Type':'application/zip','Content-Disposition':'attachment; filename="MZS-Administration-'+source.administration.fiscal_year+'-'+source.administration.issuer_id.slice(0,8)+'.zip"'}});
  }catch(error){
   const known=error instanceof YearOriginalError;
