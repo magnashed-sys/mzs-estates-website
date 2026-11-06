@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as serviceClient } from "@supabase/supabase-js";
 import { createClient } from "../../../../lib/supabase/server";
@@ -22,15 +23,15 @@ export async function PATCH(req: NextRequest) {
   if (admin?.role !== "admin" || admin.is_active !== true)
     return reply(403, { error: "Administrator access required." });
   let body: Record<string, unknown>;
-  try { body = await req.json() as Record<string, unknown>; }
-  catch { return reply(400, { error: "Invalid request." }); }
+  try { body = await boundedJsonObject(req, 16000) as Record<string, unknown>; }
+  catch (error) { if (error instanceof RequestBodyTooLarge) return reply(413, { error: "Request too large." }); return reply(400, { error: "Invalid request." }); }
   const userId = body.user_id;
   if (typeof userId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId))
     return reply(400, { error: "Invalid relationship." });
   const update: Record<Field, string | null> = {} as Record<Field, string | null>;
   for (const key of Object.keys(body)) {
     if (key === "user_id") continue;
-    if (!(key in fields)) return reply(400, { error: "Unsupported field." });
+    if (!Object.hasOwn(fields, key)) return reply(400, { error: "Unsupported field." });
     const field = key as Field;
     const value = body[key];
     if (typeof value !== "string" || value.length > fields[field])

@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { NextRequest, NextResponse } from "next/server";
 import { rentalAdministrator, rentalJson } from "../../../../lib/mzs/rental-notification-auth";
 import { deliverRentalChange, rentalChangeTemplate, rentalMailEnvironment, rentalService, RentalEvent } from "../../../../lib/mzs/rental-notifications";
@@ -31,13 +32,13 @@ export async function POST(request: NextRequest) {
   const auth = await rentalAdministrator(request, true);
   if (auth.error) return auth.error;
   let body;
-  try { body = await request.json(); } catch { return rentalJson(400, { error: "Invalid request" }); }
+  try { body = await boundedJsonObject(request, 8000); } catch (error) { if (error instanceof RequestBodyTooLarge) return rentalJson(413, { error: "Request too large." }); return rentalJson(400, { error: "Invalid request" }); }
   if (body?.action === "resolve") {
     if (body.verified !== true) return rentalJson(400, { error: "Verify delivery logs before resolving" });
     const { data, error } = await auth.db.rpc("resolve_rental_change_notification", {
       p_id: body.id, p_decision: body.decision, p_reason: body.reason,
     });
-    return error ? rentalJson(409, { error: error.message }) : rentalJson(200, { status: data });
+    return error ? rentalJson(409, { error: "Notification status could not be updated. Refresh and verify the delivery logs before retrying." }) : rentalJson(200, { status: data });
   }
   if (body?.action !== "dispatch") return rentalJson(400, { error: "Invalid action" });
   try { return rentalJson(200, { status: await deliverRentalChange() }); }

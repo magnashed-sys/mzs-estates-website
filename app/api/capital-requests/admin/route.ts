@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../lib/supabase/server";
 import { isPhase3aPreviewIsolated } from "../../../../lib/security/phase3a-preview-isolation";
@@ -20,8 +21,8 @@ export async function PATCH(request: NextRequest) {
   if (authError || !auth.user) return reply(401, { error: "Sign in required" });
 
   let input: { id?: unknown; status?: unknown };
-  try { input = await request.json(); }
-  catch { return reply(400, { error: "Invalid request" }); }
+  try { input = await boundedJsonObject(request, 4000); }
+  catch (error) { if (error instanceof RequestBodyTooLarge) return reply(413, { error: "Request too large." }); return reply(400, { error: "Invalid request" }); }
 
   if (typeof input.id !== "string" ||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.id) ||
