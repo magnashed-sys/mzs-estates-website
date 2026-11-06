@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../lib/security/bounded-form-data";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     return respond(403, { error: "An active private account is required." });
   }
   let body: { type?: unknown; amount?: unknown; explanation?: unknown };
-  try { body = await request.json(); } catch { return respond(400, { error: "Invalid request." }); }
+  try { body = await boundedJsonObject(request, 32000); } catch (error) { if (error instanceof RequestBodyTooLarge) return respond(413, { error: "Request too large." }); return respond(400, { error: "Invalid request." }); }
   const type = body.type;
   const amount = body.amount;
   const explanation = typeof body.explanation === "string" ? body.explanation.trim() : "";

@@ -37,3 +37,9 @@ export async function boundedFormData(request:Request,maxBytes:number):Promise<F
 export async function boundedText(request:Request,maxBytes:number):Promise<string>{
  return new TextDecoder().decode(await boundedBytes(request,maxBytes));
 }
+
+export async function boundedJsonObject(request:Request,maxBytes:number):Promise<Record<string,unknown>>{
+ const value:unknown=JSON.parse(await boundedText(request,maxBytes));
+ if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Expected a JSON object');
+ return value as Record<string,unknown>;
+}

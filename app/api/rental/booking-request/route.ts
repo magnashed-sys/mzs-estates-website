@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { localizedRentalMail, isLocalizedRentalLocale } from "../../../../lib/mzs/localized-rental-mail";
 import { NextRequest, NextResponse, after } from "next/server";
 import { createClient as serviceClient } from "@supabase/supabase-js";
@@ -32,8 +33,8 @@ export async function POST(request: NextRequest) {
     return reply(403, { error: "Origin verification failed." });
 
   let body: Payload;
-  try { body = await request.json() as Payload; }
-  catch { return reply(400, { error: "Invalid request." }); }
+  try { body = await boundedJsonObject(request, 16000) as Payload; }
+  catch (error) { if (error instanceof RequestBodyTooLarge) return reply(413, { error: "Request too large." }); return reply(400, { error: "Invalid request." }); }
 
   if ((body.mode !== "villa" && body.mode !== "configured") ||
       typeof body.projectId !== "string" || !/^[0-9a-f-]{36}$/i.test(body.projectId) ||
