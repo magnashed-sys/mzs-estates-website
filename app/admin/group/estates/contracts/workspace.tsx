@@ -59,7 +59,12 @@ export default function ContractWorkspace({relationships,properties,units,member
  const visibleInvoices=unitFilter?scopedInvoices.filter(i=>i.snapshot.unit_ids.includes(unitFilter)):scopedInvoices;
  const invoice=visibleInvoices.find(i=>i.id===invoiceId);
  function run(action:()=>Promise<{error?:string;message?:string}>) {setError('');setNotice('');startTransition(async()=>{try{const r=await action();if(r.error)setError(r.error);else{setNotice(r.message || 'Saved.');router.refresh();}}catch{setError('The action could not be verified. Refresh the page before trying again.');}});}
- const shown=scopedContracts.filter(c=>(!propertyFilter||c.property_id===propertyFilter)&&(!filter||`${c.title} ${c.tenant_name}`.toLowerCase().includes(filter.toLowerCase())));
+ const alphabetic=new Intl.Collator(adminLocale,{numeric:true,sensitivity:'base'});
+ const unitAddresses=new Map(units.map(u=>[u.id,u.address.trim()]));
+ const propertyAddresses=new Map(properties.map(p=>[p.id,p.address.trim()]));
+ const contractAddresses=new Map(scopedContracts.map(c=>[c.id,c.unit_ids.map(id=>unitAddresses.get(id)||'').filter(Boolean).sort(alphabetic.compare).join(', ')||propertyAddresses.get(c.property_id)||c.title]));
+ const shown=scopedContracts.filter(c=>(!propertyFilter||c.property_id===propertyFilter)&&(!filter||`${c.title} ${c.tenant_name}`.toLowerCase().includes(filter.toLowerCase())))
+  .sort((a,b)=>alphabetic.compare(contractAddresses.get(a.id)!,contractAddresses.get(b.id)!)||alphabetic.compare(a.title,b.title)||a.id.localeCompare(b.id));
  return <>
   <div className={s.notice}>{adminT("Monthly draft preparation starts with December 2026. Drafts are prepared on the 14th of the preceding month. Check each draft, explicitly approve its issue, then send the numbered invoice separately. Staging delivery is captured without emailing tenants.")}</div>
   <div className={s.metrics}><div><span className={s.label}>{adminT("CONTRACTS")}</span><strong>{scopedContracts.length}</strong></div><div><span className={s.label}>{adminT("ACTIVE SCHEDULES")}</span><strong>{scopedContracts.filter(c=>c.status==='active').length}</strong></div><div><span className={s.label}>{adminT("DRAFTS TO REVIEW")}</span><strong>{scopedInvoices.filter(i=>i.review_status==='pending'&&!issued.some(f=>f.draft_id===i.id)).length}</strong></div></div>
