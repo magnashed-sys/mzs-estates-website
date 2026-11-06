@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { contractsAvailable } from '../../../../../../lib/security/estate-contracts';
 import { notFound } from 'next/navigation';
 import { requireEstateAdmin } from '../../../../../../lib/security/estate-properties';
-import {currentUnitContracts,contractNet} from '../../../../../../lib/estates/unit-contracts';
+import {currentUnitContracts} from '../../../../../../lib/estates/unit-contracts';
+import ContractAmounts from '../contract-amounts';
 import { euros } from '../../../../../../lib/estates/rent';
 import s from '../../properties/estates.module.css';
 
@@ -26,7 +27,11 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
     .select('id,name,owner_name,ownership_kind,ownership_since_year,managing_agent_name,rent_basis')
     .eq('id', unit.property_id).maybeSingle();
   if (propertyError || !property) return <p role="alert" className={s.error}>{adminT("The linked property is unavailable. Please try again later.")}</p>;
-  const {data:contracts,error:contractError}=contractsAvailable()?await db.from('mzs_lease_contracts').select('id,title,status,tenant_name,unit_ids,lease_start,lease_end,lines').contains('unit_ids',[id]):{data:[],error:null};
+  const {data:contracts,error:contractError}=contractsAvailable()?await db.from('mzs_lease_contracts').select('id,title,status,tenant_name,unit_ids,lease_start,lease_end,first_period,pricing_basis,line_roles,lines').contains('unit_ids',[id]):{data:[],error:null};
+  const contractIds=(contracts||[]).map(c=>c.id);
+  const {data:adjustments,error:adjustmentError}=contractIds.length
+   ?await db.from('mzs_lease_adjustments').select('*').eq('status','approved').in('contract_id',contractIds)
+   :{data:[],error:null};
   // Maintenance evidence remains in the secured maintenance archive. A unit
   // dossier links to it by unit_id rather than duplicating stored photographs.
   const {data:maintenance,error:maintenanceError}=await db.from('mzs_ops_maintenance_tickets')
@@ -59,7 +64,7 @@ export default async function RentalUnit({ params }: { params: Promise<{ id: str
       </dl>
     </section>
     <section className={s.section}>
-      <h2>{adminT("Current contract")}</h2>{contractError?<p role="alert">{adminT("Contracts could not be loaded. Current rent is unconfirmed.")}</p>:current.length?current.map(c=><div key={c.id}><p>{c.tenant_name} · {c.lease_start} — {c.lease_end||adminT("open-ended")}</p><p>{euros(contractNet(c), adminLocale)}  {adminT("monthly net")} {c.unit_ids.length>1?adminT("for the full agreement covering {p0} units; no per-unit allocation", {p0: c.unit_ids.length}):''}</p><Link href={`/admin/group/estates/contracts?contract=${c.id}`}>{c.title} →</Link></div>):<p>{adminT("No active contract covering today is recorded.")}</p>}
+      <h2>{adminT("Current contract")}</h2>{contractError||adjustmentError?<p role="alert">{adminT("Contracts could not be loaded. Current rent is unconfirmed.")}</p>:current.length?current.map(c=><div key={c.id}><p>{c.tenant_name} · {c.lease_start} — {c.lease_end||adminT("open-ended")}</p><ContractAmounts contract={c} unitId={id} adjustments={adjustments||[]} today={today} t={adminT} locale={adminLocale}/><Link href={`/admin/group/estates/contracts?contract=${c.id}`}>{c.title} →</Link></div>):<p>{adminT("No active contract covering today is recorded.")}</p>}
       <h3>{adminT("Imported reference figures")}</h3><p className={s.note}>{adminT("The figures below are retained from the original unit register. A current contract above is the source for ongoing billing.")}</p>
       <dl className={s.facts}>
         <div><dt>{adminT("Recorded tenant")}</dt><dd>{unit.tenant_name || adminT("Not provided")}</dd></div>

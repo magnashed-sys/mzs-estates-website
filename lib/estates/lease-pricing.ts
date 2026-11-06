@@ -1,6 +1,6 @@
 export type PricingBasis = 'unclassified' | 'all_in' | 'separate';
 export type LineRole = 'rent' | 'advance' | 'other' | 'all_in';
-export type PricingLine = {description:string;amount:string;vat:string};
+export type PricingLine = {description:string;amount:string;vat:string;unit_id?:string};
 export type LeasePricing = {id:string;version:number;status:string;lines:PricingLine[];pricing_basis:PricingBasis;line_roles:LineRole[];indexation_review_on:string|null;indexation_clause:string};
 export type Adjustment = {id:string;contract_id:string;revision:number;kind:'indexation'|'advance';effective_on:string;status:'proposed'|'approved'|'cancelled';base_lines:PricingLine[];new_lines:PricingLine[];calculation:Record<string,string|number|null>;evidence:string;approved_at:string|null;created_at:string};
 
