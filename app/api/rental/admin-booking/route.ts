@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { NextRequest } from "next/server";
 import { rentalAdministrator, rentalJson } from "../../../../lib/mzs/rental-notification-auth";
 import { deliverRentalChange } from "../../../../lib/mzs/rental-notifications";
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
   const auth = await rentalAdministrator(request, true);
   if (auth.error) return auth.error;
   let body;
-  try { body = await request.json(); } catch { return rentalJson(400, { error: "Invalid request" }); }
+  try { body = await boundedJsonObject(request, 64000); } catch (error) { if (error instanceof RequestBodyTooLarge) return rentalJson(413, { error: "Request too large." }); return rentalJson(400, { error: "Invalid request" }); }
   if (!body || typeof body.functionName !== "string" || !Object.hasOwn(fields, body.functionName) ||
       !body.args || typeof body.args !== "object" || Array.isArray(body.args))
     return rentalJson(400, { error: "Invalid booking action" });
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     return rentalJson(400, { error: "Invalid booking reference" });
   // The unchanged RPC retains validation, availability, price and audit behaviour.
   const { data, error } = await auth.db.rpc(body.functionName, args);
-  if (error) return rentalJson(409, { error: error.message });
+  if (error) return rentalJson(409, { error: "Booking change could not be confirmed. Refresh the booking and review its current status before retrying." });
   if (body.functionName === "mzs_admin_cancel_booking_dossier" && data?.emailQueued !== true)
     return rentalJson(200, { result: data, delivery: "not_required" });
   let delivery: string = "queued";

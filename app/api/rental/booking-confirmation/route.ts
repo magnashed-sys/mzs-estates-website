@@ -1,3 +1,4 @@
+import {boundedJsonObject,RequestBodyTooLarge} from "../../../../lib/security/bounded-form-data";
 import { localizedRentalMail, isLocalizedRentalLocale } from "../../../../lib/mzs/localized-rental-mail";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as adminClient } from "@supabase/supabase-js";
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
   if (!request.headers.get("origin") || request.headers.get("origin") !== request.nextUrl.origin)
     return response(403, { error: "Origin verification failed" });
   let bookingId: unknown;
-  try { ({ bookingId } = await request.json()); } catch { return response(400, { error: "Invalid request" }); }
+  try { ({ bookingId } = await boundedJsonObject(request, 4000)); } catch (error) { if (error instanceof RequestBodyTooLarge) return response(413, { error: "Request too large." }); return response(400, { error: "Invalid request" }); }
   if (typeof bookingId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId))
     return response(400, { error: "Invalid booking reference" });
   const db = await createClient();
