@@ -89,11 +89,11 @@ const focus = [
           <p className={styles.eyebrow}>{t('our_focus_02')}</p>
           <h2 id="capital-activities">{t('private_by_nature')}</h2>
         </div>
-        <div className={styles.activityGrid}>
+        <div className={atmosphere.focusGrid}>
           {focus.map((item) => (
-            <article className={styles.activity} key={item.number}>
-              <span className={styles.number}>{item.number}</span>
-              <p className={styles.activitySubtitle}>{item.subtitle}</p>
+            <article className={atmosphere.focusCard} key={item.number}>
+              <span className={atmosphere.focusNumber}>{item.number}</span>
+              <p className={atmosphere.focusSubtitle}>{item.subtitle}</p>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
             </article>
