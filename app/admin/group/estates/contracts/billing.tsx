@@ -10,7 +10,7 @@ import type {InvoiceDocument} from '../../../../../lib/estates/invoice-pdf';
 import type {IssuerDetails} from '../../../../../lib/estates/issuer-profile';
 export {default as Issuers} from './issuers';
 import s from './contracts.module.css';
-export type Issuer={kind?:string;details?:IssuerDetails;source_company_id?:string|null;id:string;name:string;address:string;iban:string;tax_id:string;registration_number:string;prefix:string;next_number:number;relationship_id:string|null;version:number};
+export type Issuer={kind?:string;details?:IssuerDetails;source_company_id?:string|null;id:string;name:string;address:string;iban:string;tax_id:string;registration_number:string;prefix:string;number_format?:'prefixed'|'numeric';next_number:number;relationship_id:string|null;version:number};
 export type Issued=InvoiceDocument&{id:string;draft_id:string;contract_id:string;delivery_status:string;delivery_started_at:string|null};
 export type Payment={id:string;invoice_id:string;amount:number;received_on:string;reference:string;reversed_at:string|null;reversal_reason:string|null};
 export function Billing({issued,payments}:{issued:Issued[];payments:Payment[]}){
