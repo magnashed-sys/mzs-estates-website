@@ -1,5 +1,5 @@
 import {NextRequest} from 'next/server';
-import {requireContractAdmin} from '../../../../lib/security/estate-contracts';
+import {requireContractAdminApi} from '../../../../lib/security/contract-admin-api';
 import {capitalDealsEnabled} from '../../../../lib/security/capital-deals';
 import {loadInvoiceRegister,invoiceFilters,selectInvoices} from '../../../../lib/finance/invoice-register';
 import {readFinancialArchive} from '../../../../lib/finance/archive-register';
@@ -29,7 +29,9 @@ async function listBookings(db:SupabaseClient):Promise<Booking[]>{
 }
 export async function GET(request:NextRequest){
  try{
-  const {db}=await requireContractAdmin(); // Active authenticated Group Admin; fails closed.
+  const actor=await requireContractAdminApi();
+  if('response' in actor)return actor.response;
+  const {db}=actor;
   const today=madridToday(),currentYear=Number(today.slice(0,4));
   const requested=request.nextUrl.searchParams.get('year');
   const year=requested===null?currentYear:Number(requested);
