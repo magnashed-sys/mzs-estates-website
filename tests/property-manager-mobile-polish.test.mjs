@@ -54,7 +54,7 @@ test('photos are selected together then securely uploaded one-by-one below the s
  const board=file('app/staff/StaffTaskBoard.tsx');
  assert.match(create,/mzs_ops_maintenance_tickets/);
  assert.match(create,/form\.has\('photos'\)/);
- assert.match(create,/size>32000/);
+ assert.match(create,/boundedFormData\(request,32000\)/);
  assert.match(create,/ticketId:ticket\.id/);
  assert.match(photo,/normalizeMaintenancePhoto/);
  assert.match(photo,/MAX_PHOTO_BYTES/);
