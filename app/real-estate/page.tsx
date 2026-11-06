@@ -80,11 +80,11 @@ const activities = [
           <p className={styles.eyebrow}>{t('what_we_do_02')}</p>
           <h2 id="estates-activities">{t('our_activities_2')}</h2>
         </div>
-        <div className={styles.activityGrid}>
+        <div className={atmosphere.cardGrid}>
           {activities.map((item) => (
-            <article className={styles.activity} key={item.number}>
-              <span className={styles.number}>{item.number}</span>
-              <p className={styles.activitySubtitle}>{item.subtitle}</p>
+            <article className={atmosphere.card} key={item.number}>
+              <span className={atmosphere.cardNumber}>{item.number}</span>
+              <p className={atmosphere.cardSubtitle}>{item.subtitle}</p>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
             </article>
@@ -106,7 +106,6 @@ const activities = [
 
       <CaseStudies />
       <IntroCallForm preview={preview} source="real-estate" sectionNumber="05" />
-      {<p className={atmosphere.imageNote}>{t('illustrative_atmosphere_imagery')}</p>}
 
       <div className={styles.bottomNavigation}>
         <Link href={localizedPath("/", locale)}>{t('mzs_group')}</Link>
