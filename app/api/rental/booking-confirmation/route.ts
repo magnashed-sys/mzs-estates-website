@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       const sent = await transport.sendMail({
         from, to: guest.email, ...message,
       });
-      if (!sent.accepted?.some(address => (typeof address === "string" ? address : address.address).toLowerCase() === guest.email.toLowerCase()))
+      if (!sent.accepted?.some((address: string | { address: string }) => (typeof address === "string" ? address : address.address).toLowerCase() === guest.email.toLowerCase()))
         throw new Error("Message not accepted by SMTP server");
     } finally { transport.close(); }
     await service.from("rental_confirmation_mail_claims").update({
