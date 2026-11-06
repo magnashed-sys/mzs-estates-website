@@ -4,10 +4,10 @@ import {useRouter} from 'next/navigation';
 import {useAdminI18n} from '../../lib/admin/i18n';
 import {saveAdminLanguage} from './language-actions';
 import s from './language.module.css';
-export default function AdminLanguageSwitcher(){
+export default function AdminLanguageSwitcher({compact=false}:{compact?:boolean}){
   const {t,language}=useAdminI18n();
   const router=useRouter();const [pending,startTransition]=useTransition();const [failed,setFailed]=useState(false);
-  return <div className={s.bar}>
+  return <div className={compact?s.compact:s.bar}>
     <label htmlFor="admin-language">{t('Administration language')}</label>
     <select id="admin-language" value={language} disabled={pending} aria-busy={pending} onChange={event=>{
       const selected=event.target.value;setFailed(false);
