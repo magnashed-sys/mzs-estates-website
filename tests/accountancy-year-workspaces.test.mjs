@@ -116,3 +116,19 @@ test('pilot supplier payment export preserves partial, reversed, unreconciled ev
  const noPilot=pkg.yearAccountantFiles(f,id(1));
  assert.equal(noPilot.some(x=>x.name==='supplier-payment-events.csv'),false);
 });
+
+test('cost centers separate project renovation, property maintenance, unallocated income and credits without double-counting',()=>{
+ const f=fixture(),centers=load('lib/accountancy/cost-centers.ts');
+ f.projects=[{id:id(40),year_id:id(1),property_id:null,name:'At-risk renovation',kind:'renovation',source_reference:'Confirmed project'}];
+ f.costs[0].category='renovation';f.reviews[0].category='renovation';f.reviews[0].project_id=id(40);
+ f.costs[1].property_id=id(41);f.costs[1].property_name='Existing managed property';f.costs[1].cost_scope='property';f.costs[1].category='maintenance';
+ f.sales.services=[{id:id(50),draft_id:id(51),issuer_id:id(2),number:'SYNTHETIC-50',issued_on:'2026-04-01',total:'1000.00',net_total:'1000.00',vat_total:'0.00',status:'issued'}];
+ let rows=centers.costCenters(f);assert.equal(rows.find(r=>r.key==='unallocated').invoiced,100000);assert.equal(rows.find(r=>r.project_id===id(40)).renovation,12100);assert.equal(rows.find(r=>r.property_id===id(41)).maintenance,24200);
+ f.income_allocations=[{year_id:id(1),source:'services',invoice_id:id(50),property_id:null,project_id:id(40),evidence_reference:'Synthetic allocation',revision:1}];
+ f.sales.credit_notes=[{invoice_id:id(50),issuer_id:id(2),issued_on:'2026-06-01',gross_cents:25000}];
+ rows=centers.costCenters(f);const project=rows.find(r=>r.project_id===id(40));assert.equal(project.invoiced,100000);assert.equal(project.credit_notes,25000);assert.equal(rows.reduce((n,r)=>n+r.reviewed+r.pending+r.excluded,0),72600);
+ f.income_allocations[0].year_id=id(99);assert.throws(()=>centers.costCenters(f),/Invalid income allocation/);
+});
+test('income allocation database rules preserve invoice sources and enforce entity/property/year permissions',()=>{
+ const r=spawnSync(process.execPath,['tests/db/income-allocations.cjs'],{encoding:'utf8',timeout:90000,maxBuffer:2*1024*1024});assert.equal(r.status,0,r.stdout+r.stderr);
+});

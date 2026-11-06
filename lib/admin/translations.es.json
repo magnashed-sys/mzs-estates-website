@@ -3433,5 +3433,20 @@
   "Operations": "Operaciones",
   "Open tasks, maintenance, pending time reviews and corrections in one central control panel.": "Gestione tareas abiertas, mantenimiento, revisiones de horas y correcciones desde un único panel.",
   "Open operational action center →": "Abrir centro de acciones operativas →",
-  "Zorgbalans hours are recharged through the separate private billing workflow after approval.": "Las horas de Zorgbalans se refacturan mediante el proceso privado independiente tras su aprobación."
+  "Zorgbalans hours are recharged through the separate private billing workflow after approval.": "Las horas de Zorgbalans se refacturan mediante el proceso privado independiente tras su aprobación.",
+  "Pricing basis": "Tipo de precio",
+  "Basic rent and separate advances": "Renta base y anticipos separados",
+  "All-in without separate advances": "Todo incluido sin anticipos separados",
+  "Classification pending": "Clasificación pendiente",
+  "All-in amounts already include the agreed services. Review every line before saving; never add an extra advance for included services.": "El importe todo incluido ya cubre los servicios acordados. Revise cada línea antes de guardar; no añada anticipos por servicios incluidos.",
+  "Line type": "Tipo de línea",
+  "Basic rent": "Renta base",
+  "Service advance": "Anticipo de servicios",
+  "Other fixed amount": "Otro importe fijo",
+  "Template version": "Versión de la plantilla",
+  "Next indexation review date (first of month)": "Fecha de próxima revisión de renta (día 1 del mes)",
+  "Indexation clause / reference": "Cláusula de actualización / referencia",
+  "After activation, calculate and review indexations and advances in the contract dossier. All-in prices are excluded from these automatic calculations.": "Después de activar, calcule y revise las actualizaciones y anticipos en el expediente. Los precios todo incluido quedan fuera de estos cálculos automáticos.",
+  "Activated terms are retained for the audit history. Use the pricing review below for future indexations and advances. Other contract changes require a replacement schedule and review of existing drafts.": "Se conserva el historial de las condiciones activadas. Utilice la revisión de precios para futuras actualizaciones y anticipos. Otros cambios requieren un calendario de sustitución y revisar los borradores existentes.",
+  "Link existing managed units, record the agreement and prepare monthly invoice drafts for review.": "Vincule unidades que ya estén en gestión, registre el contrato y prepare borradores mensuales para su revisión."
 }
