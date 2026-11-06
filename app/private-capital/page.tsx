@@ -89,11 +89,11 @@ const focus = [
           <p className={styles.eyebrow}>{t('our_focus_02')}</p>
           <h2 id="capital-activities">{t('private_by_nature')}</h2>
         </div>
-        <div className={atmosphere.focusGrid}>
+        <div className={atmosphere.cardGrid}>
           {focus.map((item) => (
-            <article className={atmosphere.focusCard} key={item.number}>
-              <span className={atmosphere.focusNumber}>{item.number}</span>
-              <p className={atmosphere.focusSubtitle}>{item.subtitle}</p>
+            <article className={atmosphere.card} key={item.number}>
+              <span className={atmosphere.cardNumber}>{item.number}</span>
+              <p className={atmosphere.cardSubtitle}>{item.subtitle}</p>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
             </article>
@@ -118,22 +118,22 @@ const focus = [
           <h2 id="securities-heading">{t('securities')}</h2>
           <p className={atmosphere.securityIntro}>{t('a_considered_security_structure_is_an')}</p>
         </div>
-        <div className={styles.activityGrid}>
-          <article className={styles.activity}>
-            <span className={styles.number}>01</span>
-            <p className={styles.activitySubtitle}>{t('personal_commitment')}</p>
+        <div className={atmosphere.cardGrid}>
+          <article className={atmosphere.card}>
+            <span className={atmosphere.cardNumber}>01</span>
+            <p className={atmosphere.cardSubtitle}>{t('personal_commitment')}</p>
             <h3>{t('personal_guarantees')}</h3>
             <p>{t('a_personal_guarantee_may_form_part')}</p>
           </article>
-          <article className={styles.activity}>
-            <span className={styles.number}>02</span>
-            <p className={styles.activitySubtitle}>{t('real_estate_security')}</p>
+          <article className={atmosphere.card}>
+            <span className={atmosphere.cardNumber}>02</span>
+            <p className={atmosphere.cardSubtitle}>{t('real_estate_security')}</p>
             <h3>{t('mortgage_rights')}</h3>
             <p>{t('financing_may_be_secured_by_a')}</p>
           </article>
-          <article className={styles.activity}>
-            <span className={styles.number}>03</span>
-            <p className={styles.activitySubtitle}>{t('share_security')}</p>
+          <article className={atmosphere.card}>
+            <span className={atmosphere.cardNumber}>03</span>
+            <p className={atmosphere.cardSubtitle}>{t('share_security')}</p>
             <h3>{t('share_pledges')}</h3>
             <p>{t('a_pledge_over_shares_in_a')}</p>
           </article>
