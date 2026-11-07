@@ -1,14 +1,15 @@
 import {createHash,randomUUID} from 'node:crypto';
 import {createClient} from '@supabase/supabase-js';
+import {createClient as createSessionClient} from '../../../../lib/supabase/server';
 import {revalidatePath} from 'next/cache';
 import {ARCHIVE_BUCKET,documentPath} from '../../../../lib/accountancy/archive';
-import {bridgeHeaders,boundedPdf,isAssistantBridgeStaging} from '../../../../lib/accountancy/assistant-bridge';
+import {bridgeHeaders,bridgeFileHeaders,boundedPdf,isAssistantBridgeStaging,isSameOriginBridgeRequest} from '../../../../lib/accountancy/assistant-bridge';
 import {scannerOptions} from '../../../../lib/accountancy/pdf/server';
 import {scannerIsExplicitlyEnabled,scanStagingPdfWithCloudmersive} from '../../../../lib/property-operations/scanner/cloudmersive-advanced';
 
 /**
- * Disabled-by-default STAGING service-to-service intake of already registered purchase concepts.
- * Caller must present a real, verified Supabase Auth admin JWT, never the publishable API key.
+ * Disabled-by-default STAGING intake for already registered purchase concepts.
+ * Caller uses a verified admin session (same-origin browser) or user-scoped Auth JWT.
  * Only accepts raw PDF bytes and an existing immutable draft ID. No URLs, bank data or payments.
  * ChatGPT conversation files cannot be fetched from the server; an authorized client must send bytes.
  */
@@ -23,15 +24,16 @@ export async function POST(req:Request):Promise<Response>{
  // A customer-hosted endpoint is not usable until the approved scanner/region/privacy gates are active.
  if(!scannerIsExplicitlyEnabled(scannerOptions()))
   return reply({error:'scanner_not_approved'},503);
- if(req.headers.has('origin'))return reply({error:'cross_origin_request'},403);
- let input:ReturnType<typeof bridgeHeaders>;
- try{input=bridgeHeaders(req.headers);}
+ const browserRequest=req.headers.has('origin');
+ if(browserRequest&&!isSameOriginBridgeRequest(req))return reply({error:'cross_origin_request'},403);
+ let input:ReturnType<typeof bridgeFileHeaders>&{token?:string};
+ try{input=browserRequest?bridgeFileHeaders(req.headers):bridgeHeaders(req.headers);}
  catch(e){return reply({error:e instanceof Error&&e.message==='unauthenticated'?'unauthenticated':'invalid_headers'},
   e instanceof Error&&e.message==='unauthenticated'?401:400);}
- const db=createClient(
+ const db=browserRequest?await createSessionClient():createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-  {accessToken:async()=>input.token,auth:{persistSession:false,autoRefreshToken:false}}
+  {accessToken:async()=>input.token!,auth:{persistSession:false,autoRefreshToken:false}}
  );
  // Network-backed getUser verifies the JWT. Never trust a decoded JWT claim alone.
  const auth=await db.auth.getUser(input.token);

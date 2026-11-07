@@ -5,6 +5,7 @@ import {archiveEntities,archiveLanguage,archiveRows} from '../../../../../lib/ac
 import {ARCHIVE_ROOT,PAGE_SIZE,archiveFilters,archiveHref,categories,categoryLabels,copy,statuses,statusLabels} from '../../../../../lib/accountancy/archive';
 import {UploadForm} from './Forms';
 import {BulkArchiveUpload} from './BulkArchiveUpload';
+import {isAssistantBridgeEnvironment} from '../../../../../lib/accountancy/assistant-bridge';
 import s from './archive.module.css';
 export const dynamic='force-dynamic';
 export default async function Documents({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
@@ -33,6 +34,7 @@ export default async function Documents({searchParams}:{searchParams:Promise<Rec
   </tbody></table></div>
   <nav className={s.pagination} aria-label={t.page}>{f.page>1&&<Link href={archiveHref(f,f.page-1)}>{t.previous}</Link>}<span>{t.page} {f.page} / {pages}</span>{f.page<pages&&<Link href={archiveHref(f,f.page+1)}>{t.next}</Link>}</nav>
   <p className={s.notice}>{t.reference}</p>
+  {isAssistantBridgeEnvironment()&&<p><Link href={ARCHIVE_ROOT+'/assistant'}>{language==='es'?'Transferir originales a conceptos existentes · Staging':'Transfer originals to existing drafts · Staging'}</Link></p>}
   <BulkArchiveUpload entities={entities} language={language} entity={f.entity} year={f.year==='all'?new Date().getUTCFullYear():Number(f.year)}/>
   <UploadForm entities={entities} language={language} entity={f.entity} year={f.year==='all'?new Date().getUTCFullYear():Number(f.year)}/>
  </section>;
