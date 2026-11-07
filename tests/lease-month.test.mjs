@@ -25,3 +25,13 @@ test('complete invoice months preserve period, placeholders and selected languag
 });
 
 test('preparation is the 14th of the preceding month, including year rollover',()=>{assert.equal(api.leasePreparationDate('2026-12'),'2026-11-14');assert.equal(api.leasePreparationDate('2027-01'),'2026-12-14');assert.equal(api.leasePreparationDate('2028-03'),'2028-02-14');assert.equal(api.leasePreparationDate('2026-'),'');});
+
+test('next invoice retains unissued gaps and concepts, respects term count and lease end',()=>{
+ const c={status:'active',first_period:'2026-12-01',lease_start:'2026-11-01',lease_end:null,max_terms:null};
+ assert.equal(api.nextLeaseInvoicePeriod(c,[]),'2026-12-01');
+ assert.equal(api.nextLeaseInvoicePeriod(c,['2026-12-01']),'2027-01-01');
+ assert.equal(api.nextLeaseInvoicePeriod(c,['2027-01-01']),'2026-12-01');
+ assert.equal(api.nextLeaseInvoicePeriod({...c,max_terms:1},['2026-12-01']),null);
+ assert.equal(api.nextLeaseInvoicePeriod({...c,lease_end:'2026-12-31'},['2026-12-01']),null);
+ assert.equal(api.nextLeaseInvoicePeriod({...c,status:'stopped'},[]),null);
+});
