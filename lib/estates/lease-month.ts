@@ -17,3 +17,17 @@ export function leasePreparationDate(period: string): string {
  const d=new Date(`${start}T12:00:00Z`);d.setUTCMonth(d.getUTCMonth()-1);d.setUTCDate(14);
  return d.toISOString().slice(0,10);
 }
+
+/** Earliest scheduled period that has not been issued; existing concepts remain next. */
+export function nextLeaseInvoicePeriod(contract:{status:string;first_period:string;lease_start:string;lease_end:string|null;max_terms:number|null},issuedPeriods:string[]):string|null {
+ if(contract.status!=='active'||!invoiceMonthStart(contract.first_period.slice(0,7)))return null;
+ const issued=new Set(issuedPeriods);
+ const [year,month]=contract.first_period.split('-').map(Number);
+ for(let n=0;n<Math.min(contract.max_terms??600,600);n++){
+  const total=year*12+month-1+n;
+  const period=String(Math.floor(total/12)).padStart(4,'0')+'-'+String(total%12+1).padStart(2,'0')+'-01';
+  if(contract.lease_end&&period>contract.lease_end)return null;
+  if(!issued.has(period))return period;
+ }
+ return null;
+}
