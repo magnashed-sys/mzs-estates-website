@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 import { assertComplete, matchesSearch, sameIds } from "../admin-model";
 import "../admin.css";
+import {useAdminNavigationGuard} from "../AdminNavigationGuard";
 
 type Profile = { id: string; full_name: string | null; email: string; role: string; is_active: boolean };
 type Project = { id: string; title: string; location: string | null; status: string };
@@ -86,6 +87,7 @@ export default function ProjectAccessPage() {
   }, [dirty, saving]);
 
   function canLeave() { return !saving && (!dirty || window.confirm(adminT("Discard the unsaved access selection?"))); }
+  useAdminNavigationGuard(canLeave);
   function guardLink(event: MouseEvent<HTMLAnchorElement>) { if (!canLeave()) event.preventDefault(); }
   function choose(user: string, project: string) {
     if (!data || !canLeave()) return;
@@ -158,7 +160,7 @@ export default function ProjectAccessPage() {
 
   if (state !== "ready" || !data) return <main className="admin-page"><div className="admin-message"><h1>{state === "denied" ? adminT("Access restricted.") : state === "error" ? adminT("Unable to load.") : adminT("Preparing permissions.")}</h1><p role={state === "error" ? "alert" : "status"}>{state === "error" ? adminT(error) : state === "denied" ? adminT("Active administrator access is required.") : adminT("Verifying administrator access…")}</p>{state === "error" && <button className="admin-button" onClick={() => void load(selectedUser, selectedProject)}>{adminT("Try again")}</button>}<Link href="/admin?tab=projects">{adminT("Return to Admin →")}</Link></div></main>;
 
-  return <main className="admin-page"><header className="admin-header"><Link href="/" onClick={guardLink} className="admin-brand">{adminT("MZS GROUP")}</Link><Link className="admin-button" href="/admin?tab=projects" onClick={guardLink}>{adminT("← Admin dashboard")}</Link></header><section className="admin-content">
+  return <main className="admin-page"><div className="admin-page-actions"><Link className="admin-button" href="/admin?tab=projects" onClick={guardLink}>{adminT("← Admin dashboard")}</Link></div><section className="admin-content">
     <div className="admin-heading-row"><div><p className="eyebrow">{adminT("Selected relationships")}</p><h1>{adminT("Project access.")}</h1><p className="admin-intro">{adminT("Choose a relationship and review exactly which opportunities they can access.")}</p></div><button className="admin-button" disabled={saving} onClick={() => { if (canLeave()) void load(selectedUser, selectedProject); }}>{adminT("Refresh permissions")}</button></div>
     <div className="admin-access-layout">
       <aside className="admin-panel"><h2 className="admin-subtitle">{adminT("Select a relationship.")}</h2><label className="admin-field">{adminT("Search")}<input type="search" disabled={saving || uncertain} value={search} placeholder={adminT("Name or email")} onChange={e => setSearch(e.target.value)} /></label><label className="admin-field admin-space-top">{adminT("Client or partner")}<select disabled={saving || uncertain} value={selectedUser} onChange={e => choose(e.target.value, selectedProject)}><option value="">{adminT("Select relationship…")}</option>{data.profiles.filter(p => p.id === selectedUser || matchesSearch(search, p.full_name, p.email)).map(p => <option key={p.id} value={p.id}>{p.full_name || p.email} · {adminT(p.role)}{p.is_active ? "" : adminT(" · Inactive")}</option>)}</select></label><label className="admin-field admin-space-top">{adminT("Project")}<select disabled={saving || uncertain} value={selectedProject} onChange={e => choose(selectedUser, e.target.value)}><option value="">{adminT("Select project…")}</option>{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>

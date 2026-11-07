@@ -7,7 +7,8 @@ const base="app/admin/workspaces/";
 test("Workspaces layout and all independent pages verify active Group Administrator server-side",()=>{
  const layout=read(base+"layout.tsx");
  assert.match(layout,/await requireEstateAdmin\(\)/);
- assert.match(layout,/WorkspaceNavigation/);
+ assert.match(read("app/admin/layout.tsx"),/<AdminHeader\/>/);
+ assert.match(read("app/admin/AdminHeaderControls.tsx"),/WorkspaceNavigation/);
  assert.match(layout,/robots:\{index:false,follow:false\}/);
  for(const path of ["group/page.tsx","estates/page.tsx","capital/page.tsx","relationships/page.tsx"]){
   const s=read(base+path);
@@ -43,7 +44,7 @@ test("Workspaces link to existing guarded modules and preserve access to account
  const layout=read(base+"layout.tsx");
  const nav=read(base+"WorkspaceNavigation.tsx");
  const legacy=read("app/admin/page.tsx");
- assert.match(layout,/href="\/admin\/accounts"/);
+ assert.match(read("app/admin/AdminHeaderControls.tsx"),/href="\/admin\/accounts"/);
  assert.ok(legacy.includes("redirect(adminEntryRoute"));
  for(const route of ["/admin/workspaces/group","/admin/bookings","/admin/workspaces/estates","/admin/workspaces/capital","/admin/workspaces/relationships"])
   assert.ok(nav.includes(route),route);

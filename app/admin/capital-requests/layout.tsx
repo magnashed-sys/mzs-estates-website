@@ -1,6 +1,5 @@
 
 import {getAdminI18n} from '../../../lib/admin/i18n-server';
-import WorkspaceNavigation from "../workspaces/WorkspaceNavigation";
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
 import { isPhase3aPreviewIsolated } from "../../../lib/security/phase3a-preview-isolation";
@@ -52,5 +51,5 @@ export default async function CapitalRequestsLayout({
     }
   }
 
-  return <>{profile.role==="admin"&&<WorkspaceNavigation/>}{children}</>;
+  return <>{children}</>;
 }

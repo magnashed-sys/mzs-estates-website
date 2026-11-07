@@ -18,7 +18,7 @@ export default async function RelationshipsPage({searchParams}: {searchParams: P
   ]);
   if (members.error || members.count !== members.data?.length) throw new Error('The complete relationship register could not be loaded.');
   return <main className="admin-page">
-    <header className="admin-header"><Link className="admin-brand" href="/admin">{adminT("MZS GROUP")}</Link><Link className="admin-button" href="/admin?tab=relationships">{adminT("← Administration")}</Link></header>
+    <div className="admin-page-actions"><Link className="admin-button" href="/admin?tab=relationships">{adminT("← Administration")}</Link></div>
     <section className="admin-content">
       <p className="eyebrow">{adminT("MZS Group / Relationships")}</p><h1>{adminT("Clients & companies.")}</h1>
       <p className="admin-intro">{adminT("One relationship, with the roles and agreements that apply. A tenant is an existing relationship with a rental contract.")}</p>
