@@ -1,6 +1,5 @@
 
 import {getAdminI18n} from '../../../lib/admin/i18n-server';
-import WorkspaceNavigation from "../workspaces/WorkspaceNavigation";
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
 import { isPhase3aPreviewIsolated } from "../../../lib/security/phase3a-preview-isolation";
@@ -34,11 +33,6 @@ export default async function GroupLayout({ children }: { children: React.ReactN
   // Group/Estates pages carry their own Group-only guards below this layout.
   // A Capital operator never inherits legacy Group or Estates permissions.
   return <main className="mzsGroup">
-    <header>
-      <Link href={groupAdmin ? "/admin" : "/admin/group/capital"}>{adminT("MZS GROUP")}</Link>
-      <span>{groupAdmin ? adminT("PRIVATE GROUP ADMINISTRATION") : adminT("SCOPED CAPITAL ADMINISTRATION")}</span>
-    </header>
-    {groupAdmin&&<WorkspaceNavigation/>}
     {children}
   </main>;
 }

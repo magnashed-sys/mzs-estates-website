@@ -242,13 +242,7 @@ export default function RelationshipDossierPage() {
   const offeringCount = offerings.filter(offering => offeringGrantIds.has(offering.id)).length;
 
   return <main className="admin-page">
-    <header className="admin-header">
-      <Link className="admin-brand" href="/admin">{adminT("MZS GROUP")}</Link>
-      <div className="admin-header-actions">
-        <span>{adminT("Private relationship management")}</span>
-        <Link className="admin-button" href="/admin?tab=relationships">{adminT("← All relationships")}</Link>
-      </div>
-    </header>
+    <div className="admin-page-actions"><Link className="admin-button" href="/admin?tab=relationships">{adminT("← All relationships")}</Link></div>
     <section className="admin-content">
       <div className={styles.topline}>
         <div>

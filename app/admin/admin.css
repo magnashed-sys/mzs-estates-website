@@ -6,7 +6,7 @@
 
 .admin-page {
   min-height: 100vh;
-  padding: 38px 4.5vw;
+  padding: 16px clamp(20px,3.5vw,52px);
   display: flex;
   flex-direction: column;
   background:
@@ -19,61 +19,14 @@
   color: #ece8df;
 }
 
-/* HEADER */
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #292722;
-}
-
-.admin-brand {
-  color: #d5c09a;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0.16em;
-}
-
-.admin-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-
-.admin-header-actions span {
-  color: #77736b;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.admin-header-actions button {
-  padding: 11px 15px;
-  border: 1px solid #4b463c;
-  background: transparent;
-  color: #d5c09a;
-  cursor: pointer;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  transition: 0.2s ease;
-}
-
-.admin-header-actions button:hover {
-  background: #d5c09a;
-  color: #0b0b0a;
-}
+.admin-page-actions{width:100%;max-width:1480px;margin:0 auto 18px;display:flex;gap:12px;flex-wrap:wrap}
 
 /* MAIN CONTENT */
 
 .admin-content {
   width: 100%;
-  max-width: 1180px;
-  margin: 90px auto 100px;
+  max-width: 1480px;
+  margin: 0 auto 60px;
 }
 
 .admin-content > h1 {
@@ -357,14 +310,14 @@
 }
 
 /* MZS Admin workspace update — October 2026 */
-.admin-page { font-family: Arial, Helvetica, sans-serif; padding: 28px clamp(18px,4vw,68px); }
+.admin-page { font-family: Arial, Helvetica, sans-serif; padding: 16px clamp(20px,3.5vw,52px); }
 .admin-page *, .admin-page *::before, .admin-page *::after { box-sizing: border-box; }
 .admin-page a { text-decoration: none; }
 .admin-page button, .admin-page input, .admin-page select { font-family: inherit; }
 .admin-page button:disabled { cursor: not-allowed; opacity: .5; }
 .admin-page :is(button, a, input, select):focus-visible { outline: 2px solid #e9d4aa; outline-offset: 4px; }
 .admin-page .eyebrow { color: #d5c09a; font-size: 11px; letter-spacing: .18em; line-height: 1.7; text-transform: uppercase; }
-.admin-content { max-width: 1320px; margin: 48px auto 70px; }
+.admin-content { max-width: 1480px; margin: 0 auto 60px; }
 .admin-heading-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; }
 .admin-heading-row h1 { margin: 12px 0 18px; font-family: Georgia,serif; font-size: clamp(38px,5vw,66px); font-weight: 400; line-height: 1.08; letter-spacing: -.035em; }
 .admin-intro { color: #b4ac9f; font-size: 14px; max-width: 670px; }
@@ -438,7 +391,7 @@
   .admin-calendar-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
-  .admin-content { margin: 32px auto 48px; }
+  .admin-content { margin: 0 auto 48px; }
   .admin-heading-row, .admin-analytics-banner { align-items: flex-start; flex-direction: column; }
   .admin-header { gap: 12px; flex-wrap: wrap; }
   .admin-brand { font-size: 18px; }
@@ -455,3 +408,5 @@
   .admin-toolbar .admin-field { flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .admin-page * { transition: none !important; } }
+
+@media(max-width:580px){.admin-page{padding:14px}}

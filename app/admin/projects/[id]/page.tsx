@@ -188,13 +188,7 @@ export default function ProjectCockpitPage() {
   const includedGrants = offeringGrants.filter(grant=>allOfferingIds.has(grant.offering_id));
 
   return <main className="admin-page">
-    <header className="admin-header">
-      <Link href="/admin" className="admin-brand">{adminT("MZS GROUP")}</Link>
-      <div className="admin-header-actions">
-        <span>{adminT("Private Project Management")}</span>
-        <Link href="/admin?tab=projects" className="admin-button">{adminT("← All projects")}</Link>
-      </div>
-    </header>
+    <div className="admin-page-actions"><Link href="/admin?tab=projects" className="admin-button">{adminT("← All projects")}</Link></div>
     <section className="admin-content">
       <div className={styles.hero}>
         <div><p className="eyebrow">{adminT("Project Cockpit ·")} {adminT(project.status)}</p>

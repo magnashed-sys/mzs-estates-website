@@ -2,7 +2,7 @@
 import {useAdminI18n} from '../../lib/admin/i18n';
 import AdminMessage from './AdminMessage';
 
-import WorkspaceNavigation from "./workspaces/WorkspaceNavigation";
+import {useAdminNavigationGuard} from "./AdminNavigationGuard";
 import ArrowUpRightIcon from "../components/ArrowUpRightIcon";
 
 import "./admin.css";
@@ -209,6 +209,7 @@ export default function AdminPanels({section,initialFilter="pending"}:{section:T
   }, [busy]);
 
   const locked = Boolean(busy || bookingBusy || reviewing || refreshing);
+  useAdminNavigationGuard(() => !locked && !actionLock.current);
   function guardLink(event: MouseEvent<HTMLAnchorElement>) { if (locked || actionLock.current) event.preventDefault(); }
   const invitationMap = new Map(invitations.map(item => [item.request_id, item]));
   const pending = requests.filter(item => matchesRequestFilter(item.status, invitationMap.get(item.id), "pending"));
@@ -427,16 +428,6 @@ export default function AdminPanels({section,initialFilter="pending"}:{section:T
     setInvitations(items => [invitation, ...items.filter(item => item.request_id !== invitation.request_id)]);
     // The review panel reports the verified outcome, including assigned access.
   }
-  async function signOut() {
-    if (locked || actionLock.current) return;
-    actionLock.current = true; setBusy("signout");
-    try {
-      const { error: failure } = await createClient().auth.signOut();
-      if (failure) throw failure;
-      router.replace("/"); router.refresh();
-    } catch { setNotice("Unable to sign out. Please try again."); }
-    finally { actionLock.current = false; if (mounted.current) setBusy(null); }
-  }
 
   if (state !== "ready") return <main className="admin-page"><div className="admin-message">
     <p className="eyebrow">{adminT("MZS Administration")}</p>
@@ -447,10 +438,8 @@ export default function AdminPanels({section,initialFilter="pending"}:{section:T
   </div></main>;
 
   return <main className="admin-page">
-    <header className="admin-header"><Link href="/admin/workspaces/group" onClick={guardLink} className="admin-brand">{adminT("MZS GROUP")}</Link><div className="admin-header-actions"><span>{adminT("Private administration")}</span><Link href="/admin/workspaces/group" onClick={guardLink} aria-disabled={locked} className="admin-button">{adminT("Administration →")}</Link><button disabled={locked} onClick={() => void signOut()}>{busy === "signout" ? adminT("Signing out…") : adminT("Sign out")}</button></div></header>
     <section className="admin-content">
       <div className="admin-heading-row"><div><p className="eyebrow">{adminT("MZS Administration")}</p><h1>{section==="relationships"?adminT("Accounts & requests."):section==="companies"?adminT("Member companies."):section==="projects"?adminT("Projects & access."):adminT("System.")}</h1></div><div className="admin-refresh"><button className="admin-button" disabled={locked} onClick={() => void reload()}>{refreshing ? adminT("Refreshing…") : adminT("Refresh dashboard")}</button><small>{updated ? adminT("Dashboard updated {p0} · Madrid time", {p0: updated}) : ""}</small></div></div>
-      <WorkspaceNavigation disabled={locked}/>
       {reviewing && <p className="admin-help">{adminT("Close the open review to switch sections, change filters or refresh the dashboard.")}</p>}
       {notice && <p className="admin-notice" role="status">{adminT(notice)}</p>}
       {tab === "relationships" && <>
