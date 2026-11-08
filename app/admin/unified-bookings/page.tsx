@@ -46,28 +46,28 @@ export default async function UnifiedBookings(){
    checkIn:r.check_in,checkOut:r.check_out,status:r.status,amount:"€0.00",href:"/admin/owner-stays",editable:false,total:0,guestCount:null,notes:"",guestName:"Owner / partner",invoiceRecipient:"Complimentary",sourceRef:""
   }))
  ].sort((a,b)=>b.checkIn.localeCompare(a.checkIn));
- const style={color:"#f0e9de",background:"#12110f",border:"1px solid #504534",padding:"14px"} as const;
- return <main style={{minHeight:"100vh",background:"#0d0d0c",color:"#eee8dd",padding:"40px clamp(20px,5vw,70px)"}}>
-  <Link href="/admin" style={{color:"#d5c09a"}}>{adminT("← Group Administration")}</Link>
-  <p style={{fontSize:11,letterSpacing:3,color:"#d5c09a",marginTop:30}}>{adminT("MZS GROUP / BOOKINGS")}</p>
+ const style={color:"#243f35",background:"#ffffff",border:"1px solid #dce3d9",padding:"14px"} as const;
+ return <main style={{minHeight:"100vh",background:"#f5f5f0",color:"#243f35",padding:"40px clamp(20px,5vw,70px)"}}>
+  <Link href="/admin" style={{color:"#28543f"}}>{adminT("← Group Administration")}</Link>
+  <p style={{fontSize:11,letterSpacing:3,color:"#28543f",marginTop:30}}>{adminT("MZS GROUP / BOOKINGS")}</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>{adminT("Bookings.")}</h1>
-  <p style={{color:"#aaa398",maxWidth:850}}>{adminT("Your central reservation register for current, historic and future bookings. Search by guest, company, reference, property or year, then open the full reservation dossier. Booking requests, calendars and complimentary owner stays retain their dedicated approval controls.")}</p>
+  <p style={{color:"#5d7064",maxWidth:850}}>{adminT("Your central reservation register for current, historic and future bookings. Search by guest, company, reference, property or year, then open the full reservation dossier. Booking requests, calendars and complimentary owner stays retain their dedicated approval controls.")}</p>
   <nav style={{display:"flex",flexWrap:"wrap",gap:12,margin:"25px 0"}}>
-   <Link href="/admin/bookings" style={{...style,borderColor:"#d5c09a",color:"#d5c09a"}}>{adminT("All Bookings")}</Link>
+   <Link href="/admin/bookings" style={{...style,borderColor:"#28543f",color:"#28543f"}}>{adminT("All Bookings")}</Link>
    <Link href="/admin?tab=bookings" style={style}>{adminT("Requests, cancellations & calendar →")}</Link>
    <Link href="/admin/owner-stays" style={style}>{adminT("Owner stays →")}</Link>
    <Link href="/admin/group/estates/contracts?view=invoices" style={style}>{adminT("Contracts & invoices →")}</Link>
    <Link href="/admin/group/estates/properties" style={style}>{adminT("Properties →")}</Link>
   </nav>
-  {errors.length>0&&<p role="alert" style={{color:"#e3a995"}}>{adminT("Incomplete registers:")} {errors.join(", ")}{adminT(". Verify records in the source module.")}</p>}
+  {errors.length>0&&<p role="alert" style={{color:"#8b443a"}}>{adminT("Incomplete registers:")} {errors.join(", ")}{adminT(". Verify records in the source module.")}</p>}
   <section style={{display:"flex",gap:12,flexWrap:"wrap",margin:"25px 0"}} aria-label={adminT("Loaded booking summary")}>
    {[["Guest bookings",rows.filter(x=>x.category==="Guest booking").length],
       ["Awaiting review",rows.filter(x=>x.status==="requested").length],
       ["Owner stays",rows.filter(x=>x.category==="Owner stay").length],
       ["Blocked periods",rows.filter(x=>x.category==="Unavailable").length]].map(([label,total])=>
-      <div key={label} style={{...style,minWidth:160}}><small style={{color:"#d5c09a"}}>{adminT(label)}</small><p style={{fontSize:26,margin:"8px 0"}}>{total}</p></div>)}
+      <div key={label} style={{...style,minWidth:160}}><small style={{color:"#28543f"}}>{adminT(label)}</small><p style={{fontSize:26,margin:"8px 0"}}>{total}</p></div>)}
   </section>
-  <p style={{color:"#a9a092",fontSize:12}}>{adminT("Summary counts reflect the records loaded in this register, not financial receipts. Requests are approved in Requests & Calendar. Historical corrections remain audit-logged.")}</p>
+  <p style={{color:"#5d7064",fontSize:12}}>{adminT("Summary counts reflect the records loaded in this register, not financial receipts. Requests are approved in Requests & Calendar. Historical corrections remain audit-logged.")}</p>
   <BookingRegister rows={rows.map(({id,category,property,checkIn,checkOut,status,amount,href,guestName,invoiceRecipient,sourceRef})=>({id,category,property,checkIn,checkOut,status,amount,href,guestName,invoiceRecipient,sourceRef}))}/>
   {!rows.length&&<p>{adminT("No records available in the current reporting scope.")}</p>}
  </main>;

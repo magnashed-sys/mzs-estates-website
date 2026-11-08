@@ -11,8 +11,8 @@ export default async function BookingOperations({searchParams}:{searchParams:Pro
  const params=await searchParams;
  const section=params.view==="calendar"?"calendar":params.view==="cancellations"?"cancellations":"bookings";
  const scope=params.scope==="test"?"test":"live";
- return <main style={{background:"#0d0d0c",color:"#eee8dd",minHeight:"100vh",padding:"32px clamp(18px,4vw,60px)"}}>
-  <Link href="/admin/bookings" style={{color:"#d5c09a"}}>{adminT("← All bookings")}</Link>
+ return <main style={{background:"#f5f5f0",color:"#243f35",minHeight:"100vh",padding:"32px clamp(18px,4vw,60px)"}}>
+  <Link href="/admin/bookings" style={{color:"#28543f"}}>{adminT("← All bookings")}</Link>
   <h1>{adminT("Booking operations")}</h1>
   <p>{adminT("Review requests, manage the calendar and clean up test bookings.")}</p>
   <nav aria-label={adminT("Booking operations")} style={{display:"flex",gap:20,flexWrap:"wrap",marginBottom:24}}>

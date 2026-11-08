@@ -13,7 +13,7 @@ export default function BookingEditor({booking}:{booking:Booking}){
  const [dates,setDates]=useState({checkIn:booking.checkIn,checkOut:booking.checkOut,guests:String(booking.guestCount||1),notes:booking.notes});
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
- const input={background:"#211f1b",color:"#f4eadc",border:"1px solid #74654f",padding:8,minWidth:125} as const;
+ const input={background:"#ffffff",color:"#243f35",border:"1px solid #cbd9ce",padding:8,minWidth:125} as const;
  async function saveStay(){
   if(busy)return;
   const guests=Number(dates.guests);
@@ -35,7 +35,7 @@ export default function BookingEditor({booking}:{booking:Booking}){
  }
  return <div style={{maxWidth:350}}>
   <button style={input} type="button" onClick={()=>setOpen(!open)}>{open?adminT("Close"):adminT("Edit booking")}</button>
-  {open&&<div style={{padding:15,marginTop:8,border:"1px solid #625743",background:"#181613"}}>
+  {open&&<div style={{padding:15,marginTop:8,border:"1px solid #dce3d9",background:"#ffffff"}}>
     <strong>{adminT("Dates and guests")}</strong>
     <div style={{display:"grid",gap:9,marginTop:10}}>
       <label>{adminT("Check-in")} <input style={input} type="date" value={dates.checkIn} onChange={e=>setDates(x=>({...x,checkIn:e.target.value}))}/></label>
@@ -44,9 +44,9 @@ export default function BookingEditor({booking}:{booking:Booking}){
       <label>{adminT("Admin notes")} <textarea style={input} value={dates.notes} onChange={e=>setDates(x=>({...x,notes:e.target.value}))}/></label>
       <button style={input} disabled={busy} onClick={saveStay} type="button">{busy?adminT("Saving…"):adminT("Save dates and guests")}</button>
     </div>
-    <hr style={{borderColor:"#514839",margin:"20px 0"}}/>
+    <hr style={{borderColor:"#dce3d9",margin:"20px 0"}}/>
     <strong>{adminT("Booking total")}</strong>
-    <p style={{fontSize:12,color:"#bbb1a3"}}>{adminT("Adjust the complete EUR amount separately after editing dates. A reason is required and a price audit is retained. For a confirmed client booking, a price change can queue a client email.")}</p>
+    <p style={{fontSize:12,color:"#5d7064"}}>{adminT("Adjust the complete EUR amount separately after editing dates. A reason is required and a price audit is retained. For a confirmed client booking, a price change can queue a client email.")}</p>
     <form action={adjustBookingPrice} style={{display:"grid",gap:9}}>
      <input type="hidden" name="booking_id" value={booking.id}/>
      <input type="hidden" name="expected" value={booking.total===null?"":String(booking.total)}/>
@@ -54,7 +54,7 @@ export default function BookingEditor({booking}:{booking:Booking}){
      <label>{adminT("Reason")} <input style={input} name="reason" minLength={5} maxLength={500} required/></label>
      <button style={input} type="submit">{adminT("Save audited total")}</button>
     </form>
-    {error&&<p role="alert" style={{color:"#f2a58b"}}>{adminT(error)}</p>}
+    {error&&<p role="alert" style={{color:"#8b443a"}}>{adminT(error)}</p>}
    </div>}
  </div>;
 }

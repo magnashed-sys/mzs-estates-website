@@ -26,9 +26,9 @@ export default function BookingRegister({rows}:{rows:BookingRow[]}){
   (time==="all"||(time==="upcoming"?r.checkIn>=today:time==="current"?r.checkIn<=today&&r.checkOut>today:r.checkOut<=today))&&
   (!query||[r.property,r.id,r.category,r.status,r.checkIn,r.checkOut,r.guestName,r.invoiceRecipient,r.sourceRef].some(v=>v.toLowerCase().includes(query.toLowerCase().trim())))
  ),[rows,kind,status,property,year,time,query,today]);
- const control={padding:"10px 12px",background:"#171511",color:"#eee8dd",border:"1px solid #71614b",borderRadius:4,minWidth:130} as const;
+ const control={padding:"10px 12px",background:"#ffffff",color:"#243f35",border:"1px solid #cbd9ce",borderRadius:4,minWidth:130} as const;
  return <section aria-label={adminT("Unified reservation register")}>
-  <div style={{background:"#151411",border:"1px solid #514839",padding:18,marginBottom:18}}>
+  <div style={{background:"#ffffff",border:"1px solid #dce3d9",padding:18,marginBottom:18}}>
    <h2 style={{fontFamily:"Georgia,serif",fontWeight:400,marginTop:0}}>{adminT("Find reservations")}</h2>
    <div style={{display:"flex",flexWrap:"wrap",gap:12,alignItems:"end"}}>
     <label style={{display:"grid",gap:6}}>{adminT("Search")}<input style={control} aria-label={adminT("Search reservations")} value={query} placeholder={adminT("Property, guest, company or reference")} onChange={e=>setQuery(e.target.value)}/></label>
@@ -39,13 +39,13 @@ export default function BookingRegister({rows}:{rows:BookingRow[]}){
     <label style={{display:"grid",gap:6}}>{adminT("Period")}<select style={control} value={time} onChange={e=>setTime(e.target.value)}><option value="all">{adminT("All dates")}</option><option value="upcoming">{adminT("Upcoming check-ins")}</option><option value="current">{adminT("Current stays")}</option><option value="past">{adminT("Completed stays")}</option></select></label>
     <button style={control} type="button" onClick={()=>{setQuery("");setKind("all");setStatus("all");setProperty("all");setYear("all");setTime("all")}}>{adminT("Reset filters")}</button>
    </div>
-   <p aria-live="polite" style={{color:"#bcb2a4",marginBottom:0}}>{filtered.length}  {adminT("of")} {rows.length}  {adminT("loaded records. The year filter uses the year of check-in. The register is limited to the latest 250 entries per source.")}</p>
+   <p aria-live="polite" style={{color:"#5d7064",marginBottom:0}}>{filtered.length}  {adminT("of")} {rows.length}  {adminT("loaded records. The year filter uses the year of check-in. The register is limited to the latest 250 entries per source.")}</p>
   </div>
   <div style={{overflowX:"auto"}}>
    <table style={{width:"100%",borderCollapse:"collapse",minWidth:1060}}>
-    <thead><tr>{["Reservation","Guest","Invoice recipient","Reference","Property","Type","Check-in","Check-out","Status","Amount"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #655944",padding:12}}>{k}</th>)}</tr></thead>
+    <thead><tr>{["Reservation","Guest","Invoice recipient","Reference","Property","Type","Check-in","Check-out","Status","Amount"].map(k=><th key={k} style={{textAlign:"left",borderBottom:"1px solid #dce3d9",padding:12}}>{k}</th>)}</tr></thead>
     <tbody>{filtered.map(r=><tr key={r.category+r.id}>
-     <td style={{padding:12,borderBottom:"1px solid #3d382f"}}><Link style={{color:"#d5c09a",fontWeight:600}} href={r.category==="Owner stay"?r.href:"/admin/bookings/"+r.id}>{r.category==="Owner stay"?adminT("Manage owner stay →"):adminT("Open dossier →")}</Link></td>
+     <td style={{padding:12,borderBottom:"1px solid #e0e7dd"}}><Link style={{color:"#28543f",fontWeight:600}} href={r.category==="Owner stay"?r.href:"/admin/bookings/"+r.id}>{r.category==="Owner stay"?adminT("Manage owner stay →"):adminT("Open dossier →")}</Link></td>
      <td>{r.guestName}</td><td>{r.invoiceRecipient||"—"}</td><td style={{whiteSpace:"nowrap",fontSize:12}}>{r.sourceRef||"—"}</td><td>{r.property}</td><td>{adminT(r.category)}</td><td>{r.checkIn}</td><td>{r.checkOut}</td><td>{adminT(r.status)}</td><td>{r.amount}</td>
     </tr>)}</tbody>
    </table>
