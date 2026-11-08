@@ -44,3 +44,19 @@ test("owner stays are not duplicated and historical corrected billing data wins"
  assert.match(sql,/timezone\('Europe\/Madrid',now\(\)\)/);
  assert.match(sql,/strpos\(e\.search_blob,v_search\)>0/);
 });
+
+
+test("the Booking overview omits only the Status column and keeps status filtering",()=>{
+ const source=read("app/admin/bookings/page.tsx");
+ const header=source.match(/\["Reservation","Guest \/ contact"[\s\S]*?"Payment status"\]/)?.[0];
+ assert.ok(header,"booking table headers remain defined");
+ const columns=JSON.parse(header);
+ assert.equal(columns.length,11);
+ assert.ok(!columns.includes("Status"));
+ assert.ok(columns.includes("Payment status"));
+ assert.match(source,/colSpan=\{11\}/);
+ assert.match(source,/minWidth:1020/);
+ assert.match(source,/name="status"/);
+ assert.match(source,/p_status:status/);
+ assert.doesNotMatch(source,/\{adminT\(r\.status\.replaceAll\("_"," "\)\)\}<\/td>/);
+});
