@@ -60,16 +60,16 @@
   gap: 12px;
   min-height: 44px;
   padding: 6px 0;
-  color: #e4cfaa;
-  border-bottom: 1px solid rgba(213, 192, 154, .38);
+  color: var(--mzs-link-gold);
+  border-bottom: 1px solid rgba(var(--mzs-link-gold-rgb), .45);
   text-decoration: none;
   font-size: 13px;
   line-height: 1.5;
   transition: color .2s, border-color .2s;
 }
 .activities a svg {flex-shrink: 0;}
-.activities a:hover {color: #fff; border-color: #e4cfaa;}
-.activities a:focus-visible {outline: 2px solid #e4cfaa; outline-offset: 6px;}
+.activities a:hover {color: var(--mzs-link-gold-hover); border-color: var(--mzs-link-gold);}
+.activities a:focus-visible {outline: 2px solid var(--mzs-link-gold); outline-offset: 6px;}
 @media (max-width: 700px) {
   .home:global(.mzs-home) {padding: 18px 20px 14px;}
   .home:global(.mzs-home-refined) :global(.mzs-hero) {padding: clamp(54px, 9svh, 88px) 0 38px;}
