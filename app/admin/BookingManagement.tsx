@@ -67,15 +67,15 @@ type Mutation = {
     expected: string | boolean;
     success: string;
 };
-const gold = "#d5c09a";
-const muted = "#aaa398";
-const border = "#514839";
-const warning = "#e3a995";
+const gold = "#28543f";
+const muted = "#5d7064";
+const border = "#dce3d9";
+const warning = "#8b443a";
 const rowStyle: CSSProperties = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: 12 };
-const cardStyle: CSSProperties = { padding: "clamp(20px,3vw,34px)", border: `1px solid ${border}`, background: "#151411" };
+const cardStyle: CSSProperties = { padding: "clamp(20px,3vw,34px)", border: `1px solid ${border}`, background: "#ffffff" };
 const gridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 20, marginTop: 26 };
 const titleStyle: CSSProperties = { fontFamily: "Georgia, serif", fontSize: 29, fontWeight: 400, lineHeight: 1.2, margin: "0 0 10px" };
-const bookingInputStyle: CSSProperties = { width:"100%",maxWidth:"100%",minWidth:0,minHeight:46,boxSizing:"border-box",background:"#171612",color:"#eeeae2",border:"1px solid #665a45",padding:12,fontSize:15 };
+const bookingInputStyle: CSSProperties = { width:"100%",maxWidth:"100%",minWidth:0,minHeight:46,boxSizing:"border-box",background:"#ffffff",color:"#243f35",border:"1px solid #cbd9ce",padding:12,fontSize:15 };
 const badgeStyle: CSSProperties = { color: gold, border: `1px solid ${border}`, padding: "9px 12px", fontSize: 12, letterSpacing: ".08em", lineHeight: 1.5 };
 // Same eligibility as My Reservations and the cancellation RPCs.
 function isCancellationEligible(booking: Booking): boolean {
@@ -133,8 +133,8 @@ function ActionButton({ children, onClick, disabled = false, primary = false, da
     selected?: boolean;
 }) {
     return <button type="button" onClick={onClick} disabled={disabled} aria-pressed={selected} style={{ padding: "13px 18px", fontSize: 12, lineHeight: 1.4, letterSpacing: ".07em", fontFamily: "inherit",
-            border: `1px solid ${danger ? "#b78578" : gold}`, background: primary ? gold : "transparent",
-            color: primary ? "#10100d" : danger ? warning : gold, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1 }}>
+            border: `1px solid ${danger ? "#bc8f80" : gold}`, background: primary ? gold : "transparent",
+            color: primary ? "#ffffff" : danger ? warning : gold, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1 }}>
     {children}
   </button>;
 }
@@ -448,12 +448,12 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
         </section>
       </>}
     </section>;
-    return (<div className="admin-bookings" style={{ color: "#eeeae2" }}>
+    return (<div className="admin-bookings" style={{ color: "#243f35" }}>
       <div style={{ ...rowStyle, justifyContent: "space-between", marginBottom: 24 }}>
         <p style={{ color: muted, margin: 0, lineHeight: 1.7 }}>{snapshot ? adminT("{p0} pending bookings · {p1} pending cancellations · all live and test records", {p0: pendingBookings, p1: pendingCancellations}) : adminT("Booking administration")}</p>
         <ActionButton disabled={loading || busy !== null} onClick={() => void reload()}>{adminT("Refresh overview")}</ActionButton>
       </div>
-      <p><a href="/admin/owner-stays" style={{color:"#d5c09a"}}>{adminT("Property Partners, free owner stays & booking prices ↗")}</a></p>
+      <p><a href="/admin/owner-stays" style={{color:"#28543f"}}>{adminT("Property Partners, free owner stays & booking prices ↗")}</a></p>
       <nav aria-label={adminT("Booking administration sections")} style={{ ...rowStyle, paddingBottom: 24, borderBottom: `1px solid ${border}`, marginBottom: 28 }}>
         <ActionButton primary={section === "bookings"} selected={section === "bookings"} disabled={busy !== null} onClick={() => setSection("bookings")}>{adminT("Bookings")}</ActionButton>
         <ActionButton primary={section === "cancellations"} selected={section === "cancellations"} disabled={busy !== null} onClick={() => setSection("cancellations")}>
@@ -586,7 +586,7 @@ export default function BookingManagement({ mode = "full", initialSection = "boo
                   </div>
                   <div style={{ borderLeft: `2px solid ${gold}`, padding: "8px 0 8px 20px", margin: "30px 0" }}>
                     <p style={{ color: gold, fontSize: 13, margin: "0 0 10px" }}>{adminT("Client's reason")}</p>
-                    <p style={{ color: "#eeeae2", lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0 }}>{request.reason}</p>
+                    <p style={{ color: "#243f35", lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0 }}>{request.reason}</p>
                   </div>
                   {request.reviewed_by && <p style={{ color: muted, fontSize: 13 }}>{adminT("Reviewed by:")} {reviewer?.full_name || reviewer?.email || adminT("MZS administrator")}</p>}
                   {booking?.is_test && <p style={{ color: gold, lineHeight: 1.8 }}>{adminT("TEST ONLY — approving or declining this request never changes the real availability calendar. The booking remains marked as a test.")}</p>}
