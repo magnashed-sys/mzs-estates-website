@@ -101,7 +101,7 @@
 .languageToggle:hover,.languages[open] .languageToggle {color:var(--mzs-link-gold-hover);border-color:var(--mzs-link-gold);}
 .languageToggle:focus-visible,.languagePanel a:focus-visible {outline:2px solid var(--mzs-link-gold);outline-offset:3px;}
 .languagePanel {position:absolute;top:calc(100% + 10px);inset-inline-end:0;z-index:30;
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));min-width:168px;padding:6px;direction:ltr;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(252px,calc(100vw - 40px));padding:6px;direction:ltr;
   border:1px solid rgba(var(--mzs-link-gold-rgb),.55);background:#0c0d0d;
   box-shadow:0 20px 45px rgba(0,0,0,.4);}
 .languagePanel a {display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -121,8 +121,12 @@
 
 .languageStatus {grid-column:1 / -1;max-width:220px;padding:8px 12px;color:var(--mzs-link-gold-hover);font:12px/1.5 Arial,sans-serif;}
 
-/* Two columns fit sixteen choices; retain a fallback for short landscape screens. */
-.languagePanel {max-height:min(70svh,480px);overflow-y:auto;overscroll-behavior:contain;}
+/* All 24 languages fit in eight rows; use the width on short landscape screens.
+   Retain scrolling only as a fallback for unusually short or zoomed viewports. */
+.languagePanel {max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain;}
+@media (max-height:480px) and (min-width:560px) {
+ .languagePanel {grid-template-columns:repeat(6,minmax(0,1fr));width:min(504px,calc(100vw - 40px));}
+}
 .wordmark {direction:ltr;unicode-bidi:isolate;}
 
 /* Footer flags share the same language behavior as the header menu. */
