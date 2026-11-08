@@ -1,0 +1,252 @@
+/* MZS Group shared light administration surfaces.
+   This entire sheet is scoped to the content wrapper in app/admin/layout.tsx.
+   AdminHeader is a sibling, and its existing dark styling stays untouched.
+   The palette follows the existing light rental cockpit. */
+.admin-light-content {
+  --mzs-admin-canvas: #f5f5f0;
+  --mzs-admin-surface: #ffffff;
+  --mzs-admin-soft: #edf1e9;
+  --mzs-admin-ink: #243f35;
+  --mzs-admin-muted: #5d7064;
+  --mzs-admin-green: #28543f;
+  --mzs-admin-border: #dce3d9;
+  --mzs-admin-focus: #a98e54;
+  min-height: calc(100vh - 90px);
+  background: var(--mzs-admin-canvas);
+  color: var(--mzs-admin-ink);
+  color-scheme: light;
+  padding-block: 1px 30px;
+}
+.admin-light-content *,
+.admin-light-content *::before,
+.admin-light-content *::after { box-sizing: border-box; }
+
+/* Existing independent shells and legacy workspaces. Preserve their
+   spacing/grid rules; change only their colours, not permissions or markup. */
+.admin-light-content :is(
+  .admin-page, .mzsGroup,
+  [class*="workspace_shell__"], [class*="operations_root__"],
+  [class*="administration_page__"], [class*="zorgbalans_page__"],
+  [class*="expenses_page__"], [class*="entities_page__"],
+  [class*="sales_page__"], [class*="contracts_page__"]
+) {
+  background: var(--mzs-admin-canvas) !important;
+  color: var(--mzs-admin-ink) !important;
+  background-image: none !important;
+}
+.admin-light-content :is(.admin-content, [class*="_content__"], [class*="_root__"], [class*="_page__"]) {
+  color: var(--mzs-admin-ink) !important;
+}
+
+/* Page titles and ordinary readable text. Never change the shared header:
+   it sits outside .admin-light-content. Local dark subheaders retain their
+   own text colours when present. */
+.admin-light-content :is(h1,h2,h3,h4,h5,h6):not(header :is(h1,h2,h3,h4,h5,h6)) {
+  color: #213d32 !important;
+}
+.admin-light-content :is(p,li,dt,dd,label,legend):not(header :is(p,li,dt,dd,label,legend)) {
+  color: #455f50 !important;
+}
+.admin-light-content small:not(header small) { color: #607568 !important; }
+.admin-light-content :is(strong,b):not(header :is(strong,b)) { color: #244537 !important; }
+.admin-light-content :is(
+  .admin-intro,.admin-help,.admin-section-heading>span,.mzsIntro,.mzsFootnote,
+  [class*="_lead__"],[class*="_muted__"],[class*="_help__"],
+  [class*="_note__"],[class*="_intro__"],[class*="_label__"],
+  [class*="_status__"],[class*="_caption__"]
+) {
+  color: var(--mzs-admin-muted) !important;
+}
+.admin-light-content :is(
+  .admin-page .eyebrow,.mzsEyebrow,
+  [class*="_kicker__"],[class*="_eyebrow__"]
+) { color: #55735f !important; }
+.admin-light-content a:not(header a) {
+  color: #2d604a !important;
+  text-underline-offset: 3px;
+}
+.admin-light-content :is(.admin-page, .mzsGroup) a:focus-visible,
+.admin-light-content :is(button,input,select,textarea,summary,a):focus-visible {
+  outline: 2px solid var(--mzs-admin-focus) !important;
+  outline-offset: 3px;
+}
+
+/* Consistent panels, stat cards and operational lists in all modules. Avoid
+   modifying the chart bars, calendar status colours and uploaded images. */
+.admin-light-content :is(
+  .admin-panel,.admin-request,.admin-metrics>div,.admin-metrics>button,
+  .admin-stats>div,.mzsCards>a,.mzsPlanned,
+  [class*="_card__"],[class*="_panel__"],[class*="_metric__"],
+  [class*="_stat__"],[class*="_subcard__"],[class*="_item__"],
+  [class*="_shortcuts__"],[class*="_invoice__"],
+  [class*="_arrival__"],[class*="_selectionSummary__"],
+  [class*="_chartPanel__"],[class*="_detailPanel__"]
+) {
+  background: var(--mzs-admin-surface) !important;
+  color: var(--mzs-admin-ink) !important;
+  border-color: var(--mzs-admin-border) !important;
+  border-radius: 9px;
+  box-shadow: 0 2px 9px rgba(35, 63, 49, .035);
+}
+.admin-light-content :is(
+  [class*="_filters__"],[class*="_filterBar__"],[class*="_registerFilters__"],
+  [class*="_selectionFields__"],[class*="_notice__"],
+  .admin-notice
+) {
+  background: var(--mzs-admin-soft) !important;
+  border-color: var(--mzs-admin-border) !important;
+  color: #335443 !important;
+  border-radius: 8px;
+}
+.admin-light-content :is(
+  [class*="_preview__"],[class*="_blocked__"],[class*="_selectionSummary__"]
+) {
+  background: #f5f3eb !important;
+  color: #695b36 !important;
+  border-color: #ded5be !important;
+}
+.admin-light-content :is(
+  .admin-empty,.admin-change-summary,
+  [class*="_empty__"],[class*="_summaryRow__"],[class*="_event__"],
+  [class*="_projectCard__"]
+) { border-color: var(--mzs-admin-border) !important; color: #50695a !important; }
+.admin-light-content :is(
+  .admin-metrics strong,.admin-stats strong,.admin-request-top h3,
+  [class*="_metricValue__"],[class*="_metrics__"] strong,
+  [class*="_stats__"] strong,[class*="_amount__"],[class*="_year__"]
+) { color: #28523e !important; }
+
+/* Inputs must remain legible after many hours of use. This includes controls
+   in older modules that hard-code their own dark background/text colour. */
+.admin-light-content :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  background: #fff !important;
+  color: #243f35 !important;
+  border: 1px solid #cbd9ce !important;
+  border-radius: 6px;
+  color-scheme: light !important;
+  min-height: 43px;
+}
+.admin-light-content :is(input,textarea)::placeholder { color: #728276 !important; opacity: 1; }
+.admin-light-content :is(input[type=checkbox],input[type=radio]) { accent-color: #2e6049 !important; }
+.admin-light-content :is(input,select,textarea):disabled {
+  background: #f0f1ed !important;
+  color: #637467 !important;
+  opacity: .7;
+}
+
+/* Clear secondary actions, with deep-green primary buttons and accessible
+   selected tabs. Do not touch submit/action logic. */
+.admin-light-content button:not([class*="_button__"]):not(.admin-button):not(.admin-button-primary) {
+  background: #fff !important;
+  color: #2d5b46 !important;
+  border-color: #cbd9ce !important;
+}
+.admin-light-content :is(
+  .admin-button-primary,[class*="_button__"],[class*="_refresh__"]
+) {
+  background: #28543f !important;
+  border-color: #28543f !important;
+  color: #fff !important;
+  border-radius: 6px;
+}
+.admin-light-content :is(
+  .admin-button,[class*="_secondary__"],[class*="_selectionActions__"] button
+) {
+  background: #fff !important;
+  color: #2d604a !important;
+  border-color: #cbd9ce !important;
+}
+.admin-light-content :is(
+  button[aria-current="page"],button[aria-pressed="true"],
+  [class*="_tabs__"] [aria-selected="true"],
+  [class*="_nav__"] a[aria-current="page"]
+) {
+  background: #e1ebde !important;
+  border-color: #bfd1bd !important;
+  color: #244d37 !important;
+}
+.admin-light-content :is([class*="_nav__"] a,[class*="_quick__"] a,[class*="_cockpitTabs__"] a) {
+  background: #fff !important;
+  border-color: #d7e1d7 !important;
+  color: #28543f !important;
+}
+.admin-light-content :is(button,a):disabled,
+.admin-light-content [aria-disabled="true"] { opacity: .58; cursor: not-allowed; }
+
+/* Registration tables and billing registers keep their existing responsive
+   structure, alignment, cell sizes, numeric values and behaviours. */
+.admin-light-content :is(table,[class*="_table__"]) { color: #284538 !important; }
+.admin-light-content :is(
+  [class*="_tableWrap__"],[class*="_tableScroll__"],[class*="_scroll__"]
+) { border-color: var(--mzs-admin-border) !important; background: #fff !important; }
+.admin-light-content :is(table,[class*="_table__"]) th {
+  background: #edf1e9 !important;
+  color: #4e6655 !important;
+  border-color: #dce3d9 !important;
+}
+.admin-light-content :is(table,[class*="_table__"]) td {
+  color: #304b3a !important;
+  border-color: #e5e9e0 !important;
+}
+.admin-light-content :is(table,[class*="_table__"]) :is(td,th) small {
+  color: #64766a !important;
+}
+.admin-light-content :is(table,[class*="_table__"]) tbody tr:hover {
+  background: #f7f9f4 !important;
+}
+.admin-light-content :is(
+  [class*="_badge__"],[class*="_pill__"],.admin-status
+) {
+  background: #edf3e8 !important;
+  border-color: #d2e2d0 !important;
+  color: #456b4a !important;
+}
+.admin-light-content :is([role="alert"],[class*="_failure__"],[class*="_error__"]) {
+  color: #8b443a !important;
+  background: #fff1eb !important;
+  border-color: #dcb9af !important;
+}
+.admin-light-content :is([role="alert"],[class*="_failure__"],[class*="_error__"]) :is(p,small,strong) {
+  color: #8b443a !important;
+}
+.admin-light-content :is([class*="_success__"]) {
+  color: #2f6341 !important;
+  background: #edf5e9 !important;
+  border-color: #b6d2b7 !important;
+}
+
+/* Specific old standalone workspaces that use plain class names instead of
+   CSS modules: leave the universal top navigation dark and unchanged. */
+.admin-light-content .mzsGroup { max-width: 1584px; }
+.admin-light-content .mzsCards>a { color: #274d3a !important; }
+.admin-light-content .mzsCards>a :is(h2,p,small,span) { color: #43634d !important; }
+.admin-light-content .admin-page :is(.admin-field input,.admin-field select) {
+  background: white !important;
+  color: #243f35 !important;
+}
+.admin-light-content :is(.admin-nav,.admin-section-heading,.admin-request-message) {
+  border-color: var(--mzs-admin-border) !important;
+}
+.admin-light-content :is(.admin-nav button,.admin-filters button) {
+  background: white !important;
+  color: #28543f !important;
+  border-color: #cbd9ce !important;
+}
+.admin-light-content :is(.admin-nav button[aria-current="page"],.admin-filters button[aria-pressed="true"]) {
+  background: #e1ebde !important;
+  color: #244d37 !important;
+}
+.admin-light-content .admin-page .admin-button-primary {
+  background: #28543f !important;
+  color: white !important;
+}
+.admin-light-content .admin-footer { color: #69786d !important; border-color: #dae3d8 !important; }
+
+@media(max-width:700px) {
+  .admin-light-content { min-height: calc(100vh - 70px); padding-bottom: 20px; }
+  .admin-light-content :is(.admin-page,.mzsGroup,[class*="workspace_shell__"]) { padding-inline: 14px; }
+  .admin-light-content :is(input,select,textarea,button) { max-width: 100%; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .admin-light-content :is(button,a) { transition: none !important; }
+}
