@@ -71,6 +71,20 @@
   outline-offset: 3px;
 }
 
+/* Financial Cockpit and standalone dashboards also set their own dark root
+   and metric-card backgrounds; override these without shifting layout. */
+.admin-light-content [class*="_cockpit__"] {
+  background: var(--mzs-admin-canvas) !important;
+  border-color: var(--mzs-admin-border) !important;
+  color: var(--mzs-admin-ink) !important;
+}
+.admin-light-content :is([class*="_metrics__"],[class*="_stats__"]) > :is(div,article,button) {
+  background: var(--mzs-admin-surface) !important;
+  border-color: var(--mzs-admin-border) !important;
+  color: var(--mzs-admin-ink) !important;
+  border-radius: 9px;
+}
+
 /* Consistent panels, stat cards and operational lists in all modules. Avoid
    modifying the chart bars, calendar status colours and uploaded images. */
 .admin-light-content :is(
