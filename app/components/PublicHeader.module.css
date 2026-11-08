@@ -23,7 +23,7 @@
 /* Reserve the artwork's proportions before it loads, including on mobile. */
 .header .wordmark .logo {
   display: block;
-  width: clamp(128px, 11vw, 144px);
+  width: clamp(85.333px, 7.333333vw, 96px);
   height: auto;
   aspect-ratio: 640 / 289;
   object-fit: contain;
