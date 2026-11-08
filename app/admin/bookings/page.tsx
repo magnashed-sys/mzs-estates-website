@@ -74,7 +74,7 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
   return bookingId?"/admin/bookings/"+bookingId+"?"+new URLSearchParams({returnTo}).toString():"/admin/owner-stays#request-"+r.id;
  };
  const today=bookingToday(),boundary=bookingTodayBoundary(rows,today);
- const todayLine=<tr data-today-boundary={today}><td colSpan={12} style={{padding:'14px 12px',borderTop:'3px solid #28543f',borderBottom:'1px solid #28543f',background:'#e7eee4',color:'#28543f'}}><strong>{adminT("Today ·")} {formatDate(today, adminLocale)}</strong><span style={{marginLeft:16,fontSize:12}}>{adminT("Later arrivals above · Today and earlier arrivals below")}{boundary===0?adminT(" · No later arrivals on this page"):boundary===rows.length?adminT(" · Earlier arrivals may be on the next page"):''}</span></td></tr>;
+ const todayLine=<tr data-today-boundary={today}><td colSpan={11} style={{padding:'14px 12px',borderTop:'3px solid #28543f',borderBottom:'1px solid #28543f',background:'#e7eee4',color:'#28543f'}}><strong>{adminT("Today ·")} {formatDate(today, adminLocale)}</strong><span style={{marginLeft:16,fontSize:12}}>{adminT("Later arrivals above · Today and earlier arrivals below")}{boundary===0?adminT(" · No later arrivals on this page"):boundary===rows.length?adminT(" · Earlier arrivals may be on the next page"):''}</span></td></tr>;
  const loadedFrom=total===0?0:offset+1;
  const loadedTo=Math.min(offset+rows.length,total);
  return <main style={{background:"#f5f5f0",color:"#243f35",minHeight:"100vh",padding:"36px clamp(18px,4vw,60px)"}}>
@@ -128,21 +128,21 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
    </section>}
    {!error&&<section aria-label={adminT("Matching booking records")} style={{...style,padding:0,overflow:"hidden"}}>
     <div style={{overflowX:"auto"}}>
-     <table style={{width:"100%",minWidth:1250,borderCollapse:"collapse",textAlign:"left"}}>
-      <thead style={{background:"#ffffff"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Property","Type","Check-in","Check-out","Status","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"16px 12px",borderBottom:"1px solid #dce3d9",fontWeight:500,color:"#28543f"}}>{adminT(h)}</th>)}</tr></thead>
+     <table style={{width:"100%",minWidth:1020,borderCollapse:"collapse",textAlign:"left"}}>
+      <thead style={{background:"#ffffff"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Property","Type","Check-in","Check-out","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"13px 9px",borderBottom:"1px solid #dce3d9",fontWeight:500,color:"#28543f"}}>{adminT(h)}</th>)}</tr></thead>
       <tbody>{rows.map((r,index)=><Fragment key={r.category+r.id}>{index===boundary&&todayLine}<tr style={{borderBottom:"1px solid #e0e7dd"}}>
-       <td style={{padding:12}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?adminT("Manage request →"):adminT("Open dossier →")}</Link></td>
-       <td style={{padding:12}}>{r.guestName}</td>
-       <td style={{padding:12}}>{r.invoiceRecipient||"—"}</td>
-       <td style={{padding:12}}>{r.property}</td>
-       <td style={{padding:12}}>{adminT(r.category)}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkIn, adminLocale)}{r.checkIn<=today&&r.checkOut>today&&["confirmed","approved"].includes(r.status)&&r.category!=="Unavailable"&&<><br/><small style={{color:"#28543f"}}>{adminT("Current stay")}</small></>}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{formatDate(r.checkOut, adminLocale)}</td>
-       <td style={{padding:12}}>{adminT(r.status.replaceAll("_"," "))}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Owner stay"?adminT("Complimentary"):money(r.amount, adminLocale)}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"?money(r.paid, adminLocale):"—"}</td>
-       <td style={{padding:12,whiteSpace:"nowrap"}}>{r.category==="Guest booking"&&r.status==="confirmed"&&r.amount!==null?money(Math.max(0,r.amount-r.paid), adminLocale):"—"}</td>
-       <td style={{padding:12}}>{r.category==="Owner stay"?adminT("Complimentary"):r.category!=="Guest booking"||r.status!=="confirmed"?adminT("Not applicable"):r.amount===null?adminT("Not priced"):r.amount===0?adminT("No charge"):r.paid>r.amount?adminT("Overpaid"):r.paid>=r.amount?adminT("Paid"):r.paid>0?adminT("Partly paid"):adminT("Unpaid")}</td>
+       <td style={{padding:"10px 9px"}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?adminT("Manage request →"):adminT("Open dossier →")}</Link></td>
+       <td style={{padding:"10px 9px"}}>{r.guestName}</td>
+       <td style={{padding:"10px 9px"}}>{r.invoiceRecipient||"—"}</td>
+       <td style={{padding:"10px 9px"}}>{r.property}</td>
+       <td style={{padding:"10px 9px"}}>{adminT(r.category)}</td>
+       <td style={{padding:"10px 9px",whiteSpace:"nowrap"}}>{formatDate(r.checkIn, adminLocale)}{r.checkIn<=today&&r.checkOut>today&&["confirmed","approved"].includes(r.status)&&r.category!=="Unavailable"&&<><br/><small style={{color:"#28543f"}}>{adminT("Current stay")}</small></>}</td>
+       <td style={{padding:"10px 9px",whiteSpace:"nowrap"}}>{formatDate(r.checkOut, adminLocale)}</td>
+       
+       <td style={{padding:"10px 9px",whiteSpace:"nowrap"}}>{r.category==="Owner stay"?adminT("Complimentary"):money(r.amount, adminLocale)}</td>
+       <td style={{padding:"10px 9px",whiteSpace:"nowrap"}}>{r.category==="Guest booking"?money(r.paid, adminLocale):"—"}</td>
+       <td style={{padding:"10px 9px",whiteSpace:"nowrap"}}>{r.category==="Guest booking"&&r.status==="confirmed"&&r.amount!==null?money(Math.max(0,r.amount-r.paid), adminLocale):"—"}</td>
+       <td style={{padding:"10px 9px"}}>{r.category==="Owner stay"?adminT("Complimentary"):r.category!=="Guest booking"||r.status!=="confirmed"?adminT("Not applicable"):r.amount===null?adminT("Not priced"):r.amount===0?adminT("No charge"):r.paid>r.amount?adminT("Overpaid"):r.paid>=r.amount?adminT("Paid"):r.paid>0?adminT("Partly paid"):adminT("Unpaid")}</td>
       </tr></Fragment>)}{rows.length>0&&boundary===rows.length&&todayLine}</tbody>
      </table>
     </div>
