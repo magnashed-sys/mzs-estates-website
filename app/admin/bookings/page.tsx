@@ -85,10 +85,7 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
    <p style={{color:"#5d7064",maxWidth:850,lineHeight:1.8}}>{adminT("Central reservations and owner stays. Search and filter your full booking history in the database, then open an audited dossier. Original booking details and corrected billing recipients remain available.")}</p>
    <nav aria-label={adminT("Booking workflows")} style={{display:"flex",gap:10,flexWrap:"wrap",margin:"24px 0"}}>
     <Link href="/admin/bookings/operations" style={{...control,...linkStyle}}>{adminT("Requests & Calendar")}</Link>
-    <Link href="/admin/bookings/operations?scope=test" style={{...control,...linkStyle}}>{adminT("Test cleanup")}</Link>
     <Link href="/admin/owner-stays" style={{...control,...linkStyle}}>{adminT("Owner stays")}</Link>
-    <Link href="/admin/group/estates/contracts?view=invoices" style={{...control,...linkStyle}}>{adminT("Contracts & Invoices")}</Link>
-    <Link href="/admin/group/estates/properties" style={{...control,...linkStyle}}>{adminT("Properties")}</Link>
    </nav>
    <section style={style} aria-label={adminT("Search and filter bookings")}>
     <h2 style={{fontFamily:"Georgia,serif",fontWeight:400,fontSize:25,margin:"0 0 18px"}}>{adminT("Find reservations")}</h2>

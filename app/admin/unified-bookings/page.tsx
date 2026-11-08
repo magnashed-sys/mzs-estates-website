@@ -56,8 +56,6 @@ export default async function UnifiedBookings(){
    <Link href="/admin/bookings" style={{...style,borderColor:"#28543f",color:"#28543f"}}>{adminT("All Bookings")}</Link>
    <Link href="/admin?tab=bookings" style={style}>{adminT("Requests, cancellations & calendar →")}</Link>
    <Link href="/admin/owner-stays" style={style}>{adminT("Owner stays →")}</Link>
-   <Link href="/admin/group/estates/contracts?view=invoices" style={style}>{adminT("Contracts & invoices →")}</Link>
-   <Link href="/admin/group/estates/properties" style={style}>{adminT("Properties →")}</Link>
   </nav>
   {errors.length>0&&<p role="alert" style={{color:"#8b443a"}}>{adminT("Incomplete registers:")} {errors.join(", ")}{adminT(". Verify records in the source module.")}</p>}
   <section style={{display:"flex",gap:12,flexWrap:"wrap",margin:"25px 0"}} aria-label={adminT("Loaded booking summary")}>
