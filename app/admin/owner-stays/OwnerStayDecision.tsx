@@ -5,7 +5,7 @@ import {useActionState} from "react";
 import {decideOwnerStay,type OwnerStayDecisionResult} from "./actions";
 
 const initial:OwnerStayDecisionResult={status:"idle",message:""};
-const button={padding:"10px 12px",background:"#24221f",color:"#fff",border:"1px solid #655c4c",cursor:"pointer"} as const;
+const button={padding:"11px 16px",minHeight:44,borderRadius:6,background:"#28543f",color:"#fff",border:"1px solid #28543f",cursor:"pointer",fontWeight:600} as const;
 
 export default function OwnerStayDecision({id,blocked=false}:{id:string;blocked?:boolean}){
  const {t:adminT,locale:adminLocale}=useAdminI18n();
@@ -19,7 +19,7 @@ export default function OwnerStayDecision({id,blocked=false}:{id:string;blocked?
    </button>
    <button type="submit" name="decision" value="decline" disabled={pending} style={{...button,opacity:pending?0.45:1}}>{adminT("Decline")}</button>
   </div>
-  {outcome.message&&<p role={outcome.status==="error"?"alert":"status"} style={{padding:12,margin:0,border:"1px solid #655c4c",color:outcome.status==="error"?"#f0b9a6":"#c9d8bd"}}>
+  {outcome.message&&<p role={outcome.status==="error"?"alert":"status"} style={{padding:12,margin:0,border:"1px solid "+(outcome.status==="error"?"#dcb9af":"#b6d2b7"),borderRadius:8,background:outcome.status==="error"?"#fff1eb":"#edf5e9",color:outcome.status==="error"?"#8b443a":"#2f6341"}}>
     {adminT(outcome.message)}
   </p>}
  </form>;
