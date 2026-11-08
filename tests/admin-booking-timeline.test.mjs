@@ -25,13 +25,13 @@ async function bookings(dates,language='en'){
  const tree=await exports.default({searchParams:Promise.resolve({q:'Synthetic',period:'all'})});
  return {html:require('react-dom/server').renderToStaticMarkup(tree),calls};
 }
-test('rendered booking table places one 12-column divider between future and today, preserves search and hides source column',async()=>{
+test('rendered booking table places one 11-column divider between future and today, preserves search and hides source column',async()=>{
  const {html,calls}=await bookings(['2026-11-01','2026-10-28','2026-10-20']);
  assert.equal(calls[0],'auth');assert.equal(calls[1].args.p_query,'Synthetic');
  assert.equal((html.match(/data-today-boundary=/g)||[]).length,1);
  assert.ok(html.indexOf('Synthetic guest 0')<html.indexOf('data-today-boundary='));
  assert.ok(html.indexOf('data-today-boundary=')<html.indexOf('Synthetic guest 1'));
- assert.match(html,/colSpan="12"/i);assert.match(html,/Current stay/);
+ assert.match(html,/colSpan="11"/i);assert.match(html,/Current stay/);assert.doesNotMatch(html,/<th[^>]*>Status<\/th>/);assert.match(html,/Payment status/);
  assert.doesNotMatch(html,/<th[^>]*>Original reference|SOURCE-|id="accountant-export"/);
 });
 test('today marker remains accurate for filtered pages wholly before or after today and empty results',async()=>{
