@@ -3,6 +3,13 @@
    Global Design System
    ========================================================= */
 
+:root {
+  /* Warm gold shared by public links, sampled from the approved MZS logo. */
+  --mzs-link-gold: #edc66b;
+  --mzs-link-gold-hover: #ffe3a3;
+  --mzs-link-gold-rgb: 237, 198, 107;
+}
+
 * {
   box-sizing: border-box;
 }
