@@ -1,0 +1,32 @@
+name: Public GET availability (read-only)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC: daily. No financial, database, mail or authenticated calls.
+    - cron: '27 6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mzs-public-readonly-health
+  cancel-in-progress: false
+
+jobs:
+  public-get:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Check out repository without a retained token
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Use Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Verify checker with offline tests
+        run: node --test tests/public-health.test.mjs
+      - name: Verify public GET routes without any credentials
+        run: node scripts/check-public-health.mjs
