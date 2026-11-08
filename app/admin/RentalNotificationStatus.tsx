@@ -45,16 +45,16 @@ export default function RentalNotificationStatus({ refreshKey }: { refreshKey: s
     if (!reason || reason.trim().length < 10) return;
     void action({ action: "resolve", id: item.id, decision, reason, verified: true });
   }
-  return <details style={{ marginTop: 30, border: "1px solid #514839", padding: 20 }}>
-    <summary style={{ cursor: "pointer", color: "#d5c09a" }}>{adminT("Client notification status")}</summary>
-    <p style={{ color: "#cfc5b7", lineHeight: 1.7 }}>{adminT("Relevant changes and cancellations are queued automatically. Internal notes and cancellation reasons are never included. Mail-server acceptance does not confirm inbox delivery.")}{capture && adminT(" Staging captures messages without sending email.")}</p>
+  return <details style={{ marginTop: 30, border: "1px solid #dce3d9", padding: 20 }}>
+    <summary style={{ cursor: "pointer", color: "#28543f" }}>{adminT("Client notification status")}</summary>
+    <p style={{ color: "#536c5a", lineHeight: 1.7 }}>{adminT("Relevant changes and cancellations are queued automatically. Internal notes and cancellation reasons are never included. Mail-server acceptance does not confirm inbox delivery.")}{capture && adminT(" Staging captures messages without sending email.")}</p>
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       <button className="admin-button" disabled={busy} onClick={() => void refresh()}>{adminT("Refresh notifications")}</button>
       <button className="admin-button" disabled={busy} onClick={() => void action({ action: "dispatch" })}>{adminT("Process next queued email")}</button>
     </div>
     {message && <p role="status">{adminT(message)}</p>}
     {!items.length && !message && <p>{adminT("No change notifications yet.")}</p>}
-    {items.map(item => <article key={item.id} style={{ padding: "18px 0", borderBottom: "1px solid #514839", overflowWrap: "anywhere" }}>
+    {items.map(item => <article key={item.id} style={{ padding: "18px 0", borderBottom: "1px solid #dce3d9", overflowWrap: "anywhere" }}>
       <strong>{item.kind === "cancelled" ? adminT("Cancellation") : adminT("Reservation update")} — {labels[item.status] || adminT(item.status)}</strong>
       <p>{adminT("Booking")} {item.booking_id}<br />{adminT("Recipient:")} {item.recipient_email || adminT("Requires review")}<br />
         {new Date(item.created_at).toLocaleString(adminLocale, { timeZone: "Europe/Madrid" })}  {adminT("· Attempts:")} {item.attempts}</p>
@@ -67,6 +67,6 @@ export default function RentalNotificationStatus({ refreshKey }: { refreshKey: s
         </>}
       </div>
     </article>)}
-    <p style={{ color: "#cfc5b7", fontSize: 13 }}>{adminT("Showing the latest 50 notifications. Uncertain deliveries require verification before another send.")}</p>
+    <p style={{ color: "#536c5a", fontSize: 13 }}>{adminT("Showing the latest 50 notifications. Uncertain deliveries require verification before another send.")}</p>
   </details>;
 }
