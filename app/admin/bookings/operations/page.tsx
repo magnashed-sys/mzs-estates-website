@@ -14,12 +14,11 @@ export default async function BookingOperations({searchParams}:{searchParams:Pro
  return <main style={{background:"#f5f5f0",color:"#243f35",minHeight:"100vh",padding:"32px clamp(18px,4vw,60px)"}}>
   <Link href="/admin/bookings" style={{color:"#28543f"}}>{adminT("← All bookings")}</Link>
   <h1>{adminT("Booking operations")}</h1>
-  <p>{adminT("Review requests, manage the calendar and clean up test bookings.")}</p>
+  <p>{adminT("Review booking requests, cancellations and the reservation calendar.")}</p>
   <nav aria-label={adminT("Booking operations")} style={{display:"flex",gap:20,flexWrap:"wrap",marginBottom:24}}>
    <Link href="/admin/bookings/operations">{adminT("Requests")}</Link>
    <Link href="/admin/bookings/operations?view=calendar">{adminT("Calendar")}</Link>
    <Link href="/admin/bookings/operations?view=cancellations">{adminT("Cancellation requests")}</Link>
-   <Link href="/admin/bookings/operations?scope=test">{adminT("Test cleanup")}</Link>
   </nav>
   {scope==="test"&&<p>{adminT("Only eligible test records can be permanently deleted. Review each record before confirming deletion.")}</p>}
   <BookingManagement key={section+scope} initialSection={section} initialScope={scope}/>
