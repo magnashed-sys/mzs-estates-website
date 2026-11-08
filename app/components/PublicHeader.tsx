@@ -123,8 +123,16 @@ const publicNavigation = [
         className={`${styles.wordmark} mzs-wordmark`}
         aria-label={t('mzs_group_home')}
       >
-        <span className={`${styles.monogram} mzs-monogram`}>MZS</span>
-        <span className={`${styles.groupLabel} mzs-group-label`}>GROUP</span>
+        <img
+          src="/images/mzs-group-gold.webp"
+          alt=""
+          aria-hidden="true"
+          width={640}
+          height={289}
+          className={styles.logo}
+          fetchPriority="high"
+          decoding="async"
+        />
       </a>
 
       <div className={styles.navigationRegion}>
