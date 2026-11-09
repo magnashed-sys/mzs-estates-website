@@ -93,6 +93,29 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   {error&&<div className={s.failure} role="alert">{adminT(error)}</div>}
   {data&&!loading&&<>
    <p><a href="/admin/workspaces/estates/reports">{adminT("Property expense drafts and accountant export →")}</a></p><div className={s.scopeNote}>{adminT("Reporting scope:")} <strong>{entityLabel}</strong>{adminT(". Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.")}</div>
+   {view==='overview'&&<section className={s.periodSnapshot} aria-label={tr('Financial snapshot for the selected month and current balances','Resumen financiero del mes seleccionado y saldos actuales')}>
+    <h3>{tr('Selected month','Mes seleccionado')} · {monthLabel(year+'-'+String(month).padStart(2,'0'),adminLocale)} {year}</h3>
+    <div className={s.periodGrid}>
+     <div className={s.periodCard}><span>{tr('Expected rental billing · selected month','Facturación prevista de alquiler · mes seleccionado')}</span>
+       <strong>{displayEuroExact(selected?.rentForecast??0,adminLocale)}</strong>
+       <small>{tr('Contract forecast · may include VAT','Previsión contractual · puede incluir IVA')}</small></div>
+     <div className={s.periodCard}><span>{tr('Recorded rental receipts · selected month','Cobros de alquiler registrados · mes seleccionado')}</span>
+       <strong>{displayEuroExact(selected?.rentReceived??0,adminLocale)}</strong>
+       <small>{tr('Recorded payments · not bank-verified','Pagos registrados · no verificados con el banco')}</small></div>
+     <div className={s.periodCard}><span>{tr('Outstanding rental invoices · current balance','Facturas de alquiler pendientes · saldo actual')}</span>
+       <strong>{displayEuroExact(data.report.outstandingRent,adminLocale)}</strong>
+       <small>{tr('All periods · as of today','Todos los periodos · a día de hoy')}</small></div>
+     <div className={s.periodCard}><span>{tr('Overdue rental invoices · current balance','Facturas de alquiler vencidas · saldo actual')}</span>
+       <strong>{displayEuroExact(data.report.overdueRent,adminLocale)}</strong>
+       <small>{tr('All periods · as of today','Todos los periodos · a día de hoy')}</small></div>
+    </div>
+    <p className={s.periodNote}>{tr('Forecast, receipts and open invoices have different definitions and must not be added together. The selected month applies only to the first two cards. Outstanding and overdue amounts show current balances for all periods.','La previsión, los cobros y las facturas pendientes tienen definiciones distintas y no deben sumarse. El mes seleccionado solo se aplica a las dos primeras tarjetas. Los importes pendientes y vencidos muestran los saldos actuales de todos los periodos.')}</p>
+    <nav className={s.actionLinks} aria-label={tr('Financial source registers','Registros financieros de origen')}>
+      <Link href="/admin/group/estates/contracts?view=units">{tr('Rent per unit','Alquiler por unidad')}</Link>
+      <Link href="/admin/group/estates/properties">{tr('Properties and addresses','Inmuebles y direcciones')}</Link>
+      <Link href="/admin/workspaces/accountancy/sales">{tr('Invoices and payments','Facturas y pagos')}</Link>
+    </nav>
+   </section>}
    {view==='overview'&&<div className={s.metrics}>
     {cards.map(card=><div key={card.title} className={s.metric}>
      <div className={s.metricHead}><span className={s.kicker}>{adminT(card.title)}</span><span className={s.dot} data-kind={card.accent}/></div>
