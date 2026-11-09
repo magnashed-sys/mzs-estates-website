@@ -11,6 +11,7 @@ import DeleteRelationship from './DeleteRelationship';
 import CompanyFields from './CompanyFields';
 import {addressFields, formatBillingAddress, normalizedEmail, relationshipRoles, unextendedMembers, type RelationshipRecord, type RelationshipMember} from '../../../lib/relationships/model';
 import s from '../group/estates/contracts/contracts.module.css';
+import crm from './crm-register.module.css';
 
 type Draft = Omit<RelationshipRecord, 'id' | 'version'>;
 type Props = {relationships: RelationshipRecord[]; members?: RelationshipMember[]; initialKind?: 'person' | 'company'; createInitially?: boolean; initialEdit?: string; initialProfile?: string; initialFilter?: 'all' | 'company'};
@@ -21,7 +22,8 @@ function editable(record: RelationshipRecord): Draft {return {...record,billing_
 const roleLabels: Record<string,string> = {client:'Client', tenant:'Tenant', owner:'Owner', investor:'Investor', partner:'Partner'};
 
 export default function RelationshipRegister({relationships, members = [], initialKind = 'person', createInitially = false, initialEdit, initialProfile, initialFilter = 'all'}: Props) {
- const {t:adminT,locale:adminLocale}=useAdminI18n();
+ const {t:adminT,locale:adminLocale,language}=useAdminI18n();
+ const l=(en:string,es:string)=>language==='es'?es:en;
 
   const router = useRouter();
   const initialRecord = relationships.find(r => r.id === initialEdit || (r.kind === 'person' && r.profile_id === initialProfile));
@@ -30,6 +32,8 @@ export default function RelationshipRegister({relationships, members = [], initi
   const [draft, setDraft] = useState<Draft>(initialRecord ? editable(initialRecord) : newDraft(initialKind, initialMember));
   const [filter, setFilter] = useState<'all' | 'person' | 'company'>(initialFilter);
   const [search, setSearch] = useState('');
+  const [roleFilter,setRoleFilter]=useState('all');
+  const [accountFilter,setAccountFilter]=useState<'all'|'linked'|'unlinked'>('all');
   const [pending, start] = useTransition();
   const [error, setError] = useState('');
   const [existingId, setExistingId] = useState<string>();
@@ -40,17 +44,38 @@ export default function RelationshipRegister({relationships, members = [], initi
     setEditing(record); setDraft(record ? editable(record) : newDraft(kind, member)); setError(''); setExistingId(undefined); setNotice(''); setSelected(record?.id || null);
   }
   const matchedAccount = !draft.profile_id && draft.email ? members.find(m => normalizedEmail(m.email) === normalizedEmail(draft.email)) : undefined;
-  const match = (values: string[]) => values.join(' ').toLowerCase().includes(search.trim().toLowerCase());
-  const visible = relationships.filter(r => (filter === 'all' || r.kind === filter) && match([r.name,r.email,r.reference,r.address,...Object.values(r.company_details || {}).filter((v):v is string=>typeof v==='string')]));
-  const existingAccounts = unextendedMembers(relationships, members).filter(m => filter !== 'company' && match([m.full_name || '',m.email]));
+  const normalizedSearch=search.trim().toLocaleLowerCase(adminLocale);
+  const match=(values:string[])=>values.join(' ').toLocaleLowerCase(adminLocale).includes(normalizedSearch);
+  const isLinked=(r:RelationshipRecord)=>Boolean(r.profile_id);
+  const visible=relationships.filter(r=>
+    (filter==='all'||r.kind===filter)&&
+    (roleFilter==='all'||(r.roles||[]).includes(roleFilter))&&
+    (accountFilter==='all'||(accountFilter==='linked'?isLinked(r):!isLinked(r)))&&
+    match([r.name,r.email,r.phone,r.reference,r.address,...(r.roles||[]),...Object.values(r.company_details||{}).filter((v):v is string=>typeof v==='string')])
+  );
+  const availableAccounts=unextendedMembers(relationships,members);
+  const existingAccounts=availableAccounts.filter(m=>
+    filter!=='company'&&
+    (roleFilter==='all'||roleFilter===m.role)&&
+    accountFilter!=='unlinked'&&
+    match([m.full_name||'',m.email,m.role||''])
+  );
   const alphabetic=new Intl.Collator(adminLocale,{numeric:true,sensitivity:'base'});
   const rows=[
     ...visible.map(record=>({kind:'relationship' as const,record,name:record.name.trim(),id:'relationship:'+record.id})),
     ...existingAccounts.map(member=>({kind:'account' as const,member,name:member.full_name?.trim()||member.email,id:'account:'+member.id})),
   ].sort((a,b)=>alphabetic.compare(a.name,b.name)||a.id.localeCompare(b.id));
+  const crmCount=relationships.length+availableAccounts.length;
+  const companyCount=relationships.filter(r=>r.kind==='company').length;
+  const accountCount=relationships.filter(r=>Boolean(r.profile_id)).length+availableAccounts.length;
   const accountLabel = (id?: string | null) => {const m = members.find(m => m.id === id);return m ? `${m.full_name || m.email} · ${m.is_active === false ? 'Inactive' : 'Existing login'}` : 'No linked login';};
   return <>
     <p className={s.status}>{adminT("Use one person record per client and link companies to the same contact account. Roles describe the relationship; login access and project permissions remain controlled separately.")}</p>
+    <section className={crm.summary} aria-label={l('CRM relationship overview','Resumen de relaciones CRM')}>
+      <div><span>{l('All relationships','Todas las relaciones')}</span><strong>{crmCount}</strong></div>
+      <div><span>{l('Companies','Empresas')}</span><strong>{companyCount}</strong></div>
+      <div><span>{l('With linked account','Con cuenta vinculada')}</span><strong>{accountCount}</strong></div>
+    </section>
     <div className={s.toolbar}>
       <button className={s.button} disabled={pending} onClick={() => open(null,'person')}>{adminT("New client")}</button>
       <button className={s.secondary} disabled={pending} onClick={() => open(null,'company')}>{adminT("New company")}</button>
@@ -96,9 +121,15 @@ export default function RelationshipRegister({relationships, members = [], initi
     <div className={s.grid}>
       <label className={s.field}><span>{adminT("Search relationships")}</span><input type="search" value={search} disabled={pending} onChange={e=>setSearch(e.target.value)}/></label>
       <label className={s.field}><span>{adminT("Show")}</span><select value={filter} disabled={pending} onChange={e=>setFilter(e.target.value as typeof filter)}><option value="all">{adminT("People & companies")}</option><option value="person">{adminT("People")}</option><option value="company">{adminT("Companies")}</option></select></label>
+      <label className={s.field}><span>{l('Role','Rol')}</span><select value={roleFilter} disabled={pending} onChange={e=>setRoleFilter(e.target.value)}><option value="all">{l('All roles','Todos los roles')}</option>{relationshipRoles.map(role=><option key={role} value={role}>{adminT(roleLabels[role])}</option>)}</select></label>
+      <label className={s.field}><span>{l('Linked account','Cuenta vinculada')}</span><select value={accountFilter} disabled={pending} onChange={e=>setAccountFilter(e.target.value as typeof accountFilter)}><option value="all">{l('Any account state','Cualquier estado')}</option><option value="linked">{l('Linked login','Acceso vinculado')}</option><option value="unlinked">{l('Without login','Sin acceso')}</option></select></label>
+    </div>
+    <div className={crm.results} role="status">
+      <span>{l('Showing','Mostrando')} <strong>{rows.length}</strong> {l('of','de')} <strong>{crmCount}</strong> {l('relationships','relaciones')}</span>
+      {(search||filter!=='all'||roleFilter!=='all'||accountFilter!=='all')&&<button type="button" disabled={pending} onClick={()=>{setSearch('');setFilter('all');setRoleFilter('all');setAccountFilter('all');}}>{l('Clear filters','Borrar filtros')}</button>}
     </div>
     <div className={s.tableWrap}><table className={s.table}><thead><tr><th>{adminT("Name")}</th><th>{adminT("Roles")}</th><th>{adminT("Email")}</th><th>{adminT("Account / dossier")}</th><th>{adminT("Remove")}</th></tr></thead><tbody>
-      {rows.map(row=>{if(row.kind==='relationship'){const r=row.record;return (<tr key={row.id} aria-selected={selected===r.id}><td><button disabled={pending} onClick={()=>open(r)}>{r.name}</button><small>{r.kind==='company'?adminT("Company"):adminT("Person")}{r.reference?adminT("· {p0}", {p0: r.reference}):''}</small></td><td>{(r.roles || []).map(role=>roleLabels[role] || role).join(', ')}</td><td>{r.email || '—'}</td><td><small><Link href={'/admin/relationships/overview?relationship='+r.id}>Relationship 360° →</Link></small>{accountLabel(r.profile_id)}{r.profile_id&&<small><Link href={`/admin/relationships/${r.profile_id}`}>{adminT("Open account dossier →")}</Link></small>}</td><td><Link href={'/admin/relationships/invoices/'+r.id}>{adminT("Historical invoices →")}</Link><br/><DeleteRelationship kind={r.kind==='person'&&r.profile_id?'account':'relationship'} id={r.kind==='person'&&r.profile_id?r.profile_id:r.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Relationship removed.');}}/></td></tr>);}const m=row.member;return (<tr key={row.id}><td><button disabled={pending} onClick={()=>open(null,'person',m)}>{m.full_name || m.email}</button><small>{adminT("Person · existing account")}</small></td><td>{m.role==='partner'?adminT("Partner"):adminT("Client")}</td><td>{m.email}</td><td><small><Link href={'/admin/relationships/overview?profile='+m.id}>Relationship 360° →</Link></small><Link href={`/admin/relationships/${m.id}`}>{adminT("Open relationship dossier →")}</Link><small>{m.is_active===false?adminT("Inactive"):adminT("Active")}  {adminT("· Add roles and billing details to this relationship")}</small></td><td><DeleteRelationship kind="account" id={m.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Client account removed.');}}/></td></tr>);})}
+      {rows.map(row=>{if(row.kind==='relationship'){const r=row.record;return (<tr key={row.id} aria-selected={selected===r.id}><td><button disabled={pending} onClick={()=>open(r)}>{r.name}</button><small>{r.kind==='company'?adminT("Company"):adminT("Person")}{r.reference?adminT("· {p0}", {p0: r.reference}):''}</small></td><td>{(r.roles || []).map(role=>roleLabels[role] || role).join(', ')}</td><td>{r.email || '—'}</td><td><small><Link href={'/admin/relationships/overview?relationship='+r.id}>Relationship 360° →</Link></small>{accountLabel(r.profile_id)}{r.profile_id&&<small><Link href={`/admin/relationships/${r.profile_id}`}>{adminT("Open account dossier →")}</Link></small>}<small><Link href={'/admin/relationships/invoices/'+r.id}>{adminT("Historical invoices →")}</Link></small></td><td><DeleteRelationship kind={r.kind==='person'&&r.profile_id?'account':'relationship'} id={r.kind==='person'&&r.profile_id?r.profile_id:r.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Relationship removed.');}}/></td></tr>);}const m=row.member;return (<tr key={row.id}><td><button disabled={pending} onClick={()=>open(null,'person',m)}>{m.full_name || m.email}</button><small>{adminT("Person · existing account")}</small></td><td>{m.role==='partner'?adminT("Partner"):adminT("Client")}</td><td>{m.email}</td><td><small><Link href={'/admin/relationships/overview?profile='+m.id}>Relationship 360° →</Link></small><Link href={`/admin/relationships/${m.id}`}>{adminT("Open relationship dossier →")}</Link><small>{m.is_active===false?adminT("Inactive"):adminT("Active")}  {adminT("· Add roles and billing details to this relationship")}</small></td><td><DeleteRelationship kind="account" id={m.id} disabled={pending} onDeleted={()=>{setEditing(undefined);setSelected(null);setNotice('Client account removed.');}}/></td></tr>);})}
     </tbody></table></div>
     {!visible.length && !existingAccounts.length && <p className={s.empty}>{adminT("No relationships match this view. Add a client or company to begin.")}</p>}
   </>;
