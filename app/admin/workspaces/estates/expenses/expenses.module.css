@@ -89,3 +89,11 @@
 .saveButton:hover{color:#ffffff}
 .error{background:#fff1eb;color:#8b443a}
 .notice{background:#edf1e9;color:#335443}
+
+/* Purchase-document confidence is per currently visible page, not a global ledger status. */
+.originalArchived,.originalPending{display:inline-flex;align-items:center;border-radius:6px;border:1px solid;padding:6px 9px;font-size:12px;line-height:1.45}
+.originalArchived{color:#2f6341;background:#edf5e9;border-color:#b6d2b7}
+.originalPending{color:#765824;background:#f5f3eb;border-color:#ded5be}
+.tableScroll td{vertical-align:top}
+.tableScroll td p{margin:7px 0 0}
+.tableScroll td a{color:#28543f}
