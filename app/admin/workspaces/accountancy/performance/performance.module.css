@@ -1,0 +1,40 @@
+.page{max-width:1550px;margin:0 auto;padding:22px clamp(16px,3vw,42px) 70px;color:#243f35}
+.back{display:inline-block;color:#28543f;margin-bottom:20px;text-decoration:none;font-size:12px}
+.heading{display:flex;gap:20px;align-items:start;justify-content:space-between;margin-bottom:22px}
+.heading h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:10px 0 12px;letter-spacing:-.02em}
+.heading p:last-child{max-width:950px;color:#5d7064;font-size:13px;line-height:1.7;margin:0}
+.kicker{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#55735f}
+.filters{display:grid;grid-template-columns:minmax(230px,1.35fr) minmax(220px,1.4fr) minmax(210px,1.4fr) auto;gap:12px;align-items:end;padding:18px;background:#fff;border:1px solid #dce3d9;border-radius:9px}
+.filters label{display:grid;gap:7px;font-size:12px;color:#536c5a;min-width:0}
+.filters select{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid #cbd9ce;background:#fff;border-radius:6px;color:#243f35;font:inherit;color-scheme:light}
+.filters button{min-height:44px;background:#28543f;border:1px solid #28543f;color:#fff;border-radius:6px;padding:10px 16px;cursor:pointer;font-weight:600;white-space:nowrap}
+.scope{margin:16px 0 19px;font-size:13px;color:#405c49;font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.metrics>div{background:#fff;border:1px solid #dce3d9;border-radius:9px;padding:20px 18px;min-width:0;box-shadow:0 2px 9px rgba(35,63,49,.035)}
+.metrics span,.metrics small{display:block;color:#536c5a;font-size:12px;line-height:1.55}
+.metrics strong{display:block;color:#244537;font:400 clamp(22px,2.5vw,34px)/1.2 Georgia,serif;margin:12px 0 6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.metrics small{font-size:11px}
+.disclaimer{padding:15px 18px;margin:20px 0;color:#5b614e;background:#f5f3eb;border:1px solid #ded5be;border-radius:8px;font-size:12px;line-height:1.75}
+.error{padding:16px;border-radius:7px;border:1px solid #dcb9af;background:#fff1eb;color:#8b443a}
+.panel{background:#fff;border:1px solid #dce3d9;border-radius:10px;padding:clamp(17px,2.8vw,28px);margin:22px 0;min-width:0}
+.panel h2{font:400 clamp(23px,3vw,32px)/1.2 Georgia,serif;margin:8px 0 14px;color:#243f35}
+.panel>p{color:#5d7064;font-size:12px;line-height:1.7}
+.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;flex-wrap:wrap}
+.sectionHead>span{color:#607568;font-size:12px}
+.scroll{overflow-x:auto;max-width:100%;scrollbar-color:#a6baa8 #edf1e9;margin:12px 0 18px;border:1px solid #dce3d9;border-radius:7px}
+.scroll table{border-collapse:collapse;min-width:1060px;width:100%;font:12px/1.5 Arial,sans-serif;font-variant-numeric:tabular-nums}
+.scroll th,.scroll td{padding:11px 12px;border-bottom:1px solid #e5e9e0;text-align:right;color:#304b3a}
+.scroll th:first-child{text-align:left;white-space:nowrap}
+.scroll thead th{background:#edf1e9;color:#4e6655;font-weight:600;white-space:normal}
+.scroll tfoot th,.scroll tfoot td{font-weight:700;background:#edf1e9}
+.scroll tbody tr:hover{background:#f7f9f4}
+.caption{color:#607568;font-size:12px;line-height:1.7;margin:12px 0}
+.projectLinks{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 21px}
+.projectLinks a,.actions a{display:inline-flex;align-items:center;min-height:42px;background:#fff;border:1px solid #cbd9ce;color:#28543f;text-decoration:none;padding:10px 14px;border-radius:6px;font-size:12px;line-height:1.5}
+.projectLinks a[aria-current=page]{background:#e1ebde;border-color:#bfd1bd;color:#244d37;font-weight:700}
+.projectLinks a:hover,.actions a:hover{border-color:#28543f;text-decoration:underline}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.actions a{background:#f7f9f4}
+.page :is(a,select,button,.scroll):focus-visible{outline:2px solid #a98e54;outline-offset:3px}
+@media(max-width:1150px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.filters{grid-template-columns:1fr;padding:14px}.metrics{grid-template-columns:1fr}.metrics>div{padding:16px}.panel{padding:14px}.actions a{flex:1 1 100%}.scroll th,.scroll td{padding:10px 9px}}
