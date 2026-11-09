@@ -72,7 +72,7 @@ test('CRM migration requires admin RLS, controlled audited writes, and immutable
  assert.match(ddl,/with check\(public\.is_admin\(\)\)/);
  assert.match(ddl,/grant update\(status,due_on,version\)/);
  assert.match(ddl,/new\.version<>old\.version\+1/);
- assert.match(ddl,/Source fields are immutable/gi.test(ddl)?/Source fields are immutable/:/CRM source fields are immutable/);
+ assert.match(ddl,/CRM source fields are immutable/);
  assert.match(ddl,/mzs_crm_activity_events/);
  assert.doesNotMatch(ddl,/grant (?:delete|truncate)/i);
 });
