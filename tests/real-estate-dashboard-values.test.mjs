@@ -95,3 +95,11 @@ test('Estate detail CSS stays light without changing shared header',()=>{
   }
   assert.match(src('app/admin/layout.tsx'),/<AdminHeader\/><div className="admin-light-content">/);
 });
+
+
+test('Real Estate register lists are ordered alphabetically by address',()=>{
+  const properties=src('app/admin/group/estates/properties/page.tsx');
+  const units=src('app/admin/group/estates/units/page.tsx');
+  assert.match(properties,/\.order\('address', \{ ascending: true \}\)/);
+  assert.match(units,/\.order\('address'\)\.order\('sort_order'\)/);
+});
