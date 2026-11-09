@@ -59,6 +59,8 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
  const invoiceLinks=await documentLinks(db,"cost",drafts.data.map(d=>d.id));
  const archivedCostIds=new Set(invoiceLinks.filter(l=>l.is_active&&l.draft_id&&l.document.review_status!=="superseded").map(l=>l.draft_id!));
  const originalLabels=expenseOriginalLabels[language];
+ const archivedOnPage=drafts.data.filter(d=>archivedCostIds.has(d.id)).length;
+ const awaitingArchiveOnPage=drafts.data.length-archivedOnPage;
  const issuerNames=new Map((issuers.data??[]).map(x=>[x.id,x.name]));
  const propertyNames=new Map((properties.data??[]).map(x=>[x.id,x.name]));
  const supplierNames=new Map((suppliers.data??[]).map(x=>[x.id,x.name]));
@@ -106,19 +108,22 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
     <div><small>{adminT("Net · this page")}</small><strong>{formatCents(totals.net)}</strong></div>
     <div><small>{adminT("VAT · this page")}</small><strong>{formatCents(totals.vat)}</strong></div>
     <div><small>{adminT("Gross · this page")}</small><strong>{formatCents(totals.gross)}</strong></div>
+    <div><small>{language==='es'?'PDF originales archivados · esta página':'Archived original PDFs · this page'}</small><strong>{archivedOnPage}</strong></div>
+    <div><small>{language==='es'?'Pendientes de archivo verificado · esta página':'Awaiting verified archive · this page'}</small><strong>{awaitingArchiveOnPage}</strong></div>
    </div>
    {drafts.data.length===0?<p>{adminT("No expense drafts match this selection.")}</p>:
     <div className={styles.tableScroll} role="region" tabIndex={0} aria-label={adminT("Purchase expense drafts")}>
      <table>
-      <thead><tr><th>{adminT("Date")}</th><th>{adminT("Property")}</th><th>{adminT("Paying entity")}</th><th>{adminT("Supplier")}</th><th>{adminT("Reference")}</th><th>{adminT("Amount")}</th><th>{adminT("Status")}</th></tr></thead>
+      <thead><tr><th>{adminT("Date")}</th><th>{adminT("Property")}</th><th>{adminT("Paying entity")}</th><th>{adminT("Supplier")}</th><th>{adminT("Reference")}</th><th>{adminT("Amount")}</th><th>{adminT("Status")}</th><th>{language==='es'?'PDF original':'Original PDF'}</th></tr></thead>
       <tbody>{(drafts.data??[]).map(d=><tr key={d.id}>
        <td>{d.invoice_date}</td><td>{d.property_id?(propertyNames.get(d.property_id)??adminT("Unknown property")):adminT("Company-level costs")}</td>
        <td>{issuerNames.get(d.legal_entity_id)??adminT("Unknown entity")}</td>
        <td>{supplierNames.get(d.supplier_relationship_id)??adminT("Unknown relationship")}</td>
        <td>{d.supplier_invoice_number}</td><td>{formatCents(d.gross_cents)}</td>
-       <td>{d.status==="draft"?adminT("Concept"):adminT(d.status)} · {originalLabels[expenseOriginalStatus(d,archivedCostIds)]}
-        <p><Link href={attachmentHref("cost",d.id)}>{originalLabels.manage}</Link></p>
+       <td>{d.status==="draft"?adminT("Concept"):adminT(d.status)}
         <details><summary>{adminT("Details")}</summary><p className={styles.detailText}>{d.description}</p><p>{adminT("Category:")} {adminT(d.category)}</p><p>{adminT("Net")} {formatCents(d.net_cents)}  {adminT("· VAT")} {formatCents(d.vat_cents)}</p></details></td>
+       <td><span className={expenseOriginalStatus(d,archivedCostIds)==='archive'?styles.originalArchived:styles.originalPending}>{originalLabels[expenseOriginalStatus(d,archivedCostIds)]}</span>
+        <p><Link href={attachmentHref("cost",d.id)}>{originalLabels.manage} →</Link></p></td>
       </tr>)}</tbody>
      </table>
     </div>}
