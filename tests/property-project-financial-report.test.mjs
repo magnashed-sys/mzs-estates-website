@@ -84,19 +84,19 @@ test('Property and project reports use explicit allocations only, never free-tex
 });
 
 test('Invoice and cost duplication or invalid source data fails closed before rendering amounts',()=>{
- const source=setup();
+ let source=setup();
  invoiceRows.push({...invoiceRows[0]});
  assert.throws(()=>report(source),/Duplicated issued invoice/);
- setup();
+ source=setup();
  source.costs.push({...source.costs[0]});
  assert.throws(()=>report(source),/Duplicate supplier cost/);
- setup();
+ source=setup();
  source.costs[0].gross_cents=-1;
  assert.throws(()=>report(source),/Unverified source amount/);
- setup();
+ source=setup();
  source.costs[0].invoice_date='2026-02-30';
  assert.throws(()=>report(source),/Invalid source date/);
- setup();
+ source=setup();
  source.reviews.push({...source.reviews[0]});
  assert.throws(()=>report(source),/Duplicate cost review/);
 });
