@@ -50,6 +50,9 @@ export default async function PropertyFinancialPerformance({searchParams}:{searc
  const purchase=new URLSearchParams({entity:chosen?.issuer_id??'',from:String(chosen?.fiscal_year??'')+'-01-01',until:String(chosen?.fiscal_year??'')+'-12-31'});
  if(property)purchase.set('property',property);
  const sales=new URLSearchParams({entity:chosen?.issuer_id??'',year:String(chosen?.fiscal_year??'')});
+ const exportParams=new URLSearchParams({administration:chosen?.id??''});
+ if(property)exportParams.set('property',property);
+ if(project)exportParams.set('project',project);
  return <main className={s.page}>
   <Link href="/admin/workspaces/accountancy" className={s.back}>{l('← Accountancy','← Contabilidad')}</Link>
   <header className={s.heading}>
@@ -90,7 +93,7 @@ export default async function PropertyFinancialPerformance({searchParams}:{searc
    <p className={s.disclaimer}>{l('All money amounts shown here are gross source values including recorded VAT. Invoices, approved credits, reviewed purchase concepts and pending concepts are separate administrative measures. These figures are NOT profit, taxable income, bank cash received, approved expenses or a reconciled accounting statement. Historical imported archives and unbilled forecasts are not included.','Todos los importes son valores brutos de origen con IVA registrado. Facturas, abonos, borradores revisados y pendientes son medidas administrativas distintas. Estas cifras NO representan beneficios, renta imponible, cobros bancarios, gastos aprobados ni una contabilidad conciliada. No se incluyen archivos históricos importados ni previsiones sin facturar.')}</p>
    <section className={s.panel} aria-label={l('Monthly comparison','Comparación mensual')}>
     <div className={s.sectionHead}><div><p className={s.kicker}>{chosen.fiscal_year}</p><h2>{l('Month-by-month source comparison','Comparación mensual de registros')}</h2></div>
-      <span>{l('Invoice and purchase document dates','Fechas de facturas emitidas y de compras')}</span></div>
+      <div className={s.sectionActions}><span>{l('Invoice and purchase document dates','Fechas de facturas emitidas y de compras')}</span><a className={s.export} href={'/admin/workspaces/accountancy/performance/export?'+exportParams.toString()}>{l('Download monthly CSV ↓','Descargar CSV mensual ↓')}</a></div></div>
     <div className={s.scroll} role="region" tabIndex={0} aria-label={l('Monthly source values table','Tabla mensual de importes')}>
      <table><thead><tr><th>{l('Month','Mes')}</th><th>{l('Invoiced','Facturado')}</th><th>{l('Credits','Abonos')}</th><th>{l('Reviewed concepts','Borradores revisados')}</th><th>{l('Pending concepts','Borradores pendientes')}</th><th>{l('Maintenance concepts','Borradores mantenimiento')}</th><th>{l('Renovation concepts','Borradores reformas')}</th></tr></thead>
       <tbody>{report.months.map(row=><tr key={row.month}>
