@@ -79,6 +79,7 @@ export default function RelationshipRegister({relationships, members = [], initi
     <div className={s.toolbar}>
       <button className={s.button} disabled={pending} onClick={() => open(null,'person')}>{adminT("New client")}</button>
       <button className={s.secondary} disabled={pending} onClick={() => open(null,'company')}>{adminT("New company")}</button>
+      <Link className={s.secondary} href="/admin/relationships/activities">{l("CRM follow-ups →","Seguimientos CRM →")}</Link>
     </div>
     {error && <p role="alert" className={s.error}>{adminT(error)}{existingId && <> <button type="button" onClick={() => {const r=relationships.find(r=>r.id===existingId);if(r)open(r);else router.refresh();}}>{adminT("Open existing relationship")}</button></>}</p>}
     {notice && <p role="status" className={s.notice}>{adminT(notice)}</p>}
