@@ -118,7 +118,7 @@ export default async function PropertyExpenseConceptsPage({searchParams}:{search
       <tbody>{(drafts.data??[]).map(d=><tr key={d.id}>
        <td>{d.invoice_date}</td><td>{d.property_id?(propertyNames.get(d.property_id)??adminT("Unknown property")):adminT("Company-level costs")}</td>
        <td>{issuerNames.get(d.legal_entity_id)??adminT("Unknown entity")}</td>
-       <td>{supplierNames.get(d.supplier_relationship_id)??adminT("Unknown relationship")}</td>
+       <td>{supplierNames.has(d.supplier_relationship_id)?<Link href={'/admin/relationships/overview?relationship='+d.supplier_relationship_id}>{supplierNames.get(d.supplier_relationship_id)} ↗</Link>:adminT("Unknown relationship")}</td>
        <td>{d.supplier_invoice_number}</td><td>{formatCents(d.gross_cents)}</td>
        <td>{d.status==="draft"?adminT("Concept"):adminT(d.status)}
         <details><summary>{adminT("Details")}</summary><p className={styles.detailText}>{d.description}</p><p>{adminT("Category:")} {adminT(d.category)}</p><p>{adminT("Net")} {formatCents(d.net_cents)}  {adminT("· VAT")} {formatCents(d.vat_cents)}</p></details></td>
