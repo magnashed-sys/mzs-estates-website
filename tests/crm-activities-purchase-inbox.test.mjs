@@ -65,7 +65,7 @@ test('Purchase review queue reuses source completeness and prioritizes original 
 });
 
 test('CRM migration requires admin RLS, controlled audited writes, and immutable linked history',()=>{
- const ddl=read('supabase/migrations/20261109103000_crm_activities.sql');
+ const ddl=read('supabase/migrations/20261109094144_crm_activities_followups_admin_only.sql');
  assert.match(ddl,/references public\.mzs_lease_relationships\(id\) on delete restrict/);
  assert.match(ddl,/enable row level security/);
  assert.match(ddl,/using \(public\.is_admin\(\)\)/);
