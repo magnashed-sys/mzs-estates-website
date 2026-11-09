@@ -41,3 +41,8 @@
 @media(max-width:900px){.nav{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:10px;margin-bottom:22px}.nav a{flex:0 0 auto;white-space:nowrap;min-height:44px;display:flex;align-items:center;justify-content:center}.headerTag{display:none}}
 @media(max-width:580px){.header{gap:6px}.brand{font-size:19px}.headerLinks{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 104px;width:100%;gap:6px}.headerLinks a{min-width:0;font-size:11px;line-height:1.4}}
 .cockpitTabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}.cockpitTabs a{padding:12px 18px;min-height:44px;box-sizing:border-box;border:1px solid #605139;border-radius:6px;color:#d5c09a;text-decoration:none;background:#181611}.cockpitTabs a[aria-current=page]{background:#d5c09a;color:#171510}.cockpitTabs a:focus-visible{outline:2px solid #e7d4b4;outline-offset:3px}.content{min-width:0}@media(max-width:560px){.cockpitTabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cockpitTabs a{display:flex;align-items:center;justify-content:center;min-width:0;padding:10px 7px;text-align:center;font-size:12px;line-height:1.4;overflow-wrap:anywhere}.shell{padding:14px}}
+
+/* Two recurring rent-value tiles alongside the existing property/unit counts. */
+.rentStat strong{font-size:clamp(20px,2.5vw,30px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.3}
+.rentStat small{line-height:1.6}
+@media(max-width:580px){.rentStat{min-width:0}}

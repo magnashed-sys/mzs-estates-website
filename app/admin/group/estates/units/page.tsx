@@ -16,7 +16,7 @@ export default async function RentalUnits() {
   const { db } = await requireEstateAdmin();
   const [properties, units, contracts, adjustments] = await Promise.all([
     db.from('mzs_estate_properties').select('id,name,address').order('name'),
-    db.from('mzs_estate_units').select('id,property_id,address,unit_type,tenant_name,monthly_rent,rent_included').order('sort_order').order('address'),
+    db.from('mzs_estate_units').select('id,property_id,address,unit_type,tenant_name,monthly_rent,rent_included').order('address').order('sort_order'),
     db.from('mzs_lease_contracts').select('id,title,status,tenant_name,unit_ids,lease_start,lease_end,first_period,pricing_basis,line_roles,lines'),
     db.from('mzs_lease_adjustments').select('*').eq('status','approved'),
   ]);
