@@ -444,7 +444,7 @@ export default function AdminPanels({section,initialFilter="pending"}:{section:T
       {notice && <p className="admin-notice" role="status">{adminT(notice)}</p>}
       {tab === "relationships" && <>
         <div className="admin-actions admin-space-top"><Link className="admin-button admin-button-primary" onClick={guardLink} href="/admin/relationships?new=person">{adminT("New client")}</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships?new=company">{adminT("New company")}</Link><Link className="admin-button" onClick={guardLink} href="/admin/relationships">{adminT("Open central relationship register →")}</Link></div>
-        <div className="admin-panel" style={{ marginBottom: 28 }}>
+        <div id="notification-settings" className="admin-panel" style={{ marginBottom: 28 }}>
           <h3 className="admin-subtitle">{adminT("Account notification email")}</h3>
           <p className="admin-help">
             {adminT("Check whether MZS Group can connect securely to the existing invitation mailbox. No passwords or email account details are shown.")}</p>
