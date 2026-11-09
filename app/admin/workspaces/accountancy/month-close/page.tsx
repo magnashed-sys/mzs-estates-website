@@ -41,12 +41,6 @@ export default async function MonthClose({searchParams}:{searchParams:Promise<Qu
   report=monthCloseReadiness(annual,invoices,yearMonth,today,bank);
  }catch{error=true;}
  const euro=(n:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n/100);
- const closeHref=(m:string)=>{
-  const q=new URLSearchParams();
-  if(chosen)q.set('administration',chosen.id);
-  q.set('month',m);
-  return '/admin/workspaces/accountancy/month-close?'+q.toString();
- };
  const monthNames=Array.from({length:12},(_,i)=>({value:String(i+1).padStart(2,'0'),label:new Intl.DateTimeFormat(locale,{month:'short',timeZone:'UTC'}).format(new Date(Date.UTC(chosen?.fiscal_year??2026,i,15)))}));
  const start=yearMonth+'-01',end=new Date(Date.UTC(chosen?.fiscal_year??2026,Number(month),0)).toISOString().slice(0,10);
  const purchase=new URLSearchParams({entity:chosen?.issuer_id??'',from:start,until:end});
@@ -58,7 +52,7 @@ export default async function MonthClose({searchParams}:{searchParams:Promise<Qu
   {label:l('Possible duplicate purchase invoices','Posibles facturas de compra duplicadas'),count:report?.purchases.duplicateSignals??null,href:'/admin/workspaces/accountancy/purchase-inbox?administration='+chosen?.id+'&group=duplicates'},
   {label:l('Sales invoices with unknown payment balance','Facturas de venta con saldo desconocido'),count:report?.invoices.unknownBalances??null,href:'/admin/workspaces/accountancy/sales?'+new URLSearchParams({...Object.fromEntries(invoice),status:'unknown'})},
   {label:l('Sales invoices issued this month awaiting recorded settlement','Facturas del mes pendientes de cobro registrado'),count:report?.invoices.unpaidCount??null,href:'/admin/workspaces/accountancy/sales?'+new URLSearchParams({...Object.fromEntries(invoice),status:'open'})},
-  {label:l('Unallocated bank transactions imported this month','Movimientos bancarios importados sin asignar'),count:report?.bank.unallocatedTransactions??null,href:'/admin/workspaces/accountancy/administrations/'+chosen?.id+'/bank'}
+  {label:l('Imported bank transactions dated this month awaiting allocation','Movimientos bancarios importados con fecha del mes pendientes de asignación'),count:report?.bank.unallocatedTransactions??null,href:'/admin/workspaces/accountancy/administrations/'+chosen?.id+'/bank'}
  ];
  return <main className={s.page}>
   <Link href="/admin/workspaces/accountancy" className={s.back}>{l('← Accountancy','← Contabilidad')}</Link>
@@ -82,22 +76,23 @@ export default async function MonthClose({searchParams}:{searchParams:Promise<Qu
   {report&&chosen&&<>
    <p className={s.context}>{entityName} · {chosen.fiscal_year} · {monthNames.find(x=>x.value===month)?.label} <span>{l('Invoice balances reflect the latest recorded status, not the historic month end.','Los saldos reflejan el estado registrado actual, no el cierre histórico del mes.')}</span></p>
    <section className={s.metrics} aria-label={l('Monthly source overview','Resumen mensual de registros')}>
-    <div><small>{l('Issued sales invoices','Facturas emitidas')}</small><strong>{report.invoices.count}</strong><span>{l('Including credit notes · issue dates in month','Incluidos abonos · por fecha de emisión')}</span></div>
+    <div><small>{l('Issued sales invoices','Facturas emitidas')}</small><strong>{report.invoices.count}</strong><span>{l('Including credit notes · issue dates in month · imported archive rows excluded','Incluidos abonos · por fecha de emisión · registros del archivo importado excluidos')}</span></div>
     <div><small>{l('Recorded outstanding on those invoices','Saldo pendiente registrado de esas facturas')}</small><strong>{euro(report.invoices.outstandingCents)}</strong><span>{l('Current recorded balance, not month-end cash','Saldo registrado actual, no efectivo al cierre')}</span></div>
     <div><small>{l('Recorded overdue on those invoices','Saldo vencido registrado de esas facturas')}</small><strong>{euro(report.invoices.overdueCents)}</strong><span>{l('Past due as of today','Vencido a fecha de hoy')}</span></div>
-    <div><small>{l('Purchase concepts registered in month','Borradores de compra del mes')}</small><strong>{report.purchases.count}</strong><span>{euro(report.purchases.grossConceptCents)} {l('gross concepts, not posted costs','en borradores brutos, no gastos contabilizados')}</span></div>
+    <div><small>{l('Purchase concepts with invoice dates in month','Borradores de compra con fecha de factura del mes')}</small><strong>{report.purchases.count}</strong><span>{euro(report.purchases.grossConceptCents)} {l('gross concepts, not posted costs','en borradores brutos, no gastos contabilizados')}</span></div>
     <div><small>{l('Recorded invoice receipts','Cobros de facturas registrados')}</small><strong>{euro(report.invoices.receivedRecordedCents)}</strong><span>{l('Cumulative receipts on invoices issued in month; receipt dates may differ','Cobros acumulados en facturas del mes; las fechas de cobro pueden diferir')}</span></div>
     <div><small>{l('Imported bank transactions awaiting allocation','Movimientos bancarios importados sin asignar')}</small>
      <strong>{report.bank.status==='available'?euro(report.bank.unallocatedAbsoluteCents!):l('Not available','No disponible')}</strong>
-     <span>{l('Absolute unmatched portions only; no proof of bank reconciliation','Partes sin asignar en valor absoluto; no acredita conciliación')}</span></div>
+     <span>{l('By bank booking date · absolute unmatched portions only; no proof of bank reconciliation','Por fecha contable bancaria · partes sin asignar en valor absoluto; no acredita conciliación')}</span></div>
    </section>
    <p className={s.notice}>{l('Amounts in this view must NOT be combined to infer profit, cash flow or a certified closing balance. Invoice balances are current snapshots, original document checks relate to purchase concepts, and bank transactions only cover imported statements. No period is locked or automatically closed.','Los importes NO deben sumarse para calcular beneficios, caja o saldos de cierre certificados. Los saldos son actuales, los controles documentales se refieren a borradores y los movimientos bancarios solo cubren extractos importados. No se bloquea ni cierra ningún período.')}</p>
    <section className={s.panel}>
-    <div className={s.panelHeading}><h2>{l('Action list for this month','Acciones pendientes del mes')}</h2><span>{l('Verified source links','Enlaces a registros verificados')}</span></div>
+    <div className={s.panelHeading}><h2>{l('Action list for this month','Acciones pendientes del mes')}</h2><span>{l('Monthly counts · annual source registers','Recuentos mensuales · registros anuales')}</span></div>
+    <p>{l('The counts below cover the selected month. The links open source registers for the selected entity and year, so they can show additional months, imported invoices or different review groupings. Their counts may therefore differ.','Los recuentos siguientes corresponden al mes seleccionado. Los enlaces abren los registros de la entidad y el ejercicio seleccionados, que pueden incluir otros meses, facturas importadas o distintas agrupaciones de revisión. Por ello, sus recuentos pueden diferir.')}</p>
     <div className={s.list}>
      {checks.map(check=><article className={s.item} key={check.label}>
       <div><strong>{check.count===null?l('Unknown','Desconocido'):check.count}</strong><div><h3>{check.label}</h3><p>{check.count===null?l('Bank import data was unavailable, so no zero was assumed.','No hay datos bancarios disponibles; no se ha supuesto un cero.'):check.count===0?l('No flagged entries in the available registers; further checks may still be needed.','Sin incidencias en los registros disponibles; pueden faltar otras comprobaciones.'):l('Review the underlying source before resolving.','Revise los datos originales antes de resolver.')}</p></div></div>
-      <Link href={check.href}>{l('Open source →','Abrir registro →')}</Link>
+      <Link href={check.href}>{l('Open annual register →','Abrir registro anual →')}</Link>
      </article>)}
     </div>
     {bankWarning&&<p role="status" className={s.warning}>{l('Bank register could not be loaded. Bank readiness is unknown; do not treat it as reconciled.','No se pudo cargar el registro bancario. La conciliación es desconocida; no se considera realizada.')}</p>}
