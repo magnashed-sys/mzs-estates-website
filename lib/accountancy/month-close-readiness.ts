@@ -48,7 +48,7 @@ export function monthCloseReadiness(source:YearSource,invoices:readonly InvoiceR
    unpaidCount++;outstandingCents=add(outstandingCents,invoice.balance);
    if(invoice.dueOn&&invoice.dueOn<today)overdueCents=add(overdueCents,invoice.balance);
   }
-  if(invoice.paid>0)receivedRecordedCents=add(receivedRecordedCents,invoice.paid);
+  if(invoice.gross>0&&invoice.paid>0)receivedRecordedCents=add(receivedRecordedCents,invoice.paid);
  }
  const costs=source.costs.filter(c=>c.invoice_date.slice(0,7)===month);
  const evidence=annualEvidenceReadiness(source).rows.filter(r=>r.invoice_date.slice(0,7)===month);
