@@ -136,7 +136,7 @@ test('Monthly report export verifies admin scope and uses formula-safe accountan
  assert.match(route,/\.eq\('id',propertyId\)/);
  assert.match(route,/propertyFinancialReport\(source,\{propertyId:propertyId\|\|undefined,projectId:projectId\|\|undefined\}\)/);
  assert.match(route,/const csv=accountantCsv\(fields,rows\)/);
- assert.match(route,/period:'ANNUAL_TOTAL'/);
+ assert.match(route,/month:'ANNUAL_TOTAL'/);
  assert.match(route,/Cache-Control':'private, no-store'/);
  assert.match(route,/Content-Disposition/);
  assert.match(route,/No partial report exported/);
