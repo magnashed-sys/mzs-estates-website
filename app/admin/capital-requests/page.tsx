@@ -70,7 +70,7 @@ export default function CapitalRequestsAdmin() {
     {state === "error" && <p>{adminT("Unable to load capital requests.")}</p>}
     {notice && <p role="status">{adminT(notice)}</p>}
     {state === "ready" && (items.length === 0 ? <p>{adminT("No capital requests received yet.")}</p> :
-      <div className={styles.list}>{items.map(item => <article key={item.id} className={styles.card}>
+      <div className={styles.list}>{items.map(item => <article id={'request-'+item.id} key={item.id} className={styles.card}>
         <div className={styles.top}>
           <strong>{item.request_type === "capital" ? adminT("Request Capital") : adminT("Request Possibilities")}</strong>
           <span>{new Date(item.created_at).toLocaleString(adminLocale, { timeZone: "Europe/Madrid" })}</span>

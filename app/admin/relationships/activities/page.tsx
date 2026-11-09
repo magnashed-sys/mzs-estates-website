@@ -19,6 +19,8 @@ export default async function CrmActivities({searchParams}:{searchParams:Promise
  const relationshipId=typeof q.relationship==='string'?q.relationship:'';
  const scope=typeof q.scope==='string'?q.scope:'active';
  const query=typeof q.q==='string'?q.q.trim():'';
+ const focus=typeof q.activity==='string'?q.activity:'';
+ if(q.activity!==undefined&&(!focus||!crmUuid(focus)))notFound();
  if((relationshipId&&!crmUuid(relationshipId))||!['active','overdue','completed','all'].includes(scope)||query.length>100)notFound();
 
  const [contacts,activities]=await Promise.all([
@@ -40,7 +42,8 @@ export default async function CrmActivities({searchParams}:{searchParams:Promise
  );
  const pageSize=25;
  const rawPage=typeof q.page==='string'&&/^[1-9]\d{0,4}$/.test(q.page)?Number(q.page):1;
- const pageCount=Math.max(1,Math.ceil(rows.length/pageSize)),page=Math.min(rawPage,pageCount);
+ const focusIndex=focus?rows.findIndex(a=>a.id===focus):-1;
+ const pageCount=Math.max(1,Math.ceil(rows.length/pageSize)),page=focusIndex>=0?Math.floor(focusIndex/pageSize)+1:Math.min(rawPage,pageCount);
  const href=(n:number)=>{
   const p=new URLSearchParams();
   if(relationshipId)p.set('relationship',relationshipId);
@@ -83,7 +86,7 @@ export default async function CrmActivities({searchParams}:{searchParams:Promise
    <p className={s.note}>{l('Showing','Mostrando')} {rows.length} {l('matching activities. Contact history is append-only; task updates are audited.','actividades coincidentes. El historial es inmutable y los cambios de tareas se auditan.')}</p>
    {!rows.length&&<p>{l('No activities match this view. Choose All activities to review contact history.','No hay actividades en esta vista. Seleccione Todas las actividades para revisar el historial.')}</p>}
    <div className={s.list}>
-    {rows.slice((page-1)*pageSize,page*pageSize).map(item=><article key={item.id} className={s.activity}>
+    {rows.slice((page-1)*pageSize,page*pageSize).map(item=><article id={'activity-'+item.id} key={item.id} className={s.activity}>
      <div className={s.activityHeading}>
       <div><small>{l(item.kind==='task'?'Follow-up':item.kind==='note'?'Note':item.kind==='call'?'Call':item.kind==='email'?'Email':'Meeting',item.kind==='task'?'Seguimiento':item.kind==='note'?'Nota':item.kind==='call'?'Llamada':item.kind==='email'?'Correo':'Reunión')}</small>
        <h3>{item.title}</h3><Link href={'/admin/relationships/overview?relationship='+item.relationship_id}>{names.get(item.relationship_id)??l('Unknown relationship','Relación desconocida')} →</Link></div>

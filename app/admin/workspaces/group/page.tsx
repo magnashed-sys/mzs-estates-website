@@ -2,7 +2,6 @@ import Link from 'next/link';
 import {getAdminI18n} from '../../../../lib/admin/i18n-server';
 import {Suspense} from "react";
 import {requireEstateAdmin} from "../../../../lib/security/estate-properties";
-import OperationsActionCenter from "../../OperationsActionCenter";
 import DailyOperations from "../../DailyOperations";
 import FinancialCockpit from "../../FinancialCockpit";
 import GroupActionCenter from "../../GroupActionCenter";
@@ -15,10 +14,10 @@ export default async function GroupWorkspace({searchParams}:{searchParams:Promis
  return <>
   <h1 className={styles.cockpitHeading}>{adminT("Cockpit")}</h1>
   <nav className={styles.cockpitTabs} aria-label={tr('Cockpit sections','Secciones del panel')}>
-   {([['finance','Financial overview','Resumen financiero'],['actions','Requests & tasks','Solicitudes y tareas'],['planning','Arrivals & planning','Llegadas y planificación']] as const).map(([key,en,es])=><Link key={key} href={'/admin/workspaces/group?view='+key} prefetch={false} aria-current={view===key?'page':undefined}>{tr(en,es)}</Link>)}
+   {([['finance','Financial overview','Resumen financiero'],['actions','Action Center','Centro de acciones'],['planning','Arrivals & planning','Llegadas y planificación']] as const).map(([key,en,es])=><Link key={key} href={'/admin/workspaces/group?view='+key} prefetch={false} aria-current={view===key?'page':undefined}>{tr(en,es)}</Link>)}
   </nav>
-  {view==='finance'&&<FinancialCockpit refreshVersion={0}/>}
-  {view==='actions'&&<><GroupActionCenter refreshVersion={0}/><Suspense fallback={<p role="status">{adminT("Loading action list…")}</p>}><OperationsActionCenter db={db} cockpitView="actions"/></Suspense></>}
+  {view==='finance'&&<><Suspense fallback={<p role="status">{adminT("Loading action list…")}</p>}><GroupActionCenter db={db} compact/></Suspense><FinancialCockpit refreshVersion={0}/></>}
+  {view==='actions'&&<Suspense fallback={<p role="status">{adminT("Loading action list…")}</p>}><GroupActionCenter db={db} query={q}/></Suspense>}
   {view==='planning'&&<DailyOperations/>}
   {view==='finance'&&<p className={styles.note}>{adminT("The central overview reports recorded and forecast figures separately. Booked rent and scheduled loan interest do not prove cash receipt. Account approvals and administrative settings are available from Relationships and System.")}</p>}
  </>;
