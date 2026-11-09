@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import AnalyticsConsent from "./components/AnalyticsConsent";
 import VisitorActivity from "./components/VisitorActivity";
 import PublicWebAnalytics from "./components/PublicWebAnalytics";
+import PublicSpeedInsights from "./components/PublicSpeedInsights";
 import "./globals.css";
 import "./rtl.css";
 import {localeDirection} from "../i18n/public-routing";
@@ -70,6 +71,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>{children}<AnalyticsConsent preview={process.env.VERCEL_ENV === "preview"} /></NextIntlClientProvider>
         <PublicWebAnalytics />
+        <PublicSpeedInsights enabled={process.env.VERCEL_ENV === "production"} />
         <VisitorActivity />
       </body>
     </html>
