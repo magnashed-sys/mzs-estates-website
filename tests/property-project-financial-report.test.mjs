@@ -125,3 +125,23 @@ test('New report reads only authenticated entity/year source, preserves other fi
  assert.match(src('app/admin/workspaces/accountancy/page.tsx'),/href="\/admin\/workspaces\/accountancy\/performance"/);
  assert.match(src('app/admin/workspaces/estates/page.tsx'),/href="\/admin\/workspaces\/accountancy\/performance"/);
 });
+
+
+test('Monthly report export verifies admin scope and uses formula-safe accountant CSV',()=>{
+ const route=src('app/admin/workspaces/accountancy/performance/export/route.ts');
+ const page=src('app/admin/workspaces/accountancy/performance/page.tsx');
+ assert.match(route,/await requireEstateAdmin\(\)/);
+ assert.match(route,/annualSource\(db,yearId\)/);
+ assert.match(route,/\.eq\('id',yearId\)/);
+ assert.match(route,/\.eq\('id',propertyId\)/);
+ assert.match(route,/propertyFinancialReport\(source,\{propertyId:propertyId\|\|undefined,projectId:projectId\|\|undefined\}\)/);
+ assert.match(route,/const csv=accountantCsv\(fields,rows\)/);
+ assert.match(route,/period:'ANNUAL_TOTAL'/);
+ assert.match(route,/Cache-Control':'private, no-store'/);
+ assert.match(route,/Content-Disposition/);
+ assert.match(route,/No partial report exported/);
+ assert.doesNotMatch(route,/\.insert\(|\.update\(|\.delete\(|\.upsert\(/);
+ assert.match(page,/exportParams\.set\('property',property\)/);
+ assert.match(page,/exportParams\.set\('project',project\)/);
+ assert.match(page,/\/admin\/workspaces\/accountancy\/performance\/export\?/);
+});
