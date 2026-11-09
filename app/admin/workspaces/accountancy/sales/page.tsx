@@ -10,7 +10,7 @@ export const dynamic='force-dynamic';
 const money=(n:number|null, adminLocale = 'en-GB')=>n===null?'Not recorded':new Intl.NumberFormat(adminLocale,{style:'currency',currency:'EUR'}).format(n/100);
 const date=(d:string|null, adminLocale = 'en-GB')=>d?new Intl.DateTimeFormat(adminLocale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(d+'T12:00:00Z')):'See payment terms';
 export default async function Invoices({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const {t:adminT,locale:adminLocale}=await getAdminI18n();
+ const {t:adminT,locale:adminLocale,language}=await getAdminI18n();
 
  const {db}=await requireEstateAdmin();
  let filters;try{filters=invoiceFilters(await searchParams);}catch{return <section className={s.page}><h1>{adminT("Invalid invoice filters")}</h1><Link href="/admin/workspaces/accountancy/sales">{adminT("Clear filters")}</Link></section>;}
@@ -22,6 +22,15 @@ export default async function Invoices({searchParams}:{searchParams:Promise<Reco
   <Link href="/admin/workspaces/accountancy" className={s.back}>{adminT("← Accountancy")}</Link>
   <header className={s.heading}><div><p className={s.eyebrow}>{adminT("SALES / ISSUED INVOICES")}</p><h1>{adminT("Invoices")}</h1><p>{adminT("Standalone, rental contract, booking and imported invoices in one place.")}</p></div><Link className={s.button} href={invoiceHref(filters,1,true)} prefetch={false}>{adminT("Download CSV")}</Link></header>
   <p><Link className={s.button} href="/admin/workspaces/accountancy/sales/new">{adminT("Create invoice / review drafts →")}</Link> <Link className={s.button} href="/admin/workspaces/accountancy/sales/receivables">{adminT("Receivables & follow-up →")}</Link></p>
+  <nav className={s.quickViews} aria-label={language==='es'?'Vistas rápidas de facturas':'Invoice quick views'}>
+   {(['all','open','overdue','partial','unknown','paid'] as const).map(status=>{
+    const count=selectInvoices(all,{...filters,status,page:1},today).totals.count;
+    return <Link key={status} href={invoiceHref({...filters,status,page:1},1)} aria-current={filters.status===status?'page':undefined}>
+      <span>{adminT(invoiceStatuses[status])}</span><strong>{count}</strong>
+    </Link>;
+   })}
+  </nav>
+  <p className={s.quickNote}>{language==='es'?'Los contadores cubren todos los registros que coinciden con el año, la entidad, el origen y la búsqueda seleccionados, no solo esta página.':'Counts cover all records matching the selected year, entity, source and search—not just this page.'}</p>
   <form method="get" className={s.filters}>
    <label>{adminT("Search")}<input name="q" maxLength={150} defaultValue={filters.q} placeholder={adminT("Customer, number or description")}/></label>
    <label>{adminT("Invoice year")}<select name="year" defaultValue={filters.year??'all'}><option value="all">{adminT("All years")}</option>{Array.from({length:Math.max(Number(today.slice(0,4))+2,filters.year??0)-1999},(_,i)=>Math.max(Number(today.slice(0,4))+2,filters.year??0)-i).map(y=><option key={y} value={y}>{y}</option>)}</select></label>
