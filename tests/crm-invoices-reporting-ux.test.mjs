@@ -22,7 +22,8 @@ test('CRM register adds role and account-state filtering without changing author
  assert.match(register,/href=\{'\/admin\/relationships\/invoices\/'\+r\.id\}/);
  assert.match(css,/\.summary\{display:grid/);
  assert.match(css,/max-width:560px/);
- assert.doesNotMatch(register,/deleteUser|updateUserById|saveRelationship\(\{.*roles.*\}\)/s);
+ assert.doesNotMatch(register,/deleteUser|updateUserById/);
+ assert.match(register,/saveRelationship\(\{\.\.\.draft\}, editing\?\.id, editing\?\.version\)/);
 });
 
 test('sales invoice status shortcuts preserve validated report filters and do not record payments',()=>{
