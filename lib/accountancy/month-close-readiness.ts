@@ -43,7 +43,7 @@ export function monthCloseReadiness(source:YearSource,invoices:readonly InvoiceR
   if(seen.has(id))throw Error('Duplicate month-close invoice');seen.add(id);
   checkMoney(Math.abs(invoice.gross));
   if(invoice.paid===null||invoice.balance===null){unknownBalances++;continue;}
-  checkMoney(Math.abs(invoice.paid));checkMoney(Math.abs(invoice.balance));
+  checkMoney(invoice.paid);checkMoney(Math.abs(invoice.balance));
   if(invoice.gross>0&&invoice.balance>0){
    unpaidCount++;outstandingCents=add(outstandingCents,invoice.balance);
    if(invoice.dueOn&&invoice.dueOn<today)overdueCents=add(overdueCents,invoice.balance);
