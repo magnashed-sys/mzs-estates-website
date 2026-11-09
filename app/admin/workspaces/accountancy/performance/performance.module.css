@@ -38,3 +38,8 @@
 .page :is(a,select,button,.scroll):focus-visible{outline:2px solid #a98e54;outline-offset:3px}
 @media(max-width:1150px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.filters{grid-template-columns:1fr;padding:14px}.metrics{grid-template-columns:1fr}.metrics>div{padding:16px}.panel{padding:14px}.actions a{flex:1 1 100%}.scroll th,.scroll td{padding:10px 9px}}
+
+.sectionActions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sectionActions>span{color:#607568;font-size:12px}
+.export{display:inline-flex;align-items:center;min-height:42px;padding:10px 14px;background:#edf1e9;border:1px solid #cbd9ce;border-radius:7px;text-decoration:none;color:#28543f;font-size:12px;font-weight:600}
+.export:hover{border-color:#28543f;text-decoration:underline}
