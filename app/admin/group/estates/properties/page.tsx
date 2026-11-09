@@ -13,7 +13,7 @@ export default async function EstateProperties() {
   const { db } = await requireEstateAdmin();
   const { data, error } = await db.from('mzs_estate_properties')
     .select('id,name,address,city,country_code,owner_name,ownership_kind,mzs_estate_units(monthly_rent,utilities_advance)')
-    .order('name', { ascending: true }).order('id', { ascending: true });
+    .order('address', { ascending: true }).order('id', { ascending: true });
   return <>
     <p className="mzsEyebrow">{adminT("MZS ESTATES / MANAGEMENT")}</p>
     <h1>{adminT("Ownership & units")}</h1>
