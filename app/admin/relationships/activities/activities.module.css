@@ -1,0 +1,49 @@
+.page{max-width:1480px;margin:0 auto;padding:26px clamp(16px,3vw,42px) 70px;color:#243f35}
+.back{display:inline-block;color:#28543f;margin-bottom:24px;text-decoration:none;font-size:12px}
+.heading{margin-bottom:24px}
+.kicker{font-size:10px;letter-spacing:.15em;color:#55735f}
+.heading h1{font:400 clamp(30px,4vw,46px)/1.2 Georgia,serif;margin:9px 0}
+.heading p{font-size:13px;max-width:820px;line-height:1.7;color:#5d7064}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.metrics>div,.panel{background:#fff;border:1px solid #dce3d9;border-radius:9px;box-shadow:0 2px 9px rgba(35,63,49,.035)}
+.metrics>div{padding:15px 18px}
+.metrics small{color:#5d7064;display:block;line-height:1.5}
+.metrics strong{display:block;margin-top:8px;color:#244537;font:400 clamp(24px,2.7vw,32px)/1.2 Georgia,serif;font-variant-numeric:tabular-nums}
+.panel{padding:clamp(18px,2.5vw,28px);margin:22px 0}
+.panel h2{font:400 clamp(23px,2.7vw,30px)/1.3 Georgia,serif;color:#243f35;margin:0 0 18px}
+.form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.form label,.filters label,.updateForm label{display:grid;gap:7px;color:#536c5a;font-size:12px}
+.form select,.form input,.form textarea,.filters select,.filters input,.updateForm select,.updateForm input{
+ box-sizing:border-box;width:100%;min-width:0;min-height:44px;border:1px solid #cbd9ce;border-radius:6px;background:#fff;color:#243f35;padding:10px 12px;font:inherit;color-scheme:light
+}
+.form textarea{min-height:94px;resize:vertical}
+.wide{grid-column:1/-1}
+.formActions{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.formActions p,.note{font-size:12px;color:#5d7064;line-height:1.65;margin:0}
+.form button,.filters button,.updateForm button{min-height:44px;border:1px solid #28543f;border-radius:6px;background:#28543f;color:#fff;font-weight:600;padding:10px 16px;cursor:pointer}
+.form button:disabled,.updateForm button:disabled{opacity:.55;cursor:wait}
+.error{background:#fff1eb;border:1px solid #dcb9af;color:#8b443a;padding:12px;border-radius:6px}
+.confirmation{background:#edf5e9;border:1px solid #b6d2b7;color:#2f6341;padding:12px;border-radius:6px}
+.filters{display:grid;grid-template-columns:minmax(180px,1fr) minmax(145px,.5fr) minmax(180px,1fr) auto auto;align-items:end;gap:10px}
+.filters a{display:inline-flex;align-items:center;min-height:44px;color:#28543f;padding:8px}
+.filters button{white-space:nowrap}
+.list{display:grid;gap:12px;margin:18px 0}
+.activity{padding:18px;border:1px solid #dce3d9;border-radius:8px;background:#fff}
+.activityHeading{display:flex;justify-content:space-between;gap:16px;align-items:start}
+.activityHeading small{font-size:11px;color:#55735f}
+.activityHeading h3{font:400 23px/1.3 Georgia,serif;margin:5px 0 8px;overflow-wrap:anywhere}
+.activityHeading a,.list a,.pagination a{color:#28543f;text-underline-offset:3px;font-size:12px}
+.open,.done{font-size:11px;display:inline-block;border:1px solid;border-radius:6px;padding:5px 10px;white-space:nowrap}
+.open{color:#765824;border-color:#ded5be;background:#f5f3eb}
+.done{color:#2f6341;border-color:#b6d2b7;background:#edf5e9}
+.detail{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.65;color:#455f50}
+.meta{color:#607568;font-size:12px;line-height:1.55}
+.update{margin-top:12px}
+.update summary{cursor:pointer;color:#28543f;font-size:12px}
+.updateForm{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin-top:12px}
+.updateForm label{flex:1 1 175px}
+.pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px;color:#5d7064}
+.page :is(button,input,select,textarea,summary,a):focus-visible{outline:2px solid #a98e54;outline-offset:3px}
+@media(max-width:1080px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.form{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metrics>div{padding:12px}.filters,.form{grid-template-columns:1fr}.formActions{align-items:start;flex-direction:column}.activityHeading{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.page *{transition:none!important}}
