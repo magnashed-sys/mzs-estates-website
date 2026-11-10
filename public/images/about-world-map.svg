@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 620" width="1600" height="620">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="366.6666667 0 1066.6666667 413.3333333" width="1600" height="620">
 <!-- Natural Earth public-domain geography. Country highlights: Netherlands, Spain, UAE. -->
 <defs><radialGradient id="ocean"><stop stop-color="#1d2421"/><stop offset="1" stop-color="#101513"/></radialGradient><radialGradient id="halo"><stop stop-color="#e9c987" stop-opacity=".26"/><stop offset="1" stop-color="#e9c987" stop-opacity="0"/></radialGradient><linearGradient id="gold" x2=".6" y2="1"><stop stop-color="#eddbb0"/><stop offset="1" stop-color="#ac8954"/></linearGradient></defs>
 <path fill="url(#ocean)" d="M0 0h1600v620H0z"/>
@@ -208,7 +208,4 @@
 <circle cx="810.7" cy="189.0" r="3" fill="#fff3d2" stroke="#766345" stroke-width="1"/>
 <circle cx="1024.2" cy="243.2" r="3" fill="#fff3d2" stroke="#766345" stroke-width="1"/>
 <circle cx="1020.5" cy="246.1" r="3" fill="#fff3d2" stroke="#766345" stroke-width="1"/>
-<path d="M819.9,140.7L895,95" fill="none" stroke="#d6ba82" stroke-opacity=".7" stroke-width="1"/><circle cx="895" cy="95" r="18" fill="#16201b" stroke="#b69b6b"/><text x="895" y="99" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1" fill="#f0dbb3">01</text>
-<path d="M795.9,189.3L680,235" fill="none" stroke="#d6ba82" stroke-opacity=".7" stroke-width="1"/><circle cx="680" cy="235" r="18" fill="#16201b" stroke="#b69b6b"/><text x="680" y="239" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1" fill="#f0dbb3">02</text>
-<path d="M1022.2,244.8L1120,315" fill="none" stroke="#d6ba82" stroke-opacity=".7" stroke-width="1"/><circle cx="1120" cy="315" r="18" fill="#16201b" stroke="#b69b6b"/><text x="1120" y="319" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1" fill="#f0dbb3">03</text>
 </svg>
