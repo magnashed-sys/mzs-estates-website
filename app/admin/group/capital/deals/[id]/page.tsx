@@ -6,13 +6,14 @@ import {randomUUID} from 'node:crypto';
 import {requireDealsAdmin} from '../../../../../../lib/security/capital-deals';
 import DealForm from '../DealForm';
 import Documents from '../Documents';
+import ReminderPanel from '../ReminderPanel';
 import ClientAccess,{type ClientGrant,type AccessRelationship} from '../ClientAccess';
 import {addInstalment,recordPayment,voidPayment,correctInterestReceipt} from '../actions';
 import {allocateInterestCredits} from '../../../../../../lib/capital/interest-allocation';
 import {type Deal,type Instalment,type Payment,type LoanDocument,money,date,label,paidFor} from '../model';
 import s from '../deals.module.css';
 export const dynamic='force-dynamic';
-export default async function Dossier({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{notice?:string;mail?:string}>}) {
+export default async function Dossier({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{notice?:string;mail?:string;reminder?:string}>}) {
  const {t:adminT,locale:adminLocale}=await getAdminI18n();
 
  const {db}=await requireDealsAdmin();const {id}=await params;const query=await searchParams;
@@ -89,5 +90,6 @@ export default async function Dossier({params,searchParams}:{params:Promise<{id:
   <section className={s.section}><h2>{adminT("Agreements & documents")}</h2><p>{adminT("Retained document versions for full administrators only. Downloads open in a new tab using short-lived private links.")}</p>{docs.error||docs.count!==(docs.data||[]).length?<p role="alert">{adminT("Document list could not be loaded completely.")}</p>:<div id="documents"><Documents dealId={id} documents={docs.data as LoanDocument[]}/></div>}</section>
   <ClientAccess dealId={id} grants={(access.data||[]) as ClientGrant[]} relationships={(relationships.data||[]) as AccessRelationship[]} complete={!access.error&&!relationships.error&&access.count===(access.data||[]).length&&relationships.count===(relationships.data||[]).length}/>
   <section className={s.section}><h2>{adminT("Activity history")}</h2><p>{adminT("Latest 30 recorded changes. Complete records are retained in the audit store.")}</p>{audit.error?<p role="alert">{adminT("History unavailable.")}</p>:<ul>{(audit.data||[]).map(a=><li key={a.id}>{date(a.created_at, adminLocale)} · {a.table_name.replace('mzs_capital_','')} · {adminT(a.action.toLowerCase())} · {a.actor_id?adminT("Administrator {p0}", {p0: a.actor_id.slice(0,8)}):adminT("Controlled source import")}{a.new_record?.is_void?adminT(" · payment voided"):''}</li>)}</ul>}</section>
+  <ReminderPanel dealId={id} notice={query.reminder}/>
  </>;
 }

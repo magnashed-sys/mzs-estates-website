@@ -19,15 +19,15 @@ export function capitalReminderMessage(s: CapitalReminder) {
     `Een vriendelijke herinnering aan de komende rentebetaling voor ${s.title}, met betaaldatum ${date}.`,
     `Volgens onze administratie resteert voor deze termijn ${money(s.amount)}.${s.credit > 0 ? ` Het eerdere tegoed van ${money(s.credit)} is hierin al verrekend.` : ''}`,
     'Wil je ervoor zorgen dat de betaling volgens onze afspraak wordt voldaan?',
-    'Heb je inmiddels betaald, dan hartelijk dank en kun je deze herinnering als afgehandeld beschouwen. Neem gerust contact op als je vragen hebt.',
-    `Met vriendelijke groet,\n${s.lender}`,
+    'Heb je inmiddels betaald, dan hartelijk dank en kun je deze herinnering als afgehandeld beschouwen.',
+    'Met vriendelijke groet,\nMZS Group',
   ] : [
     `Dear ${s.recipient_name},`,
     `A friendly reminder of the upcoming interest payment for ${s.title}, with a payment date of ${date}.`,
     `According to our records, the remaining amount for this instalment is ${money(s.amount)}.${s.credit > 0 ? ` This already includes the credit of ${money(s.credit)} carried forward from earlier payments.` : ''}`,
     'Could you please arrange payment in line with our agreement?',
-    'If you have already made the payment, thank you and please disregard this reminder. Please feel free to get in touch if you have any questions.',
-    `Kind regards,\n${s.lender}`,
+    'If you have already made the payment, thank you and please disregard this reminder.',
+    'Kind regards,\nMZS Group',
   ];
   return {subject, text: paragraphs.join('\n\n'), html: `<!doctype html><html lang="${s.locale}"><body style="margin:0;background:#f4f1eb;font-family:Arial,sans-serif;color:#25231e"><div style="max-width:600px;margin:24px auto;padding:28px;background:#fff;border-top:3px solid #ad925c"><p style="color:#897044;letter-spacing:3px;font-size:12px">MZS GROUP</p>${paragraphs.map(p => `<p style="line-height:1.6">${escape(p).replace(/\n/g, '<br>')}</p>`).join('')}</div></body></html>`};
 }

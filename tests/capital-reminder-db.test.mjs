@@ -27,6 +27,7 @@ async function fixture() {
  ('${id(15)}','${id(10)}','principal',(now() at time zone 'Europe/Madrid')::date+5,1000);
  insert into mzs_capital_payments values('${id(11)}',299.5,false),('${id(12)}',103.25,false),('${id(12)}',100,true);`);
  await db.exec(migration);
+ await db.exec(readFileSync('supabase/migrations/20261110205149_capital_reminder_envelope.sql','utf8'));
  await db.exec(`insert into mzs_capital_reminder_settings(deal_id,recipient_user_id,recipient_email,first_due_date,authorized_by)
  values('${id(10)}','${id(2)}','borrower@example.invalid',(now() at time zone 'Europe/Madrid')::date,'${id(1)}');`);
  return db;
@@ -48,7 +49,8 @@ test('Disabled default; exact five-day remaining interest accounts for earlier s
   await db.exec(`insert into mzs_capital_payments values('${id(13)}',97.25,false)`);
   assert.equal(await snapshot(db),null);
   assert.equal((await db.query(`select mzs_finish_capital_reminder('${id(13)}','cancelled') as ok`)).rows[0].ok,true);
-  assert.equal((await db.query(`select mzs_finish_capital_reminder('${id(13)}','accepted') as ok`)).rows[0].ok,false);
+  await assert.rejects(db.query(`select mzs_finish_capital_reminder('${id(13)}','accepted')`),/Both recipients/);
+  assert.equal((await db.query(`select mzs_finish_capital_reminder('${id(13)}','accepted','{"recipientAccepted":true,"copyAccepted":true}') as ok`)).rows[0].ok,false);
  } finally {await db.close();}
 });
 
