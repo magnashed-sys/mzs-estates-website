@@ -31,22 +31,9 @@ export default async function AboutPage() {
       </section>
       <figure className={styles.figure}>
         <div className={styles.panorama}>
-          <Image src="/images/about-journey.png" alt={t('caption')} fill priority sizes="100vw" className={styles.image} />
+          <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
       </figure>
-      <section className={styles.story} aria-label={t('label')}>
-        <ol className={styles.journey}>
-          <li><span className={styles.number}>01</span><h2>{t('amsterdam')}</h2><span className={styles.year}>1990</span></li>
-          <li><span className={styles.number}>02</span><h2>{t('spain')}</h2></li>
-          <li><span className={styles.number}>03</span><h2>{t('dubai')}</h2></li>
-        </ol>
-        <div className={styles.storyContent}>
-          <figure className={styles.historyPhoto}>
-            <Image src="/images/about-bazaar.webp" alt="De Bazaar, Beverwijk" width={1250} height={544} sizes="(max-width: 850px) 100vw, 48vw" />
-          </figure>
-          <p className={styles.body}>{t('body')}</p>
-        </div>
-      </section>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
         <div className={styles.activityGrid}>
