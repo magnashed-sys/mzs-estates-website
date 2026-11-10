@@ -20,8 +20,8 @@ export default async function Home() {
     {href: '/real-estate', label: header('real_estate')},
     {href: '/private-capital', label: header('private_capital')},
   ];
-  preload('/images/home-hero-960.webp', {as: 'image', media: '(max-width: 700px)'});
-  preload('/images/home-hero-1536.webp', {as: 'image', media: '(min-width: 701px)'});
+  preload('/images/home-hero-960.webp', {as: 'image', media: '(max-width: 700px)', fetchPriority: 'high'});
+  preload('/images/home-hero-1536.webp', {as: 'image', media: '(min-width: 701px)', fetchPriority: 'high'});
   return (
     <main className={`mzs-home mzs-home-image mzs-home-refined ${polish.home}`}>
       <OrganizationData />

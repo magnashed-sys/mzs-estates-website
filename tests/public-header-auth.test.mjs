@@ -10,7 +10,7 @@ const source=ts.transpileModule(readFileSync('app/components/PublicHeader.tsx','
  compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}
 }).outputText;
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};}
-function fixture({locale='nl',user={id:'synthetic-user'},profile={role:'client',is_active:true},profileResult,signOut=async()=>({error:null})}={}){
+function fixture({locale='nl',user={id:'synthetic-user'},profile={role:'client',is_active:true},profileResult,clientReady,signOut=async()=>({error:null})}={}){
  const slots=[],effects=[],scheduled=[],redirects=[],calls=[];
  let index=0,first=true,authListener,cleanup,unsubscribed=false,profileCalls=0;
  const messages=JSON.parse(readFileSync(`messages/${locale}.json`,'utf8'));
@@ -27,13 +27,13 @@ function fixture({locale='nl',user={id:'synthetic-user'},profile={role:'client',
  const deps={react,'react/jsx-runtime':jsx,'next-intl':{useLocale:()=>locale,useTranslations:namespace=>createTranslator({locale,messages,namespace})},
   './ArrowUpRightIcon':{default:()=>null},'./LanguageSwitcher':{default:()=>null},
   '../../i18n/public-routing':{localizedPath:(path,l)=>l==='en'?path:`/${l}${path==='/'?'':path}`},
-  '../../lib/supabase/client':{createClient:()=>client},'./PublicHeader.module.css':{default:new Proxy({},{get:(_,key)=>key})}
+  '../../lib/supabase/lazy-client':{loadBrowserClient:async()=>{if(clientReady)await clientReady;return client;}},'./PublicHeader.module.css':{default:new Proxy({},{get:(_,key)=>key})}
  };
  const exports={};vm.runInNewContext(source,{exports,require:name=>{assert.ok(name in deps,name);return deps[name];},window:{setTimeout:fn=>scheduled.push(fn),location:{replace:path=>redirects.push(path)}}});
  function render(){index=0;const tree=exports.default();if(first){first=false;for(const effect of effects)cleanup=effect();}return tree;}
  async function settle(){for(let i=0;i<12;i++){await Promise.resolve();while(scheduled.length)scheduled.shift()();}}
  function emit(event){authListener(event);}
- return{render,settle,emit,calls,redirects,messages,unmount:()=>cleanup(),get unsubscribed(){return unsubscribed;},get profileCalls(){return profileCalls;}};
+ return{render,settle,emit,calls,redirects,messages,unmount:()=>cleanup(),get unsubscribed(){return unsubscribed;},get profileCalls(){return profileCalls;},get subscribed(){return !!authListener;}};
 }
 function nodes(tree,predicate){if(!tree||typeof tree!=='object')return[];if(Array.isArray(tree))return tree.flatMap(n=>nodes(n,predicate));return[...(predicate(tree)?[tree]:[]),...nodes(tree.props?.children,predicate)];}
 const buttons=tree=>nodes(tree,n=>n.type==='button');
@@ -87,4 +87,16 @@ test('auth events update account actions and unmount unsubscribes from session c
  f.emit('SIGNED_OUT');assert.equal(buttons(f.render()).length,0);
  f.emit('SIGNED_IN');await f.settle();assert.equal(buttons(f.render()).length,2);
  f.unmount();assert.equal(f.unsubscribed,true);
+});
+
+test('leaving while the account chunk loads does not create a late subscription',async()=>{
+ const pending=deferred(),f=fixture({clientReady:pending.promise});
+ f.render();f.unmount();pending.resolve();await f.settle();
+ assert.equal(f.subscribed,false);assert.equal(f.profileCalls,0);
+});
+test('an unavailable account chunk leaves public navigation and Login usable',async()=>{
+ const pending=deferred(),f=fixture({clientReady:pending.promise});
+ f.render();pending.reject(Error('chunk unavailable'));await f.settle();
+ const tree=f.render();assert.equal(f.subscribed,false);assert.equal(buttons(tree).length,0);
+ assert.equal(nodes(tree,n=>n.type==='a'&&n.props.href==='/nl/login').length,2);
 });

@@ -37,7 +37,7 @@ test('All public, inline and account flag menus render the requested twenty-four
   const Switcher=load('app/components/LanguageSwitcher.tsx',{
    react:React,'react/jsx-runtime':jsx,'next-intl':{useLocale:()=>locale,useTranslations:ns=>createTranslator({locale,messages,namespace:ns})},
    'next/navigation':{usePathname:()=>account?'/private/profile':routing.localizedPath('/about',locale)},
-   '../../i18n/public-routing':routing,'../../lib/supabase/client':{createClient:()=>{throw Error('render must not mutate auth')}},
+   '../../i18n/public-routing':routing,'../../lib/supabase/lazy-client':{loadBrowserClient:()=>{throw Error('render must not mutate auth')}},
    '../../i18n/client-preference':{},'./PublicHeader.module.css':{default:{}}
   }).default;
   const html=renderToStaticMarkup(React.createElement(Switcher,{account,inline}));

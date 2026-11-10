@@ -5,7 +5,7 @@ import {useLocale, useTranslations} from 'next-intl';
 import { useEffect, useRef, useState } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import {localizedPath} from "../../i18n/public-routing";
-import { createClient } from "../../lib/supabase/client";
+import { loadBrowserClient } from "../../lib/supabase/lazy-client";
 import styles from "./PublicHeader.module.css";
 
 
@@ -40,62 +40,73 @@ const publicNavigation = [
   useEffect(() => {
     let mounted = true;
     let requestVersion = 0;
-    const supabase = createClient();
+    let unsubscribe: (() => void) | undefined;
 
-    async function updateDashboardLink() {
-      const version = ++requestVersion;
-      try {
-        const { data: auth, error: authError } = await supabase.auth.getUser();
-        if (!mounted || version !== requestVersion) return;
+    async function connect() {
+      const supabase = await loadBrowserClient();
+      if (!mounted) return;
 
-        if (authError || !auth.user) {
-          setDashboardHref(null);
-          return;
+      async function updateDashboardLink() {
+        const version = ++requestVersion;
+        try {
+          const { data: auth, error: authError } = await supabase.auth.getUser();
+          if (!mounted || version !== requestVersion) return;
+
+          if (authError || !auth.user) {
+            setDashboardHref(null);
+            return;
+          }
+
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("role,is_active")
+            .eq("id", auth.user.id)
+            .maybeSingle();
+
+          if (!mounted || version !== requestVersion) return;
+
+          if (profileError || !profile || profile.is_active !== true) {
+            setDashboardHref(null);
+            return;
+          }
+
+          if (profile.role === "admin") {
+            setDashboardHref("/admin");
+          } else if (profile.role === "client" || profile.role === "partner") {
+            setDashboardHref("/private");
+          } else {
+            setDashboardHref(null);
+          }
+        } catch {
+          if (mounted && version === requestVersion) setDashboardHref(null);
         }
-
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role,is_active")
-          .eq("id", auth.user.id)
-          .maybeSingle();
-
-        if (!mounted || version !== requestVersion) return;
-
-        if (profileError || !profile || profile.is_active !== true) {
-          setDashboardHref(null);
-          return;
-        }
-
-        if (profile.role === "admin") {
-          setDashboardHref("/admin");
-        } else if (profile.role === "client" || profile.role === "partner") {
-          setDashboardHref("/private");
-        } else {
-          setDashboardHref(null);
-        }
-      } catch {
-        if (mounted && version === requestVersion) setDashboardHref(null);
       }
+
+      void updateDashboardLink();
+
+      // Keep the shortcut in sync when users log in or out while a public
+      // page is open. Defer Supabase calls until the auth callback is complete.
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_OUT") {
+          requestVersion += 1;
+          if (mounted) setDashboardHref(null);
+        } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+          window.setTimeout(() => {
+            if (mounted) void updateDashboardLink();
+          }, 0);
+        }
+      });
+      unsubscribe = () => subscription.unsubscribe();
     }
 
-    void updateDashboardLink();
-
-    // Keep the shortcut in sync when users log in or out while a public
-    // page is open. Defer Supabase calls until the auth callback is complete.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        requestVersion += 1;
-        if (mounted) setDashboardHref(null);
-      } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        window.setTimeout(() => {
-          if (mounted) void updateDashboardLink();
-        }, 0);
-      }
+    void connect().catch(() => {
+      // Public navigation remains usable if the optional account chunk fails.
+      if (mounted) setDashboardHref(null);
     });
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
@@ -105,7 +116,8 @@ const publicNavigation = [
     setSigningOut(true);
     setSignOutError(false);
     try {
-      const { error } = await createClient().auth.signOut({ scope: "local" });
+      const supabase = await loadBrowserClient();
+      const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) throw error;
       setDashboardHref(null);
       window.location.replace(localizedPath("/", locale));

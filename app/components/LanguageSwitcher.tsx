@@ -3,7 +3,7 @@ import {useEffect, useRef, useState, type CSSProperties} from 'react';
 import {useLocale, useTranslations} from 'next-intl';
 import {usePathname} from 'next/navigation';
 import {locales, memberLocales, publicRoute, localizedPath, isAccountPath} from '../../i18n/public-routing';
-import {createClient} from '../../lib/supabase/client';
+import {loadBrowserClient} from '../../lib/supabase/lazy-client';
 import {rememberLocale} from '../../i18n/client-preference';
 import styles from './PublicHeader.module.css';
 
@@ -47,7 +47,8 @@ export default function LanguageSwitcher({account = false, inline = false, langu
           if (busy) return;
           setBusy(true); setSaveError(false);
           try {
-            const {error} = await createClient().auth.updateUser({data: {preferred_language: locale}});
+            const supabase = await loadBrowserClient();
+            const {error} = await supabase.auth.updateUser({data: {preferred_language: locale}});
             if (error) throw error;
             rememberLocale(locale);
             location.reload();
