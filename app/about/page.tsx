@@ -16,6 +16,12 @@ export const generateMetadata = () => publicMetadata('about', '/about');
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
   const work = getWorkCopy(locale);
+  const countryNames = new Intl.DisplayNames([locale], {type: 'region'});
+  const regions = [
+    {country: 'NL', locations: ['Amsterdam']},
+    {country: 'ES', locations: ['Alicante', 'Madrid', 'Ibiza', 'Mallorca']},
+    {country: 'AE', locations: ['Dubai', 'Abu Dhabi']},
+  ];
   const activities = [
     {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
     {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
@@ -31,8 +37,19 @@ export default async function AboutPage() {
       </section>
       <figure className={styles.figure}>
         <div className={styles.panorama}>
-          <Image src="/images/about-journey.png" alt={t('caption')} fill priority sizes="100vw" className={styles.image} />
+          <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
+        <figcaption className={styles.mapLegend}>
+          {regions.map((region, index) => (
+            <div className={styles.mapRegion} key={region.country}>
+              <span className={styles.mapNumber} aria-hidden="true">0{index + 1}</span>
+              <div>
+                <p className={styles.mapCountry}>{countryNames.of(region.country)}</p>
+                <p className={styles.mapLocations} dir="ltr">{region.locations.join(' · ')}</p>
+              </div>
+            </div>
+          ))}
+        </figcaption>
       </figure>
       <section className={styles.story} aria-label={t('label')}>
         <ol className={styles.journey}>
