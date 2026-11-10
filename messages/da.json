@@ -309,7 +309,22 @@
     "payment_date": "Betalingsdato",
     "amount": "Beløb",
     "no_payments": "Der er endnu ikke bekræftet rentebetalinger i denne sag.",
-    "confirmed_note": "Kun bekræftede renter medregnes. Planlagte renter og afdrag på hovedstolen er ikke medtaget. Manglende bekræftelse betyder ikke, at en betaling er forfalden."
+    "confirmed_note": "Kun bekræftede renter medregnes. Planlagte renter og afdrag på hovedstolen er ikke medtaget. Manglende bekræftelse betyder ikke, at en betaling er forfalden.",
+    "schedule_title": "Renteterminer",
+    "next_open": "Første åbne rate",
+    "remaining_scheduled": "Resterende planlagte renter",
+    "planned_amount": "Planlagt",
+    "credit_applied": "Modregnet tilgodehavende",
+    "remaining_amount": "Resterende",
+    "settled": "Afregnet",
+    "credits_title": "Modregning af renter",
+    "credit_transfer": "Fra {from} til {to}",
+    "credit_explanation": "Ekstra renter dækker først tidligere åbne beløb og derefter kommende rater. Betalingen tælles kun én gang.",
+    "schedule_empty": "Der er endnu ikke registreret renteterminer.",
+    "schedule_settled": "Alle registrerede rater er afregnet",
+    "unallocated_credit": "Ikke modregnet rentetilgodehavende",
+    "schedule_note": "Saldi bygger på registrerede betalinger og tilgodehavender. Manglende bekræftelse betyder ikke, at en betaling er udeblevet.",
+    "past_due_unconfirmed": "Forfaldsdato passeret; betaling ikke fuldt bekræftet"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Denne forhåndsvisning er endnu ikke forbundet med MZS Staging. Profilredigering er deaktiveret.",

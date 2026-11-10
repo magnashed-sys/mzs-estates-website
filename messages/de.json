@@ -309,7 +309,22 @@
     "payment_date": "Zahlungsdatum",
     "amount": "Betrag",
     "no_payments": "In diesem Dossier wurden noch keine Zinszahlungen bestätigt.",
-    "confirmed_note": "Es werden nur bestätigte Zinsen berücksichtigt. Geplante Zinsen und Tilgungen sind ausgeschlossen. Eine fehlende Bestätigung bedeutet nicht, dass eine Zahlung überfällig ist."
+    "confirmed_note": "Es werden nur bestätigte Zinsen berücksichtigt. Geplante Zinsen und Tilgungen sind ausgeschlossen. Eine fehlende Bestätigung bedeutet nicht, dass eine Zahlung überfällig ist.",
+    "schedule_title": "Zinstermine",
+    "next_open": "Erste offene Rate",
+    "remaining_scheduled": "Verbleibende geplante Zinsen",
+    "planned_amount": "Geplant",
+    "credit_applied": "Verrechnetes Guthaben",
+    "remaining_amount": "Offen",
+    "settled": "Beglichen",
+    "credits_title": "Zinsgutschriften",
+    "credit_transfer": "Von {from} auf {to}",
+    "credit_explanation": "Zusätzliche Zinszahlungen decken zuerst frühere offene Beträge, danach kommende Raten. Der Zahlungseingang wird einmal gezählt.",
+    "schedule_empty": "Es sind noch keine Zinsraten erfasst.",
+    "schedule_settled": "Alle erfassten Raten beglichen",
+    "unallocated_credit": "Noch nicht verrechnetes Zinsguthaben",
+    "schedule_note": "Salden beruhen auf erfassten Zahlungen und Guthaben. Eine fehlende Bestätigung bedeutet nicht, dass eine Zahlung ausgeblieben ist.",
+    "past_due_unconfirmed": "Fälligkeit überschritten; Zahlung nicht vollständig bestätigt"
   },
   "AccountUI": {
     "a000": "Falls für diese E-Mail-Adresse ein berechtigtes MZS-Konto besteht, erhalten Sie in Kürze Anweisungen zur Passwortwiederherstellung. Bitte prüfen Sie Ihren Posteingang und Spamordner.",

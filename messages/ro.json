@@ -309,7 +309,22 @@
     "payment_date": "Data de plată",
     "amount": "Sumă",
     "no_payments": "Nu au fost confirmate încă plăți de dobândă în acest dosar.",
-    "confirmed_note": "Sunt incluse numai dobânzile confirmate. Dobânzile programate și rambursările principalului sunt excluse. Lipsa confirmării nu înseamnă că plata este restantă."
+    "confirmed_note": "Sunt incluse numai dobânzile confirmate. Dobânzile programate și rambursările principalului sunt excluse. Lipsa confirmării nu înseamnă că plata este restantă.",
+    "schedule_title": "Scadențarul dobânzilor",
+    "next_open": "Prima rată deschisă",
+    "remaining_scheduled": "Dobânzi planificate rămase",
+    "planned_amount": "Planificat",
+    "credit_applied": "Credit compensat",
+    "remaining_amount": "Rămas",
+    "settled": "Achitat",
+    "credits_title": "Compensarea dobânzilor",
+    "credit_transfer": "De la {from} la {to}",
+    "credit_explanation": "Dobânzile suplimentare acoperă mai întâi soldurile anterioare, apoi ratele viitoare. Încasarea este contabilizată o singură dată.",
+    "schedule_empty": "Nu sunt înregistrate încă rate de dobândă.",
+    "schedule_settled": "Toate ratele înregistrate sunt achitate",
+    "unallocated_credit": "Credit de dobândă necompensat",
+    "schedule_note": "Soldurile reflectă plățile și creditele înregistrate. Lipsa unei confirmări nu înseamnă că plata nu a fost efectuată.",
+    "past_due_unconfirmed": "Scadență depășită; plata nu este confirmată integral"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Această previzualizare nu este încă conectată la mediul MZS Staging. Editarea profilului este dezactivată.",

@@ -309,7 +309,22 @@
     "payment_date": "Betaaldatum",
     "amount": "Bedrag",
     "no_payments": "Er zijn nog geen rentebetalingen bevestigd in dit dossier.",
-    "confirmed_note": "Alleen bevestigde rente is opgenomen. Geplande rente en aflossingen zijn niet inbegrepen. Een ontbrekende bevestiging betekent niet dat een betaling achterstallig is."
+    "confirmed_note": "Alleen bevestigde rente is opgenomen. Geplande rente en aflossingen zijn niet inbegrepen. Een ontbrekende bevestiging betekent niet dat een betaling achterstallig is.",
+    "schedule_title": "Rentetermijnen",
+    "next_open": "Eerstvolgende open termijn",
+    "remaining_scheduled": "Resterende geplande rente",
+    "planned_amount": "Gepland",
+    "credit_applied": "Verrekend tegoed",
+    "remaining_amount": "Resterend",
+    "settled": "Voldaan",
+    "credits_title": "Verrekening van rentetegoeden",
+    "credit_transfer": "Van {from} naar {to}",
+    "credit_explanation": "Extra ontvangen rente wordt eerst met eerdere open bedragen verrekend en daarna met volgende termijnen. De ontvangst telt één keer mee.",
+    "schedule_empty": "Er zijn nog geen rentetermijnen vastgelegd.",
+    "schedule_settled": "Alle vastgelegde termijnen voldaan",
+    "unallocated_credit": "Nog te verrekenen rentetegoed",
+    "schedule_note": "Saldi zijn gebaseerd op geregistreerde betalingen en tegoeden. Een ontbrekende bevestiging betekent niet dat een betaling is uitgebleven.",
+    "past_due_unconfirmed": "Vervaldatum verstreken; betaling niet volledig bevestigd"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Deze Preview is nog niet gekoppeld aan MZS Staging. Je profiel kan niet worden bewerkt.",
