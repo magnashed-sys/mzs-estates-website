@@ -209,7 +209,9 @@
     "verify": "Váš účet sa nepodarilo overiť. Kontaktujte MZS Group.",
     "inactive": "Váš účet je momentálne neaktívny. Kontaktujte MZS Group.",
     "role": "Váš účet nemá platnú prístupovú rolu.",
-    "failed": "Momentálne sa nedá prihlásiť. Skúste to znova."
+    "failed": "Momentálne sa nedá prihlásiť. Skúste to znova.",
+    "show_password": "Zobraziť heslo",
+    "hide_password": "Skryť heslo"
   },
   "Private": {
     "marinaApartmentTitle": "Apartmán s 2–3 spálňami na Ibize, Španielsko",

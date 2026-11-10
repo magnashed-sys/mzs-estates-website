@@ -45,7 +45,9 @@
     "verify": "Ihr Konto konnte nicht überprüft werden. Bitte kontaktieren Sie MZS Group.",
     "inactive": "Ihr Konto ist derzeit inaktiv. Bitte kontaktieren Sie MZS Group.",
     "role": "Ihrem Konto ist keine gültige Zugangsrolle zugewiesen.",
-    "failed": "Eine Anmeldung ist derzeit nicht möglich. Bitte versuchen Sie es erneut."
+    "failed": "Eine Anmeldung ist derzeit nicht möglich. Bitte versuchen Sie es erneut.",
+    "show_password": "Passwort anzeigen",
+    "hide_password": "Passwort verbergen"
   },
   "Metadata": {
     "homeTitle": "Beratung, Immobilien & Privatkapital | MZS Group",

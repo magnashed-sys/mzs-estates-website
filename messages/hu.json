@@ -209,7 +209,9 @@
     "verify": "Fiókja nem ellenőrizhető. Kérjük, lépjen kapcsolatba az MZS Grouppal.",
     "inactive": "Fiókja jelenleg inaktív. Kérjük, lépjen kapcsolatba az MZS Grouppal.",
     "role": "Fiókjához nem tartozik érvényes hozzáférési szerepkör.",
-    "failed": "Jelenleg nem lehet bejelentkezni. Kérjük, próbálja újra."
+    "failed": "Jelenleg nem lehet bejelentkezni. Kérjük, próbálja újra.",
+    "show_password": "Jelszó megjelenítése",
+    "hide_password": "Jelszó elrejtése"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 hálószobás apartman Ibizán, Spanyolországban",

@@ -209,7 +209,9 @@
     "verify": "Kontoen din kunne ikke verifiseres. Kontakt MZS Group.",
     "inactive": "Kontoen din er foreløpig inaktiv. Kontakt MZS Group.",
     "role": "Kontoen din har ingen gyldig tilgangsrolle.",
-    "failed": "Du kan ikke logge inn akkurat nå. Prøv igjen."
+    "failed": "Du kan ikke logge inn akkurat nå. Prøv igjen.",
+    "show_password": "Vis passord",
+    "hide_password": "Skjul passord"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 Soveromslelighet i Ibiza Spania",

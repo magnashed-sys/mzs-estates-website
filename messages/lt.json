@@ -209,7 +209,9 @@
     "verify": "Nepavyko patikrinti jūsų paskyros. Susisiekite su MZS Group.",
     "inactive": "Jūsų paskyra šiuo metu neaktyvi. Susisiekite su MZS Group.",
     "role": "Jūsų paskyrai nepriskirtas galiojantis prieigos vaidmuo.",
-    "failed": "Šiuo metu nepavyksta prisijungti. Bandykite dar kartą."
+    "failed": "Šiuo metu nepavyksta prisijungti. Bandykite dar kartą.",
+    "show_password": "Rodyti slaptažodį",
+    "hide_password": "Slėpti slaptažodį"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 miegamųjų apartamentai Ibizoje, Ispanijoje",

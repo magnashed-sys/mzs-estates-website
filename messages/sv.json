@@ -209,7 +209,9 @@
     "verify": "Kan inte verifiera ditt konto. Kontakta gärna MZS Group.",
     "inactive": "Ditt konto är för närvarande inaktivt. Kontakta MZS Group.",
     "role": "Ditt konto har ingen giltig åtkomstroll.",
-    "failed": "Kan inte logga in just nu. Försök igen."
+    "failed": "Kan inte logga in just nu. Försök igen.",
+    "show_password": "Visa lösenord",
+    "hide_password": "Dölj lösenord"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 Sovrum lägenhet i Ibiza Spanien",

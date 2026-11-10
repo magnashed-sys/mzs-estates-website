@@ -31,7 +31,7 @@ test('Lithuanian translations cover the entire English catalogue and ICU variabl
    }
   }
  };
- scan(en,lt);assert.equal(count,1182);
+ scan(en,lt);assert.equal(count,1184);
 });
 test('Lithuanian route is a public-only prefix and preserves all protected paths',()=>{
  assert.equal(routing.memberLocale('lt'),'lt');
