@@ -3474,5 +3474,6 @@
   "Selected: {p0} · Total: {p1}": "Seleccionadas: {p0} · Total: {p1}",
   "Unconfirmed payments: {p0}. Retry uses the same payment identifiers to prevent duplicate entries.": "Cobros sin confirmar: {p0}. El reintento utiliza los mismos identificadores para evitar duplicados.",
   "Retry remaining payments": "Reintentar cobros restantes",
-  "Record selected payments": "Registrar cobros seleccionados"
+  "Record selected payments": "Registrar cobros seleccionados",
+  "Approved Zorgbalans hours are included in the monthly rental invoice with an hours statement.": "Las horas aprobadas de Zorgbalans se incluyen en la factura mensual de alquiler con un detalle de horas."
 }

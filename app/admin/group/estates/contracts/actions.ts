@@ -34,6 +34,12 @@ export async function generateDrafts() {
   if (error) return { error:error.message };
   revalidatePath(path); return { count:Number(data) };
 }
+export async function refreshCleaning(id:string) {
+ const {db}=await requireContractAdmin();
+ const {data,error}=await db.rpc('mzs_refresh_lease_cleaning',{p_draft:id});
+ if(error)return {error:error.message};
+ revalidatePath(path);revalidatePath('/admin/workspaces/estates/zorgbalans');return {count:Number(data)};
+}
 export async function reviewInvoice(id: string, checked: boolean, note: string) {
   const { db } = await requireContractAdmin();
   const { data,error } = await db.from('mzs_lease_invoice_drafts').update({review_status:checked?'checked':'pending',review_note:note}).eq('id',id).select('id').maybeSingle();
