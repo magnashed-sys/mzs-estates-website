@@ -29,5 +29,8 @@ export function capitalReminderMessage(s: CapitalReminder) {
     'If you have already made the payment, thank you and please disregard this reminder.',
     'Kind regards,\nMZS Group',
   ];
-  return {subject, text: paragraphs.join('\n\n'), html: `<!doctype html><html lang="${s.locale}"><body style="margin:0;background:#f4f1eb;font-family:Arial,sans-serif;color:#25231e"><div style="max-width:600px;margin:24px auto;padding:28px;background:#fff;border-top:3px solid #ad925c"><p style="color:#897044;letter-spacing:3px;font-size:12px">MZS GROUP</p>${paragraphs.map(p => `<p style="line-height:1.6">${escape(p).replace(/\n/g, '<br>')}</p>`).join('')}</div></body></html>`};
+  const footer = nl
+    ? 'Dit is een geautomatiseerd bericht van MZS Group. Bij vragen kun je contact opnemen met je relatiemanager.'
+    : 'This is an automated message from MZS Group. If you have any questions, please contact your relationship manager.';
+  return {subject, text: [...paragraphs, footer].join('\n\n'), html: `<!doctype html><html lang="${s.locale}"><body style="margin:0;background:#f4f1eb;font-family:Arial,sans-serif;color:#25231e"><div style="max-width:600px;margin:24px auto;padding:28px;background:#fff;border-top:3px solid #ad925c"><p style="color:#897044;letter-spacing:3px;font-size:12px">MZS GROUP</p>${paragraphs.map(p => `<p style="line-height:1.6">${escape(p).replace(/\n/g, '<br>')}</p>`).join('')}<p style="margin-top:24px;padding-top:16px;border-top:1px solid #e6e0d5;font-size:12px;line-height:1.6;color:#6b6457">${escape(footer)}</p></div></body></html>`};
 }
