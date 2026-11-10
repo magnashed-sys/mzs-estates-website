@@ -362,6 +362,25 @@ export default async function PrivateProjectPage({ params }: Props) {
           </section>
 
           {slug === "marina-botafoch-apartment" && (
+            <section id="apartment-floorplan" className={styles.marinaVideoSection} aria-labelledby="marina-floorplan-heading">
+              <div className={styles.marinaVideoIntro}>
+                <p className={styles.kicker}>MARINA BOTAFOCH / IBIZA</p>
+                <h2 id="marina-floorplan-heading">{t("documentCategories.floorplan")}</h2>
+              </div>
+              <a className={styles.marinaFloorplan} href="/api/project-floorplan/1d67c84d-e421-4452-93ea-0c72727a0c0b" target="_blank" rel="noopener noreferrer">
+                <Image
+                  src="/api/project-floorplan/1d67c84d-e421-4452-93ea-0c72727a0c0b"
+                  unoptimized
+                  alt={`${t("documentCategories.floorplan")} — Marina Botafoch`}
+                  width={1199}
+                  height={1312}
+                  sizes="(max-width: 900px) 100vw, 900px"
+                />
+              </a>
+            </section>
+          )}
+
+          {slug === "marina-botafoch-apartment" && (
             <section id="apartment-video" className={styles.marinaVideoSection} aria-labelledby="marina-apartment-video-heading">
               <div className={styles.marinaVideoIntro}>
                 <p className={styles.kicker}>{t("marinaVideoKicker")}</p>

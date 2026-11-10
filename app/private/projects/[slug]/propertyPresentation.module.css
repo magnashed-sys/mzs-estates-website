@@ -428,3 +428,7 @@
   .marinaVideoSection { padding: 64px 18px; }
   .marinaVideoIntro { margin-bottom: 22px; }
 }
+
+.marinaFloorplan { display: block; max-width: 900px; margin: 0 auto; background: #fff; border: 1px solid var(--edge); }
+.marinaFloorplan img { display: block; width: 100%; height: auto; }
+.marinaFloorplan:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
