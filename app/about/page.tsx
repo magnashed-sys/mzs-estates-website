@@ -16,12 +16,6 @@ export const generateMetadata = () => publicMetadata('about', '/about');
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
   const work = getWorkCopy(locale);
-  const countryNames = new Intl.DisplayNames([locale], {type: 'region'});
-  const regions = [
-    {country: 'NL', locations: ['Amsterdam']},
-    {country: 'ES', locations: ['Alicante', 'Madrid', 'Ibiza', 'Mallorca']},
-    {country: 'AE', locations: ['Dubai', 'Abu Dhabi']},
-  ];
   const activities = [
     {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
     {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
@@ -39,31 +33,7 @@ export default async function AboutPage() {
         <div className={styles.panorama}>
           <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
-        <figcaption className={styles.mapLegend}>
-          {regions.map((region, index) => (
-            <div className={styles.mapRegion} key={region.country}>
-              <span className={styles.mapNumber} aria-hidden="true">0{index + 1}</span>
-              <div>
-                <p className={styles.mapCountry}>{countryNames.of(region.country)}</p>
-                <p className={styles.mapLocations} dir="ltr">{region.locations.join(' · ')}</p>
-              </div>
-            </div>
-          ))}
-        </figcaption>
       </figure>
-      <section className={styles.story} aria-label={t('label')}>
-        <ol className={styles.journey}>
-          <li><span className={styles.number}>01</span><h2>{t('amsterdam')}</h2><span className={styles.year}>1990</span></li>
-          <li><span className={styles.number}>02</span><h2>{t('spain')}</h2></li>
-          <li><span className={styles.number}>03</span><h2>{t('dubai')}</h2></li>
-        </ol>
-        <div className={styles.storyContent}>
-          <figure className={styles.historyPhoto}>
-            <Image src="/images/about-bazaar.webp" alt="De Bazaar, Beverwijk" width={1250} height={544} sizes="(max-width: 850px) 100vw, 48vw" />
-          </figure>
-          <p className={styles.body}>{t('body')}</p>
-        </div>
-      </section>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
         <div className={styles.activityGrid}>

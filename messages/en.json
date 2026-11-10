@@ -309,7 +309,22 @@
     "payment_date": "Payment date",
     "amount": "Amount",
     "no_payments": "No interest payments have been confirmed in this dossier yet.",
-    "confirmed_note": "Only confirmed interest is included. Scheduled interest and principal repayments are excluded. A missing confirmation does not mean a payment is overdue."
+    "confirmed_note": "Only confirmed interest is included. Scheduled interest and principal repayments are excluded. A missing confirmation does not mean a payment is overdue.",
+    "schedule_title": "Interest schedule",
+    "next_open": "First open instalment",
+    "remaining_scheduled": "Remaining scheduled interest",
+    "planned_amount": "Scheduled",
+    "credit_applied": "Credit applied",
+    "remaining_amount": "Remaining",
+    "settled": "Settled",
+    "credits_title": "Interest credits",
+    "credit_transfer": "From {from} to {to}",
+    "credit_explanation": "Extra interest first settles earlier balances, then upcoming instalments. The cash receipt is counted once.",
+    "schedule_empty": "No interest instalments have been recorded.",
+    "schedule_settled": "All recorded instalments settled",
+    "unallocated_credit": "Unallocated interest credit",
+    "schedule_note": "Balances reflect registered payments and credits. A missing confirmation does not establish a missed payment.",
+    "past_due_unconfirmed": "Due date passed; payment not fully confirmed"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "This Preview is not yet linked to MZS Staging. Profile editing is disabled.",

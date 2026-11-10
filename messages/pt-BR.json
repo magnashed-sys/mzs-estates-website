@@ -309,7 +309,22 @@
     "payment_date": "Data do pagamento",
     "amount": "Valor",
     "no_payments": "Nenhum pagamento de juros foi confirmado neste dossiê ainda.",
-    "confirmed_note": "Apenas juros confirmados estão incluídos. Juros programados e amortizações do principal estão excluídos. A ausência de confirmação não significa que um pagamento esteja em atraso."
+    "confirmed_note": "Apenas juros confirmados estão incluídos. Juros programados e amortizações do principal estão excluídos. A ausência de confirmação não significa que um pagamento esteja em atraso.",
+    "schedule_title": "Cronograma de juros",
+    "next_open": "Primeira parcela em aberto",
+    "remaining_scheduled": "Juros programados restantes",
+    "planned_amount": "Programado",
+    "credit_applied": "Crédito compensado",
+    "remaining_amount": "Restante",
+    "settled": "Quitada",
+    "credits_title": "Compensação de créditos de juros",
+    "credit_transfer": "De {from} para {to}",
+    "credit_explanation": "Os juros adicionais cobrem primeiro os saldos anteriores e depois as próximas parcelas. O recebimento é contabilizado uma única vez.",
+    "schedule_empty": "Nenhuma parcela de juros foi registrada.",
+    "schedule_settled": "Todas as parcelas registradas estão quitadas",
+    "unallocated_credit": "Crédito de juros não compensado",
+    "schedule_note": "Os saldos refletem pagamentos e créditos registrados. A falta de confirmação não significa que um pagamento não foi realizado.",
+    "past_due_unconfirmed": "Vencimento ultrapassado; pagamento não confirmado integralmente"
   },
   "AccountUI": {
     "a000": "Se houver uma conta MZS elegível para este e-mail, você receberá em breve instruções para recuperar a senha. Confira sua caixa de entrada e a pasta de spam.",

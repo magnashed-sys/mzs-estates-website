@@ -309,7 +309,22 @@
     "payment_date": "Data di pagamento",
     "amount": "Importo",
     "no_payments": "In questo dossier non sono ancora stati confermati pagamenti di interessi.",
-    "confirmed_note": "Sono inclusi solo gli interessi confermati. Gli interessi programmati e i rimborsi del capitale sono esclusi. L’assenza di conferma non significa che un pagamento sia scaduto."
+    "confirmed_note": "Sono inclusi solo gli interessi confermati. Gli interessi programmati e i rimborsi del capitale sono esclusi. L’assenza di conferma non significa che un pagamento sia scaduto.",
+    "schedule_title": "Scadenze degli interessi",
+    "next_open": "Prima rata aperta",
+    "remaining_scheduled": "Interessi programmati residui",
+    "planned_amount": "Previsto",
+    "credit_applied": "Credito applicato",
+    "remaining_amount": "Residuo",
+    "settled": "Saldato",
+    "credits_title": "Compensazione degli interessi",
+    "credit_transfer": "Dal {from} al {to}",
+    "credit_explanation": "Gli interessi aggiuntivi coprono prima i saldi precedenti, poi le prossime rate. L’incasso viene conteggiato una sola volta.",
+    "schedule_empty": "Non sono registrate rate di interessi.",
+    "schedule_settled": "Tutte le rate registrate sono saldate",
+    "unallocated_credit": "Credito di interessi non applicato",
+    "schedule_note": "I saldi riflettono pagamenti e crediti registrati. L’assenza di conferma non indica necessariamente un mancato pagamento.",
+    "past_due_unconfirmed": "Scadenza trascorsa; pagamento non interamente confermato"
   },
   "AccountUI": {
     "a000": "Se esiste un account MZS idoneo per questo indirizzo email, riceverai a breve le istruzioni per recuperare la password. Controlla la posta in arrivo e lo spam.",

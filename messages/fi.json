@@ -309,7 +309,22 @@
     "payment_date": "Maksupäivä",
     "amount": "Summa",
     "no_payments": "Tässä asiakirjakokonaisuudessa ei ole vielä vahvistettuja korkomaksuja.",
-    "confirmed_note": "Vain vahvistetut korot sisältyvät lukuihin. Suunnitellut korot ja lainan lyhennykset eivät sisälly niihin. Vahvistuksen puuttuminen ei tarkoita maksun olevan myöhässä."
+    "confirmed_note": "Vain vahvistetut korot sisältyvät lukuihin. Suunnitellut korot ja lainan lyhennykset eivät sisälly niihin. Vahvistuksen puuttuminen ei tarkoita maksun olevan myöhässä.",
+    "schedule_title": "Korkoerät",
+    "next_open": "Ensimmäinen avoin erä",
+    "remaining_scheduled": "Jäljellä oleva suunniteltu korko",
+    "planned_amount": "Suunniteltu",
+    "credit_applied": "Käytetty hyvitys",
+    "remaining_amount": "Jäljellä",
+    "settled": "Maksettu",
+    "credits_title": "Korkohyvitysten kohdistus",
+    "credit_transfer": "Päivältä {from} päivälle {to}",
+    "credit_explanation": "Ylimääräinen korko kattaa ensin aiemmat avoimet saldot ja sitten tulevat erät. Maksusuoritus lasketaan vain kerran.",
+    "schedule_empty": "Korkoeriä ei ole vielä kirjattu.",
+    "schedule_settled": "Kaikki kirjatut erät on maksettu",
+    "unallocated_credit": "Kohdistamaton korkohyvitys",
+    "schedule_note": "Saldot perustuvat kirjattuihin maksuihin ja hyvityksiin. Vahvistuksen puuttuminen ei tarkoita maksun laiminlyöntiä.",
+    "past_due_unconfirmed": "Eräpäivä ohitettu; maksua ei ole kokonaan vahvistettu"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Tätä esikatselua ei ole vielä yhdistetty MZS Stagingiin. Profiilin muokkaus on poistettu käytöstä.",

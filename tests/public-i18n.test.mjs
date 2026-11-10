@@ -33,7 +33,7 @@ test('All translation catalogues are complete and every ICU message renders with
         const path = prefix ? `${prefix}.${key}` : key;
         if (typeof value === 'object') { check(value, actual[key], path); continue; }
         assert.ok(actual[key].trim());
-        const rendered = t(path, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference', name: 'Test company', message: 'Saved', start: '1 Jan', end: '3 Jan', explanation: 'Test', date: '1 Jan', count: 2, bedrooms: 2, bathrooms: 1, price: '€400', index: 1, total: 5, caption: 'Photo', kind: 'investment', role: 'Client'});
+        const rendered = t(path, {brand: 'MZS Estates', address: 'test@example.invalid', title: 'Test project', id: 'test-reference', name: 'Test company', message: 'Saved', start: '1 Jan', end: '3 Jan', from: '1 Jan', to: '3 Jan', explanation: 'Test', date: '1 Jan', count: 2, bedrooms: 2, bathrooms: 1, price: '€400', index: 1, total: 5, caption: 'Photo', kind: 'investment', role: 'Client'});
         assert.ok(rendered.length > 0);
       }
     }

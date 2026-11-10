@@ -309,7 +309,22 @@
     "payment_date": "Fecha de pago",
     "amount": "Importe",
     "no_payments": "Todavía no se han confirmado pagos de intereses en este expediente.",
-    "confirmed_note": "Solo se incluyen intereses confirmados. Se excluyen los intereses programados y las devoluciones del principal. La falta de confirmación no significa que un pago esté vencido."
+    "confirmed_note": "Solo se incluyen intereses confirmados. Se excluyen los intereses programados y las devoluciones del principal. La falta de confirmación no significa que un pago esté vencido.",
+    "schedule_title": "Calendario de intereses",
+    "next_open": "Primera cuota pendiente",
+    "remaining_scheduled": "Intereses programados pendientes",
+    "planned_amount": "Previsto",
+    "credit_applied": "Crédito aplicado",
+    "remaining_amount": "Pendiente",
+    "settled": "Liquidada",
+    "credits_title": "Compensación de intereses",
+    "credit_transfer": "De {from} a {to}",
+    "credit_explanation": "Los intereses adicionales cubren primero los saldos anteriores y después las próximas cuotas. El cobro se contabiliza una sola vez.",
+    "schedule_empty": "No hay cuotas de intereses registradas.",
+    "schedule_settled": "Todas las cuotas registradas están liquidadas",
+    "unallocated_credit": "Crédito de intereses sin aplicar",
+    "schedule_note": "Los saldos reflejan pagos y créditos registrados. La falta de confirmación no implica que no se haya pagado.",
+    "past_due_unconfirmed": "Vencimiento pasado; pago no confirmado por completo"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Esta vista previa aún no está conectada a MZS Staging. La edición del perfil está desactivada.",

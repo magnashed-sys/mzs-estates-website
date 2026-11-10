@@ -309,7 +309,22 @@
     "payment_date": "Dátum platby",
     "amount": "Suma",
     "no_payments": "V tomto spise zatiaľ neboli potvrdené žiadne úrokové platby.",
-    "confirmed_note": "Zahrnuté sú iba potvrdené úroky. Plánované úroky a splátky istiny sú vylúčené. Chýbajúce potvrdenie neznamená, že platba je po splatnosti."
+    "confirmed_note": "Zahrnuté sú iba potvrdené úroky. Plánované úroky a splátky istiny sú vylúčené. Chýbajúce potvrdenie neznamená, že platba je po splatnosti.",
+    "schedule_title": "Splátky úrokov",
+    "next_open": "Prvá otvorená splátka",
+    "remaining_scheduled": "Zostávajúce plánované úroky",
+    "planned_amount": "Plánované",
+    "credit_applied": "Započítaný preplatok",
+    "remaining_amount": "Zostáva",
+    "settled": "Vyrovnané",
+    "credits_title": "Započítanie úrokových preplatkov",
+    "credit_transfer": "Z {from} na {to}",
+    "credit_explanation": "Dodatočné úroky najskôr pokryjú predchádzajúce neuhradené sumy a potom budúce splátky. Príjem sa započíta iba raz.",
+    "schedule_empty": "Zatiaľ nie sú evidované žiadne úrokové splátky.",
+    "schedule_settled": "Všetky evidované splátky sú vyrovnané",
+    "unallocated_credit": "Nezapočítaný úrokový preplatok",
+    "schedule_note": "Zostatky vychádzajú z evidovaných platieb a preplatkov. Chýbajúce potvrdenie neznamená, že platba nebola vykonaná.",
+    "past_due_unconfirmed": "Dátum splatnosti uplynul; platba nie je úplne potvrdená"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Tento náhľad ešte nie je prepojený s testovacím prostredím MZS. Úprava profilu je vypnutá.",

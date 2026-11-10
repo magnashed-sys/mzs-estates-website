@@ -309,7 +309,22 @@
     "payment_date": "Ödeme tarihi",
     "amount": "Tutar",
     "no_payments": "Bu dosyada henüz onaylanmış faiz ödemesi yok.",
-    "confirmed_note": "Yalnızca onaylanmış faiz dâhildir. Planlanan faiz ve anapara geri ödemeleri hariçtir. Eksik bir onay, ödemenin geciktiği anlamına gelmez."
+    "confirmed_note": "Yalnızca onaylanmış faiz dâhildir. Planlanan faiz ve anapara geri ödemeleri hariçtir. Eksik bir onay, ödemenin geciktiği anlamına gelmez.",
+    "schedule_title": "Faiz takvimi",
+    "next_open": "İlk açık taksit",
+    "remaining_scheduled": "Kalan planlanmış faiz",
+    "planned_amount": "Planlanan",
+    "credit_applied": "Mahsup edilen alacak",
+    "remaining_amount": "Kalan",
+    "settled": "Kapatıldı",
+    "credits_title": "Faiz alacaklarının mahsubu",
+    "credit_transfer": "{from} tarihinden {to} tarihine",
+    "credit_explanation": "Fazladan ödenen faiz önce önceki açık tutarları, ardından gelecek taksitleri karşılar. Tahsilat yalnızca bir kez sayılır.",
+    "schedule_empty": "Henüz faiz taksiti kaydedilmedi.",
+    "schedule_settled": "Kayıtlı tüm taksitler kapatıldı",
+    "unallocated_credit": "Mahsup edilmemiş faiz alacağı",
+    "schedule_note": "Bakiyeler kayıtlı ödemelere ve alacaklara dayanır. Onay eksikliği, ödemenin yapılmadığı anlamına gelmez.",
+    "past_due_unconfirmed": "Vade geçti; ödeme tam olarak onaylanmadı"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Bu önizleme henüz MZS Staging'e bağlı değil. Profil düzenleme devre dışı.",

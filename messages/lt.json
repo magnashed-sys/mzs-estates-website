@@ -309,7 +309,22 @@
     "payment_date": "Mokėjimo data",
     "amount": "Suma",
     "no_payments": "Šioje byloje dar nėra patvirtintų palūkanų mokėjimų.",
-    "confirmed_note": "Įtraukiamos tik patvirtintos palūkanos. Suplanuotos palūkanos ir pagrindinės paskolos sumos grąžinimai neįtraukiami. Patvirtinimo nebuvimas nereiškia, kad mokėjimas pradelstas."
+    "confirmed_note": "Įtraukiamos tik patvirtintos palūkanos. Suplanuotos palūkanos ir pagrindinės paskolos sumos grąžinimai neįtraukiami. Patvirtinimo nebuvimas nereiškia, kad mokėjimas pradelstas.",
+    "schedule_title": "Palūkanų grafikas",
+    "next_open": "Pirmoji nepadengta įmoka",
+    "remaining_scheduled": "Likusios planuotos palūkanos",
+    "planned_amount": "Suplanuota",
+    "credit_applied": "Įskaityta permoka",
+    "remaining_amount": "Likutis",
+    "settled": "Padengta",
+    "credits_title": "Palūkanų permokų įskaitymas",
+    "credit_transfer": "Iš {from} į {to}",
+    "credit_explanation": "Papildomos palūkanos pirmiausia padengia ankstesnius likučius, tada būsimas įmokas. Gautas mokėjimas skaičiuojamas vieną kartą.",
+    "schedule_empty": "Palūkanų įmokų dar neužregistruota.",
+    "schedule_settled": "Visos registruotos įmokos padengtos",
+    "unallocated_credit": "Neįskaityta palūkanų permoka",
+    "schedule_note": "Likučiai pagrįsti registruotais mokėjimais ir permokomis. Patvirtinimo nebuvimas nereiškia, kad mokėjimas neatliktas.",
+    "past_due_unconfirmed": "Terminas praėjo; mokėjimas nevisiškai patvirtintas"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Ši peržiūros versija dar nesusieta su MZS Staging. Profilio redagavimas išjungtas.",

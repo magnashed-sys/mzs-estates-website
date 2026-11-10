@@ -309,7 +309,22 @@
     "payment_date": "Data wypłaty",
     "amount": "Kwota",
     "no_payments": "W tej dokumentacji nie potwierdzono jeszcze żadnych płatności odsetek.",
-    "confirmed_note": "Uwzględniono wyłącznie potwierdzone odsetki. Zaplanowane odsetki i spłaty kapitału nie są uwzględnione. Brak potwierdzenia nie oznacza zaległości w płatności."
+    "confirmed_note": "Uwzględniono wyłącznie potwierdzone odsetki. Zaplanowane odsetki i spłaty kapitału nie są uwzględnione. Brak potwierdzenia nie oznacza zaległości w płatności.",
+    "schedule_title": "Harmonogram odsetek",
+    "next_open": "Pierwsza otwarta rata",
+    "remaining_scheduled": "Pozostałe planowane odsetki",
+    "planned_amount": "Planowane",
+    "credit_applied": "Rozliczona nadpłata",
+    "remaining_amount": "Pozostało",
+    "settled": "Rozliczone",
+    "credits_title": "Rozliczenie nadpłat odsetek",
+    "credit_transfer": "Z {from} na {to}",
+    "credit_explanation": "Dodatkowe odsetki pokrywają najpierw wcześniejsze otwarte kwoty, a następnie przyszłe raty. Wpływ jest liczony tylko raz.",
+    "schedule_empty": "Nie zarejestrowano jeszcze rat odsetkowych.",
+    "schedule_settled": "Wszystkie zarejestrowane raty są rozliczone",
+    "unallocated_credit": "Nierozliczona nadpłata odsetek",
+    "schedule_note": "Salda opierają się na zarejestrowanych płatnościach i nadpłatach. Brak potwierdzenia nie oznacza, że płatność nie nastąpiła.",
+    "past_due_unconfirmed": "Termin minął; płatność nie jest w pełni potwierdzona"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Ta wersja podglądowa nie jest jeszcze połączona ze środowiskiem MZS Staging. Edycja profilu jest wyłączona.",

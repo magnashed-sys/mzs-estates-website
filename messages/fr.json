@@ -309,7 +309,22 @@
     "payment_date": "Date de paiement",
     "amount": "Montant",
     "no_payments": "Aucun paiement d’intérêts n’a encore été confirmé dans ce dossier.",
-    "confirmed_note": "Seuls les intérêts confirmés sont inclus. Les intérêts prévus et les remboursements du principal sont exclus. L’absence de confirmation ne signifie pas qu’un paiement est en retard."
+    "confirmed_note": "Seuls les intérêts confirmés sont inclus. Les intérêts prévus et les remboursements du principal sont exclus. L’absence de confirmation ne signifie pas qu’un paiement est en retard.",
+    "schedule_title": "Échéancier des intérêts",
+    "next_open": "Première échéance ouverte",
+    "remaining_scheduled": "Intérêts prévus restant dus",
+    "planned_amount": "Prévu",
+    "credit_applied": "Crédit imputé",
+    "remaining_amount": "Restant",
+    "settled": "Soldée",
+    "credits_title": "Imputation des crédits d’intérêts",
+    "credit_transfer": "Du {from} au {to}",
+    "credit_explanation": "Les intérêts supplémentaires couvrent d’abord les soldes antérieurs, puis les prochaines échéances. L’encaissement est compté une seule fois.",
+    "schedule_empty": "Aucune échéance d’intérêts n’a été enregistrée.",
+    "schedule_settled": "Toutes les échéances enregistrées sont soldées",
+    "unallocated_credit": "Crédit d’intérêts non imputé",
+    "schedule_note": "Les soldes reflètent les paiements et crédits enregistrés. Une absence de confirmation ne signifie pas qu’un paiement n’a pas été effectué.",
+    "past_due_unconfirmed": "Échéance dépassée ; paiement non entièrement confirmé"
   },
   "AccountUI": {
     "a000": "Si un compte MZS éligible existe pour cette adresse e-mail, vous recevrez prochainement les instructions de récupération du mot de passe. Vérifiez votre boîte de réception et vos courriers indésirables.",
