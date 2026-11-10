@@ -28,6 +28,7 @@ async function fixture() {
  insert into mzs_capital_payments values('${id(11)}',299.5,false),('${id(12)}',103.25,false),('${id(12)}',100,true);`);
  await db.exec(migration);
  await db.exec(readFileSync('supabase/migrations/20261110205149_capital_reminder_envelope.sql','utf8'));
+ await db.exec(readFileSync('supabase/migrations/20261110214200_capital_reminder_attempt_history.sql','utf8'));
  await db.exec(`insert into mzs_capital_reminder_settings(deal_id,recipient_user_id,recipient_email,first_due_date,authorized_by)
  values('${id(10)}','${id(2)}','borrower@example.invalid',(now() at time zone 'Europe/Madrid')::date,'${id(1)}');`);
  return db;
@@ -108,5 +109,30 @@ test('Only service role can dispatch; client cannot read snapshots or opt in; ac
   await db.exec('reset role;set role service_role');
   assert.equal((await db.query(`select mzs_finish_capital_reminder('${id(13)}','uncertain') as ok`)).rows[0].ok,true);
   await assert.rejects(db.exec('delete from mzs_capital_reminder_deliveries'),/permission denied/);
+ }finally{await db.close();}
+});
+
+test('Operator retry preserves the full previous attempt; archive is admin read-only and clients cannot reset claims',async()=>{
+ const db=await fixture();try {
+  await enable(db);await db.query(`select mzs_claim_capital_reminder('${id(13)}')`);
+  await db.query(`select mzs_finish_capital_reminder('${id(13)}','uncertain','{"recipientAccepted":false,"copyAccepted":false}')`);
+  await db.exec(`with archived as (
+   insert into mzs_capital_reminder_attempt_history(instalment_id,previous_attempt,authorized_by,reason)
+   select instalment_id,to_jsonb(d),'${id(1)}','Explicit owner retry request' from mzs_capital_reminder_deliveries d where instalment_id='${id(13)}' and status='uncertain'
+   returning instalment_id
+  ) delete from mzs_capital_reminder_deliveries where instalment_id in (select instalment_id from archived);`);
+  assert.equal((await db.query('select previous_attempt from mzs_capital_reminder_attempt_history')).rows[0].previous_attempt.snapshot.amount,97.25);
+  assert.equal((await db.query('select mzs_due_capital_reminders()')).rows.length,1);
+  assert.equal((await db.query(`select mzs_claim_capital_reminder('${id(13)}') as s`)).rows[0].s.amount,97.25);
+  for(const role of ['anon','authenticated','service_role']){
+   await db.exec(`set role ${role};set test.uid='${id(2)}'`);
+   await assert.rejects(db.exec('delete from mzs_capital_reminder_attempt_history'),/permission denied/);
+   await assert.rejects(db.exec('delete from mzs_capital_reminder_deliveries'),/permission denied/);
+   if(role==='authenticated')assert.equal((await db.query('select * from mzs_capital_reminder_attempt_history')).rows.length,0);
+   else await assert.rejects(db.query('select * from mzs_capital_reminder_attempt_history'),/permission denied/);
+   await db.exec('reset role');
+  }
+  await db.exec(`set role authenticated;set test.uid='${id(1)}'`);
+  assert.equal((await db.query('select * from mzs_capital_reminder_attempt_history')).rows.length,1);
  }finally{await db.close();}
 });

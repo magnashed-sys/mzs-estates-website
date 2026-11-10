@@ -19,6 +19,12 @@ Set `MZS_CAPITAL_REMINDER_FROM` and `MZS_CAPITAL_REMINDER_COPY` to the separatel
 
 Pause using the environment flag or the individual settings `enabled=false`; retain the ledger. The settings table is intentionally empty after migration. Activation is a separate reviewed operation; no ChatGPT scheduled task is required.
 
+## Explicitly authorized retries
+
+An uncertain attempt never becomes retryable automatically. If the owner reports nonreceipt and explicitly requests a new attempt, a trusted operator may atomically copy the complete previous delivery row into `mzs_capital_reminder_attempt_history`, with authorizing administrator and reason, before removing that specific claim. Match the expected status and claim timestamp; never reset a sending or accepted attempt. Recheck the current balance and recipient, enable only that dossier, and dispatch the selected instalment once. This preserves the original evidence, including ambiguous outcomes; a retry can still duplicate an email already accepted without acknowledgement. Application roles cannot archive or reset claims. The current ledger and history are both private to administrators.
+
+Transport failures retain the stage, bounded SMTP error code/command, and a redacted SMTP response in the private delivery result. Raw error messages and credentials are never recorded. An explicit 4xx/5xx rejection is failed; a connection loss during sending remains uncertain. Neither is automatically retried.
+
 ## Preparation validation
 
 The additive migrations were applied to staging on 10 November 2026 (versions `20261110203307` and `20261110205149`). Settings and delivery ledger remain empty. Local executable PostgreSQL tests cover access isolation, authorization revocation, date windows, amount/credit allocation, settlement and claim deduplication. Mail transport tests use synthetic recipients and mock SMTP, including partial BCC acceptance and sender/copy validation. No real mail is sent from staging.
