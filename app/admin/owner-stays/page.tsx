@@ -6,6 +6,7 @@ import {grantPartner,adjustBookingPrice} from './actions';
 import OwnerStayDecision from './OwnerStayDecision';
 import OwnerStayCleanup from './OwnerStayCleanup';
 export const dynamic='force-dynamic';
+type OwnerStayRequest={id:string;partner_id:string;check_in:string;check_out:string;guest_count:number;status:string;notes:string|null;booking_id:string|null;rental_bookings:{status:string}|null};
 const money=(n:number|string|null, adminLocale = 'en-GB')=>n===null?'Not priced':new Intl.NumberFormat(adminLocale,{style:'currency',currency:'EUR'}).format(Number(n));
 export default async function PropertyPartnerManagement(){
  const {t:adminT,locale:adminLocale}=await getAdminI18n();
@@ -15,12 +16,15 @@ export default async function PropertyPartnerManagement(){
  db.from('profiles').select('id,full_name,email,role').in('role',['client','partner']).eq('is_active',true).order('full_name'),
  db.from('projects').select('id,title').order('title'),
  db.from('mzs_property_partners').select('id,profile_id,project_id,complimentary_owner_stays,is_active'),
- db.from('mzs_owner_stay_requests').select('id,partner_id,check_in,check_out,guest_count,status,notes,booking_id').order('created_at',{ascending:false}),
+ db.from('mzs_owner_stay_requests').select('id,partner_id,check_in,check_out,guest_count,status,notes,booking_id,rental_bookings(status)').order('created_at',{ascending:false}),
  db.rpc('admin_list_rental_bookings').in('status',['confirmed','requested']).eq('is_test',false).order('check_in',{ascending:false}).limit(200)
  ]);
  const sections={people:people.error?.message,projects:projects.error?.message,grants:grants.error?.message,requests:requests.error?.message,bookings:bookings.error?.message};
  const failures=Object.entries(sections).filter(([,message])=>!!message).map(([key])=>key);
  if(failures.length)console.error('Property partners: unavailable admin data sections',failures);
+ // Legacy cancellations can leave the request confirmed. Match the partner
+ // overview by displaying the linked reservation's cancellation, without writes.
+ const ownerRequests=((requests.data||[]) as unknown as OwnerStayRequest[]).map(r=>({...r,status:r.rental_bookings?.status==='cancelled'?'cancelled':r.status}));
 
  const names=new Map((people.data||[]).map(x=>[x.id,x.full_name||x.email]));
  const places=new Map((projects.data||[]).map(x=>[x.id,x.title]));
@@ -28,7 +32,7 @@ export default async function PropertyPartnerManagement(){
  // Exact calendar-overlap checks for each distinct pending owner-stay interval.
  // Reuse one query for duplicate submissions; never load private booking data
  // outside the existing administrator guard.
- const pending=(requests.data||[]).filter(r=>r.status==='requested');
+ const pending=ownerRequests.filter(r=>r.status==='requested');
  const intervals=new Map<string,{projectId:string;checkIn:string;checkOut:string}>();
  for(const request of pending){
   const grant=grantIndex.get(request.partner_id);
@@ -64,7 +68,7 @@ export default async function PropertyPartnerManagement(){
  <section style={section}><h2>{adminT("Owner-stay requests")}</h2>
  <p style={{color:'#5d7064'}}>{adminT("Every approval is checked against confirmed stays and unavailable periods. An overlapping request cannot create a second reservation.")}</p>
  {conflictError&&<p role='alert' style={{padding:14,border:'1px solid #dcb9af',background:'#fff1eb',color:'#8b443a',borderRadius:8}}>{adminT("Availability checks could not be completed. Approvals are temporarily disabled; refresh the page and verify the calendar before proceeding.")}</p>}
- {(requests.data||[]).length===0?<p>{adminT("No requests yet.")}</p>:(requests.data||[]).map(r=>{const g=grantIndex.get(r.partner_id);const check=g?conflictByInterval.get([g.project_id,r.check_in,r.check_out].join('|')):null;const conflict=check?.data?.[0];const blocked=Boolean(r.status==='requested'&&(!g||!check||check.error||conflictError||conflict));return <article id={'request-'+r.id} key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #dce3d9'}}>
+ {ownerRequests.length===0?<p>{adminT("No requests yet.")}</p>:ownerRequests.map(r=>{const g=grantIndex.get(r.partner_id);const check=g?conflictByInterval.get([g.project_id,r.check_in,r.check_out].join('|')):null;const conflict=check?.data?.[0];const blocked=Boolean(r.status==='requested'&&(!g||!check||check.error||conflictError||conflict));return <article id={'request-'+r.id} key={r.id} style={{padding:'16px 0',borderBottom:'1px solid #dce3d9'}}>
  <strong>{names.get(g?.profile_id||'')||adminT("Partner")} · {places.get(g?.project_id||'')||adminT("Property")}</strong>
  <p>{r.check_in} – {r.check_out} · {r.guest_count}  {adminT("guests ·")} {adminT(r.status.toUpperCase())}  {adminT("· €0 owner stay")}</p><p>{r.notes}</p>
  {r.booking_id&&<Link href={'/admin/bookings/'+r.booking_id} style={{color:'#28543f'}}>{adminT("Open reservation dossier →")}</Link>}
