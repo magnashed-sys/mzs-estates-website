@@ -14,6 +14,7 @@ function harness(locale,{active=true,authenticated=true,allowed=true,loadError=f
   if(name==='next-intl/server')return {getTranslations:async()=>createTranslator({locale,messages:messages.AccountUI})};
   if(name==='next/navigation')return {notFound:()=>{throw Error('404')},redirect:()=>{throw Error('login')}};
   if(name.endsWith('/capital-client-environment'))return {capitalClientEnvironmentAllowed:()=>allowed};
+  if(name.endsWith('/capital/client-summary'))return {buildClientCapitalSummaries:items=>items};
   if(name.endsWith('/server'))return {createClient:async()=>({auth:{getUser:async()=>({data:{user:authenticated?{id:'local-user'}:null}})},from:()=>({select(){return this},eq(){return this},single:async()=>({data:{is_active:active,role:'client'}})}),rpc:async()=>{reads++;return {data:[],error:loadError?{}:null}}})};
   if(name.endsWith('.css'))return {default:{}};
   if(name==='./SummaryCards')return {default:()=>null};

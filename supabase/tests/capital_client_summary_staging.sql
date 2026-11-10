@@ -16,7 +16,10 @@ begin
  r:=public.mzs_my_capital_summaries();
  select x into r from jsonb_array_elements(r) x where x->>'id'=g::text;
  if r is null or (r->>'total_interest_received')::numeric<>40 or (r->>'total_interest_paid')::numeric<>0 or jsonb_array_length(r->'interest_payments')<>1 then raise exception 'Interest projection failed';end if;
- if exists(select 1 from jsonb_object_keys(r) k where k not in ('id','label','party_role','principal','currency','start_date','end_date','total_interest_received','total_interest_paid','interest_payments')) then raise exception 'Unapproved field';end if;
+ if exists(select 1 from jsonb_object_keys(r) k where k not in ('summary_version','id','label','party_role','principal','currency','annual_rate','start_date','end_date','total_interest_received','total_interest_paid','interest_payments','interest_schedule')) then raise exception 'Unapproved field';end if;
+ if (r->>'summary_version')::int<>2 or jsonb_array_length(r->'interest_schedule')<>1 then raise exception 'Incomplete interest schedule';end if;
+ if exists(select 1 from jsonb_array_elements(r->'interest_schedule') x, lateral jsonb_object_keys(x) k where k not in ('id','due_date','amount')) then raise exception 'Unapproved schedule field';end if;
+ if exists(select 1 from jsonb_array_elements(r->'interest_payments') x, lateral jsonb_object_keys(x) k where k not in ('date','amount','instalment_id')) then raise exception 'Unapproved receipt field';end if;
  if r::text like '%PRIVATE%' or r::text like '%Secret%' then raise exception 'Sensitive fields exposed';end if;
  if exists(select 1 from public.mzs_capital_deals where id=d) or exists(select 1 from public.mzs_capital_payments where instalment_id=i) or exists(select 1 from public.mzs_capital_client_access where id=g) then raise exception 'Raw data exposed';end if;
  denied:=false;begin insert into public.mzs_capital_client_access(deal_id,user_id,party_role,display_label) values(d,stranger,'lender','Escalation');exception when insufficient_privilege then denied:=true;end;

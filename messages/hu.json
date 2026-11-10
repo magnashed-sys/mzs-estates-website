@@ -309,7 +309,22 @@
     "payment_date": "Fizetés dátuma",
     "amount": "Összeg",
     "no_payments": "Ebben a dossziéban még nincsenek megerősített kamatfizetések.",
-    "confirmed_note": "Csak a megerősített kamatok szerepelnek. Az ütemezett kamatok és tőketörlesztések nem tartoznak ide. A megerősítés hiánya nem jelenti azt, hogy egy fizetés késedelmes."
+    "confirmed_note": "Csak a megerősített kamatok szerepelnek. Az ütemezett kamatok és tőketörlesztések nem tartoznak ide. A megerősítés hiánya nem jelenti azt, hogy egy fizetés késedelmes.",
+    "schedule_title": "Kamatfizetési ütemezés",
+    "next_open": "Első nyitott részlet",
+    "remaining_scheduled": "Fennmaradó ütemezett kamat",
+    "planned_amount": "Tervezett",
+    "credit_applied": "Beszámított túlfizetés",
+    "remaining_amount": "Fennmaradó",
+    "settled": "Rendezve",
+    "credits_title": "Kamatjóváírások elszámolása",
+    "credit_transfer": "{from} dátumról {to} dátumra",
+    "credit_explanation": "A többletkamat először a korábbi nyitott összegeket, majd a következő részleteket fedezi. A beérkezett összeg egyszer kerül elszámolásra.",
+    "schedule_empty": "Még nincsenek rögzített kamatrészletek.",
+    "schedule_settled": "Minden rögzített részlet rendezve",
+    "unallocated_credit": "Még fel nem használt kamatjóváírás",
+    "schedule_note": "Az egyenlegek a rögzített fizetéseken és jóváírásokon alapulnak. A visszaigazolás hiánya nem jelenti a fizetés elmaradását.",
+    "past_due_unconfirmed": "A határidő lejárt; a fizetés nincs teljesen visszaigazolva"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Ez az előnézet még nincs az MZS tesztkörnyezetéhez kapcsolva. A profilszerkesztés le van tiltva.",

@@ -309,7 +309,22 @@
     "payment_date": "Betalingsdato",
     "amount": "Beløp",
     "no_payments": "Ingen rentebetalinger er bekreftet i dette dossieret ennå.",
-    "confirmed_note": "Bare bekreftede renter er inkludert. Planlagte renter og avdrag er ikke inkludert. En manglende bekreftelse betyr ikke at en betaling er forfalt."
+    "confirmed_note": "Bare bekreftede renter er inkludert. Planlagte renter og avdrag er ikke inkludert. En manglende bekreftelse betyr ikke at en betaling er forfalt.",
+    "schedule_title": "Renteterminer",
+    "next_open": "Første åpne termin",
+    "remaining_scheduled": "Gjenstående planlagte renter",
+    "planned_amount": "Planlagt",
+    "credit_applied": "Motregnet tilgodebeløp",
+    "remaining_amount": "Gjenstående",
+    "settled": "Oppgjort",
+    "credits_title": "Motregning av renter",
+    "credit_transfer": "Fra {from} til {to}",
+    "credit_explanation": "Ekstra renter dekker først tidligere åpne beløp, deretter kommende terminer. Betalingen telles én gang.",
+    "schedule_empty": "Ingen renteterminer er registrert ennå.",
+    "schedule_settled": "Alle registrerte terminer er oppgjort",
+    "unallocated_credit": "Rentetilgodebeløp uten motregning",
+    "schedule_note": "Saldoer bygger på registrerte betalinger og tilgodebeløp. Manglende bekreftelse betyr ikke at en betaling har uteblitt.",
+    "past_due_unconfirmed": "Forfallsdato passert; betaling ikke fullt bekreftet"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Denne forhåndsvisningen er ikke koblet til ennå MZS Profilredigering er slått av.",

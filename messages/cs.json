@@ -309,7 +309,22 @@
     "payment_date": "Datum platby",
     "amount": "Částka",
     "no_payments": "V tomto spisu zatím nebyly potvrzeny žádné platby úroků.",
-    "confirmed_note": "Zahrnuty jsou pouze potvrzené úroky. Plánované úroky a splátky jistiny jsou vyloučeny. Chybějící potvrzení neznamená, že je platba po splatnosti."
+    "confirmed_note": "Zahrnuty jsou pouze potvrzené úroky. Plánované úroky a splátky jistiny jsou vyloučeny. Chybějící potvrzení neznamená, že je platba po splatnosti.",
+    "schedule_title": "Splátky úroků",
+    "next_open": "První otevřená splátka",
+    "remaining_scheduled": "Zbývající plánované úroky",
+    "planned_amount": "Plánováno",
+    "credit_applied": "Započtený přeplatek",
+    "remaining_amount": "Zbývá",
+    "settled": "Vypořádáno",
+    "credits_title": "Započtení úrokových přeplatků",
+    "credit_transfer": "Z {from} na {to}",
+    "credit_explanation": "Dodatečné úroky nejprve pokryjí dřívější neuhrazené částky a poté budoucí splátky. Příjem se započítá pouze jednou.",
+    "schedule_empty": "Zatím nejsou evidovány žádné úrokové splátky.",
+    "schedule_settled": "Všechny evidované splátky jsou vypořádány",
+    "unallocated_credit": "Nezapočtený úrokový přeplatek",
+    "schedule_note": "Zůstatky vycházejí z evidovaných plateb a přeplatků. Chybějící potvrzení neznamená, že platba nebyla provedena.",
+    "past_due_unconfirmed": "Datum splatnosti uplynulo; platba není plně potvrzena"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Tento náhled zatím není propojen s MZS Staging. Úpravy profilu jsou zakázány.",

@@ -309,7 +309,22 @@
     "payment_date": "Betalningsdatum",
     "amount": "Ändamål",
     "no_payments": "Inga räntebetalningar har ännu bekräftats i detta ärende.",
-    "confirmed_note": "Endast bekräftad ränta ingår. Planerad ränta och amorteringar ingår inte. En saknad bekräftelse innebär inte att en betalning är försenad."
+    "confirmed_note": "Endast bekräftad ränta ingår. Planerad ränta och amorteringar ingår inte. En saknad bekräftelse innebär inte att en betalning är försenad.",
+    "schedule_title": "Ränteperioder",
+    "next_open": "Första öppna betalningen",
+    "remaining_scheduled": "Återstående planerad ränta",
+    "planned_amount": "Planerat",
+    "credit_applied": "Avräknat tillgodohavande",
+    "remaining_amount": "Återstående",
+    "settled": "Reglerad",
+    "credits_title": "Avräkning av ränta",
+    "credit_transfer": "Från {from} till {to}",
+    "credit_explanation": "Extra ränta täcker först tidigare öppna belopp och därefter kommande betalningar. Inbetalningen räknas en gång.",
+    "schedule_empty": "Inga räntebetalningar har planerats ännu.",
+    "schedule_settled": "Alla registrerade betalningsterminer är reglerade",
+    "unallocated_credit": "Ej avräknat räntetillgodohavande",
+    "schedule_note": "Saldon bygger på registrerade betalningar och tillgodohavanden. En saknad bekräftelse betyder inte att en betalning har uteblivit.",
+    "past_due_unconfirmed": "Förfallodatum passerat; betalning inte helt bekräftad"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "Denna förhandsversion är ännu inte ansluten till MZS Staging. Profilredigering är avstängd.",

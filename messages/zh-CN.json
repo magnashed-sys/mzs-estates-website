@@ -309,7 +309,22 @@
     "payment_date": "付款日期",
     "amount": "数额数额",
     "no_payments": "此档案中尚无已确认的利息支付。",
-    "confirmed_note": "仅计入已确认的利息，不包括计划支付的利息或本金偿还。缺少确认并不表示付款逾期。"
+    "confirmed_note": "仅计入已确认的利息，不包括计划支付的利息或本金偿还。缺少确认并不表示付款逾期。",
+    "schedule_title": "利息还款计划",
+    "next_open": "首笔未结清款项",
+    "remaining_scheduled": "剩余计划利息",
+    "planned_amount": "计划金额",
+    "credit_applied": "已抵扣金额",
+    "remaining_amount": "剩余金额",
+    "settled": "已结清",
+    "credits_title": "利息抵扣明细",
+    "credit_transfer": "从 {from} 转至 {to}",
+    "credit_explanation": "多付的利息先抵扣此前未结清的金额，再抵扣后续款项。实际收款仅计算一次。",
+    "schedule_empty": "尚未记录利息付款计划。",
+    "schedule_settled": "所有已记录的款项均已结清",
+    "unallocated_credit": "尚未分配的利息余额",
+    "schedule_note": "余额根据已登记的付款和抵扣计算。缺少确认并不表示款项未支付。",
+    "past_due_unconfirmed": "到期日已过；付款尚未完全确认"
   },
   "MemberUI": {
     "thisPreviewIsNotYetLinkedToMzs": "此预览尚未连接到 MZS 测试环境，个人资料编辑已禁用。",
