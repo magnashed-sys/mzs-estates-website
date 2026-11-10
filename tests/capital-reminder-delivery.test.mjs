@@ -4,18 +4,18 @@ function load(file,deps={},globals={}){const exports={};vm.runInNewContext(ts.tr
 const message=load('lib/capital/payment-reminder.ts');
 const sample={instalment_id:'synthetic',deal_id:'loan',due_date:'2026-11-15',recipient_email:'borrower@example.invalid',recipient_name:'Borrower',lender:'Lender',title:'Synthetic agreement',amount:97.25,credit:2.75,locale:'en'};
 function harness(options={}){
- const sent=[];let claimed=false;let outcome;let claims=0;
+ const sent=[];let claimed=false;let outcome;let diagnostic;let claims=0;
  const db={rpc:async(name,args)=>{
   if(name==='mzs_due_capital_reminders')return {data:['synthetic']};
   if(name==='mzs_claim_capital_reminder'){claims++;if(claimed)return {data:null};claimed=true;return {data:sample};}
   if(name==='mzs_capital_reminder_snapshot')return {data:options.cancel?null:options.changed?{...sample,amount:47.25}:sample,error:options.readError?{}:null};
-  if(name==='mzs_finish_capital_reminder'){outcome=args.p_status;return {data:!options.saveError,error:options.saveError?{}:null};}
+  if(name==='mzs_finish_capital_reminder'){outcome=args.p_status;diagnostic=args.p_delivery_result.diagnostic;return {data:!options.saveError,error:options.saveError?{}:null};}
   throw Error(name);
  }};
- const nodemailer={createTransport:()=>({verify:async()=>{if(options.verifyError)throw Error('SMTP configuration');},sendMail:async m=>{sent.push(m);if(options.smtp==='unknown')throw Error('socket');return {accepted:options.smtp==='rejected'?[]:options.smtp==='partial'?[sample.recipient_email]:[sample.recipient_email,'owner@example.invalid']};},close(){}})};
+ const nodemailer={createTransport:()=>({verify:async()=>{if(options.verifyError)throw Error('SMTP configuration');},sendMail:async m=>{sent.push(m);if(options.smtpError)throw options.smtpError;if(options.smtp==='unknown')throw Error('socket');return {accepted:options.smtp==='rejected'?[]:options.smtp==='partial'?[sample.recipient_email]:[sample.recipient_email,'owner@example.invalid']};},close(){}})};
  const env={VERCEL_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:'https://ptrnjzmcehrhbsfxntgw.supabase.co',MZS_CAPITAL_REMINDERS_ENABLED:'true',MZS_CAPITAL_DEALS_ENABLED:'true',MZS_CAPITAL_REMINDER_FROM:'info@example.invalid',MZS_CAPITAL_REMINDER_COPY:'owner@example.invalid',SUPABASE_SERVICE_ROLE_KEY:'synthetic',SMTP_HOST:'example.invalid',SMTP_USER:'smtp@example.invalid',SMTP_PASSWORD:'synthetic',...options.env};
- const worker=load('lib/capital/payment-reminder-delivery.ts',{'@supabase/supabase-js':{createClient:()=>db},nodemailer,'./payment-reminder':message},{process:{env}});
- return {run:worker.deliverCapitalReminders,sent,get outcome(){return outcome},get claims(){return claims}};
+ const worker=load('lib/capital/payment-reminder-delivery.ts',{'@supabase/supabase-js':{createClient:()=>db},nodemailer,'./payment-reminder':message},{process:{env},console:{error(){}}});
+ return {run:worker.deliverCapitalReminders,sent,get outcome(){return outcome},get diagnostic(){return diagnostic},get claims(){return claims}};
 }
 test('Friendly copy contains net balance, credit and no arrears claim; HTML escapes user fields',()=>{
  const copy=message.capitalReminderMessage(sample);assert.match(copy.text,/€97.25/);assert.match(copy.text,/€2.75/);assert.match(copy.text,/15 November 2026/);assert.match(copy.text,/already made the payment/);assert.doesNotMatch(copy.text,/overdue|penalty/i);
@@ -33,7 +33,12 @@ test('Preparation defaults off; preview, local, wrong DB and disabled Capital ne
  }
 });
 test('Payment, opt-out or recipient changes cancel before SMTP; failed snapshot read fails closed',async()=>{
- for(const options of [{cancel:true},{changed:true},{readError:true}]){const h=harness(options);await h.run();assert.equal(h.sent.length,0);assert.equal(h.outcome,options.readError?'uncertain':'cancelled');}
+ for(const options of [{cancel:true},{changed:true},{readError:true}]){const h=harness(options);await h.run();assert.equal(h.sent.length,0);assert.equal(h.outcome,options.readError?'failed':'cancelled');}
+});
+test('Explicit SMTP rejection is failed with a redacted diagnostic; socket ambiguity stays uncertain and never retries',async()=>{
+ const h=harness({smtpError:{code:'EENVELOPE',command:'MAIL FROM',responseCode:550,response:'550 Sender sender@example.invalid not permitted',message:'password=secret'}});
+ await h.run();assert.equal(h.outcome,'failed');assert.equal(h.diagnostic.stage,'smtp');assert.equal(h.diagnostic.responseCode,550);assert.match(h.diagnostic.response,/\[mailbox\]/);assert.doesNotMatch(JSON.stringify(h.diagnostic),/secret|sender@example/);await h.run();assert.equal(h.sent.length,1);
+ const socket=harness({smtpError:{code:'ESOCKET',command:'DATA',message:'credentials'}});await socket.run();assert.equal(socket.outcome,'uncertain');assert.equal(socket.diagnostic.response,null);
 });
 test('Uncertain SMTP or DB acknowledgement never auto-retries; rejection never reported accepted',async()=>{
  for(const options of [{smtp:'unknown'},{smtp:'rejected'},{smtp:'partial'},{saveError:true}]){const h=harness(options);assert.equal((await h.run()).status,'requires_review');await h.run();assert.equal(h.sent.length,1);if(options.smtp==='partial')assert.equal(h.outcome,'uncertain');}
