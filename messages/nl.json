@@ -209,7 +209,9 @@
     "verify": "Je account kon niet worden gecontroleerd. Neem contact op met MZS Group.",
     "inactive": "Je account is momenteel niet actief. Neem contact op met MZS Group.",
     "role": "Je account heeft geen geldige toegangsrol.",
-    "failed": "Inloggen is momenteel niet mogelijk. Probeer het opnieuw."
+    "failed": "Inloggen is momenteel niet mogelijk. Probeer het opnieuw.",
+    "show_password": "Wachtwoord tonen",
+    "hide_password": "Wachtwoord verbergen"
   },
   "Private": {
     "marinaApartmentTitle": "Appartement met 2–3 slaapkamers op Ibiza Spanje",

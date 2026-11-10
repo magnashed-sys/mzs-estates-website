@@ -209,7 +209,9 @@
     "verify": "无法校验您的账户。 请联系 MZS Group.",
     "inactive": "您的账户目前尚未激活，请联系 MZS Group。",
     "role": "您的账户没有有效的访问功能 。",
-    "failed": "无法在此时签名。 请重试 。"
+    "failed": "无法在此时签名。 请重试 。",
+    "show_password": "显示密码",
+    "hide_password": "隐藏密码"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 西班牙伊比萨的卧室公寓",

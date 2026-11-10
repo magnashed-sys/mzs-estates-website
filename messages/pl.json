@@ -209,7 +209,9 @@
     "verify": "Nie można zweryfikować konta. Proszę o kontakt MZS Group.",
     "inactive": "Twoje konto jest obecnie nieaktywne. Skontaktuj się z MZS Group.",
     "role": "Twoje konto nie ma poprawnej roli w dostępie.",
-    "failed": "Nie można zalogować się w tej chwili. Proszę spróbować ponownie."
+    "failed": "Nie można zalogować się w tej chwili. Proszę spróbować ponownie.",
+    "show_password": "Pokaż hasło",
+    "hide_password": "Ukryj hasło"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 Sypialnia Apartament w Ibiza Hiszpania",

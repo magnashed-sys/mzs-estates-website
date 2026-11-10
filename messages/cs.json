@@ -209,7 +209,9 @@
     "verify": "Váš účet se nepodařilo ověřit. Kontaktujte MZS Group.",
     "inactive": "Váš účet je momentálně neaktivní. Kontaktujte MZS Group.",
     "role": "Váš účet nemá platnou přístupovou roli.",
-    "failed": "Momentálně se nelze přihlásit. Zkuste to znovu."
+    "failed": "Momentálně se nelze přihlásit. Zkuste to znovu.",
+    "show_password": "Zobrazit heslo",
+    "hide_password": "Skrýt heslo"
   },
   "Private": {
     "marinaApartmentTitle": "Apartmán se 2–3 ložnicemi na Ibize ve Španělsku",

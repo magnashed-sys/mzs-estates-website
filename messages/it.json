@@ -45,7 +45,9 @@
     "verify": "Impossibile verificare il tuo account. Contatta MZS Group.",
     "inactive": "Il tuo account è attualmente inattivo. Contatta MZS Group.",
     "role": "Il tuo account non dispone di un ruolo di accesso valido.",
-    "failed": "Al momento non è possibile accedere. Riprova."
+    "failed": "Al momento non è possibile accedere. Riprova.",
+    "show_password": "Mostra password",
+    "hide_password": "Nascondi password"
   },
   "Metadata": {
     "homeTitle": "Consulenza, immobili e capitale privato | MZS Group",

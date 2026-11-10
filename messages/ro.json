@@ -209,7 +209,9 @@
     "verify": "Imposibil de verificat contul. Vă rugăm să contactați MZS Group.",
     "inactive": "Contul dumneavoastră este momentan inactiv. Contactați MZS Group.",
     "role": "Contul dvs. nu are un rol de acces valid.",
-    "failed": "Nu pot semna în acest moment. Vă rugăm să încercaţi din nou."
+    "failed": "Nu pot semna în acest moment. Vă rugăm să încercaţi din nou.",
+    "show_password": "Afișează parola",
+    "hide_password": "Ascunde parola"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 Apartament de dormitor în Ibiza Spania",

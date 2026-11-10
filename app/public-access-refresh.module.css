@@ -270,3 +270,11 @@
 .page .loginActions :global(button[type="submit"]) {flex:1 1 180px;width:auto;margin:0;}
 .requestAccessButton {display:inline-flex;flex:1 1 180px;align-items:center;justify-content:center;min-height:50px;padding:14px 20px;border:1px solid #d5c09a;border-radius:4px;background:transparent;color:#d5c09a;font:500 14px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;text-align:center;text-decoration:none;}
 .requestAccessButton:hover {background:rgba(213,192,154,.12);color:#f1e1c5;}
+
+/* Keep the visibility control inside the field, also in right-to-left locales. */
+.passwordControl {position:relative;margin-top:10px;}
+.page .passwordControl input {margin-top:0;padding-inline-end:54px;}
+.page .passwordControl .passwordToggle {position:absolute;inset-inline-end:4px;top:4px;bottom:4px;display:flex;align-items:center;justify-content:center;width:44px;min-height:44px;margin:0;padding:0;border:0;border-radius:3px;background:transparent;color:#d5c09a;cursor:pointer;}
+.page .passwordControl .passwordToggle:hover {background:rgba(213,192,154,.12);color:#f1e1c5;}
+.page .passwordControl .passwordToggle:focus-visible {outline:2px solid #d5c09a;outline-offset:-2px;}
+.page .passwordControl .passwordToggle:disabled {cursor:default;opacity:.55;}

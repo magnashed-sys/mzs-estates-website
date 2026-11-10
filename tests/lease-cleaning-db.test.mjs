@@ -9,6 +9,8 @@ test('monthly cleaning: cron, rounding, carry-forward, review, immutable issue a
  const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
  const actor=async id=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${id}',false)`);
  try{
+ // Fixture dates must use the billing timezone, including after local midnight.
+ await db.exec("set time zone 'Europe/Amsterdam'");
  await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;grant usage on schema auth to authenticated;
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
  create table profiles(id uuid primary key,role text,is_active boolean,email text);

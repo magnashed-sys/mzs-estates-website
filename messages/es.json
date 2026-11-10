@@ -209,7 +209,9 @@
     "verify": "No hemos podido verificar tu cuenta. Contacta con MZS Group.",
     "inactive": "Tu cuenta está inactiva. Contacta con MZS Group.",
     "role": "Tu cuenta no tiene un rol de acceso válido.",
-    "failed": "No se puede iniciar sesión en este momento. Inténtalo de nuevo."
+    "failed": "No se puede iniciar sesión en este momento. Inténtalo de nuevo.",
+    "show_password": "Mostrar contraseña",
+    "hide_password": "Ocultar contraseña"
   },
   "Private": {
     "marinaApartmentTitle": "Apartamento de 2–3 dormitorios en Ibiza España",

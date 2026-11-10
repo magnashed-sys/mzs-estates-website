@@ -19,6 +19,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +28,7 @@ export default function LoginPage() {
     if (loading) return;
 
     setError("");
+    setPasswordVisible(false);
     setLoading(true);
 
     const supabase = createClient();
@@ -196,18 +198,38 @@ export default function LoginPage() {
             />
           </label>
 
-          <label>
-            {t("password")}
-            <input
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              disabled={loading}
-            />
-          </label>
+          <div>
+            <label htmlFor="login-password">{t("password")}</label>
+            <div className={styles.passwordControl}>
+              <input
+                id="login-password"
+                type={passwordVisible ? "text" : "password"}
+                name="password"
+                autoComplete="current-password"
+                autoCapitalize="none"
+                spellCheck={false}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                aria-label={t(passwordVisible ? "hide_password" : "show_password")}
+                title={t(passwordVisible ? "hide_password" : "show_password")}
+                aria-controls="login-password"
+                onClick={() => setPasswordVisible(visible => !visible)}
+                disabled={loading}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                  {passwordVisible && <path d="m3 3 18 18" />}
+                </svg>
+              </button>
+            </div>
+          </div>
 
           <div className={recoveryStyles.forgotLinkRow}>
             <a

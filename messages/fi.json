@@ -209,7 +209,9 @@
     "verify": "Tiliäsi ei voitu vahvistaa. Ota yhteyttä MZS Groupiin.",
     "inactive": "Tilisi ei ole tällä hetkellä aktiivinen. Ota yhteyttä MZS Groupiin.",
     "role": "Tililläsi ei ole kelvollista käyttöroolia.",
-    "failed": "Kirjautuminen ei onnistu juuri nyt. Yritä uudelleen."
+    "failed": "Kirjautuminen ei onnistu juuri nyt. Yritä uudelleen.",
+    "show_password": "Näytä salasana",
+    "hide_password": "Piilota salasana"
   },
   "Private": {
     "marinaApartmentTitle": "2–3 makuuhuoneen huoneisto Ibizalla, Espanjassa",

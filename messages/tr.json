@@ -209,7 +209,9 @@
     "verify": "Hesabınız doğrulanamadı. Lütfen MZS Group ile iletişime geçin.",
     "inactive": "Hesabınız şu anda etkin değil. Lütfen MZS Group ile iletişime geçin.",
     "role": "Hesabınızın geçerli bir erişim rolü bulunmuyor.",
-    "failed": "Şu anda giriş yapılamıyor. Lütfen tekrar deneyin."
+    "failed": "Şu anda giriş yapılamıyor. Lütfen tekrar deneyin.",
+    "show_password": "Şifreyi göster",
+    "hide_password": "Şifreyi gizle"
   },
   "Private": {
     "marinaApartmentTitle": "İbiza, İspanya'da 2–3 Yatak Odalı Daire",
