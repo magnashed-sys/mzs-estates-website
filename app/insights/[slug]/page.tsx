@@ -10,6 +10,7 @@ import IntroCallForm from '../../private-capital/IntroCallForm';
 import {getInsight,translations,relatedInsights} from '../../../lib/insights/data';
 import {insightPath,INSIGHTS_DISCOVERABLE,safeSource} from '../../../lib/insights/model';
 import {insightsCopy} from '../../../lib/insights/copy';
+import {florawegCopy} from '../../../lib/insights/floraweg';
 import Content from '../Content';
 import Cover from '../Cover';
 import Share from '../Share';
@@ -32,8 +33,9 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
 export default async function ArticlePage({params}:Props){
  const [locale,t,{slug}]=await Promise.all([getLocale(),getTranslations('Header'),params]);
  const a=await getInsight(locale,slug);if(!a) notFound();
- const isFloraweg=locale==='nl'&&a.slug==='samen-bouwen-aan-de-toekomst-van-de-floraweg';
- const imageBreak=isFloraweg?a.body.indexOf('## Samenwerking maakt het verschil'):-1;
+ const isFloraweg=a.cover_image==='/images/insights/floraweg-ondertekening.webp';
+ const imageBreak=isFloraweg?(Array.from(a.body.matchAll(/^## /gm))[1]?.index??-1):-1;
+ const photoCopy=florawegCopy(locale);
  const [variants,related]=await Promise.all([translations(a.article_id),relatedInsights(a)]),c=insightsCopy(locale);
  const labels={'real-estate':t('real_estate'),'private-capital':t('private_capital'),consultancy:t('consultancy')};
  const languageLinks=Object.fromEntries(locales.flatMap(l=>variants.filter(v=>v.locale===l).map(v=>[v.locale,insightPath(v.locale,v.slug)])));
@@ -44,11 +46,11 @@ export default async function ArticlePage({params}:Props){
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p>{!isFloraweg&&<p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p>}</header>
-   <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
+   <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?photoCopy.caption:undefined}/>
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
-    <Image src="/images/case-studies/amsterdam-85-units.webp" alt="Architectuurimpressie van de woontoren met 85 woningen aan de Floraweg in Amsterdam-Noord." width={1400} height={876} sizes="(max-width: 850px) 90vw, 780px" style={{display:'block',width:'100%',height:'auto',borderRadius:5}}/>
-    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO Architecten in opdracht van MZS Vastgoed.</figcaption>
+    <Image src="/images/case-studies/amsterdam-85-units.webp" alt={photoCopy.renderCaption} width={1400} height={876} sizes="(max-width: 850px) 90vw, 780px" style={{display:'block',width:'100%',height:'auto',borderRadius:5}}/>
+    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>{photoCopy.renderCaption}</figcaption>
    </figure>}
    {imageBreak>=0&&<div className={s.prose}><Content body={a.body.slice(imageBreak)}/></div>}
    <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
