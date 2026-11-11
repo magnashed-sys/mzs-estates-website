@@ -12,6 +12,8 @@ import {insightPath,INSIGHTS_DISCOVERABLE,safeSource} from '../../../lib/insight
 import {insightsCopy} from '../../../lib/insights/copy';
 import Content from '../Content';
 import Cover from '../Cover';
+import Share from '../Share';
+import {shareLabels} from '../../../lib/insights/share';
 import {insightImage} from '../../../lib/insights/images';
 import Cards from '../Cards';
 import s from '../insights.module.css';
@@ -42,6 +44,7 @@ export default async function ArticlePage({params}:Props){
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
+   <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
    <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
