@@ -37,19 +37,6 @@ export default async function AboutPage() {
           <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
       </figure>
-      <section className={styles.articleFeature} aria-labelledby="floraweg-article-title">
-        <Link className={styles.articleCard} href={florawegArticle.href} prefetch={false} aria-labelledby="floraweg-article-title floraweg-article-action">
-          <div className={styles.articleMedia}>
-            <Image src="/images/insights/floraweg-ondertekening.webp" alt={florawegCopy(locale).caption} width={1320} height={557} sizes="(max-width: 760px) 86vw, 43vw" className={styles.articleImage} />
-          </div>
-          <div className={styles.articleContent}>
-            <p className={styles.eyebrow}>MZS INSIGHTS <span aria-hidden="true">/</span> FLORAWEG · AMSTERDAM</p>
-            <h2 id="floraweg-article-title">{florawegArticle.title}</h2>
-            <p className={styles.articleSummary}>{florawegArticle.summary}</p>
-            <span className={styles.articleAction} id="floraweg-article-action">{florawegArticle.readArticle}<span className={styles.articleArrow} aria-hidden="true"><ArrowUpRightIcon /></span></span>
-          </div>
-        </Link>
-      </section>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
         <div className={styles.activityGrid}>
@@ -84,7 +71,20 @@ export default async function AboutPage() {
           <a className={styles.workAction} href="#introductory-call">{work.careerAction} <ArrowUpRightIcon /></a>
         </article>
       </section>
-      <CaseStudies />
+      <CaseStudies projectIds={['ijmuiden-transformatie', 'ibiza-20-units', 'alicante-beheer-exploitatie']} />
+      <section className={styles.articleFeature} aria-labelledby="floraweg-article-title">
+        <Link className={styles.articleCard} href={florawegArticle.href} prefetch={false} aria-labelledby="floraweg-article-title floraweg-article-action">
+          <div className={styles.articleMedia}>
+            <Image src="/images/insights/floraweg-ondertekening.webp" alt={florawegCopy(locale).caption} width={1320} height={557} sizes="(max-width: 760px) 86vw, 43vw" className={styles.articleImage} />
+          </div>
+          <div className={styles.articleContent}>
+            <p className={styles.eyebrow}>MZS INSIGHTS <span aria-hidden="true">/</span> FLORAWEG · AMSTERDAM</p>
+            <h2 id="floraweg-article-title">{florawegArticle.title}</h2>
+            <p className={styles.articleSummary}>{florawegArticle.summary}</p>
+            <span className={styles.articleAction} id="floraweg-article-action">{florawegArticle.readArticle}<span className={styles.articleArrow} aria-hidden="true"><ArrowUpRightIcon /></span></span>
+          </div>
+        </Link>
+      </section>
       <IntroCallForm introduction="" source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>
