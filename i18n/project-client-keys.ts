@@ -1,6 +1,9 @@
 // Only client-component copy is serialized. Server-only project and loan narratives
 // remain behind the project/offering checks in the page. Keep in sync with client components.
 export const projectClientKeys = [
+  "floraFloor",
+  "floraRoof",
+  "floraSection",
   "investmentKind",
   "acquisitionKind",
   "blockedDate",
