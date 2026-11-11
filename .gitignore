@@ -6,3 +6,7 @@ node_modules/
 supabase/.temp/
 *.tsbuildinfo
 next-env.d.ts
+
+# Private Floraweg image originals must never be published with source.
+/public/properties/amsterdam-floraweg/do-2026/
+/.private-assets/
