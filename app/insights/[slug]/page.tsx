@@ -43,12 +43,12 @@ export default async function ArticlePage({params}:Props){
  return <main className={s.page}><div className={s.header}><PublicHeader languageLinks={languageLinks}/></div><div className={s.wrap}>
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
-   <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
+   <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p>{!isFloraweg&&<p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p>}</header>
    <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
     <Image src="/images/case-studies/amsterdam-85-units.webp" alt="Architectuurimpressie van de woontoren met 85 woningen aan de Floraweg in Amsterdam-Noord." width={1400} height={876} sizes="(max-width: 850px) 90vw, 780px" style={{display:'block',width:'100%',height:'auto',borderRadius:5}}/>
-    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO in opdracht van MZS Vastgoed.</figcaption>
+    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO Architecten in opdracht van MZS Vastgoed.</figcaption>
    </figure>}
    {imageBreak>=0&&<div className={s.prose}><Content body={a.body.slice(imageBreak)}/></div>}
    <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
