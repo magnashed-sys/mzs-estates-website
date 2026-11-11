@@ -1,4 +1,6 @@
 import {getWorkCopy} from './work-copy';
+import {aboutFlorawegArticle} from './floraweg-article';
+import {florawegCopy} from '../../lib/insights/floraweg';
 import IntroCallForm from '../private-capital/IntroCallForm';
 import CaseStudies from '../consultancy/CaseStudies';
 import Image from 'next/image';
@@ -16,6 +18,7 @@ export const generateMetadata = () => publicMetadata('about', '/about');
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
   const work = getWorkCopy(locale);
+  const florawegArticle = aboutFlorawegArticle(locale);
   const activities = [
     {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
     {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
@@ -34,6 +37,19 @@ export default async function AboutPage() {
           <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
       </figure>
+      <section className={styles.articleFeature} aria-labelledby="floraweg-article-title">
+        <Link className={styles.articleCard} href={florawegArticle.href} prefetch={false} aria-labelledby="floraweg-article-title floraweg-article-action">
+          <div className={styles.articleMedia}>
+            <Image src="/images/insights/floraweg-ondertekening.webp" alt={florawegCopy(locale).caption} width={1320} height={557} sizes="(max-width: 760px) 86vw, 43vw" className={styles.articleImage} />
+          </div>
+          <div className={styles.articleContent}>
+            <p className={styles.eyebrow}>MZS INSIGHTS <span aria-hidden="true">/</span> FLORAWEG · AMSTERDAM</p>
+            <h2 id="floraweg-article-title">{florawegArticle.title}</h2>
+            <p className={styles.articleSummary}>{florawegArticle.summary}</p>
+            <span className={styles.articleAction} id="floraweg-article-action">{florawegArticle.readArticle}<span className={styles.articleArrow} aria-hidden="true"><ArrowUpRightIcon /></span></span>
+          </div>
+        </Link>
+      </section>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
         <div className={styles.activityGrid}>
