@@ -43,7 +43,7 @@ export default async function ArticlePage({params}:Props){
  return <main className={s.page}><div className={s.header}><PublicHeader languageLinks={languageLinks}/></div><div className={s.wrap}>
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
-   <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
+   <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p>{!isFloraweg&&<p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p>}</header>
    <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
