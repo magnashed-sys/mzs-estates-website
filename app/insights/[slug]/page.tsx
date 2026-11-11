@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import {notFound} from 'next/navigation';
 import {getLocale,getTranslations} from 'next-intl/server';
 import {locales,localizedPath} from '../../../i18n/public-routing';
@@ -29,6 +30,8 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
 export default async function ArticlePage({params}:Props){
  const [locale,t,{slug}]=await Promise.all([getLocale(),getTranslations('Header'),params]);
  const a=await getInsight(locale,slug);if(!a) notFound();
+ const isFloraweg=locale==='nl'&&a.slug==='samen-bouwen-aan-de-toekomst-van-de-floraweg';
+ const imageBreak=isFloraweg?a.body.indexOf('## Samenwerking maakt het verschil'):-1;
  const [variants,related]=await Promise.all([translations(a.article_id),relatedInsights(a)]),c=insightsCopy(locale);
  const labels={'real-estate':t('real_estate'),'private-capital':t('private_capital'),consultancy:t('consultancy')};
  const languageLinks=Object.fromEntries(locales.flatMap(l=>variants.filter(v=>v.locale===l).map(v=>[v.locale,insightPath(v.locale,v.slug)])));
@@ -39,13 +42,18 @@ export default async function ArticlePage({params}:Props){
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
-   <Cover src={a.cover_image} alt={a.cover_alt} priority/>
-   <div className={s.prose}><Content body={a.body}/></div>
+   <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
+   <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
+   {isFloraweg&&<figure style={{margin:'36px 0'}}>
+    <Image src="/images/case-studies/amsterdam-85-units.webp" alt="Architectuurimpressie van de woontoren met 85 woningen aan de Floraweg in Amsterdam-Noord." width={1400} height={876} sizes="(max-width: 850px) 90vw, 780px" style={{display:'block',width:'100%',height:'auto',borderRadius:5}}/>
+    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO in opdracht van MZS Vastgoed.</figcaption>
+   </figure>}
+   {imageBreak>=0&&<div className={s.prose}><Content body={a.body.slice(imageBreak)}/></div>}
    {!!a.sources.length&&<section className={s.sources}><h2>{c.sources}</h2><ul>{a.sources.filter(u=>safeSource(u)).map(u=><li key={u}><a href={u} rel="noopener noreferrer" target="_blank">{u}</a></li>)}</ul></section>}
-   <div className={s.cta}><Link href={localizedPath('/'+a.category,locale)}>{labels[a.category]} ↗</Link><a href="#introductory-call">{c.contact} ↗</a></div>
+   {!isFloraweg&&<div className={s.cta}><Link href={localizedPath('/'+a.category,locale)}>{labels[a.category]} ↗</Link><a href="#introductory-call">{c.contact} ↗</a></div>}
   </article>
-  {!!related.length&&<section className={s.related}><h2>{c.related}</h2><Cards items={related} labels={labels}/></section>}
- </div><div className={s.contact}><IntroCallForm source={a.category} preview={process.env.VERCEL_ENV==='preview'} sectionNumber="" introduction={c.contact}/></div><div className={s.footer}><HomeContactFooter/></div>
+  {!isFloraweg&&!!related.length&&<section className={s.related}><h2>{c.related}</h2><Cards items={related} labels={labels}/></section>}
+ </div>{!isFloraweg&&<div className={s.contact}><IntroCallForm source={a.category} preview={process.env.VERCEL_ENV==='preview'} sectionNumber="" introduction={c.contact}/></div>}<div className={s.footer}><HomeContactFooter/></div>
  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  </main>;
 }
