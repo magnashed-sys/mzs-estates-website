@@ -20,7 +20,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
  const locale=await getLocale(),{slug}=await params,a=await getInsight(locale,slug);
  if(!a) return {title:'MZS Insights',robots:{index:false,follow:false},alternates:{canonical:insightPath(locale)}};
  const variants=await translations(a.article_id),title=a.seo_title||a.title,description=a.seo_description||a.summary,url=insightPath(locale,a.slug);
- const cover=insightImage(a.cover_image),images=cover?[{url:'https://www.mzsgroup.com'+cover.src,width:1672,height:941,alt:a.cover_alt}]:undefined;
+ const cover=insightImage(a.cover_image),images=cover?[{url:'https://www.mzsgroup.com'+cover.src,width:cover.width,height:cover.height,alt:a.cover_alt}]:undefined;
  return {title,description,alternates:{canonical:url,languages:Object.fromEntries(variants.map(v=>[v.locale,insightPath(v.locale,v.slug)]))},
   robots:{index:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production',follow:INSIGHTS_DISCOVERABLE&&process.env.VERCEL_ENV==='production'},
   openGraph:{type:'article',title,description,url,publishedTime:a.publish_at!,modifiedTime:a.content_updated_on,authors:[a.author],locale,...(images?{images}:{})},
