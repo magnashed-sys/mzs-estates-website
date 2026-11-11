@@ -25,6 +25,10 @@
     {
       "path": "/api/weekly-hours-report",
       "schedule": "0 5,6 * * 1"
+    },
+    {
+      "path": "/api/owner-reports/dispatch",
+      "schedule": "*/10 * * * *"
     }
   ]
 }
