@@ -48,7 +48,7 @@ export default async function ArticlePage({params}:Props){
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
     <Image src="/images/case-studies/amsterdam-85-units.webp" alt="Architectuurimpressie van de woontoren met 85 woningen aan de Floraweg in Amsterdam-Noord." width={1400} height={876} sizes="(max-width: 850px) 90vw, 780px" style={{display:'block',width:'100%',height:'auto',borderRadius:5}}/>
-    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO in opdracht van MZS Vastgoed.</figcaption>
+    <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO Architecten in opdracht van MZS Vastgoed.</figcaption>
    </figure>}
    {imageBreak>=0&&<div className={s.prose}><Content body={a.body.slice(imageBreak)}/></div>}
    <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
