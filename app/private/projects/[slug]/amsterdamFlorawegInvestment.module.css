@@ -37,3 +37,11 @@
 .project{overflow-wrap:anywhere}
 .cards article{min-width:0}
 .cards article>*{max-width:100%}
+
+/* A growing chronological collection of achieved project milestones. */
+.milestones{display:grid;gap:36px}
+.milestone{margin:0;border:1px solid var(--edge);background:#15130f;overflow:hidden}
+.milestoneImage{display:block;width:100%;height:auto}
+.milestone figcaption{padding:22px clamp(18px,3vw,32px)}
+.milestone time{display:block;color:var(--gold);font-size:12px;line-height:1.6}
+.milestone figcaption p{margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.8}

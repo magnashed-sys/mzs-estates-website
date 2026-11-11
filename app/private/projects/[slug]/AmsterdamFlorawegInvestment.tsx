@@ -6,12 +6,15 @@ import {useTranslations, useLocale} from "next-intl";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import {florawegMilestones} from "../../../../lib/projects/floraweg-milestones";
 import styles from "./amsterdamFlorawegInvestment.module.css";
 
 type Props = { allowInvestment: boolean; allowAcquisition: boolean };
 export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquisition}:Props) {
   const t = useTranslations("ProjectUI");
-  const rtl = useLocale() === "ar";
+  const locale = useLocale();
+  const rtl = locale === "ar";
+  const milestones = florawegMilestones(locale);
   const base = "/properties/amsterdam-floraweg";
   const visuals = [
     {file:"hero-park-view.webp",label:t("p000")},
@@ -101,6 +104,13 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
         <div><strong>AMSTERDAM</strong><span>{t("p043")}</span></div>
       </div>
       <p className={styles.smallPrint}>{t("p044")}</p>
+    </section>
+    <section id="milestones" className={styles.section} aria-labelledby="milestones-heading">
+      <div className={styles.heading}><h2 id="milestones-heading">{milestones.heading}</h2></div>
+      <div className={styles.milestones}>{milestones.items.map(item=><figure key={item.id} className={styles.milestone}>
+        <Image src={item.image} alt={item.caption} width={item.width} height={item.height} sizes="(max-width: 800px) 100vw, 88vw" className={styles.milestoneImage}/>
+        <figcaption><time dateTime={item.date}>{new Intl.DateTimeFormat(locale,{dateStyle:"long",timeZone:"UTC"}).format(new Date(item.date))}</time><p>{item.caption}</p></figcaption>
+      </figure>)}</div>
     </section>
     <section id="architecture" className={styles.section}>
       <div className={styles.heading}><div><p className={styles.eyebrow}>{t("p045")}</p><h2>{t("p046")}</h2></div><p>{t("p047")}</p></div>
