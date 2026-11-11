@@ -1,3 +1,4 @@
+import {florawegArticleLink} from '../../lib/insights/floraweg-link';
 import {getWorkCopy} from './work-copy';
 import IntroCallForm from '../private-capital/IntroCallForm';
 import CaseStudies from '../consultancy/CaseStudies';
@@ -16,6 +17,7 @@ export const generateMetadata = () => publicMetadata('about', '/about');
 export default async function AboutPage() {
   const [t, header, estates, locale] = await Promise.all([getTranslations('About'), getTranslations('Header'), getTranslations('Estates'), getLocale()]);
   const work = getWorkCopy(locale);
+  const floraweg = florawegArticleLink(locale);
   const activities = [
     {href: '/consultancy', label: header('consultancy'), introduction: t('consultancy_intro')},
     {href: '/real-estate', label: header('real_estate'), introduction: t('real_estate_intro')},
@@ -28,6 +30,7 @@ export default async function AboutPage() {
         <p className={styles.eyebrow}>{t('label')} <span aria-hidden="true">/</span> MZS GROUP</p>
         <h1 id="about-title">{t('headline')}</h1>
         <p className={styles.positioning}>{t('positioning')}</p>
+        <Link className={styles.workAction} href={floraweg.href}>{floraweg.title} <ArrowUpRightIcon /></Link>
       </section>
       <figure className={styles.figure}>
         <div className={styles.panorama}>
