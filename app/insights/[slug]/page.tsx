@@ -44,7 +44,6 @@ export default async function ArticlePage({params}:Props){
   <Link className={s.back} href={insightPath(locale)}>← {c.back}</Link>
   <article className={s.article}>
    <header><p className={s.eyebrow}>{labels[a.category]}{a.region&&<> · {a.region}</>}</p><h1>{a.title}</h1><p className={s.lead}>{a.summary}</p><p className={s.byline}>{a.author} · {c.updated} <time dateTime={a.content_updated_on}>{new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(a.content_updated_on))}</time></p></header>
-   <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
    <Cover src={a.cover_image} alt={a.cover_alt} priority caption={isFloraweg?'Magdy Nashed is namens MZS aanwezig bij de ondertekening van de contracten.':undefined}/>
    <div className={s.prose}><Content body={imageBreak>=0?a.body.slice(0,imageBreak):a.body}/></div>
    {isFloraweg&&<figure style={{margin:'36px 0'}}>
@@ -52,6 +51,7 @@ export default async function ArticlePage({params}:Props){
     <figcaption style={{fontSize:'.8rem',lineHeight:1.6,color:'#58614f',paddingTop:10}}>Impressie van de woontoren aan de Floraweg met 85 woningen, ontworpen door FARO in opdracht van MZS Vastgoed.</figcaption>
    </figure>}
    {imageBreak>=0&&<div className={s.prose}><Content body={a.body.slice(imageBreak)}/></div>}
+   <Share url={'https://www.mzsgroup.com'+insightPath(locale,a.slug)} title={a.title} labels={shareLabels(locale)}/>
    {!!a.sources.length&&<section className={s.sources}><h2>{c.sources}</h2><ul>{a.sources.filter(u=>safeSource(u)).map(u=><li key={u}><a href={u} rel="noopener noreferrer" target="_blank">{u}</a></li>)}</ul></section>}
    {!isFloraweg&&<div className={s.cta}><Link href={localizedPath('/'+a.category,locale)}>{labels[a.category]} ↗</Link><a href="#introductory-call">{c.contact} ↗</a></div>}
   </article>
