@@ -1,0 +1,24 @@
+{
+  "confirmation": {
+    "nl": "Bevestig uw e-mailadres | MZS Group",
+    "es": "Confirme su dirección de correo electrónico | MZS Group",
+    "de": "Bestätigen Sie Ihre E-Mail-Adresse | MZS Group",
+    "it": "Confermi il Suo indirizzo e-mail | MZS Group",
+    "fr": "Confirmez votre adresse e-mail | MZS Group",
+    "pt-BR": "Confirme seu endereço de e-mail | MZS Group",
+    "ar": "أكّدوا عنوان بريدكم الإلكتروني | MZS Group",
+    "ru": "Подтвердите адрес электронной почты MZS Group",
+    "en": "Confirm your MZS Group email address"
+  },
+  "recovery": {
+    "nl": "Stel uw wachtwoord opnieuw in | MZS Group",
+    "es": "Restablezca su contraseña | MZS Group",
+    "de": "Setzen Sie Ihr Passwort zurück | MZS Group",
+    "it": "Reimposti la Sua password | MZS Group",
+    "fr": "Réinitialisez votre mot de passe | MZS Group",
+    "pt-BR": "Redefina sua senha | MZS Group",
+    "ar": "أعيدوا تعيين كلمة المرور | MZS Group",
+    "ru": "Сброс пароля MZS Group",
+    "en": "Reset your MZS Group password"
+  }
+}
