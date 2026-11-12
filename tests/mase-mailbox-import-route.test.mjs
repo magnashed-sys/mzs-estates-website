@@ -8,6 +8,7 @@ function harness({admin=true,enabled=true,scanner=true,scope=true}={}){
  let imports=0,clients=0;
  const query={select(){return this},eq(){return this},async single(){return {data:scope?{id:year,issuer_id:issuer}:null,error:null}}};
  const mocks={
+ '../../../../../../lib/accountancy/mailbox/receipts.mjs':{recordReceipt:async()=>({id:'receipt',state:'review'})},
  'next/server':{NextResponse:{json:(body,options)=>Response.json(body,options)}},
  '../../../../../../lib/accountancy/pdf/server':{requirePdfAdmin:async()=>{if(!admin)throw Error('Denied');return {db:{from:()=>query},user:{id:'admin'}}},pdfProcessingReady:()=>scanner,processingClient:()=>({}),scannerOptions:()=>({})},
  '../../../../../../lib/accountancy/pdf/retain':{retainPurchasePdf:async()=>{}},

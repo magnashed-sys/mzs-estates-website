@@ -1,30 +1,52 @@
-# Mase mailbox intake — staging pilot (disabled)
+# Mase mailbox intake — release preparation, disabled
 
-Mailbox: mase@mzsgroup.eu; IMAP mailspace.org:993, verified TLS.
-The read-only connection diagnostic succeeded from a Vercel build on 12 November 2026: login plus INBOX and Verwerkt STATUS passed. This is not evidence of completed invoice ingestion.
+Mailbox: mase@mzsgroup.eu. IMAP: mailspace.org:993 with verified TLS.
+Source: INBOX. Destination: Verwerkt.
 
-## Implementation
-The staging admin page /admin/workspaces/accountancy/purchases/mailbox contains the connection test and a gated batch import form.
-The import endpoint checks active admin, preview/staging environment, same-origin request, configured Mase issuer, selected financial year, scanner readiness and the explicit import switch before connecting.
+## Delivery scope
+An active Group Admin starts bounded batches (five messages, five PDF attachments per message, 16 MiB message / 4 MiB PDF limits), chooses the financial year and reviews the proposed invoice fields.
+The importer uses EXAMINE and does not mark mail seen. It retains the original PDF privately and requires a clean scanner result before extraction. SHA/issuer deduplication verifies stored bytes; another year is a conflict. Confirmation remains manual; no payment or tax claim is generated.
 
-Pinned ImapFlow 2.11.0 and MailParser 3.14.3 retrieve at most five messages per batch using a read-only INBOX lock and UID-based download. Whole messages are capped at 16 MiB; at most five PDF attachments of 4 MiB per message. Unsupported attachments require attention; CID inline images are ignored. Mail HTML is not rendered and body text is not logged. The UI offers retry and next-batch controls.
+Durable receipts are created only after every eligible PDF is clean and retained. Identity is mailbox/folder/UIDVALIDITY/UID, with a full-message SHA and ordered PDF SHA/intake references. Database errors and partial imports never produce a complete receipt. Repeating intake uses existing PDFs. Receipt identity and scope are immutable.
 
-PDF persistence is shared with website uploads through retainPurchasePdf. It retains the original privately, scans before PDF extraction, stores proposals and reuses issuer/SHA matches only after verifying the retained bytes. Another financial year is a conflict. Expense concepts still require the existing explicit review/confirmation; supplier and invoice-number uniqueness remains enforced there. No payments, tax claims or automatic entity/year inference are added.
+The admin separately requests movement after all attachments have accepted decisions. Database and application both enforce this. Before moving, stored originals, clean results, decisions, source UIDVALIDITY and full-message hash are reverified. Only native IMAP MOVE plus UIDPLUS are allowed; COPY/DELETE fallback is prohibited. The destination UIDVALIDITY, UID and downloaded message checksum must match before marking moved.
 
-Partial failures leave stored PDFs retryable. There are intentionally NO MOVE, STORE or EXPUNGE commands, no scheduler and no production activation in this pilot. All messages remain in INBOX, even after successful staging review. The real Fenie expense in production remains unchanged.
+A conditional review -> moving update prevents simultaneous moves. Known pre-MOVE failures return to review. A missing acknowledgement or failed destination verification becomes uncertain. A process crash may leave moving. Neither moving nor uncertain is automatically retried; an operator must reconcile both folders and the recorded source checksum. No success is inferred from the source disappearing. Receipt data is visible only to active admins, writable only by the backend.
 
-## Activation prerequisites
-Preview branch feature/mase-mailbox-import must use Supabase senonkpxdtlhyhrubicg:
-- MZS_MASE_IMAP_PASSWORD: branch-scoped sensitive secret (already provisioned).
-- MZS_MASE_ISSUER_ID: verified Mase issuer ID from staging, never a production ID guessed from memory.
-- MZS_MASE_IMPORT_ENABLED=true: only after the remaining prerequisites are met.
-- Existing scanner configuration described in purchase-pdf-intake.md: owner approval of provider/region/privacy terms, private scanner API key, staging scanner service-role credential, enable/approval switches.
+## Isolation and release switches
+Preview must use senonkpxdtlhyhrubicg. Production must use ptrnjzmcehrhbsfxntgw and MZS_PURCHASE_PDF_PRODUCTION_READY=true. No preview can move the real source mailbox. The module has no cron: the first release is explicitly admin-operated.
 
-The Cloudmersive adapter transfers PDF bytes to that third party. No real invoice has been sent by this pilot. Scanner and import switches remain disabled pending approval and configuration.
+All switches remain disabled until the acceptance steps below:
+- MZS_MASE_IMPORT_ENABLED=false
+- MZS_MASE_MOVE_ENABLED=false
+- MZS_PURCHASE_PDF_PRODUCTION_READY=false
+- MZS_OPS_AV_SCAN_ENABLED=false
+- MZS_OPS_AV_PROCESSOR_APPROVED=false
 
-## Verification
-Ten targeted mailbox tests pass: real MIME decoding, attachment/message limits, partial failures/retry, read-only enforcement, cursor handling, authorization, scanner/import gates, origin and issuer checks. Three existing upload tests and a new corrupted-duplicate source test pass. Dependency installation/audit reported zero known vulnerabilities. Full CI/build checks are required on the latest commit.
+## Subscription/configuration handoff
+Do not buy a plan or transmit real invoices as part of offline readiness work.
+After the owner arranges the EU-capable Cloudmersive subscription:
+1. Obtain the EU Germany endpoint from the subscribed portal API Endpoints page. Do not invent a hostname. Set MZS_OPS_CLOUDMERSIVE_BASE_URL to that HTTPS origin and MZS_OPS_AV_REGION=eu-de only after verifying its assigned region and privacy agreement. There is no global-endpoint fallback.
+2. Store MZS_OPS_CLOUDMERSIVE_API_KEY as a server-only sensitive secret.
+3. Preview uses MZS_OPS_STAGING_SCANNER_SERVICE_ROLE_KEY; production uses a separately provisioned MZS_PURCHASE_SCANNER_SERVICE_ROLE_KEY. Never reuse a production key in preview.
+4. Set MZS_MASE_ISSUER_ID from the actual target database and confirm the year belongs to that issuer. Production IDs must never be copied into staging.
+5. Provision the IMAP password server-side. Never place it in source, tests, logs or browser configuration.
 
-## Remaining before production
-Run a synthetic authenticated upload/scan/review/confirmation/retry test on the deployed preview and verify the original PDF checksum and one resulting concept. Verify UI on desktop/mobile. Test real invoices only after processor approval.
-Add durable mailbox source/attachment receipts keyed by mailbox/folder/UIDVALIDITY/UID before automatic processing and moving messages. Implement a separate move step only after every eligible attachment has a verified final result, with UIDVALIDITY checks and safe interrupted-move recovery. Do not move the original production-source mail during a staging trial.
+## Database rollout
+The existing 20261029155105_purchase_pdf_intake_staging.sql establishes intake/results/decisions and the private quarantine bucket. It exists on staging, not production as checked 12 November 2026.
+The new 20261112200134_mase_mailbox_receipts.sql adds the receipt register and transition checks; applied to staging only.
+Before release, inspect production prerequisites and deploy both intake and receipt schemas in dependency order through the controlled migration process. Do not rerun all historical staging migrations or seed demo data into production. Confirm RLS, privileges, bucket privacy and confirmation function permissions after rollout.
+
+## Validation
+Offline tests cover MIME parsing, partial/repeated imports, receipt failure, clean-source checks, corrupted-original rejection, permission/origin/environment gates, native-MOVE and UIDVALIDITY requirements, concurrent move claims, lost acknowledgements, bad destination checksums, and database permissions/transitions.
+The existing PDF intake tests cover extraction, quarantine, confirmation and duplicate originals. Fake scanner responses exist in tests only; no production bypass exists.
+
+Before activation, still required:
+- Full CI/typecheck/build on the final commit and authenticated preview UI inspection.
+- Live synthetic PDF scan through the subscribed EU endpoint (including unsafe/unknown result and timeout handling).
+- Authenticated deployed upload/import -> original checksum -> review/confirmation -> repeat, proving one expense concept.
+- A controlled production mailbox move after confirmation, proving destination content and receipt state. Staging must never move the real invoice mail.
+- Verify the existing Fenie concept is not duplicated: an earlier manually booked invoice requires explicit reconciliation, not a second confirmation.
+
+## Rollback
+Disable import and move first, then scanning; preserve receipts, PDFs and decisions. Do not delete ledger evidence. In-flight or uncertain moves require reconciliation before re-enabling. No real mail was moved and no invoice was sent to Cloudmersive during preparation.

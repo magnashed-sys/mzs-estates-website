@@ -42,3 +42,14 @@ test('read-write mailbox is rejected, cursor past last UID never fetches',async(
 });
 
 test('changed UIDVALIDITY refuses a stale cursor before retrieval',async()=>{const f=fake(pdf);await assert.rejects(importMailboxBatch({client:f.client,afterUid:1,expectedValidity:'999',retain:async()=>{}}));assert.ok(!f.calls.includes('search'));});
+
+test('receipt is recorded only after every attachment is clean and retained',async()=>{
+ const source=mime([{name:'one.pdf',bytes:pdf},{name:'two.pdf',bytes:pdf}]);let receipts=0;
+ const record=async r=>{receipts++;assert.deepEqual(r.source,source);assert.equal(r.files.length,2);assert.equal(r.intakes.length,2);return {id:'receipt',state:'review'}};
+ const good=await importMailboxBatch({client:fake(source).client,record,retain:async()=>({status:200,body:{id:'saved',verdict:'clean'}})});
+ assert.equal(good[0].receiptId,'receipt');assert.equal(receipts,1);
+ await importMailboxBatch({client:fake(source).client,record,retain:async()=>({status:503,body:{}})});
+ assert.equal(receipts,1);
+ const failed=await importMailboxBatch({client:fake(source).client,record:async()=>{throw Error('database offline')},retain:async()=>({status:200,body:{id:'saved',verdict:'clean'}})});
+ assert.equal(failed[0].code,'partial');assert.equal(failed[0].receiptId,undefined);
+});

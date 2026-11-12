@@ -20,6 +20,8 @@ export default async function MailboxCheck({searchParams}:{searchParams:Promise<
  const issuer=process.env.MZS_MASE_ISSUER_ID;
  const {data:years}=issuer?await db.from('mzs_accountancy_years').select('id,fiscal_year').eq('issuer_id',issuer).order('fiscal_year',{ascending:false}):{data:[]};
  const ready=Boolean(issuer&&years?.length&&process.env.MZS_MASE_IMAP_PASSWORD&&process.env.MZS_MASE_IMPORT_ENABLED==='true'&&pdfProcessingReady());
+ const {data:receipts}=issuer?await db.from('mzs_mailbox_receipts').select('id,uid,state,attachments').eq('issuer_id',issuer).order('created_at',{ascending:false}).limit(50):{data:[]};
+ const moveReady=ready&&process.env.VERCEL_ENV==='production'&&process.env.MZS_MASE_MOVE_ENABLED==='true';
  const params=await searchParams;
  const result=typeof params.result==='string'?messages[params.result]:undefined;
  return <main>
@@ -31,7 +33,7 @@ export default async function MailboxCheck({searchParams}:{searchParams:Promise<
    <button type="submit">Mailboxverbinding controleren</button>
   </form>
   <p>Een geslaagde verbindingstest betekent nog niet dat de factuurimport actief is.</p>
-  <MailboxImportForm years={years??[]} ready={ready}/>
+  <MailboxImportForm years={years??[]} ready={ready} receipts={receipts??[]} moveReady={moveReady}/>
   <a href="/admin/workspaces/accountancy/purchases">Terug naar inkoopfacturen</a>
  </main>;
 }
