@@ -1,29 +1,30 @@
-# Mase mailbox intake — preparation, not an active importer
+# Mase mailbox intake — staging pilot (disabled)
 
-Mailbox: mase@mzsgroup.eu. IMAP: mailspace.org:993 with certificate validation.
-Destination folder requested by the owner: Verwerkt.
+Mailbox: mase@mzsgroup.eu; IMAP mailspace.org:993, verified TLS.
+The read-only connection diagnostic succeeded from a Vercel build on 12 November 2026: login plus INBOX and Verwerkt STATUS passed. This is not evidence of completed invoice ingestion.
 
-## Evidence on 12 November 2026
-A credential-free connection from the development runtime resolved mailspace.org and received a Stalwart IMAP OK greeting over validated TLS 1.3. This proves transport reachability only, not login, folder access, Vercel connectivity or successful invoice ingestion.
+## Implementation
+The staging admin page /admin/workspaces/accountancy/purchases/mailbox contains the connection test and a gated batch import form.
+The import endpoint checks active admin, preview/staging environment, same-origin request, configured Mase issuer, selected financial year, scanner readiness and the explicit import switch before connecting.
 
-## Read-only diagnostic
-Run `node scripts/check-mase-mailbox.mjs` with a fresh `MZS_MASE_IMAP_PASSWORD` supplied by a private environment or secret manager, never in an argument, commit, chat or log. It uses the fixed mailbox and host above. It authenticates, runs STATUS for INBOX and Verwerkt and closes the connection. It does not read message content, change seen flags, move mail or send email. Results contain only a stage and stable result code. A missing Verwerkt folder may mean it has a different server-side path; inspect that before changing configuration.
+Pinned ImapFlow 2.11.0 and MailParser 3.14.3 retrieve at most five messages per batch using a read-only INBOX lock and UID-based download. Whole messages are capped at 16 MiB; at most five PDF attachments of 4 MiB per message. Unsupported attachments require attention; CID inline images are ignored. Mail HTML is not rendered and body text is not logged. The UI offers retry and next-batch controls.
 
-Five simulated test scenarios cover missing secrets, fragmented responses, TLS rejection, login rejection and unavailable folders. Run `node --test tests/mase-mailbox.test.mjs`. The live authenticated check has not been run.
+PDF persistence is shared with website uploads through retainPurchasePdf. It retains the original privately, scans before PDF extraction, stores proposals and reuses issuer/SHA matches only after verifying the retained bytes. Another financial year is a conflict. Expense concepts still require the existing explicit review/confirmation; supplier and invoice-number uniqueness remains enforced there. No payments, tax claims or automatic entity/year inference are added.
 
-## Remaining integration
-The existing purchase PDF intake is staging-only and requires an approved scanner and private scanner credentials; see purchase-pdf-intake.md. Do not enable that provider or transmit real invoices until the owner has selected/approved the processor.
-
-Implementation must:
-- Restrict the pilot to preview and Supabase senonkpxdtlhyhrubicg; no production service role.
-- Use a maintained IMAP/MIME client for bounded attachment retrieval with BODY.PEEK, without changing seen flags.
-- Bind the mailbox to Mase Estates SL explicitly. Resolve the financial year from a reviewed invoice date; do not silently use the current year.
-- Record mailbox, folder, UIDVALIDITY and UID as durable source identity. Message-ID alone is insufficient.
-- Persist each PDF privately, deduplicate per entity by SHA and supplier/invoice number, scan before extraction, and leave ambiguous proposals for manual review.
-- Move the message by UID only after every relevant attachment has a durable, verified result. Unsupported attachments, scan errors, ambiguous scope and partial persistence leave the message in INBOX.
-- Make retries safe when the process stops after persistence but before MOVE; do not duplicate concepts.
-- Keep the existing real Fenie invoice 2026100716972 / EUR 302.31 in production unchanged. In staging use synthetic data or an explicitly isolated test copy; a staging success must never move the real production-source email.
-- Verify a synthetic multi-attachment flow, partial failures, duplicate/retry, missing folder and UIDVALIDITY changes before release.
+Partial failures leave stored PDFs retryable. There are intentionally NO MOVE, STORE or EXPUNGE commands, no scheduler and no production activation in this pilot. All messages remain in INBOX, even after successful staging review. The real Fenie expense in production remains unchanged.
 
 ## Activation prerequisites
-A fresh mailbox secret must be supplied securely. Scanner provider approval and credentials are also outstanding. No cron, mailbox ingestion, deployment, production migration or message move is enabled by this diagnostic PR.
+Preview branch feature/mase-mailbox-import must use Supabase senonkpxdtlhyhrubicg:
+- MZS_MASE_IMAP_PASSWORD: branch-scoped sensitive secret (already provisioned).
+- MZS_MASE_ISSUER_ID: verified Mase issuer ID from staging, never a production ID guessed from memory.
+- MZS_MASE_IMPORT_ENABLED=true: only after the remaining prerequisites are met.
+- Existing scanner configuration described in purchase-pdf-intake.md: owner approval of provider/region/privacy terms, private scanner API key, staging scanner service-role credential, enable/approval switches.
+
+The Cloudmersive adapter transfers PDF bytes to that third party. No real invoice has been sent by this pilot. Scanner and import switches remain disabled pending approval and configuration.
+
+## Verification
+Ten targeted mailbox tests pass: real MIME decoding, attachment/message limits, partial failures/retry, read-only enforcement, cursor handling, authorization, scanner/import gates, origin and issuer checks. Three existing upload tests and a new corrupted-duplicate source test pass. Dependency installation/audit reported zero known vulnerabilities. Full CI/build checks are required on the latest commit.
+
+## Remaining before production
+Run a synthetic authenticated upload/scan/review/confirmation/retry test on the deployed preview and verify the original PDF checksum and one resulting concept. Verify UI on desktop/mobile. Test real invoices only after processor approval.
+Add durable mailbox source/attachment receipts keyed by mailbox/folder/UIDVALIDITY/UID before automatic processing and moving messages. Implement a separate move step only after every eligible attachment has a verified final result, with UIDVALIDITY checks and safe interrupted-move recovery. Do not move the original production-source mail during a staging trial.

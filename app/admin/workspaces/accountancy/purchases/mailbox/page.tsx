@@ -1,4 +1,5 @@
-import {requirePdfAdmin} from '../../../../../../lib/accountancy/pdf/server';
+import MailboxImportForm from './MailboxImportForm';
+import {requirePdfAdmin,pdfProcessingReady} from '../../../../../../lib/accountancy/pdf/server';
 export const dynamic='force-dynamic';
 const messages:Record<string,string>={
  ready:'De mailboxverbinding werkt. INBOX en Verwerkt zijn bereikbaar.',
@@ -15,7 +16,10 @@ const messages:Record<string,string>={
  unexpected_response:'De mailboxserver gaf een onverwacht antwoord.'
 };
 export default async function MailboxCheck({searchParams}:{searchParams:Promise<{result?:string}>}){
- await requirePdfAdmin();
+ const {db}=await requirePdfAdmin();
+ const issuer=process.env.MZS_MASE_ISSUER_ID;
+ const {data:years}=issuer?await db.from('mzs_accountancy_years').select('id,fiscal_year').eq('issuer_id',issuer).order('fiscal_year',{ascending:false}):{data:[]};
+ const ready=Boolean(issuer&&years?.length&&process.env.MZS_MASE_IMAP_PASSWORD&&process.env.MZS_MASE_IMPORT_ENABLED==='true'&&pdfProcessingReady());
  const params=await searchParams;
  const result=typeof params.result==='string'?messages[params.result]:undefined;
  return <main>
@@ -27,6 +31,7 @@ export default async function MailboxCheck({searchParams}:{searchParams:Promise<
    <button type="submit">Mailboxverbinding controleren</button>
   </form>
   <p>Een geslaagde verbindingstest betekent nog niet dat de factuurimport actief is.</p>
+  <MailboxImportForm years={years??[]} ready={ready}/>
   <a href="/admin/workspaces/accountancy/purchases">Terug naar inkoopfacturen</a>
  </main>;
 }

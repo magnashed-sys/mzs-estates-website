@@ -56,3 +56,5 @@ test('original download requires clean matching verdict and verifies the stored 
  const intake=h.db.tables.mzs_purchase_pdf_intakes[0];h.db.files.set(intake.file_path,new Blob([Buffer.from('%PDF-'+'x'.repeat(200))]));response=await route.GET(new Request('https://example.test'),context);assert.equal(response.status,404);
  h.db.tables.mzs_purchase_pdf_results[0].verdict='malicious';assert.equal((await route.GET(new Request('https://example.test'),context)).status,404);
 });
+
+test('duplicate reuse verifies retained bytes and refuses corrupt originals',async()=>{const h=uploadHarness();await h.route.POST(h.request());const entry=[...h.db.files.keys()][0];h.db.files.set(entry,new Blob([Buffer.from('%PDF-'+ 'x'.repeat(200))]));const r=await h.route.POST(h.request());assert.equal(r.status,503);assert.equal(h.scans,1);});
