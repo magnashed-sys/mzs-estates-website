@@ -1,5 +1,6 @@
 import {getWorkCopy} from './work-copy';
 import {aboutFlorawegArticle} from './floraweg-article';
+import {aboutMapCaption} from './map-caption';
 import {florawegCopy} from '../../lib/insights/floraweg';
 import IntroCallForm from '../private-capital/IntroCallForm';
 import CaseStudies from '../consultancy/CaseStudies';
@@ -36,6 +37,7 @@ export default async function AboutPage() {
         <div className={styles.panorama}>
           <Image src="/images/about-world-map.svg" alt={estates('selected_activity_across_the_netherlands_spain')} width={1600} height={620} priority className={styles.image} />
         </div>
+        <figcaption className={styles.mapCaption}>{aboutMapCaption(locale)}</figcaption>
       </figure>
       <section className={styles.activities} aria-labelledby="about-activities">
         <h2 id="about-activities">{estates('our_activities_2')}</h2>
