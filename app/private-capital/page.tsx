@@ -140,7 +140,7 @@ const focus = [
         </div>
       </section>}
 
-      <CaseStudies sectionNumber={atmosphereEnabled ? "05" : "04"} />
+      <CaseStudies projectIds={['ter-apel-jachthaven', 'alicante-beheer-exploitatie', 'heiloo-bedrijfsverzamelgebouw']} sectionNumber={atmosphereEnabled ? "05" : "04"} />
       {introCallEnabled ? <IntroCallForm sectionNumber={atmosphereEnabled ? "06" : "05"} preview={process.env.VERCEL_ENV === "preview"} /> : <section className={styles.invitation} aria-labelledby="capital-invitation">
         <p className={styles.eyebrow}>{t('selected_private_access')}</p>
         <h2 id="capital-invitation">{t('a_confidential_conversation')}<br />{t('starts_here')}</h2>
