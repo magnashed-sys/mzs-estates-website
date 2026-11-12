@@ -2,8 +2,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 /** Basic headers compatible with existing images, galleries and external links. */
 export default createNextIntlPlugin()({
  poweredByHeader: false,
- serverExternalPackages: ['pdfjs-dist'],
- outputFileTracingIncludes: {'/admin/workspaces/accountancy/purchases/upload': ['./scripts/extract-purchase-pdf.mjs','./node_modules/pdfjs-dist/package.json','./node_modules/pdfjs-dist/legacy/build/**','./node_modules/@napi-rs/canvas/**','./node_modules/@napi-rs/canvas-linux-x64-gnu/**'],'/admin/group/estates/contracts': ['./lib/estates/fonts/DejaVuSans.ttf']},
+ serverExternalPackages: ['pdfjs-dist','imapflow','mailparser'],
+ outputFileTracingIncludes: {'/admin/workspaces/accountancy/purchases/mailbox-import': ['./scripts/extract-purchase-pdf.mjs','./node_modules/pdfjs-dist/package.json','./node_modules/pdfjs-dist/legacy/build/**','./node_modules/@napi-rs/canvas/**','./node_modules/@napi-rs/canvas-linux-x64-gnu/**'],'/admin/workspaces/accountancy/purchases/upload': ['./scripts/extract-purchase-pdf.mjs','./node_modules/pdfjs-dist/package.json','./node_modules/pdfjs-dist/legacy/build/**','./node_modules/@napi-rs/canvas/**','./node_modules/@napi-rs/canvas-linux-x64-gnu/**'],'/admin/group/estates/contracts': ['./lib/estates/fonts/DejaVuSans.ttf']},
  async headers() {
   return [{source:'/:path*',headers:[
    {key:'X-Content-Type-Options',value:'nosniff'},
