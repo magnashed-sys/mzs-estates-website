@@ -95,7 +95,7 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
       <span className={styles.heroNote}>{t("p027")}</span>
     </section>
     <nav className={styles.nav} aria-label={t("p028")}>
-      <span>FLORAWEG / AMS003</span><div><a href="#overview">{t("p030")}</a><a href="#architecture">{t("p031")}</a><a href="#plans">{t("p032")}</a><a href="#opportunity">{t("p033")}</a></div>
+      <span>FLORAWEG</span><div><a href="#overview">{t("p030")}</a><a href="#architecture">{t("p031")}</a><a href="#plans">{t("p032")}</a><a href="#opportunity">{t("p033")}</a></div>
     </nav>
     <section id="overview" className={styles.overview}>
       <p className={styles.eyebrow}>{t("p034")}</p>
@@ -104,17 +104,9 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
       <div className={styles.statGrid}>
         <div><strong>85</strong><span>{t("p037")}</span></div>
         <div><strong>DO</strong><span>{t("p039")}</span></div>
-        <div><strong>AMS003</strong><span>{t("p041")}</span></div>
         <div><strong>AMSTERDAM</strong><span>{t("p043")}</span></div>
       </div>
       <p className={styles.smallPrint}>{t("p044")}</p>
-    </section>
-    <section id="milestones" className={styles.section} aria-labelledby="milestones-heading">
-      <div className={styles.heading}><h2 id="milestones-heading">{milestones.heading}</h2></div>
-      <div className={styles.milestones}>{milestones.items.map(item=><figure key={item.id} className={styles.milestone}>
-        <Image unoptimized src={item.image} alt={item.caption} width={item.width} height={item.height} sizes="(max-width: 800px) 100vw, 88vw" className={styles.milestoneImage}/>
-        <figcaption><time dateTime={item.date}>{new Intl.DateTimeFormat(locale,{dateStyle:"long",timeZone:"UTC"}).format(new Date(item.date))}</time><p>{item.caption}</p></figcaption>
-      </figure>)}</div>
     </section>
     <section id="architecture" className={styles.section}>
       <div className={styles.heading}><div><p className={styles.eyebrow}>{t("p045")}</p><h2>{t("p046")}</h2></div><p>{t("p047")}</p></div>
@@ -136,6 +128,13 @@ export default function AmsterdamFlorawegInvestment({allowInvestment,allowAcquis
     <section className={styles.sustainable}>
       <p className={styles.eyebrow}>{t("p055")}</p><h2>{t("p056")}</h2>
       <div className={styles.principles}><article><b>01</b><h3>{t("p010")}</h3><p>{t("p057")}</p></article><article><b>02</b><h3>{t("p058")}</h3><p>{t("p059")}</p></article><article><b>03</b><h3>{t("p060")}</h3><p>{t("p061")}</p></article></div>
+    </section>
+    <section id="milestones" className={styles.section} aria-labelledby="milestones-heading">
+      <div className={styles.heading}><h2 id="milestones-heading">{milestones.heading}</h2></div>
+      <div className={styles.milestones}>{milestones.items.map(item=><figure key={item.id} className={styles.milestone}>
+        <Image unoptimized src={item.image} alt={item.caption} width={item.width} height={item.height} sizes="(max-width: 800px) 100vw, 88vw" className={styles.milestoneImage}/>
+        <figcaption><time dateTime={item.date}>{new Intl.DateTimeFormat(locale,{dateStyle:"long",timeZone:"UTC"}).format(new Date(item.date))}</time><p>{item.caption}</p></figcaption>
+      </figure>)}</div>
     </section>
     <section id="opportunity" className={styles.opportunity}>
       <p className={styles.eyebrow}>{t("p062")}</p><h2>{t("p063")}</h2>
