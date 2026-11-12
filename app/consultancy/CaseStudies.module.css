@@ -13,7 +13,7 @@
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.section{padding-top:12px;padding-bottom:48px}.heading{padding-top:26px;gap:16px;margin-bottom:24px}.grid{grid-template-columns:minmax(0,1fr);gap:30px}.visual{aspect-ratio:auto;background:transparent}.visual img{width:100%;height:auto;object-fit:contain}.card figcaption{padding-top:13px}.card h3{font-size:21px}}
 
-.introduction{max-width:740px;margin:-8px 0 30px;color:#c5beb3;font-size:15px;line-height:1.85}
+.introduction{margin:-8px 0 30px;color:#c5beb3;font-size:15px;line-height:1.85}
 @media(max-width:700px){.introduction{font-size:14px;margin-bottom:24px}}
 
 .unfiltered img{filter:none}
