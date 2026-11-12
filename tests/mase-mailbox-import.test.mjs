@@ -38,5 +38,7 @@ test('blocked scan and incomplete source never count as retained',async()=>{
 });
 test('read-write mailbox is rejected, cursor past last UID never fetches',async()=>{
  const f=fake(pdf,{readOnly:false});await assert.rejects(importMailboxBatch({client:f.client,retain:async()=>{}}));assert.equal(f.calls.at(-1),'close');
- const other=fake(pdf);assert.deepEqual(await importMailboxBatch({client:other.client,afterUid:42,retain:async()=>{}}),[]);assert.ok(!other.calls.includes('search'));
+ const other=fake(pdf);assert.deepEqual(await importMailboxBatch({client:other.client,afterUid:42,expectedValidity:'123',retain:async()=>{}}),[]);assert.ok(!other.calls.includes('search'));
 });
+
+test('changed UIDVALIDITY refuses a stale cursor before retrieval',async()=>{const f=fake(pdf);await assert.rejects(importMailboxBatch({client:f.client,afterUid:1,expectedValidity:'999',retain:async()=>{}}));assert.ok(!f.calls.includes('search'));});
