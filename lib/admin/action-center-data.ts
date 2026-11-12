@@ -14,7 +14,7 @@ import {staffEnvironmentAvailable} from '../security/property-staff';
 import {checkedActions,crmActions,invoiceActions,purchaseActions,verifiedDate,type ActionCategory,type DailyAction,type ActionSnapshot} from './action-center';
 
 /** Caller must already pass requireEstateAdmin. Reads use that user's client/RLS;
- * no privileged service client, new permissions or financial mutations. */
+ * the notification RPC additionally checks active-admin access to its aggregate. */
 export async function loadActionCenter(db:SupabaseClient,today:string,includeMonths=true):Promise<ActionSnapshot>{
  verifiedDate(today);
  const snapshot:ActionSnapshot={today,items:[],failures:[],months:[]};
@@ -61,9 +61,10 @@ export async function loadActionCenter(db:SupabaseClient,today:string,includeMon
     href:'/admin/capital-requests#request-'+r.id,dueOn:null,count:1,kind:'record'}));
   }),
   source('email','system',async()=>{
-   const rows=await read<{id:string}>('mzs_mail_outbox','id',q=>q.eq('status','failed'));
-   return rows.length?[{id:'email:failed',category:'system',priority:'review',title:'failed_email',detail:'',
-    href:'/admin/accounts#notification-settings',dueOn:null,count:rows.length,kind:'queue'}]:[];
+   const {data:count,error}=await db.rpc('mzs_failed_notification_count');
+   if(error||typeof count!=='number'||!Number.isSafeInteger(count)||count<0)throw Error('Unavailable notification count');
+   return count?[{id:'email:failed',category:'system',priority:'review',title:'failed_email',detail:'',
+    href:'/admin/accounts#notification-settings',dueOn:null,count,kind:'queue'}]:[];
   }),
   source('operations','operations',async()=>{
    if(!staffEnvironmentAvailable())throw Error('Unavailable property operations');

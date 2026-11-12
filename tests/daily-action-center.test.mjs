@@ -45,13 +45,16 @@ test('sort is deadline-first within priority, stable and does not mutate the sou
  assert.deepEqual(model.selectActions(snapshot(items),filters).rows.map(r=>r.title),['INV-1','INV-2','INV-3']);assert.equal(items[0].title,'INV-2');
  assert.throws(()=>model.checkedActions([{...items[0],href:'https://evil.test'}]));assert.throws(()=>model.checkedActions([{...items[0],count:0}]));
 });
-function setup({tables={},fail={},counts={},invoiceRows=[],invoiceError=false,annuals={},queueRows=[],bankError=false,staff=true}={}){
+function setup({tables={},fail={},counts={},invoiceRows=[],invoiceError=false,annuals={},queueRows=[],bankError=false,staff=true,notificationCount=0,notificationError=null}={}){
  const calls=[],banks=[],annualCalls=[];
  function query(name){let conditions=[],from=0,to=499;const q={
   select:(...a)=>{calls.push([name,'select',...a]);return q},eq:(k,v)=>{conditions.push(r=>r[k]===v);calls.push([name,'eq',k,v]);return q},in:(k,v)=>{conditions.push(r=>v.includes(r[k]));return q},order:()=>q,range:(a,b)=>{from=a;to=b;return q},returns:()=>q,
   then:(resolve,reject)=>{calls.push([name,'range',from,to]);const rows=(tables[name]??[]).filter(r=>conditions.every(f=>f(r)));return Promise.resolve({data:fail[name]?null:rows.slice(from,to+1),error:fail[name]??null,count:Object.hasOwn(counts,name)?counts[name]:rows.length}).then(resolve,reject)}
  };return q;}
- const db={from:query,rpc:query};
+ const db={from:query,rpc:name=>{
+  if(name==='mzs_failed_notification_count'){calls.push([name,'rpc']);return Promise.resolve({data:notificationCount,error:notificationError});}
+  return query(name);
+ }};
  const api=load('lib/admin/action-center-data.ts',{
   '../property-operations/staff-data':{allRows},'../finance/invoice-register':{loadInvoiceRegister:async(db,year)=>{assert.equal(year,null);if(invoiceError)throw Error('invoice unavailable');return invoiceRows}},
   '../accountancy/administration-data':{annualSource:async(db,id)=>{annualCalls.push(id);if(!annuals[id])throw Error('annual unavailable');return annuals[id]}},
@@ -66,6 +69,23 @@ function setup({tables={},fail={},counts={},invoiceRows=[],invoiceError=false,an
 const year={id:uid(90),issuer_id:uid(91),fiscal_year:2026,purpose:'current'};
 const annualTables={'mzs_accountancy_years':[year],'mzs_lease_issuers':[{id:uid(91),name:'Mase Estates'}]};
 const annual={administration:year,purchase:[{id:'cost:1',label:'Cost',href:'/admin/workspaces/accountancy/costs',issues:['missing_original']}]};
+test('notification aggregate is exact beyond API page sizes and never reads the private outbox',async()=>{
+ for(const count of [0,1,1201]){
+  const x=setup({notificationCount:count}),s=await x.run(false);
+  assert.equal(model.selectActions(s,filters).counts.find(c=>c.category==='system').count,count);
+  assert.equal(s.items.find(i=>i.id==='email:failed')?.count,count||undefined);
+  assert.equal(x.calls.filter(c=>c[0]==='mzs_failed_notification_count').length,1);
+  assert.ok(!x.calls.some(c=>c[0]==='mzs_mail_outbox'));
+ }
+});
+test('denied, unavailable and invalid notification aggregates remain unknown',async()=>{
+ for(const options of [{notificationError:{message:'denied'}},...[-1,1.2,null,'4',[],NaN,Number.MAX_SAFE_INTEGER+1].map(notificationCount=>({notificationCount}))]){
+  const s=await setup(options).run(false);
+  assert.ok(s.failures.some(f=>f.source==='email'));
+  assert.equal(model.selectActions(s,filters).counts.find(c=>c.category==='system').count,null);
+  assert.ok(!s.items.some(i=>i.id==='email:failed'));
+ }
+});
 test('loader paginates beyond legacy 12/100 limits, uses scoped RPC and exact counts',async()=>{
  const x=setup({tables:{mzs_crm_activities:Array.from({length:501},(_,i)=>task(i+100)),mzs_lease_relationships:[{id:uid(8),name:'Contact',kind:'person'}],mzs_owner_stay_requests:[{id:uid(1),status:'requested',check_in:today,check_out:'2026-11-10'}],admin_list_rental_bookings:[{id:uid(2),status:'requested',is_test:false,check_in:today,check_out:'2026-11-10'},{id:uid(3),status:'requested',is_test:true}],mzs_capital_admin_list_requests:[{id:uid(5),status:'new',member_name:'Capital'},{id:uid(6),status:'closed'}]},invoiceRows:[invoice(1)]});
  const s=await x.run(false);assert.equal(s.failures.length,0);assert.equal(s.items.filter(i=>i.category==='crm').length,501);assert.equal(s.items.filter(i=>i.category==='requests').length,3);

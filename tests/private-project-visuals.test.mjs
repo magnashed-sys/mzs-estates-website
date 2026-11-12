@@ -96,6 +96,6 @@ test('The complete gallery uses cookie-authenticated image requests and no publi
  const ast=ts.createSourceFile('Gallery.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let count=0;
  function visit(node){if((ts.isJsxSelfClosingElement(node)||ts.isJsxOpeningElement(node))&&node.tagName.getText(ast)==='Image'){
   count++;assert.ok(node.attributes.properties.some(p=>ts.isJsxAttribute(p)&&p.name.getText(ast)==='unoptimized'),'Image optimization must not cache protected bytes');
- }ts.forEachChild(node,visit);}visit(ast);assert.equal(count,6);
+ }ts.forEachChild(node,visit);}visit(ast);assert.equal(count,7);
  assert.doesNotMatch(source,/createSignedUrl|getPublicUrl|data:image/);
 });

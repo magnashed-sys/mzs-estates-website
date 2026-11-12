@@ -37,7 +37,7 @@ export default async function ConsultancyPage() {
           </article>
         ))}
       </section>
-      <CaseStudies />
+      <CaseStudies projectIds={['ter-apel-jachthaven', 'alicante-beheer-exploitatie', 'heiloo-bedrijfsverzamelgebouw']} />
       <IntroCallForm source="consultancy" sectionNumber="05" preview={process.env.VERCEL_ENV === "preview"} />
       <div className={styles.footer}><HomeContactFooter /></div>
     </main>

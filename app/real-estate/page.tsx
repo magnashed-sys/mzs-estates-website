@@ -104,7 +104,7 @@ const activities = [
         </div>
       </section>
 
-      <CaseStudies />
+      <CaseStudies projectIds={['amsterdam-85-units', 'ijmuiden-transformatie', 'ibiza-20-units']} />
       <IntroCallForm preview={preview} source="real-estate" sectionNumber="05" />
 
       <div className={styles.bottomNavigation}>
