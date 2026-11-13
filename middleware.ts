@@ -4,6 +4,15 @@ import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const publicPage = publicRoute(pathname);
+  const marketing = publicPage && ((publicPaths as readonly string[]).includes(publicPage.path) || isInsightPath(publicPage.path));
+  // These read-only pages have no Server Actions. Forms submit to /api/intro-calls.
+  // Reject unsupported methods before auth/network work and Next's action decoder.
+  if (marketing && request.method !== "GET" && request.method !== "HEAD") {
+    return NextResponse.json({error: "Method not allowed"}, {
+      status: 405, headers: {Allow: "GET, HEAD", "Cache-Control": "no-store"},
+    });
+  }
 
   // A saved explicit choice applies only at the language-neutral entry point.
   // Language-specific URLs always win; login shares the public choice.
@@ -20,7 +29,6 @@ export async function middleware(request: NextRequest) {
 
   // Never trust a caller-supplied locale header on private or machine routes.
   const forwardedHeaders = new Headers(request.headers);
-  const publicPage = publicRoute(pathname);
   forwardedHeaders.set("x-mzs-locale", publicPage?.locale || (isAccountPath(pathname) && isLocale(preference) ? preference : "en"));
   forwardedHeaders.set("x-mzs-client-overview", (pathname === "/private" || pathname.startsWith("/private/")) ? "true" : "false");
   forwardedHeaders.set("x-mzs-admin", pathname === "/admin" || pathname.startsWith("/admin/") ? "true" : "false");
@@ -51,7 +59,6 @@ export async function middleware(request: NextRequest) {
 
   // Only anonymous marketing GET/HEAD requests skip session refresh.
   // Account, private, API and authenticated requests retain the existing flow.
-  const marketing = publicPage && ((publicPaths as readonly string[]).includes(publicPage.path) || isInsightPath(publicPage.path));
   const hasAuthCookie = request.cookies.getAll().some(({name}) => /^sb-.*-auth-token(?:\.\d+)?$/.test(name));
   if (marketing && (request.method === "GET" || request.method === "HEAD") && !hasAuthCookie) return response;
 
