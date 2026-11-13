@@ -21,9 +21,9 @@ type Props = {
   onInvited: (invitation: PlannedInvitation) => void;
   onClose: () => void;
 };
-const gold = "#d5c09a";
-const muted = "#b4ac9f";
-const edge = "#514839";
+const gold = "#28543f";
+const muted = "#5d7064";
+const edge = "#dce3d9";
 const button: CSSProperties = {
   padding: "13px 20px", border: `1px solid ${gold}`, background: "transparent", color: gold,
   fontSize: 12, lineHeight: 1.5, letterSpacing: ".07em", cursor: "pointer",
@@ -182,18 +182,18 @@ function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: P
     } finally { actionLock.current = false; if (mounted.current) setBusy(false); }
   }
 
-  return <section aria-label={adminT("Review access for {p0}", {p0: request.full_name})} style={{ marginTop: 28, padding: "clamp(18px,3vw,30px)", border: `1px solid ${edge}`, background: "#11110f", color: "#eeeae2" }}>
+  return <section aria-label={adminT("Review access for {p0}", {p0: request.full_name})} style={{ marginTop: 28, padding: "clamp(18px,3vw,30px)", border: `1px solid ${edge}`, background: "#ffffff", color: "#243f35" }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
       <h4 style={{ fontFamily: "Georgia,serif", fontSize: 26, fontWeight: 400, margin: 0 }}>{adminT("Approval & project access")}</h4>
       <button type="button" style={button} onClick={closeReview} disabled={busy}>{adminT("Close")}</button>
     </div>
     <p style={{ color: muted, lineHeight: 1.7 }}>{adminT("Select only the opportunities this member may see. Interests on the application do not grant access automatically.")}</p>
     {loading && <p role="status">{adminT("Loading approved access...")}</p>}
-    {error && <p role="alert" style={{ color: "#e3a995", lineHeight: 1.8 }}>{adminT(error)}</p>}
+    {error && <p role="alert" style={{ color: "#8b443a", lineHeight: 1.8 }}>{adminT(error)}</p>}
     {notice && <p role="status" style={{ color: gold, lineHeight: 1.8 }}>{adminT(notice)}</p>}
     {!loading && <>
       <label style={{ display: "grid", gap: 10, maxWidth: 320, marginBottom: 26 }}>
-        {adminT("Account type")}<select value={role} disabled={locked} onChange={e => setRole(e.target.value as Role)} style={{ padding: 14, color: "#eeeae2", background: "#151411", border: `1px solid ${edge}`, fontSize: 15 }}>
+        {adminT("Account type")}<select value={role} disabled={locked} onChange={e => setRole(e.target.value as Role)} style={{ padding: 14, color: "#243f35", background: "#ffffff", border: `1px solid ${edge}`, fontSize: 15 }}>
           <option value="client">{adminT("Client")}</option><option value="partner">{adminT("Partner")}</option>
         </select>
       </label>
@@ -211,10 +211,10 @@ function LegacyInvitationApproval({ request, onApproved, onInvited, onClose }: P
         </div>)}
         {!selectable.length && <p>{adminT("No active opportunities are available.")}</p>}
       </fieldset>
-      {unavailableSaved && <p role="alert" style={{ color: "#e3a995" }}>{adminT("A saved opportunity is no longer active. Review its status before changing this plan.")}</p>}
+      {unavailableSaved && <p role="alert" style={{ color: "#8b443a" }}>{adminT("A saved opportunity is no longer active. Review its status before changing this plan.")}</p>}
       <p style={{ color: muted, lineHeight: 1.8 }}>{selected.length}  {adminT("selected opportunities. No selection means no project access. Future opportunities are not included automatically.")}</p>
       {invitation ? <p style={{ color: gold, lineHeight: 1.8 }}>{adminT("Invitation status:")} {adminT(invitation.status)}{adminT(". This initial selection is locked. Use Project Access Management for later changes.")}</p> : <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}>
-        <button type="button" style={{ ...button, background: gold, color: "#111", opacity: locked || unavailableSaved ? .5 : 1 }} disabled={locked || unavailableSaved} onClick={() => void approveAndSave()}>{busy ? adminT("Processing...") : saved ? adminT("Save approved selection") : adminT("Approve & save selection")}</button>
+        <button className="admin-primary-action" type="button" style={{ ...button, background: gold, color: "#ffffff", opacity: locked || unavailableSaved ? .5 : 1 }} disabled={locked || unavailableSaved} onClick={() => void approveAndSave()}>{busy ? adminT("Processing...") : saved ? adminT("Save approved selection") : adminT("Approve & save selection")}</button>
         <button type="button" style={{ ...button, opacity: locked || dirty || !saved || unavailableSaved ? .5 : 1 }} disabled={locked || dirty || !saved || unavailableSaved} onClick={() => void sendInvitation()}>{adminT("Send invitation →")}</button>
       </div>}
       {error && <button type="button" style={{ ...button, marginTop: 16 }} disabled={busy || loading} onClick={() => { if (!unsavedEdits || window.confirm(adminT("Discard unsaved edits and reload the recorded status?"))) void load(); }}>{adminT("Reload recorded status")}</button>}

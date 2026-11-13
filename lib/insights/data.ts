@@ -29,12 +29,13 @@ export const getInsight = cache(async(locale:string,slug:string)=>{
   if(error) throw new Error('The article could not be loaded. Please try again.');
   return data as Insight|null;
 });
-export async function translations(articleId:string) {
+// Reuse public language variants within one render (metadata + page), never across requests.
+export const translations = cache(async(articleId:string)=>{
   const {data,error}=await publicDb().from('mzs_insights').select('locale,slug').eq('article_id',articleId)
     .eq('status','published').lte('publish_at',new Date().toISOString());
   if(error) throw new Error('Translations could not be loaded.');
   return (data||[]) as Pick<Insight,'locale'|'slug'>[];
-}
+});
 export async function relatedInsights(article:Insight) {
   const {data,error}=await publicDb().from('mzs_insights').select(cardFields).eq('locale',article.locale)
     .eq('category',article.category).neq('article_id',article.article_id).eq('status','published')

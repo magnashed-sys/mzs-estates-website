@@ -20,10 +20,10 @@ type Offering = {
   id: string; project_id: string; title: string | null;
   offering_type: string;
 };
-const gold = "#d5c09a";
+const gold = "#28543f";
 const button: CSSProperties = {
-  padding: "14px 22px", border: "1px solid #d5c09a", background: gold,
-  color: "#0b0b0a", cursor: "pointer", fontSize: 12, letterSpacing: ".08em",
+  padding: "14px 22px", border: "1px solid #28543f", background: gold,
+  color: "#ffffff", cursor: "pointer", fontSize: 12, letterSpacing: ".08em",
 };
 
 export default function RegisteredRequestApproval({
@@ -129,14 +129,14 @@ export default function RegisteredRequestApproval({
   }
 
   return (
-    <section style={{ marginTop: 28, border: "1px solid #514839", background: "#11100e",
-      color: "#f4f0e7", padding: "clamp(18px,3vw,30px)" }}>
+    <section style={{ marginTop: 28, border: "1px solid #dce3d9", background: "#ffffff",
+      color: "#243f35", padding: "clamp(18px,3vw,30px)" }}>
       <h3 style={{ fontFamily: "Georgia,serif", fontWeight: 400, fontSize: 27, marginTop: 0 }}>
         {adminT("Verified account approval")}</h3>
-      <p style={{ color: "#c1b9a9", lineHeight: 1.8 }}>
+      <p style={{ color: "#5d7064", lineHeight: 1.8 }}>
         {request.full_name} · {request.email}
       </p>
-      <p role="status" style={{ color: request.email_verified_at ? gold : "#e3a995" }}>
+      <p role="status" style={{ color: request.email_verified_at ? gold : "#8b443a" }}>
         {request.email_verified_at
           ? adminT("Email address verified · Account awaiting your approval")
           : adminT("Email confirmation pending. Approval will be available after verification.")}
@@ -147,7 +147,7 @@ export default function RegisteredRequestApproval({
           <label style={{ display: "grid", gap: 9, maxWidth: 330, marginBottom: 25 }}>
             {adminT("Account type")}<select value={role} disabled={saving || completed || request.status !== "pending"}
               onChange={event => setRole(event.target.value as Role)}
-              style={{ background: "#171612", color: "#f4f0e7", border: "1px solid #514839", padding: 13 }}>
+              style={{ background: "#ffffff", color: "#243f35", border: "1px solid #dce3d9", padding: 13 }}>
               <option value="client">{adminT("Client")}</option>
               <option value="partner">{adminT("Partner")}</option>
             </select>
@@ -159,7 +159,7 @@ export default function RegisteredRequestApproval({
             {projects.map(project => {
               const choices = offerings.filter(offering => offering.project_id === project.id);
               return choices.length ? (
-                <div key={project.id} style={{ padding: "20px 0", borderTop: "1px solid #514839" }}>
+                <div key={project.id} style={{ padding: "20px 0", borderTop: "1px solid #dce3d9" }}>
                   <strong>{project.title}</strong>
                   <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginTop: 10 }}>
                     {choices.map(offering => (
@@ -176,10 +176,10 @@ export default function RegisteredRequestApproval({
           </fieldset>
         </>
       )}
-      {error && <p role="alert" style={{ color: "#e3a995" }}>{adminT(error)}</p>}
+      {error && <p role="alert" style={{ color: "#8b443a" }}>{adminT(error)}</p>}
       {notice && <p role="status" style={{ color: gold }}>{adminT(notice)}</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
-        <button type="button" style={button}
+        <button className="admin-primary-action" type="button" style={button}
           disabled={loading || saving || completed || !request.email_verified_at ||
             !request.auth_user_id || request.status !== "pending" ||
             selected.length === 0 || Boolean(error)}
@@ -189,7 +189,7 @@ export default function RegisteredRequestApproval({
         <button type="button" onClick={onClose} disabled={saving}
           style={{ ...button, background: "transparent", color: gold }}>{adminT("Close")}</button>
       </div>
-      <p style={{ color: "#a9a398", fontSize: 12, marginTop: 25 }}>
+      <p style={{ color: "#5d7064", fontSize: 12, marginTop: 25 }}>
         {adminT("Account activation and project permissions are saved together. Email delivery is tracked separately and may be retried safely.")}</p>
     </section>
   );

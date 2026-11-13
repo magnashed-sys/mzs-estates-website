@@ -103,3 +103,21 @@ test('overview metadata indexes clean production URLs, excluding filtered URLs a
   }
  }
 });
+
+test('Floraweg does not wait for hidden related articles; other articles still load them',async()=>{
+ let relatedReads=0;
+ const article={article_id:'group',title:'Synthetic',summary:'Summary',locale:'nl',slug:'example',author:'Tester',category:'real-estate',body:'## One\n\nText\n\n## Two\n\nText',sources:[],publish_at:'2026-11-01',content_updated_on:'2026-11-01',cover_image:'/images/insights/floraweg-ondertekening.webp'};
+ const Page=load('app/insights/[slug]/page.tsx',{
+  'next/link':()=>null,'next/navigation':{notFound(){throw Error('404')}},
+  'next-intl/server':{getLocale:async()=>'nl',getTranslations:async()=>key=>key},
+  '../../../i18n/public-routing':routing,'../../components/PublicHeader':{},'../../components/HomeContactFooter':{},'../../private-capital/IntroCallForm':{},
+  '../../../lib/insights/data':{getInsight:async()=>article,translations:async()=>[{locale:'nl',slug:'example'}],relatedInsights:async()=>{relatedReads++;throw Error('related unavailable')}},
+  '../../../lib/insights/model':m,'../../../lib/insights/copy':{insightsCopy:()=>({})},'../../../lib/insights/floraweg':{florawegCopy:()=>({})},'../../../lib/insights/share':{shareLabels:()=>({})},
+  '../Content':{},'../Cover':{},'../Share':{},'../Cards':{},'../insights.module.css':{default:{}},
+ }).default;
+ assert.ok(await Page({params:Promise.resolve({slug:'example'})}));
+ assert.equal(relatedReads,0);
+ article.cover_image='/images/insights/vastgoed-spanje.webp';
+ await assert.rejects(Page({params:Promise.resolve({slug:'example'})}),/related unavailable/);
+ assert.equal(relatedReads,1);
+});

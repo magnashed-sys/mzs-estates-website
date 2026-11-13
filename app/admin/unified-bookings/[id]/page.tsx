@@ -136,7 +136,7 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
     {chargeable&&approvedInvoiceModel&&<div style={{padding:16,border:"1px solid #dce3d9",marginBottom:18}}>
      <h3>{adminT("Trilingual invoice model · NL / EN / ES")}</h3>
      <p>{adminT("Includes the booking details, current payments, 50% deposit within 7 days of booking and remaining 50% due 14 days before arrival. A paid deposit is non-refundable on cancellation. Missing customer addresses are omitted.")}</p>
-     <a href={"/admin/bookings/"+id+"/invoice/pdf"} target="_blank" rel="noopener noreferrer" style={{display:"inline-block",padding:12,background:"#28543f",color:"#ffffff"}}>{adminT("Open invoice draft PDF ↗")}</a>
+     <a className="admin-primary-action" href={"/admin/bookings/"+id+"/invoice/pdf"} target="_blank" rel="noopener noreferrer" style={{display:"inline-block",padding:12,background:"#28543f",color:"#ffffff"}}>{adminT("Open invoice draft PDF ↗")}</a>
      <p style={{fontSize:12}}>{adminT("Preview only: no invoice number is assigned and no email is sent. Historical booking dates use the original confirmation date when available.")}</p>
     </div>}
     <p style={{color:"#5d7064"}}>{adminT("Invoice drafts only. No invoice number is consumed, no invoice is issued and no email is sent. The VAT rate must be verified by the administrator for the property, issuer and transaction.")}</p>

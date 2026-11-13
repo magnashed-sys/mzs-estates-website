@@ -36,7 +36,7 @@ export default async function ArticlePage({params}:Props){
  const isFloraweg=a.cover_image==='/images/insights/floraweg-ondertekening.webp';
  const imageBreak=isFloraweg?(Array.from(a.body.matchAll(/^## /gm))[1]?.index??-1):-1;
  const photoCopy=florawegCopy(locale);
- const [variants,related]=await Promise.all([translations(a.article_id),relatedInsights(a)]),c=insightsCopy(locale);
+ const [variants,related]=await Promise.all([translations(a.article_id),isFloraweg?Promise.resolve([]):relatedInsights(a)]),c=insightsCopy(locale);
  const labels={'real-estate':t('real_estate'),'private-capital':t('private_capital'),consultancy:t('consultancy')};
  const languageLinks=Object.fromEntries(locales.flatMap(l=>variants.filter(v=>v.locale===l).map(v=>[v.locale,insightPath(v.locale,v.slug)])));
  const schema={'@context':'https://schema.org','@type':'Article',headline:a.title,description:a.summary,inLanguage:a.locale,
