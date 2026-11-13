@@ -3,12 +3,14 @@ import {useEffect, useId, useMemo, useRef, useState, type ReactNode} from 'react
 import {useLocale, useTranslations} from 'next-intl';
 import {callingCode, countryOptions, editPhone, splitPhone} from '../../lib/contact-inputs';
 import s from './contact-inputs.module.css';
+import {useBrowserHydrated} from './useBrowserHydrated';
 
 export default function PhoneInput({value, onChange, label, name, disabled, className = ''}: {
   value: string; onChange: (value: string) => void; label: ReactNode; name?: string; disabled?: boolean; className?: string;
 }) {
   const locale = useLocale(); const t = useTranslations('ContactInput'); const id = useId();
-  const options = useMemo(() => countryOptions(locale, true), [locale]);
+  const hydrated = useBrowserHydrated();
+  const options = useMemo(() => countryOptions(locale, true, hydrated), [locale, hydrated]);
   const [draft, setDraft] = useState(() => splitPhone(value));
   const input = useRef<HTMLInputElement>(null);
   // A different dossier or form reset replaces the draft; ordinary typing retains the chosen prefix.

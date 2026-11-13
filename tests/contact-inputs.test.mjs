@@ -38,3 +38,12 @@ test('shared form labels are complete in every platform language',()=>{
   assert.deepEqual(Object.keys(copy).sort(),keys);assert.ok(Object.values(copy).every(Boolean));
  }
 });
+
+test('initial country options are independent of server/browser ICU labels and sort order',()=>{
+ const initial=api.countryOptions('nl',true,false);
+ assert.equal(initial.find(o=>o.code==='HK').name,'HK');
+ assert.equal(initial.find(o=>o.code==='PS').name,'PS');
+ for(const locale of ['en','ar','zh-CN','es','de'])assert.deepEqual(api.countryOptions(locale,true,false),initial);
+ assert.ok(api.countryOptions('nl',true,true).some(o=>o.name!==o.code));
+ assert.equal(new Set(initial.map(o=>o.code)).size,initial.length);
+});

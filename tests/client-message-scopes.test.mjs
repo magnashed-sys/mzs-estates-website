@@ -50,3 +50,24 @@ test('all client account routes receive AccountUI and localized login reuses its
  for(const route of ['reset-password','accept-invitation'])assert.match(readFileSync('app/'+route+'/layout.tsx','utf8'),/forgot-password\/layout/);
  assert.match(readFileSync('app/[locale]/login/layout.tsx','utf8'),/login\/layout/);
 });
+
+test('contact controls keep identical initial HTML across differing Intl country names',()=>{
+ const actualHook=load('app/components/useBrowserHydrated.ts');
+ const copy={ContactInput:messages.ContactInput};
+ for(const component of ['CountrySelect','PhoneInput']){
+  function render(browserNames,hydrated=false){
+   const Component=load('app/components/'+component+'.tsx',{
+    './contact-inputs.module.css':{default:{}},
+    './useBrowserHydrated':hydrated?{useBrowserHydrated:()=>true}:actualHook,
+    '../../lib/contact-inputs':{
+     countryOptions:(_locale,_telephone,localized)=>[{code:'HK',name:localized?(browserNames?'Hongkong':'Hongkong SAR van China'):'HK'}],
+     countryCode:()=>browserNames?undefined:'HK',countryName:()=> 'Hong Kong',
+     splitPhone:value=>({value,country:'',national:value,error:''}),callingCode:()=> '852',
+    },
+   }).default;
+   return renderToStaticMarkup(React.createElement(intl.NextIntlClientProvider,{locale:'nl',timeZone:'Europe/Madrid',messages:copy},React.createElement(Component,{value:component==='CountrySelect'?'Hongkong SAR van China':'',onChange(){},label:'Telephone'})));
+  }
+  assert.equal(render(false),render(true),component+' must hydrate with matching HTML');
+  assert.ok(render(true,true).includes('Hongkong'));
+ }
+});
