@@ -24,7 +24,7 @@
 /* Existing independent shells and legacy workspaces. Preserve their
    spacing/grid rules; change only their colours, not permissions or markup. */
 .admin-light-content :is(
-  .admin-page, .mzsGroup,
+  .admin-page, .mzsGroup, [class*="requests_page__"],
   [class*="workspace_shell__"], [class*="operations_root__"],
   [class*="administration_page__"], [class*="zorgbalans_page__"],
   [class*="expenses_page__"], [class*="entities_page__"],
@@ -94,7 +94,9 @@
   [class*="_stat__"],[class*="_subcard__"],[class*="_item__"],
   [class*="_shortcuts__"],[class*="_invoice__"],
   [class*="_arrival__"],[class*="_selectionSummary__"],
-  [class*="_chartPanel__"],[class*="_detailPanel__"]
+  [class*="_chartPanel__"],[class*="_detailPanel__"],
+  [class*="directory_directory__"],[class*="capitalAccess_account__"],
+  [class*="deletion_dialog__"],[class*="BookingSummary_empty__"]
 ) {
   background: var(--mzs-admin-surface) !important;
   color: var(--mzs-admin-ink) !important;
@@ -150,7 +152,7 @@
 
 /* Clear secondary actions, with deep-green primary buttons and accessible
    selected tabs. Do not touch submit/action logic. */
-.admin-light-content button:not([class*="_button__"]):not(.admin-button):not(.admin-button-primary) {
+.admin-light-content button:not([class*="_button__"]):not(.admin-button):not(.admin-button-primary):not(.admin-primary-action):not([class*="deletion_confirm__"]) {
   background: #fff !important;
   color: #2d5b46 !important;
   border-color: #cbd9ce !important;
@@ -189,7 +191,10 @@
 
 /* Registration tables and billing registers keep their existing responsive
    structure, alignment, cell sizes, numeric values and behaviours. */
-.admin-light-content :is(table,[class*="_table__"]) { color: #284538 !important; }
+.admin-light-content :is(table,[class*="_table__"]) {
+  color: #284538 !important;
+  background: var(--mzs-admin-surface) !important;
+}
 .admin-light-content :is(
   [class*="_tableWrap__"],[class*="_tableScroll__"],[class*="_scroll__"]
 ) { border-color: var(--mzs-admin-border) !important; background: #fff !important; }
@@ -255,6 +260,57 @@
   color: white !important;
 }
 .admin-light-content .admin-footer { color: #69786d !important; border-color: #dae3d8 !important; }
+
+/* Legacy navigation and nested accountancy surfaces are not generic cards. */
+.admin-light-content [class*="directory_grid__"] a {
+  background: var(--mzs-admin-surface) !important;
+  border-color: var(--mzs-admin-border) !important;
+}
+.admin-light-content [class*="directory_grid__"] a:hover,
+.admin-light-content [class*="administration_metrics__"] p {
+  background: var(--mzs-admin-soft) !important;
+  border-color: var(--mzs-admin-border) !important;
+}
+.admin-light-content :is(
+  [class*="directory_directory__"] summary,
+  [class*="directory_directory__"] summary span,
+  [class*="capitalAccess_identity__"] span,
+  [class*="_panel__"] summary,
+  [class*="handover_tag__"]
+) { color: var(--mzs-admin-green) !important; }
+.admin-light-content [class*="_tabs__"] a[aria-current="page"] {
+  background: var(--mzs-admin-soft) !important;
+  border-color: var(--mzs-admin-border) !important;
+  color: var(--mzs-admin-green) !important;
+}
+
+/* Link buttons need the same contrast as real buttons. This rule must follow
+   the general link and secondary-action rules above. */
+.admin-light-content :is(a.admin-button-primary,a[class*="_button__"],a[class*="admin_primary__"]),
+.admin-light-content .admin-primary-action {
+  background: var(--mzs-admin-green) !important;
+  border-color: var(--mzs-admin-green) !important;
+  color: #fff !important;
+}
+.admin-light-content :is(a.admin-button-primary,a[class*="_button__"],a[class*="admin_primary__"],.admin-primary-action) :is(span,strong,small) {
+  color: inherit !important;
+}
+.admin-light-content a[class*="_secondary__"] {
+  background: var(--mzs-admin-surface) !important;
+  color: var(--mzs-admin-green) !important;
+}
+.admin-light-content [class*="admin_languages__"] [aria-current="page"] {
+  color: #fff !important;
+}
+.admin-light-content [class*="deletion_confirm__"] {
+  background: #803d2e !important;
+  color: #fff !important;
+  border-color: #803d2e !important;
+}
+.admin-light-content [class*="deletion_trigger__"],
+.admin-light-content [class*="handover_overdue__"] {
+  color: #8b443a !important;
+}
 
 @media(max-width:700px) {
   .admin-light-content { min-height: calc(100vh - 70px); padding-bottom: 20px; }
