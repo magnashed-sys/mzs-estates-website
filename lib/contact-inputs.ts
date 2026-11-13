@@ -16,7 +16,9 @@ function stableCountries(locale: string): readonly {code: string; name: string}[
 export function countryName(code: string, locale = 'en') {
   return stableCountries(locale)?.find(item => item.code === code)?.name ?? displayNames(locale).of(code) ?? code;
 }
-export function countryOptions(locale: string, telephone = false) {
+export function countryOptions(locale: string, telephone = false, localized = true) {
+  // ISO labels are deterministic across Node/browser ICU versions on the first render.
+  if (!localized) return [...(telephone ? phoneCountries : countryCodes)].sort().map(code => ({code, name: code}));
   // Persisted labels and ordering avoid hydration mismatches between Node and browser CLDR releases.
   const stable = stableCountries(locale);
   if (stable) return stable.filter(item => telephone ? phoneCountries.includes(item.code as CountryCode) : countryCodes.includes(item.code));
