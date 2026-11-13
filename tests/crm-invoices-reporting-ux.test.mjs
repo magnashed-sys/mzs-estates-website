@@ -10,7 +10,7 @@ test('CRM register adds role and account-state filtering without changing author
  const css=read('app/admin/relationships/crm-register.module.css');
  assert.match(page,/await requireEstateAdmin\(\)/);
  assert.match(page,/readRegister\(db, 'mzs_lease_relationships'\)/);
- assert.match(register,/const \[roleFilter,setRoleFilter\]=useState\('all'\)/);
+ assert.match(register,/const \[roleFilter,setRoleFilter\]=useRegisterFilter\('role', 'all', \[.*relationshipRoles\]\)/);
  assert.match(register,/const \[accountFilter,setAccountFilter\]/);
  assert.match(register,/r\.roles\|\|\[\]\)\.includes\(roleFilter\)/);
  assert.match(register,/accountFilter==='linked'\?isLinked\(r\):!isLinked\(r\)/);
