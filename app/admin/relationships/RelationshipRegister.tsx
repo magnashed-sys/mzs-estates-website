@@ -3,7 +3,8 @@ import {useAdminI18n} from '../../../lib/admin/i18n';
 
 import CountrySelect from "../../components/CountrySelect";
 import PhoneInput from "../../components/PhoneInput";
-import {useState, useTransition} from 'react';
+import {useMemo, useState, useTransition} from 'react';
+import {useRegisterFilter} from '../../../lib/admin/use-register-filter';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {saveRelationship} from './actions';
@@ -30,10 +31,10 @@ export default function RelationshipRegister({relationships, members = [], initi
   const initialMember = members.find(m => m.id === initialProfile);
   const [editing, setEditing] = useState<RelationshipRecord | null | undefined>(initialRecord || (createInitially || initialMember ? null : undefined));
   const [draft, setDraft] = useState<Draft>(initialRecord ? editable(initialRecord) : newDraft(initialKind, initialMember));
-  const [filter, setFilter] = useState<'all' | 'person' | 'company'>(initialFilter);
-  const [search, setSearch] = useState('');
-  const [roleFilter,setRoleFilter]=useState('all');
-  const [accountFilter,setAccountFilter]=useState<'all'|'linked'|'unlinked'>('all');
+  const [filter, setFilter] = useRegisterFilter('kind', 'all', ['all','person','company']);
+  const [search, setSearch] = useRegisterFilter('q');
+  const [roleFilter,setRoleFilter]=useRegisterFilter('role', 'all', ['all', ...relationshipRoles]);
+  const [accountFilter,setAccountFilter]=useRegisterFilter('account', 'all', ['all','linked','unlinked']);
   const [pending, start] = useTransition();
   const [error, setError] = useState('');
   const [existingId, setExistingId] = useState<string>();
@@ -53,7 +54,8 @@ export default function RelationshipRegister({relationships, members = [], initi
     (accountFilter==='all'||(accountFilter==='linked'?isLinked(r):!isLinked(r)))&&
     match([r.name,r.email,r.phone,r.reference,r.address,...(r.roles||[]),...Object.values(r.company_details||{}).filter((v):v is string=>typeof v==='string')])
   );
-  const availableAccounts=unextendedMembers(relationships,members);
+  const availableAccounts=useMemo(()=>unextendedMembers(relationships,members),[relationships,members]);
+  const membersById=useMemo(()=>new Map(members.map(m=>[m.id,m])),[members]);
   const existingAccounts=availableAccounts.filter(m=>
     filter!=='company'&&
     (roleFilter==='all'||roleFilter===m.role)&&
@@ -68,7 +70,7 @@ export default function RelationshipRegister({relationships, members = [], initi
   const crmCount=relationships.length+availableAccounts.length;
   const companyCount=relationships.filter(r=>r.kind==='company').length;
   const accountCount=relationships.filter(r=>Boolean(r.profile_id)).length+availableAccounts.length;
-  const accountLabel = (id?: string | null) => {const m = members.find(m => m.id === id);return m ? `${m.full_name || m.email} · ${m.is_active === false ? 'Inactive' : 'Existing login'}` : 'No linked login';};
+  const accountLabel = (id?: string | null) => {const m = id ? membersById.get(id) : undefined;return m ? `${m.full_name || m.email} · ${m.is_active === false ? 'Inactive' : 'Existing login'}` : 'No linked login';};
   return <>
     <p className={s.status}>{adminT("Use one person record per client and link companies to the same contact account. Roles describe the relationship; login access and project permissions remain controlled separately.")}</p>
     <section className={crm.summary} aria-label={l('CRM relationship overview','Resumen de relaciones CRM')}>

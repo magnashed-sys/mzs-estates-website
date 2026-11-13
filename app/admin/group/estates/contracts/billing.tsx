@@ -1,6 +1,7 @@
 'use client';
 import {useAdminI18n} from '../../../../../lib/admin/i18n';
 
+import {useRegisterFilter} from '../../../../../lib/admin/use-register-filter';
 import {useState,useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import {sendInvoice,recordPayment,reversePayment} from './actions';
@@ -17,7 +18,7 @@ export type Payment={id:string;invoice_id:string;amount:number;received_on:strin
 export function Billing({issued,payments}:{issued:Issued[];payments:Payment[]}){
  const {t:adminT,locale:adminLocale}=useAdminI18n();
 
- const [query,setQuery]=useState('');const [status,setStatus]=useState('all');
+ const [query,setQuery]=useRegisterFilter('invoiceQuery');const [status,setStatus]=useRegisterFilter('paymentStatus','all',['all','open','paid']);
  const visible=issued.filter(i=>(!query||`${i.number} ${i.payload.snapshot.tenant_name}`.toLowerCase().includes(query.toLowerCase()))&&(status==='all'||(status==='open'?invoiceBalance(i,payments)>0:invoiceBalance(i,payments)<=0)));
  const router=useRouter();const [busy,start]=useTransition();const [message,setMessage]=useState('');const [selected,setSelected]=useState<string|null>(null);const [paymentKey,setPaymentKey]=useState('');
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const totals=cashflowSummary(issued,payments,today);const invoice=issued.find(i=>i.id===selected);

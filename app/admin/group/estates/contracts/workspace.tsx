@@ -4,6 +4,7 @@ import {cashflowSummary} from '../../../../../lib/estates/lease-cashflow';
 import {billingSelection} from '../../../../../lib/relationships/overview';
 import {useAdminI18n} from '../../../../../lib/admin/i18n';
 
+import {useRegisterFilter} from '../../../../../lib/admin/use-register-filter';
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -46,10 +47,10 @@ export default function ContractWorkspace({relationships,properties,units,member
  const [selected,setSelected]=useState<string|null>(searchParams.get('contract'));
  const [error,setError]=useState('');const [notice,setNotice]=useState('');
  const l=(en:string,es:string)=>adminLocale.startsWith('es')?es:en;
- const [entityFilter,setEntityFilter]=useState('');
- const [monthFilter,setMonthFilter]=useState('');
- const [statusFilter,setStatusFilter]=useState('active');
- const [filter,setFilter]=useState('');const [propertyFilter,setPropertyFilter]=useState(searchParams.get('property')||'');
+ const [entityFilter,setEntityFilter]=useRegisterFilter('entity');
+ const [monthFilter,setMonthFilter]=useRegisterFilter('month');
+ const [statusFilter,setStatusFilter]=useRegisterFilter('status','active',['active','ended','draft','all']);
+ const [filter,setFilter]=useRegisterFilter('q');const [propertyFilter,setPropertyFilter]=useRegisterFilter('property');
  const [invoiceId,setInvoiceId]=useState<string|null>(null);
  const unitFilter=searchParams.get('unit');
  const profileFilter=searchParams.get('profile');
