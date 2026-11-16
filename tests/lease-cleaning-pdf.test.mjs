@@ -24,3 +24,19 @@ test('rental PDF appends the frozen hours statement, paginates long descriptions
  const ordinary=fixture();delete ordinary.payload.snapshot.cleaning;ordinary.payload.lines.pop();
  assert.equal((await PDFDocument.load(await invoicePdf(ordinary))).getPageCount(),1,'ordinary rental PDFs are unaffected');
 });
+
+test('Zorgbalans-style rental layout fits mixed VAT, issuer details and payment instructions on one page',async()=>{
+ const invoice=fixture();delete invoice.payload.snapshot.cleaning;
+ invoice.number='TEST-7128';invoice.payload.lines=[{description:'Huur',vat:'exempt',net:550,tax:0,total:550},{description:'Voorschot nutsvoorzieningen',vat:'21',net:50,tax:10.5,total:60.5}];
+ invoice.payload.subtotal=600;invoice.payload.tax_total=10.5;invoice.total=610.5;
+ Object.assign(invoice.payload.snapshot,{issuer_name:'Synthetic issuer',issuer_tax_id:'TEST-TAX',issuer_address:'Teststraat 23\\n1000AA Teststad\\nNH\\nNetherlands',tenant_name:'Synthetic tenant BV',tenant_address:'Testlaan 1\\n2000BB Teststad\\nNH\\nThe Netherlands',issuer_details:{country:'Netherlands',contact_name:'Synthetic issuer',email:'issuer@example.test',phone:'+31000000000',account_holder:'Synthetic issuer',payment_instructions:'Huurbetalingen dienen voor de 1ste van de desbetreffende maand te zijn bijgeschreven'}});
+ const before=structuredClone(invoice);
+ assert.equal((await PDFDocument.load(await invoicePdf(invoice))).getPageCount(),1);
+ assert.deepEqual(invoice,before,'rendering must not mutate financial snapshots');
+ invoice.payload.lines[0].description='Huur kantoor één - Димитров '.repeat(400);
+ invoice.payload.snapshot.customer_reference='Reference '.repeat(150);
+ assert.ok((await PDFDocument.load(await invoicePdf(invoice))).getPageCount()>2);
+ invoice.payload.snapshot.issuer_details.logo='data:image/png;base64,AAAA';
+ await assert.rejects(invoicePdf(invoice),/saved issuer logo is invalid/);
+});
+
