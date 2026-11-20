@@ -69,10 +69,10 @@ export async function saveIssuer(input:Record<string,unknown>,id?:string,version
  const {data,error}=await q.select('id').maybeSingle();if(error||!data)return {error:error?issuerSaveError(error):'Issuer changed. Refresh before editing.'};revalidatePath(path);return {id:data.id};
 }
 export async function issueInvoice(id:string){const {db}=await requireContractAdmin();const {data,error}=await db.rpc('mzs_issue_lease_invoice',{p_draft:id});if(error)return {error:error.message};revalidatePath(path);return {id:data as string};}
-export async function sendInvoice(id:string){
+export async function sendInvoice(id:string,copy?:{previousStart:string|null}){
  const {db}=await requireContractAdmin();const {data,error}=await db.from('mzs_lease_invoices').select('*').eq('id',id).single();if(error||!data)return {error:'Invoice unavailable.'};
  try{const {prepareInvoiceDelivery}=await import('../../../../../lib/estates/invoice-delivery');const deliver=await prepareInvoiceDelivery(data);
- const {data:token,error:claimError}=await db.rpc('mzs_claim_lease_invoice_mail',{p_id:id});if(claimError)return {error:claimError.message};
+ const {data:token,error:claimError}=copy ? await db.rpc('mzs_claim_lease_invoice_copy',{p_id:id,p_previous_start:copy.previousStart}) : await db.rpc('mzs_claim_lease_invoice_mail',{p_id:id});if(claimError)return {error:claimError.message};
  const status=await deliver(id,token);revalidatePath(path);return {status};
  }catch(e){return {error:e instanceof Error?e.message:'Delivery could not be verified.'};}
 }
