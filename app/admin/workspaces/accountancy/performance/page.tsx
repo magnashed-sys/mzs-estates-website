@@ -83,7 +83,7 @@ export default async function PropertyFinancialPerformance({searchParams}:{searc
   {failed&&<p role="alert" className={s.error}>{l('The full source register could not be verified. No partial financial totals are shown.','No se pudo verificar el registro completo. No se muestran totales financieros parciales.')}</p>}
   {counts&&source&&chosen&&<>
    <section className={s.metrics} aria-label={l('Administrative financial overview','Resumen financiero administrativo')}>
-    <div><span>{l('Issued invoices incl. VAT','Facturas emitidas incl. IVA')}</span><strong>{money(counts.invoicedGross)}</strong><small>{counts.invoiceCount} {l('invoices, by issue date','facturas, por fecha de emisión')}</small></div>
+    <div><span>{l('Issued invoices incl. VAT','Facturas emitidas incl. IVA')}</span><strong>{money(counts.invoicedGross)}</strong><small>{counts.invoiceCount} {l('invoices contributing to this year','facturas que corresponden al ejercicio')}</small></div>
     <div><span>{l('Credit notes incl. VAT','Abonos incl. IVA')}</span><strong>{money(counts.creditsGross)}</strong><small>{counts.creditCount} {l('credits, shown separately','abonos, por separado')}</small></div>
     <div><span>{l('Reviewed purchase concepts incl. VAT','Borradores revisados incl. IVA')}</span><strong>{money(counts.reviewedCostGross)}</strong><small>{l('Reviewed does not mean paid or posted','Revisado no significa pagado ni contabilizado')}</small></div>
     <div><span>{l('Purchase concepts pending review','Borradores pendientes de revisión')}</span><strong>{money(counts.pendingCostGross)}</strong><small>{l('Not posted expenses','No son gastos contabilizados')}</small></div>
