@@ -130,3 +130,13 @@ test('cockpit authorization happens before any action source renders',async()=>{
  let rendered=false;const p=load('app/admin/workspaces/group/page.tsx',{'react/jsx-runtime':jsx,'react':React,'next/link':{default:'a'},'../../../../lib/admin/i18n-server':{getAdminI18n:async()=>({t:v=>v,language:'en'})},'../../../../lib/security/estate-properties':{requireEstateAdmin:async()=>{throw Error('denied')}},'../../DailyOperations':{default:()=>null},'../../FinancialCockpit':{default:()=>null},'../../GroupActionCenter':{default:()=>{rendered=true;return null}},'../workspace.module.css':{default:{}}});
  await assert.rejects(()=>p.default({searchParams:Promise.resolve({view:'actions'})}),/denied/);assert.equal(rendered,false);
 });
+
+test('allocation review flags the incomplete contract and links to it',async()=>{
+ const contract={id:uid(10),title:'Rental A',status:'active',unit_ids:[uid(11)],first_period:'2026-12-01',pricing_basis:'separate',line_roles:['rent'],lines:[{amount:'450.00',description:'Huur',vat:'0'}]};
+ const {run}=setup({tables:{mzs_lease_contracts:[contract,{...contract,id:uid(12),unit_ids:[uid(11),uid(13)]}],mzs_estate_units:[{id:uid(11),address:'Unit A'},{id:uid(13),address:'Unit B'}]}});
+ const result=await run(false);
+ const alerts=result.items.filter(i=>i.id.startsWith('allocation:'));
+ assert.equal(alerts.length,1);
+ assert.match(alerts[0].detail,/Unit B/);
+ assert.ok(alerts[0].href.endsWith('contract='+uid(12)));
+});
