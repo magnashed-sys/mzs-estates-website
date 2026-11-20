@@ -57,7 +57,7 @@ export async function GET(request:NextRequest){
    includeBalances?loadInvoiceRegister(db,year):Promise.resolve([])
   ]);
   let annualSnapshot;
-  if(detail==='summary'){
+  if(detail==='summary'&&request.nextUrl.searchParams.get('annual')==='1'){
    const [register,rent]=await Promise.all([loadInvoiceRegister(db,2026),db.rpc('mzs_cockpit_contract_rent',{p_year:2027})]);
    if(rent.error||rent.data==null)throw new Error('Annual rental outlook unavailable');
    const invoiced=register.filter(row=>row.issuerId==='1984220a-89ad-4e7b-8c70-399673e00451').reduce((sum,row)=>sum+row.gross,0);
