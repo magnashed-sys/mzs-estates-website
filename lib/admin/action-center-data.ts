@@ -1,4 +1,6 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
+import {contractualAllocation,type UnitContract} from '../estates/unit-contracts';
+import {effectiveLeaseLines,type PricingLine,type Adjustment} from '../estates/lease-pricing';
 import {allRows} from '../property-operations/staff-data';
 import {loadInvoiceRegister} from '../finance/invoice-register';
 import {annualSource} from '../accountancy/administration-data';
@@ -35,6 +37,30 @@ export async function loadActionCenter(db:SupabaseClient,today:string,includeMon
  const year=Number(today.slice(0,4)),month=today.slice(0,7);
  await Promise.all([
   source('invoices','invoices',async()=>{const rows=await invoices;if(!rows)throw Error('Unavailable invoices');return invoiceActions(rows,today);}),
+  source('unit_allocations','operations',async()=>{
+   const [contracts,units,adjustments]=await Promise.all([
+    read<UnitContract & {lines:PricingLine[]}>('mzs_lease_contracts','id,title,tenant_name,status,unit_ids,lines,pricing_basis,line_roles,first_period,lease_start,lease_end',q=>q.in('status',['active','draft'])),
+    read<{id:string;address:string}>('mzs_estate_units','id,address'),
+    read<Adjustment>('mzs_lease_adjustments','id,contract_id,status,revision,effective_on,new_lines',q=>q.eq('status','approved'))
+   ]);
+   const addresses=new Map(units.map(u=>[u.id,u.address.trim()]));
+   const alerts:DailyAction[]=[];
+   for(const contract of contracts){
+    const changes=adjustments.filter(a=>a.contract_id===contract.id);
+    const dates=[today,...changes.filter(a=>a.effective_on>today).map(a=>a.effective_on)].sort();
+    for(const date of dates){
+     const lines=effectiveLeaseLines({lines:contract.lines as PricingLine[]},changes,date);
+     const allocated=contract.unit_ids.map(id=>contractualAllocation({...contract,lines},id,addresses));
+     const missing=contract.unit_ids.filter((id,i)=>!addresses.has(id)||!allocated[i]);
+     const expected=lines.reduce((sum,l)=>{const net=Math.round(Number(l.amount)*100);return sum+net+Math.round(net*(l.vat==='exempt'?0:Number(l.vat))/100)},0);
+     if(contract.unit_ids.length&&!missing.length&&allocated.reduce((s,a)=>s+(a?.total??0),0)===expected)continue;
+     const detail=missing.length?missing.map(id=>addresses.get(id)??id).join(', '):contract.unit_ids.length?'Unitbedragen sluiten niet aan':'Geen unit gekoppeld';
+     alerts.push({id:'allocation:'+contract.id,category:'operations',priority:'review',title:'Controleer unitallocatie',detail:contract.title+' · '+detail+(date>today?' · '+date:''),href:'/admin/group/estates/contracts?view=contracts&contract='+contract.id,dueOn:null,count:1,kind:'record'});
+     break;
+    }
+   }
+   return alerts;
+  }),
   source('crm','crm',async()=>{
    const [rows,contacts]=await Promise.all([read<CrmActivity>('mzs_crm_activities','id,relationship_id,kind,title,due_on,status',q=>q.eq('kind','task').eq('status','open')),suppliers]);
    if(!contacts)throw Error('Unavailable relationships');
