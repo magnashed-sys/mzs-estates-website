@@ -56,6 +56,13 @@ export async function GET(request:NextRequest){
    includeArchive?readFinancialArchive(db,year):Promise.resolve([]),
    includeBalances?loadInvoiceRegister(db,year):Promise.resolve([])
   ]);
+  let annualSnapshot;
+  if(detail==='summary'){
+   const [register,rent]=await Promise.all([loadInvoiceRegister(db,2026),db.rpc('mzs_cockpit_contract_rent',{p_year:2027})]);
+   if(rent.error||rent.data==null)throw new Error('Annual rental outlook unavailable');
+   const invoiced=register.filter(row=>row.issuerId==='1984220a-89ad-4e7b-8c70-399673e00451').reduce((sum,row)=>sum+row.gross,0);
+   annualSnapshot={invoiced:invoiced/100,rent:Number(rent.data)};
+  }
   const result=buildFinancialPhase2({
    year,asOf:today,entityId,
    contracts:contracts as AttributedLease[],rentPayments:rentPayments as AttributedPayment[],
@@ -64,7 +71,7 @@ export async function GET(request:NextRequest){
    issuers:issuers as Issuer[],invoices:invoices as LeaseInvoice[],archiveInvoices
   });
   const filters=invoiceFilters({year:String(year)});const chosen=entityId==='unassigned'?[]:currentInvoices.filter(i=>(year===2026||i.source!=='archive')&&(entityId==='all'||i.issuerId===entityId));
-  return Response.json({...result,loadedDetail:detail,historical:{...result.historical,enabled:includeArchive&&result.historical.enabled},...(includeBalances?{currentInvoices:selectInvoices(chosen,filters,today).totals}:{})},{headers});
+  return Response.json({...result,annualSnapshot,loadedDetail:detail,historical:{...result.historical,enabled:includeArchive&&result.historical.enabled},...(includeBalances?{currentInvoices:selectInvoices(chosen,filters,today).totals}:{})},{headers});
  }catch{
   // Do not leak which private financial register exists or failed.
   return Response.json({error:'Financial overview is currently unavailable; no partial totals are shown.'},{status:503,headers});
