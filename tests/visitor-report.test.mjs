@@ -8,15 +8,15 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const exports={};
 vm.runInNewContext(ts.transpileModule(read('lib/mzs/visitor-report.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Intl,Date});
 const {reportWindow,visitorPath,visitorReport}=exports;
-test('Weekly visitor window covers Monday to Sunday across DST and year boundaries',()=>{
+test('Daily visitor window covers the previous calendar day across DST and year boundaries',()=>{
  for(const [now,start,end,hours] of [
- ['2026-11-02T06:00:00Z','2026-10-25T23:00:00.000Z','2026-11-01T23:00:00.000Z',168],
- ['2026-10-26T06:00:00Z','2026-10-18T22:00:00.000Z','2026-10-25T23:00:00.000Z',169],
- ['2026-03-30T05:00:00Z','2026-03-22T23:00:00.000Z','2026-03-29T22:00:00.000Z',167],
- ['2027-01-04T06:00:00Z','2026-12-27T23:00:00.000Z','2027-01-03T23:00:00.000Z',168]]) {
+ ['2026-11-21T06:00:00Z','2026-11-19T23:00:00.000Z','2026-11-20T23:00:00.000Z',24],
+ ['2026-10-26T06:00:00Z','2026-10-24T22:00:00.000Z','2026-10-25T23:00:00.000Z',25],
+ ['2026-03-30T05:00:00Z','2026-03-28T23:00:00.000Z','2026-03-29T22:00:00.000Z',23],
+ ['2027-01-01T06:00:00Z','2026-12-30T23:00:00.000Z','2026-12-31T23:00:00.000Z',24]]) {
  const w=reportWindow(new Date(now));assert.equal(w.start,start);assert.equal(w.end,end);assert.equal((Date.parse(end)-Date.parse(start))/3600000,hours);
  }
- for(const now of ['2026-11-02T05:00Z','2026-03-30T06:00Z','2026-11-03T06:00Z'])assert.equal(reportWindow(new Date(now)),null);
+ for(const now of ['2026-11-02T05:00Z','2026-03-30T06:00Z'])assert.equal(reportWindow(new Date(now)),null);
 });
 test('Only allowlisted pages are recorded, never tokens or arbitrary text',()=>{
  for(const path of ['/reset-password?token=secret','/private?email=x','/private#secret','/admin','//evil.com','/private/projects/a%2Fb','/api/account','/forgot-password','/private/profile/security'])assert.equal(visitorPath(path),null);

@@ -20,7 +20,7 @@
     },
     {
       "path": "/api/visitor-report",
-      "schedule": "0 5,6 * * 1"
+      "schedule": "0 5,6 * * *"
     },
     {
       "path": "/api/weekly-hours-report",
