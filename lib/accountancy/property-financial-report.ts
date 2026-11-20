@@ -3,7 +3,7 @@ import {annualCategory,type YearSource} from './administration';
 
 /** Reporting presentation, not a posting engine, tax return or income statement.
  * Values are original invoice / purchase-concept GROSS cents, including source VAT.
- * The same source is counted once per entity-year, by its original document date.
+ * The same source is counted once per entity-year, with rental and booking revenue distributed over service months.
  * Only explicit income allocations may attribute revenue to a property/project.
  */
 export type PropertyFinanceTotals={
@@ -67,13 +67,18 @@ export function propertyFinancialReport(source:YearSource,scope:PropertyFinanceS
   // For the complete entity report, unknown allocations are visible but never
   // silently attributed to a property.
   if(!matches(record.allocation?.property_id,record.allocation?.project_id))continue;
-  const gross=safeAmount(record.gross_cents);
-  apply(record.invoice_date,'invoicedGross',gross);
-  apply(record.invoice_date,'invoiceCount',1);
-  if(!explicitlyAllocated){
-   apply(record.invoice_date,'unallocatedInvoiceCount',1);
-   apply(record.invoice_date,'unallocatedIncomeGross',gross);
+  const portions=record.months??[{month:record.invoice_date,cents:record.gross_cents}];
+  for(const part of portions){
+   const bucket=byMonth.get(monthKey(part.month,year))!;
+   apply(part.month,'invoicedGross',safeAmount(part.cents));
+   add(bucket,'invoiceCount',1);
+   if(!explicitlyAllocated){
+    apply(part.month,'unallocatedIncomeGross',part.cents);
+    add(bucket,'unallocatedInvoiceCount',1);
+   }
   }
+  add(totals,'invoiceCount',1);
+  if(!explicitlyAllocated)add(totals,'unallocatedInvoiceCount',1);
  }
  const credits=source.sales.credit_notes??[];
  if(!Array.isArray(credits))throw Error('Invalid credit-note register');

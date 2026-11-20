@@ -145,3 +145,16 @@ test('Monthly report export verifies admin scope and uses formula-safe accountan
  assert.match(page,/exportParams\.set\('project',project\)/);
  assert.match(page,/\/admin\/workspaces\/accountancy\/performance\/export\?/);
 });
+
+test('A stay issued last year can contribute to two months and counts once in the annual total',()=>{
+ const source=setup();
+ invoiceRows=[{allocation_source:'bookings',invoice_id:'booking',invoice_date:'2025-12-12',
+  gross_cents:12500,months:[{month:'2026-01-01',cents:7500},{month:'2026-02-01',cents:5000}]}];
+ source.sales.credit_notes=[];
+ const {months,totals}=report(source);
+ assert.equal(months[0].invoicedGross,7500);
+ assert.equal(months[1].invoicedGross,5000);
+ assert.equal(totals.invoicedGross,12500);
+ assert.equal(totals.invoiceCount,1);
+ assert.equal(totals.unallocatedInvoiceCount,1);
+});

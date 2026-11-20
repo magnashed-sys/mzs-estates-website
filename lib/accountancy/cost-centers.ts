@@ -4,10 +4,22 @@ export type IncomeSource='leases'|'bookings'|'external'|'services';
 export type IncomeAllocation={year_id:string;source:IncomeSource;invoice_id:string;property_id:string|null;project_id:string|null;evidence_reference:string;revision:number};
 const sourceNames={leases:'rental_contract',bookings:'holiday_booking',external:'external_cost_invoice',services:'standalone_invoice'} as const;
 export function yearIncome(s:YearSource){
- const records=Object.entries(sourceNames).flatMap(([key,source])=>(s.sales[key]??[]).filter((i:IssuedInvoice)=>i.issued_on.startsWith(s.administration.fiscal_year+'-')).map((i:IssuedInvoice)=>({
-  ...normalizeIssuedInvoice({...i,source},s.administration.issuer_id,s.administration.fiscal_year),allocation_source:key as IncomeSource,
-  gross_cents:euroCents(i.total)
- })));
+ type PeriodInvoice = IssuedInvoice & {revenue_months?:{month:string;cents:number}[]};
+ const year=s.administration.fiscal_year;
+ const records=Object.entries(sourceNames).flatMap(([key,source])=>{
+  const invoices:PeriodInvoice[]=s.sales[key]??[];
+  return invoices.flatMap(i=>{
+   const gross=euroCents(i.total);
+   const months=i.revenue_months??[{month:i.issued_on,cents:gross}];
+   if(months.some(m=>!Number.isSafeInteger(m.cents)||m.cents<0)||months.reduce((n,m)=>n+m.cents,0)!==gross)
+    throw Error('Invalid revenue distribution');
+   const portions=months.filter(m=>m.month.startsWith(year+'-'));
+   if(!portions.length)return [];
+   const cents=portions.reduce((n,m)=>n+m.cents,0);
+   const invoice=normalizeIssuedInvoice({...i,source},s.administration.issuer_id,Number(i.issued_on.slice(0,4)));
+   return [{...invoice,allocation_source:key as IncomeSource,gross_cents:cents,gross_eur:(cents/100).toFixed(2),months:portions}];
+  });
+ });
  const keys=new Set<string>();for(const r of records){const k=r.allocation_source+':'+r.invoice_id;if(keys.has(k))throw Error('Duplicate income source');keys.add(k);}
  for(const a of s.income_allocations??[]){
   const project=a.project_id?s.projects.find(p=>p.id===a.project_id):null;

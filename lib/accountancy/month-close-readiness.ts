@@ -55,7 +55,7 @@ export function monthCloseReadiness(source:YearSource,invoices:readonly InvoiceR
  const controls=annualInvoiceControl(source).rows.filter(r=>r.invoice_date.slice(0,7)===month);
  let grossConceptCents=0;
  for(const cost of costs)grossConceptCents=add(grossConceptCents,cost.gross_cents);
- const income=yearIncome(source).filter(r=>r.invoice_date.slice(0,7)===month&&!r.allocation);
+ const income=yearIncome(source).filter(r=>!r.allocation).flatMap(r=>(r.months??[{month:r.invoice_date,cents:r.gross_cents}]).filter(p=>p.month.slice(0,7)===month).map(p=>({...r,gross_cents:p.cents})));
  let unallocatedGrossCents=0;
  for(const i of income)unallocatedGrossCents=add(unallocatedGrossCents,i.gross_cents);
  const purchases={
