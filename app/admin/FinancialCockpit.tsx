@@ -94,6 +94,10 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
   {data&&!loading&&<>
    <p><a href="/admin/workspaces/estates/reports">{adminT("Property expense drafts and accountant export →")}</a></p><div className={s.scopeNote}>{adminT("Reporting scope:")} <strong>{entityLabel}</strong>{adminT(". Rental invoices and loans use their explicitly selected issuing/reporting entities. Unlinked records stay visible as Unassigned.")}</div>
    {view==='overview'&&<section className={s.periodSnapshot} aria-label={tr('Financial snapshot for the selected month and current balances','Resumen financiero del mes seleccionado y saldos actuales')}>
+    {data.annualSnapshot&&<div className={s.periodGrid}>
+     <div className={s.periodCard}><span>Totaal gefactureerd 2026 · M. Nashed</span><strong>{displayEuroExact(data.annualSnapshot.invoiced,'nl-NL')}</strong><small>Op factuurdatum, inclusief btw en creditnota’s.</small></div>
+     <div className={s.periodCard}><span>Verwachte huurinkomsten 2027</span><strong>{displayEuroExact(data.annualSnapshot.rent,'nl-NL')}</strong><small>Alle verhuurders · per huurmaand, inclusief voorschotten en btw.</small></div>
+    </div>}
     <h3>{tr('Selected month','Mes seleccionado')} · {monthLabel(year+'-'+String(month).padStart(2,'0'),adminLocale)} {year}</h3>
     <div className={s.periodGrid}>
      <div className={s.periodCard}><span>{tr('Expected rental billing · selected month','Facturación prevista de alquiler · mes seleccionado')}</span>
