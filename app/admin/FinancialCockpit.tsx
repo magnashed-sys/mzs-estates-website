@@ -34,7 +34,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
  useEffect(()=>{
   const ctrl=new AbortController();
   setLoading(true);setError('');setData(null);
-  fetch('/api/admin/financial-cockpit?year='+year+'&entity='+encodeURIComponent(entity)+'&detail='+detail,{cache:'no-store',signal:ctrl.signal})
+  fetch('/api/admin/financial-cockpit?year='+year+'&entity='+encodeURIComponent(entity)+'&detail='+detail+(view==='overview'?'&annual=1':''),{cache:'no-store',signal:ctrl.signal})
    .then(async r=>{if(!r.ok)throw new Error('The complete financial overview could not be loaded.');return r.json() as Promise<FinancialPhase2>;})
    .then(next=>{if(!ctrl.signal.aborted){setEntityOptions(next.entities);setData(next);}}).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
    .finally(()=>{if(!ctrl.signal.aborted)setLoading(false);});
