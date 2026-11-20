@@ -39,7 +39,7 @@ export default function FinancialCockpit({refreshVersion}:{refreshVersion:number
    .then(next=>{if(!ctrl.signal.aborted){setEntityOptions(next.entities);setData(next);}}).catch(()=>{if(!ctrl.signal.aborted)setError('Financial data is currently unavailable. Totals are hidden to avoid an incomplete report.');})
    .finally(()=>{if(!ctrl.signal.aborted)setLoading(false);});
   return ()=>ctrl.abort();
- },[year,entity,detail,retry,refreshVersion]);
+ },[year,entity,detail,view,retry,refreshVersion]);
  const selected=data?.rows.find(r=>r.month===year+'-'+String(month).padStart(2,'0'));
  const rows=data?.rows||[];
  const loanAvailable=data?.loansAvailable===true;
