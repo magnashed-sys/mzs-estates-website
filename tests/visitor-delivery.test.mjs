@@ -6,7 +6,7 @@ import ts from 'typescript';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function load(file,deps={},globals={}) {const exports={};vm.runInNewContext(ts.transpileModule(read(file),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,{exports,require:n=>{assert.ok(n in deps,n);return deps[n];},Date,Intl,Buffer,...globals});return exports;}
 const report=load('lib/mzs/visitor-report.ts');
-function harness({environment='production',role='admin',active=true,email='owner@example.invalid',claimed=false,smtp='ok',saveError=false}={}) {
+function harness({environment='production',role='client',active=true,email='magdy@mzsgroup.eu',claimed=false,smtp='ok',saveError=false}={}) {
  const sent=[];let claims=0;let status;let claimedState=claimed;
  const db={auth:{admin:{getUserById:async()=>({data:{user:{email,email_confirmed_at:'2026-01-01'}}})}},rpc:async()=>({data:[]}),from(table){
  let op='select';const q={select(){return q},eq(){return q},single:async()=>({data:table==='mzs_visitor_settings'?{enabled:true,recipient_user_id:'owner',started_at:'2026-10-24'}:{role,is_active:active,email}}),insert:async()=>{claims++;if(claimedState)return {error:{code:'23505'}};claimedState=true;return{};},update(v){op='update';status=v.status;return q},delete(){return q},lt:async()=>({}),then(resolve){return Promise.resolve({data:[{report_day:'2026-10-24'}],error:op==='update'&&saveError?{}:null}).then(resolve)}};return q;}};
@@ -15,11 +15,11 @@ function harness({environment='production',role='admin',active=true,email='owner
  const {deliverVisitorReport}=load('lib/mzs/visitor-delivery.ts',{'@supabase/supabase-js':{createClient:()=>db},nodemailer,'./visitor-report':report},{process:{env}});
  return {run:()=>deliverVisitorReport(new Date('2026-11-21T06:00:00Z')),sent,get status(){return status},get claims(){return claims}};
 }
-test('Scheduled delivery uses only the verified active admin and cannot send twice',async()=>{
- const h=harness();assert.equal(await h.run(),'accepted');assert.equal(h.sent[0].to,'owner@example.invalid');assert.match(h.sent[0].subject,/Bezoekersoverzicht 2026-11-20$/);assert.equal(await h.run(),'already_claimed');assert.equal(h.sent.length,1);
+test('Scheduled delivery uses only the verified active owner mailbox and cannot send twice',async()=>{
+ const h=harness();assert.equal(await h.run(),'accepted');assert.equal(h.sent[0].to,'magdy@mzsgroup.eu');assert.match(h.sent[0].subject,/Bezoekersoverzicht 2026-11-20$/);assert.equal(await h.run(),'already_claimed');assert.equal(h.sent.length,1);
 });
-test('Preview, inactive accounts and non-admin recipients never receive visitor reports',async()=>{
- for(const config of [{environment:'preview'},{active:false},{role:'client'}]){const h=harness(config);await h.run();assert.equal(h.sent.length,0);assert.equal(h.claims,0);}
+test('Preview, inactive accounts and other mailboxes never receive visitor reports',async()=>{
+ for(const config of [{environment:'preview'},{active:false},{role:'admin',email:'info@mzsestates.com'},{role:'client',email:'other@example.invalid'}]){const h=harness(config);await h.run();assert.equal(h.sent.length,0);assert.equal(h.claims,0);}
 });
 test('Uncertain SMTP or database acknowledgement never triggers a duplicate send',async()=>{
  for(const config of [{smtp:'unknown'},{saveError:true}]){const h=harness(config);assert.equal(await h.run(),'uncertain');assert.equal(await h.run(),'already_claimed');assert.equal(h.sent.length,1);}

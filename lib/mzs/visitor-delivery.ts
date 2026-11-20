@@ -12,11 +12,11 @@ export async function deliverVisitorReport(now=new Date()) {
   const {data:settings,error:settingsError}=await db.from('mzs_visitor_settings').select('enabled,recipient_user_id,started_at').eq('singleton',true).single();
   if(settingsError)throw new Error('Visitor settings unavailable');
   if(!settings.enabled||!settings.recipient_user_id)return 'disabled';
-  const {data:profile,error:profileError}=await db.from('profiles').select('role,is_active,email').eq('id',settings.recipient_user_id).single();
+  const {data:profile,error:profileError}=await db.from('profiles').select('is_active,email').eq('id',settings.recipient_user_id).single();
   const {data:auth,error:authError}=await db.auth.admin.getUserById(settings.recipient_user_id);
   const recipient=auth?.user?.email?.toLowerCase();
-  if(profileError||authError||profile?.role!=='admin'||profile.is_active!==true||!auth.user?.email_confirmed_at||
-    !recipient||recipient!==profile.email?.toLowerCase()||!/^[^@\s<>;,]+@[^@\s<>;,]+\.[^@\s<>;,]+$/.test(recipient))return 'recipient_requires_review';
+  if(profileError||authError||profile?.is_active!==true||!auth.user?.email_confirmed_at||
+    recipient!=='magdy@mzsgroup.eu'||recipient!==profile.email?.toLowerCase())return 'recipient_requires_review';
   const host=env.MZS_SMTP_HOST||env.SMTP_HOST,port=Number(env.MZS_SMTP_PORT||env.SMTP_PORT||587),user=env.MZS_SMTP_USER||env.SMTP_USER,pass=env.MZS_SMTP_PASSWORD||env.SMTP_PASSWORD;
   const from=env.MZS_SMTP_FROM||env.SMTP_FROM||(user?.includes('@')?`MZS Group <${user}>`:null);
   if(!host||!user||!pass||!from||![465,587].includes(port))return 'not_configured';
