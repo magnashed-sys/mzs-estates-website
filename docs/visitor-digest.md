@@ -1,10 +1,7 @@
-# Weekly visitor report (updated 2 November 2026)
-
-Owner requested weekly delivery alongside hours on Monday 07:00 Europe/Madrid. The report now covers the previous Monday through Sunday. Existing recipient and SMTP configuration are retained. Both 05:00 and 06:00 UTC cron invocations run on Monday; only local 07:00 sends. The ledger key remains the period-ending Sunday. See weekly-hours-digest.md for cutover. Below is the historical daily implementation record.
-
 # Daily visitor report
 
-The owner requested daily visitor email, selected info@mzsestates.com, and changed dispatch from 23:30 to **00:00 Europe/Madrid**. Report covers the entire preceding local calendar day. DST boundary days correctly contain 23 or 25 hours.
+The daily visitor email goes to info@mzsestates.com at **07:00 Europe/Madrid** and covers the entire preceding local calendar day. DST boundary days contain 23 or 25 hours. The separate weekly hours report runs on Mondays.
+
 
 ## Scope
 
@@ -16,7 +13,7 @@ The report contains visitor name/email/role, login and page counts, first/last t
 
 API derives user/session from validated Supabase authentication, never the request body. Only active supported roles; project and offering permissions checked for project events. Same-origin POST, restricted path allowlist, deduplication by event ID/login session and 60 events/minute limit. All new tables use RLS, no anon/authenticated grants or policies, and service-role-only invoker functions. Existing rights and tables remain unchanged.
 
-Single configured verified active admin recipient. Preview cannot send mail, even with SMTP credentials. Production/database pairing enforced. Existing SMTP_* / MZS_SMTP_* and CRON_SECRET settings are reused, with no new secret. Unique report-day claim precedes SMTP; duplicate workers cannot send twice. SMTP acceptance is not inbox delivery. Unknown delivery outcome or crash after claim needs manual review, never automatic resend. A pre-claim failure can be retried within the midnight hour. Vercel runs at 22:00 and 23:00 UTC; only the invocation corresponding to local midnight dispatches. This requires a Vercel plan allowing these schedules. No ChatGPT automation is created.
+Single configured verified active admin recipient. Preview cannot send mail, even with SMTP credentials. Production/database pairing enforced. Existing SMTP_* / MZS_SMTP_* and CRON_SECRET settings are reused, with no new secret. Unique report-day claim precedes SMTP; duplicate workers cannot send twice. SMTP acceptance is not inbox delivery. Unknown delivery outcome or crash after claim needs manual review, never automatic resend. A pre-claim failure can be retried during the local 07:00 hour. Vercel runs at 05:00 and 06:00 UTC daily; only the invocation corresponding to 07:00 local time dispatches. This requires a Vercel plan allowing these schedules. No ChatGPT automation is created.
 
 ## Release
 
