@@ -29,3 +29,19 @@ export function unitAllocation(c:UnitContract,unitId:string):UnitAllocation|null
  result.total=result.net+result.tax;
  return result;
 }
+
+/** Resolve legacy contract lines from the sole linked unit or the exact contractual address. */
+export function contractualAllocation(c:UnitContract,unitId:string,addresses:Map<string,string>){
+ const roles=c.line_roles?.length===c.lines.length?c.line_roles:c.lines.map(line=>{
+  if(line.description==='Huur')return 'rent';
+  if(line.description==='Voorschot nutsvoorzieningen')return 'advance';
+  return undefined;
+ });
+ if(!roles.every((role):role is LineRole=>role!==undefined))return null;
+ const lines=c.lines.map(line=>{
+  if(line.unit_id)return line;
+  const matches=c.unit_ids.filter(id=>addresses.has(id)&&line.description===`All-in huur ${addresses.get(id)} inclusief gas, water, elektra en internet`);
+  return {...line,unit_id:c.unit_ids.length===1?c.unit_ids[0]:matches.length===1?matches[0]:undefined};
+ });
+ return unitAllocation({...c,lines,line_roles:roles,pricing_basis:c.pricing_basis==='unclassified'?'separate':c.pricing_basis},unitId);
+}
