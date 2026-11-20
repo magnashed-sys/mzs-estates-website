@@ -224,6 +224,18 @@ export default async function PrivateProjectPage({ params }: Props) {
     .in("id", offeringIds);
   if (offeringError || !offerings?.length) notFound();
   const visibleOfferings = offerings as Offering[];
+  const isIJmuiden = ["multi-tenant-building-ijmuiden","multi-unit-building-ijmuiden"].includes(slug);
+  let propertyPhotos:{caption:string;webp:string}[] = [];
+  if (isIJmuiden) {
+    const {data: details,error} = await supabase.from("offerings")
+      .select("content").eq("project_id",property.id).eq("status","active").in("id",visibleOfferings.map(o=>o.id));
+    if (error) notFound();
+    for (const row of details ?? []) {
+      const photos = row.content?.property_photos;
+      if (Array.isArray(photos)) propertyPhotos.push(...photos.filter(photo =>
+        photo && typeof photo.caption === "string" && typeof photo.webp === "string" && /^[A-Za-z0-9+/]+=*$/.test(photo.webp)));
+    }
+  }
   const hasRental = visibleOfferings.some((o) => o.offering_type === "rental");
   const presentation = hasRental ? presentations[slug] : undefined;
   const showStagingTestCalendar = process.env.VERCEL_ENV === "preview"
@@ -581,6 +593,11 @@ export default async function PrivateProjectPage({ params }: Props) {
             <p>{t("p423")}</p>
           </div>
           <RentalCalendar projectId={property.id} />
+          {propertyPhotos.length>0 && <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%, 260px),1fr))",gap:"1rem"}}>
+            {propertyPhotos.map((photo,index)=><figure key={index} style={{margin:0}}>
+              <img src={`data:image/webp;base64,${photo.webp}`} alt={photo.caption} loading={index===0?"eager":"lazy"} style={{width:"100%",height:"auto",display:"block"}}/>
+            </figure>)}
+          </div>}
         </section>
       )}
 
