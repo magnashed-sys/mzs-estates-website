@@ -32,6 +32,7 @@ type Offering = {
   id: string;
   project_id: string;
   offering_type: string;
+  card_jpeg: string | null;
   title: string;
   status: string;
 };
@@ -56,7 +57,9 @@ const fallbackImages: Record<string, string> = {
   "villa-des-coloms-ibiza": "/properties/villa-des-coloms-ibiza/vision-12.webp",
 };
 
-function imageFor(project: Project): string | null {
+function imageFor(project: Opportunity): string | null {
+  const cover = project.offerings.find(offering => offering.card_jpeg)?.card_jpeg;
+  if (cover) return `data:image/jpeg;base64,${cover}`;
   // The overview only accepts site-local property assets as image sources.
   const configuredImage = project.hero_image_url?.trim();
   if (configuredImage?.startsWith("/properties/") && !configuredImage.includes("..")) {
@@ -215,7 +218,7 @@ const categories: { id: Category; title: string; description?: string; shortTitl
             .select("id,slug,title,subtitle,location,hero_image_url,status")
             .in("id", projectIds).eq("status", "active"),
           supabase.from("offerings")
-            .select("id,project_id,offering_type,title,status")
+            .select("id,project_id,offering_type,title,status,card_jpeg:content->>card_jpeg")
             .in("id", offeringIds).in("project_id", projectIds).eq("status", "active"),
         ]);
         if (!mounted) return;
