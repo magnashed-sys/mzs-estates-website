@@ -592,17 +592,15 @@ export default async function PrivateProjectPage({ params }: Props) {
           <h1>{property.title}</h1>
           {property.subtitle && <p>{property.subtitle}</p>}
           {property.location && <p>{property.location}</p>}
-          {isAndromedastraat && (
-            <>
-              <p>Jaarlijkse cashflow <strong>€ 121.000</strong></p>
-              <iframe
-                title="Ligging van de Andromedastraat in IJmuiden"
-                src="https://maps.google.com/maps?q=Andromedastraat%2C%20IJmuiden%2C%20Nederland&z=15&output=embed"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-                style={{display: "block", width: "100%", height: "clamp(230px, 30vw, 350px)", border: 0}}
-              />
-            </>
+          {isAndromedastraat && <p>Jaarlijkse cashflow <strong>€ 121.000</strong></p>}
+          {isIJmuiden && (
+            <iframe
+              title={`Ligging van ${property.title}`}
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(isAndromedastraat ? "Andromedastraat, IJmuiden, Nederland" : "Kennemerlaan 1, IJmuiden, Nederland")}&z=15&output=embed`}
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              style={{display: "block", width: "100%", height: "clamp(230px, 30vw, 350px)", border: 0}}
+            />
           )}
           <div className={styles.otherOfferings}>
             {visibleOfferings.map((offering) => (
