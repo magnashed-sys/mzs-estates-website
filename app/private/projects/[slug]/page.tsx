@@ -234,7 +234,7 @@ export default async function PrivateProjectPage({ params }: Props) {
       .select("content").eq("project_id",property.id).eq("status","active").in("id",visibleOfferings.map(o=>o.id));
     if (error) notFound();
     for (const row of details ?? []) {
-      if (isAndromedastraat && typeof row.content?.cover_jpeg === "string") {
+      if (typeof row.content?.cover_jpeg === "string") {
         coverJpeg = row.content.cover_jpeg;
       }
       const plans = row.content?.floor_plans;
@@ -584,8 +584,8 @@ export default async function PrivateProjectPage({ params }: Props) {
         <section className={styles.fallback}>
           {coverJpeg && (
             <img src={`data:image/jpeg;base64,${coverJpeg}`}
-              alt="Luchtfoto van het pand aan de Andromedastraat in IJmuiden"
-              width={1800} height={1013} fetchPriority="high"
+              alt={`Luchtfoto van ${property.title}`}
+              width={1800} height={isAndromedastraat ? 1012 : 1030} fetchPriority="high"
               style={{display: "block", width: "100%", height: "auto", marginBottom: "1.5rem"}} />
           )}
           <p className={styles.kicker}>{t("p420")}</p>
