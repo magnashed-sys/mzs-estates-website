@@ -234,11 +234,11 @@ export default async function PrivateProjectPage({ params }: Props) {
       .select("content").eq("project_id",property.id).eq("status","active").in("id",visibleOfferings.map(o=>o.id));
     if (error) notFound();
     for (const row of details ?? []) {
-      if (isAndromedastraat && typeof row.content?.cover_jpeg === "string") {
+      if (typeof row.content?.cover_jpeg === "string") {
         coverJpeg = row.content.cover_jpeg;
       }
       const plans = row.content?.floor_plans;
-      if (isAndromedastraat && Array.isArray(plans)) {
+      if (Array.isArray(plans)) {
         for (const plan of plans) {
           if (typeof plan?.caption === "string" && typeof plan.jpeg === "string") {
             floorPlans.push({caption: plan.caption, jpeg: plan.jpeg});
@@ -584,8 +584,8 @@ export default async function PrivateProjectPage({ params }: Props) {
         <section className={styles.fallback}>
           {coverJpeg && (
             <img src={`data:image/jpeg;base64,${coverJpeg}`}
-              alt="Luchtfoto van het pand aan de Andromedastraat in IJmuiden"
-              width={1800} height={1013} fetchPriority="high"
+              alt={`Luchtfoto van ${property.title}`}
+              width={1800} height={isAndromedastraat ? 1012 : 1030} fetchPriority="high"
               style={{display: "block", width: "100%", height: "auto", marginBottom: "1.5rem"}} />
           )}
           <p className={styles.kicker}>{t("p420")}</p>
@@ -616,33 +616,32 @@ export default async function PrivateProjectPage({ params }: Props) {
       )}
 
       {isAndromedastraat && (
-        <>
-          <section className={styles.marinaVideoSection} aria-labelledby="andromeda-video">
-            <p>Beherend makelaar · <a href="https://kramerenpartners.nl/" target="_blank" rel="noopener noreferrer">Kramer &amp; Partners</a></p>
-            <div className={styles.marinaVideoIntro}>
-              <h2 id="andromeda-video">Video-impressie Andromedastraat</h2>
-            </div>
-            <div className={styles.marinaVideoPlayer}>
-              <iframe src="https://www.youtube-nocookie.com/embed/8wg-Lb7UlqY?rel=0"
-                title="Video-impressie Andromedastraat, IJmuiden" loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allow="encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
-            </div>
-            <a className={styles.marinaVideoLink} href="https://youtu.be/8wg-Lb7UlqY" target="_blank" rel="noopener noreferrer">Bekijk op YouTube ↗</a>
-          </section>
-          {floorPlans.length > 0 && (
-            <section className={styles.marinaVideoSection} aria-labelledby="andromeda-plans">
-              <div className={styles.marinaVideoIntro}><h2 id="andromeda-plans">Plattegronden</h2></div>
-              {floorPlans.map(plan => (
-                <figure key={plan.caption} style={{margin: "2rem auto", maxWidth: "56rem"}}>
-                  <figcaption><h3>{plan.caption}</h3></figcaption>
-                  <img src={`data:image/jpeg;base64,${plan.jpeg}`} alt={`Plattegrond Andromedastraat — ${plan.caption}`}
-                    loading="lazy" style={{display: "block", width: "100%", height: "auto"}} />
-                </figure>
-              ))}
-            </section>
-          )}
-        </>
+        <section className={styles.marinaVideoSection} aria-labelledby="andromeda-video">
+          <p>Beherend makelaar · <a href="https://kramerenpartners.nl/" target="_blank" rel="noopener noreferrer">Kramer &amp; Partners</a></p>
+          <div className={styles.marinaVideoIntro}>
+            <h2 id="andromeda-video">Video-impressie Andromedastraat</h2>
+          </div>
+          <div className={styles.marinaVideoPlayer}>
+            <iframe src="https://www.youtube-nocookie.com/embed/8wg-Lb7UlqY?rel=0"
+              title="Video-impressie Andromedastraat, IJmuiden" loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allow="encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
+          </div>
+          <a className={styles.marinaVideoLink} href="https://youtu.be/8wg-Lb7UlqY" target="_blank" rel="noopener noreferrer">Bekijk op YouTube ↗</a>
+        </section>
+      )}
+
+      {floorPlans.length > 0 && (
+        <section className={styles.marinaVideoSection} aria-labelledby="property-floor-plans">
+          <div className={styles.marinaVideoIntro}><h2 id="property-floor-plans">Plattegronden</h2></div>
+          {floorPlans.map(plan => (
+            <figure key={plan.caption} style={{margin: "2rem auto", maxWidth: "56rem"}}>
+              <figcaption><h3>{plan.caption}</h3></figcaption>
+              <img src={`data:image/jpeg;base64,${plan.jpeg}`} alt={`Plattegrond ${property.title} — ${plan.caption}`}
+                loading="lazy" style={{display: "block", width: "100%", height: "auto"}} />
+            </figure>
+          ))}
+        </section>
       )}
 
       <ProjectResources projectId={property.id} editorial={editorial} />
