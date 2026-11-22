@@ -229,19 +229,19 @@ const workCopy = {
     "partnerTitle": "Collaborare con MZS",
     "partnerLead": "Le relazioni solide iniziano con un primo incontro.",
     "partnerBody": "Ampliamo costantemente la nostra rete con partner che condividono il nostro approccio personale e le nostre ambizioni internazionali. Da agenti immobiliari, notai e architetti ad altri specialisti: insieme uniamo conoscenze locali e competenze complementari.",
-    "partnerInvitation": "Vede opportunità di collaborazione con MZS? Richieda un account partner e ci racconti brevemente le sue competenze e la collaborazione che ha in mente.",
+    "partnerInvitation": "Vedi un’opportunità per collaborare con MZS? Richiedi un account partner e raccontaci in breve di cosa ti occupi e come vorresti collaborare.",
     "partnerAction": "Richiedi un account partner",
     "careerEyebrow": "Carriera e crescita internazionale",
     "careerTitle": "Lavorare per MZS",
-    "careerLead": "Contribuisca alla nostra crescita internazionale.",
+    "careerLead": "Contribuisci alla nostra crescita internazionale.",
     "careerBody": "La crescita della nostra clientela e il nostro modello di business internazionale offrono spazio a nuovi colleghi. Cerchiamo quindi account manager in grado di assistere i nostri clienti nelle seguenti lingue:",
     "languages": [
       "Spagnolo",
       "Italiano",
       "Russo"
     ],
-    "careerInvitation": "Sa costruire relazioni e si sente a suo agio in un ambiente internazionale? Saremo lieti di discutere come la sua esperienza e le sue ambizioni possano inserirsi in MZS. Indichi nella richiesta le sue competenze linguistiche e le esperienze pertinenti.",
-    "careerAction": "Le interessa? Conosciamoci"
+    "careerInvitation": "Sai costruire relazioni e ti senti a tuo agio in un ambiente internazionale? Parliamo di come la tua esperienza e le tue ambizioni potrebbero trovare spazio in MZS. Nella richiesta, raccontaci quali lingue parli e quali esperienze hai maturato.",
+    "careerAction": "Ti interessa? Conosciamoci"
   },
   "ru": {
     "sectionLabel": "Сотрудничество и работа в MZS",
