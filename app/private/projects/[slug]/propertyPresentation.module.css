@@ -358,7 +358,7 @@
   .galleryTileImage, .primaryButton, .secondaryButton, .stayPrice a, .galleryAllButton { transition: none; }
 }
 
-/* Marina Botafoch only: editorial map and nearby points of interest. */
+/* Marina Botafoc only: editorial map and nearby points of interest. */
 .marinaMapSection { background: #0e0f0f; border-top: 1px solid var(--edge); padding: clamp(65px,7vw,108px) clamp(22px,6vw,110px); }
 .marinaMapIntroduction { max-width: 780px; margin-bottom: clamp(26px,4vw,42px); }
 .marinaMapIntroduction h2 { max-width: 760px; font: 400 clamp(32px,4vw,58px)/1.12 Georgia,serif; letter-spacing: -.035em; margin: 13px 0 18px; color: #f0e9df; }
@@ -387,7 +387,7 @@
   .marinaNearby { grid-template-columns: minmax(0,1fr); }
 }
 
-/* Marina Botafoch apartment film; layout aligns with the existing editorial gallery. */
+/* Marina Botafoc apartment film; layout aligns with the existing editorial gallery. */
 .marinaVideoSection {
   padding: clamp(64px, 7vw, 105px) clamp(22px, 6vw, 110px);
   background: #100f0d;

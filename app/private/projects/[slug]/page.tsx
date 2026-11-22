@@ -167,7 +167,7 @@ export default async function PrivateProjectPage({ params }: Props) {
         { title: t("p378"), price: "€400", details: t("twoBedroomDetails"), description: t("p379") },
         { title: t("p380"), price: "€600", details: t("threeBedroomDetails"), description: t("p381") },
       ],
-      locationHeading: "Marina Botafoch, Ibiza.",
+      locationHeading: "Marina Botafoc, Ibiza.",
       locationDescription: t("p383"),
       locationDetail: t("p384"),
     },
@@ -390,14 +390,14 @@ export default async function PrivateProjectPage({ params }: Props) {
           {slug === "marina-botafoch-apartment" && (
             <section id="apartment-floorplan" className={styles.marinaVideoSection} aria-labelledby="marina-floorplan-heading">
               <div className={styles.marinaVideoIntro}>
-                <p className={styles.kicker}>MARINA BOTAFOCH / IBIZA</p>
+                <p className={styles.kicker}>MARINA BOTAFOC / IBIZA</p>
                 <h2 id="marina-floorplan-heading">{t("documentCategories.floorplan")}</h2>
               </div>
               <a className={styles.marinaFloorplan} href="/api/project-floorplan/1d67c84d-e421-4452-93ea-0c72727a0c0b" target="_blank" rel="noopener noreferrer">
                 <Image
                   src="/api/project-floorplan/1d67c84d-e421-4452-93ea-0c72727a0c0b"
                   unoptimized
-                  alt={`${t("documentCategories.floorplan")} — Marina Botafoch`}
+                  alt={`${t("documentCategories.floorplan")} — Marina Botafoc`}
                   width={1199}
                   height={1312}
                   sizes="(max-width: 900px) 100vw, 900px"
@@ -528,7 +528,7 @@ export default async function PrivateProjectPage({ params }: Props) {
           {slug === "marina-botafoch-apartment" && (
             <section className={styles.marinaMapSection} aria-labelledby="marina-map-heading">
               <div className={styles.marinaMapIntroduction}>
-                <p className={styles.kicker}>MARINA BOTAFOCH / IBIZA</p>
+                <p className={styles.kicker}>MARINA BOTAFOC / IBIZA</p>
                 <h2 id="marina-map-heading">{mapT("heading")}</h2>
                 <p>{mapT("intro")}</p>
               </div>
@@ -536,8 +536,8 @@ export default async function PrivateProjectPage({ params }: Props) {
                 <div className={styles.marinaMapMain}>
                   <div className={styles.marinaMapFrame}>
                     <iframe
-                      src="https://maps.google.com/maps?q=Marina%20Botafoch%20Ibiza&z=14&output=embed"
-                      title="Marina Botafoch Ibiza neighbourhood map"
+                      src="https://maps.google.com/maps?q=Marina%20Botafoc%20Ibiza&z=14&output=embed"
+                      title="Marina Botafoc Ibiza neighbourhood map"
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                       allowFullScreen
@@ -545,16 +545,16 @@ export default async function PrivateProjectPage({ params }: Props) {
                   </div>
                   <p className={styles.marinaMapNote}>{mapT("note")}</p>
                   <a className={styles.marinaMapLink}
-                    href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoch%20Ibiza"
+                    href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoc%20Ibiza"
                     target="_blank" rel="noopener noreferrer">
                     {mapT("open")} <span aria-hidden="true">↗</span>
                   </a>
                 </div>
                 <div className={styles.marinaNearby}>
-                  <a href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoch%20Ibiza"
+                  <a href="https://www.google.com/maps/search/?api=1&query=Marina%20Botafoc%20Ibiza"
                      target="_blank" rel="noopener noreferrer" className={styles.marinaNearbyItem}>
                     <span className={styles.marinaNearbyIndex}>01 /</span>
-                    <strong>Marina Botafoch</strong>
+                    <strong>Marina Botafoc</strong>
                     <span>{mapT("waterfront")}</span>
                   </a>
                   <a href="https://www.google.com/maps/search/?api=1&query=Talamanca%20Beach%20Ibiza"
