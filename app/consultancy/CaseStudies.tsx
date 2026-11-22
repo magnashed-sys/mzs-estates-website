@@ -157,35 +157,35 @@ const financing: Record<string,string> = {
  lt:'Finansavimas · Verslo centro statyba',
 };
 const introductions: Record<string,string> = {
-  "hu": "Ez projektjeink egy válogatása. Személyes beszélgetés során szívesen bemutatunk további, az Ön érdeklődéséhez és terveihez illő projekteket.",
-  "bg": "Това е подбор от нашите проекти. В личен разговор с удоволствие ще представим други проекти, подходящи за Вашите интереси и планове.",
-  "sk": "Toto je výber našich projektov. Pri osobnom rozhovore radi predstavíme ďalšie projekty zodpovedajúce vašim záujmom a plánom.",
-  "el": "Αυτή είναι μια επιλογή από τα έργα μας. Σε μια προσωπική συζήτηση θα χαρούμε να παρουσιάσουμε επιπλέον έργα σχετικά με τα ενδιαφέροντα και τα σχέδιά σας.",
+  "hu": "Ez projektjeink egy válogatása. Személyes beszélgetés során szívesen bemutatunk további, az érdeklődésedhez és terveidhez illő projekteket.",
+  "bg": "Това е подбор от нашите проекти. В личен разговор с удоволствие ще представим други проекти, подходящи за твоите интереси и планове.",
+  "sk": "Toto je výber našich projektov. Pri osobnom rozhovore radi predstavíme ďalšie projekty zodpovedajúce tvojim záujmom a plánom.",
+  "el": "Αυτή είναι μια επιλογή από τα έργα μας. Σε μια προσωπική συζήτηση θα χαρούμε να παρουσιάσουμε επιπλέον έργα σχετικά με τα ενδιαφέροντα και τα σχέδιά σου.",
 
 
   "da": "Dette er et udvalg af vores projekter. I en personlig samtale fortæller vi gerne om flere projekter, der passer til dine interesser og planer.",
-  "uk": "Це добірка наших проєктів. В особистій розмові ми радо розповімо про інші проєкти, що відповідають вашим інтересам і планам.",
+  "uk": "Це добірка наших проєктів. В особистій розмові ми радо розповімо про інші проєкти, що відповідають твоїм інтересам і планам.",
   "fi": "Tässä on valikoima hankkeitamme. Keskustelemme mielellämme henkilökohtaisesti myös muista kiinnostuksiisi ja suunnitelmiisi sopivista hankkeista.",
-  "cs": "Toto je výběr našich projektů. Při osobním rozhovoru rádi představíme další projekty odpovídající vašim zájmům a plánům."
+  "cs": "Toto je výběr našich projektů. Při osobním rozhovoru rádi představíme další projekty odpovídající tvým zájmům a plánům."
 ,
 
 "nb":"Dette er et utvalg av prosjektene våre. I en personlig samtale presenterer vi gjerne flere prosjekter som passer dine interesser og planer.",
 "sv":"Detta är ett urval av våra projekt. Vid ett personligt samtal berättar vi gärna om fler projekt som passar dina intressen och planer.",
-"pl":"To wybrane przykłady naszych projektów. Podczas osobistej rozmowy chętnie przedstawimy kolejne projekty odpowiadające Państwa zainteresowaniom i planom.",
-"ro":"Aceasta este o selecție a proiectelor noastre. În cadrul unei discuții personale, vă prezentăm cu plăcere alte proiecte relevante pentru interesele și planurile dumneavoastră.",
-"zh":"这里展示了我们的部分项目。我们很乐意在私人会谈中介绍更多符合您兴趣和计划的项目。",
+"pl":"To wybrane przykłady naszych projektów. Podczas osobistej rozmowy chętnie przedstawimy kolejne projekty odpowiadające Twoim zainteresowaniom i planom.",
+"ro":"Aceasta este o selecție a proiectelor noastre. În cadrul unei discuții personale, îți prezentăm cu plăcere alte proiecte relevante pentru interesele și planurile tale.",
+"zh":"这里展示了我们的部分项目。我们很乐意在私人会谈中介绍更多符合你兴趣和计划的项目。",
 
-  "nl": "Dit is een selectie van onze projecten. Tijdens een persoonlijk gesprek lichten we graag meer projecten toe die aansluiten bij uw interesses en plannen.",
-  "en": "These are a selection of our projects. We would be pleased to discuss further projects relevant to your interests and plans in a personal conversation.",
-  "es": "Esta es una selección de nuestros proyectos. En una conversación personal, estaremos encantados de presentar otros proyectos relacionados con sus intereses y planes.",
-  "de": "Dies ist eine Auswahl unserer Projekte. In einem persönlichen Gespräch stellen wir Ihnen gerne weitere Projekte vor, die zu Ihren Interessen und Plänen passen.",
-  "fr": "Voici une sélection de nos projets. Lors d’un échange personnel, nous serons heureux de vous présenter d’autres projets en lien avec vos intérêts et vos objectifs.",
+  "nl": "Dit is een selectie van onze projecten. Tijdens een persoonlijk gesprek lichten we graag meer projecten toe die aansluiten bij je interesses en plannen.",
+  "en": "Here are some of our projects. We’d be happy to discuss further projects relevant to your interests and plans in a personal conversation.",
+  "es": "Esta es una selección de nuestros proyectos. En una conversación personal, estaremos encantados de presentar otros proyectos relacionados con tus intereses y planes.",
+  "de": "Dies ist eine Auswahl unserer Projekte. In einem persönlichen Gespräch stellen wir dir gerne weitere Projekte vor, die zu deinen Interessen und Plänen passen.",
+  "fr": "Voici une sélection de nos projets. Lors d’un échange personnel, nous serons heureux de te présenter d’autres projets en lien avec tes intérêts et tes objectifs.",
   "it": "Questa è una selezione dei nostri progetti. Se ti va, possiamo raccontarti di persona altri progetti in linea con i tuoi interessi e i tuoi programmi.",
-  "pt": "Esta é uma seleção dos nossos projetos. Em uma conversa pessoal, teremos prazer em apresentar outros projetos alinhados aos seus interesses e planos.",
-  "ru": "Здесь представлена лишь часть наших проектов. В личной беседе мы будем рады рассказать о других проектах, соответствующих вашим интересам и планам.",
-  "ar": "هذه مجموعة مختارة من مشاريعنا. يسعدنا خلال لقاء شخصي مناقشة مشاريع أخرى تتناسب مع اهتماماتكم وخططكم.",
-  "tr": "Bunlar projelerimizden seçilmiş örneklerdir. Kişisel bir görüşmede ilgi alanlarınıza ve planlarınıza uygun diğer projeleri paylaşmaktan memnuniyet duyarız.",
-  "lt": "Tai tik dalis mūsų projektų. Asmeninio pokalbio metu mielai pristatysime daugiau projektų, atitinkančių jūsų interesus ir planus."
+  "pt": "Esta é uma seleção dos nossos projetos. Em uma conversa, podemos te mostrar outros projetos alinhados aos seus interesses e planos.",
+  "ru": "Здесь представлена лишь часть наших проектов. В личной беседе мы будем рады рассказать о других проектах, соответствующих твоим интересам и планам.",
+  "ar": "هذه مجموعة مختارة من مشاريعنا. يسعدنا خلال لقاء شخصي مناقشة مشاريع أخرى تتناسب مع اهتماماتك وخططك.",
+  "tr": "Bunlar projelerimizden seçilmiş örneklerdir. Kişisel bir görüşmede ilgi alanlarına ve planlarına uygun diğer projeleri paylaşmaktan memnuniyet duyarız.",
+  "lt": "Tai tik dalis mūsų projektų. Asmeninio pokalbio metu mielai pristatysime daugiau projektų, atitinkančių tavo interesus ir planus."
 };
 
 const management: Record<string,string> = {
