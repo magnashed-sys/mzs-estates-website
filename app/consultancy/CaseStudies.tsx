@@ -180,7 +180,7 @@ const introductions: Record<string,string> = {
   "es": "Esta es una selección de nuestros proyectos. En una conversación personal, estaremos encantados de presentar otros proyectos relacionados con sus intereses y planes.",
   "de": "Dies ist eine Auswahl unserer Projekte. In einem persönlichen Gespräch stellen wir Ihnen gerne weitere Projekte vor, die zu Ihren Interessen und Plänen passen.",
   "fr": "Voici une sélection de nos projets. Lors d’un échange personnel, nous serons heureux de vous présenter d’autres projets en lien avec vos intérêts et vos objectifs.",
-  "it": "Questa è una selezione dei nostri progetti. Durante un colloquio personale, saremo lieti di presentarvi altri progetti in linea con i vostri interessi e programmi.",
+  "it": "Questa è una selezione dei nostri progetti. Se ti va, possiamo raccontarti di persona altri progetti in linea con i tuoi interessi e i tuoi programmi.",
   "pt": "Esta é uma seleção dos nossos projetos. Em uma conversa pessoal, teremos prazer em apresentar outros projetos alinhados aos seus interesses e planos.",
   "ru": "Здесь представлена лишь часть наших проектов. В личной беседе мы будем рады рассказать о других проектах, соответствующих вашим интересам и планам.",
   "ar": "هذه مجموعة مختارة من مشاريعنا. يسعدنا خلال لقاء شخصي مناقشة مشاريع أخرى تتناسب مع اهتماماتكم وخططكم.",
