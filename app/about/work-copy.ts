@@ -42,7 +42,7 @@ const workCopy = {
   "sk": {
     "sectionLabel": "Spolupráca a práca pre MZS",
     "partnerEyebrow": "Partneri a spolupráca",
-    "partnerTitle": "Spolupracujte s MZS",
+    "partnerTitle": "Spolupracuj s MZS",
     "partnerLead": "Pevné vzťahy sa začínajú zoznámením.",
     "partnerBody": "Neustále rozširujeme sieť o partnerov, ktorí zdieľajú náš osobný prístup a medzinárodné ambície. Od realitných maklérov, notárov a architektov po ďalších odborníkov spájame miestne znalosti a dopĺňajúcu sa odbornosť.",
     "partnerInvitation": "Vidíš možnosti spolupráce s MZS? Požiadaj o partnerský účet a stručne predstav svoju odbornosť a zamýšľanú spoluprácu.",
@@ -62,7 +62,7 @@ const workCopy = {
   "el": {
     "sectionLabel": "Συνεργασία και εργασία με την MZS",
     "partnerEyebrow": "Συνεργάτες και συνεργασία",
-    "partnerTitle": "Συνεργαστείτε με την MZS",
+    "partnerTitle": "Συνεργάσου με την MZS",
     "partnerLead": "Οι ισχυρές σχέσεις ξεκινούν με μια γνωριμία.",
     "partnerBody": "Διευρύνουμε συνεχώς το δίκτυό μας με συνεργάτες που μοιράζονται την προσωπική μας προσέγγιση και τις διεθνείς φιλοδοξίες μας. Από μεσίτες, συμβολαιογράφους και αρχιτέκτονες έως άλλους ειδικούς, συνδυάζουμε τοπική γνώση και συμπληρωματική τεχνογνωσία.",
     "partnerInvitation": "Βλέπεις δυνατότητες συνεργασίας με την MZS; Ζήτησε λογαριασμό συνεργάτη και παρουσίασε σύντομα την εξειδίκευσή σου και τη συνεργασία που επιθυμείς.",
@@ -144,7 +144,7 @@ const workCopy = {
   "cs": {
     "sectionLabel": "Spolupráce a práce pro MZS",
     "partnerEyebrow": "Partneři a spolupráce",
-    "partnerTitle": "Spolupracujte s MZS",
+    "partnerTitle": "Spolupracuj s MZS",
     "partnerLead": "Pevné vztahy začínají seznámením.",
     "partnerBody": "Průběžně rozšiřujeme síť partnerů, kteří sdílejí náš osobní přístup a mezinárodní ambice. Od realitních makléřů, notářů a architektů po další specialisty společně propojujeme místní znalosti a doplňující odbornost.",
     "partnerInvitation": "Vidíš možnosti spolupráce s MZS? Požádej o partnerský účet a stručně představ svou odbornost a zamýšlenou spolupráci.",
@@ -206,7 +206,7 @@ const workCopy = {
   "es": {
     "sectionLabel": "Colaborar y trabajar con MZS",
     "partnerEyebrow": "Socios y colaboración",
-    "partnerTitle": "Colabore con MZS",
+    "partnerTitle": "Colabora con MZS",
     "partnerLead": "Las relaciones sólidas comienzan con una presentación.",
     "partnerBody": "Ampliamos continuamente nuestra red con socios que comparten nuestro trato personal y nuestras ambiciones internacionales. Desde agentes inmobiliarios, notarios y arquitectos hasta otros especialistas, juntos combinamos conocimiento local y experiencia complementaria.",
     "partnerInvitation": "¿Ves oportunidades de colaborar con MZS? Solicita una cuenta de socio y cuéntanos brevemente tu especialidad y la colaboración que tienes en mente.",
@@ -260,7 +260,7 @@ const workCopy = {
       "Итальянский",
       "Русский"
     ],
-    "careerInvitation": "Ты умеешь выстраивать отношения и комфортно чувствуешь себя в международной среде? Будем рады обсудить, как твой опыт и стремления могут найти применение в MZS. Укажи в заявке твои языковые навыки и соответствующий опыт.",
+    "careerInvitation": "Ты умеешь выстраивать отношения и комфортно чувствуешь себя в международной среде? Будем рады обсудить, как твой опыт и стремления могут найти применение в MZS. Укажи в заявке свои языковые навыки и соответствующий опыт.",
     "careerAction": "Интересно? Давай познакомимся"
   },
   "de": {
@@ -366,7 +366,7 @@ const workCopy = {
   "lt": {
     "sectionLabel": "Bendradarbiavimas ir darbas MZS",
     "partnerEyebrow": "Partneriai ir bendradarbiavimas",
-    "partnerTitle": "Bendradarbiaukite su MZS",
+    "partnerTitle": "Bendradarbiauk su MZS",
     "partnerLead": "Tvirti santykiai prasideda nuo pažinties.",
     "partnerBody": "Nuolat plečiame partnerių tinklą, burdami tuos, kurie pritaria mūsų asmeniniam požiūriui ir tarptautiniams siekiams. Kartu su nekilnojamojo turto brokeriais, notarais, architektais ir kitais specialistais sujungiame vietos rinkos žinias ir viena kitą papildančias kompetencijas.",
     "partnerInvitation": "Matai galimybių bendradarbiauti su MZS? Pateik prašymą sukurti partnerio paskyrą ir trumpai papasakok apie savo kompetenciją bei numatomą bendradarbiavimą.",
@@ -446,7 +446,7 @@ const workCopy = {
   "ro": {
     "sectionLabel": "Colaborare și carieră la MZS",
     "partnerEyebrow": "Parteneri și colaborare",
-    "partnerTitle": "Colaborați cu MZS",
+    "partnerTitle": "Colaborează cu MZS",
     "partnerLead": "Relațiile solide încep prin a ne cunoaște.",
     "partnerBody": "Ne extindem continuu rețeaua cu parteneri care împărtășesc abordarea noastră personală și ambițiile internaționale. De la agenți imobiliari, notari și arhitecți până la alți specialiști, reunim cunoștințe locale și expertiză complementară.",
     "partnerInvitation": "Vezi oportunități de colaborare cu MZS? Solicită un cont de partener și prezintă-ne pe scurt experiența ta și colaborarea pe care o ai în vedere.",
