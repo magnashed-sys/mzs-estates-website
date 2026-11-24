@@ -359,6 +359,11 @@ export default function RentalCalendar({
             </button>
           </div>
 
+          <div data-testid="rental-selected-dates" aria-live="polite" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12, padding: "12px", marginBottom: 16, border: `1px solid ${border}`, background: "#211c15", overflowWrap: "anywhere" }}>
+            <div><span style={{ display: "block", color: muted, fontSize: 12 }}>{t("p165")}</span><strong style={{ color: checkIn ? gold : muted }}>{checkIn ? displayDate(checkIn) : t("p166")}</strong></div>
+            <div><span style={{ display: "block", color: muted, fontSize: 12 }}>{t("p167")}</span><strong style={{ color: checkOut ? gold : muted }}>{checkOut ? displayDate(checkOut) : t("p166")}</strong></div>
+          </div>
+
           <div
             style={{
               display: "grid",
