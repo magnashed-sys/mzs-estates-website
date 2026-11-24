@@ -159,6 +159,11 @@ export default function ConfiguredRentalCalendar({ projectId }: { projectId: str
             <span style={{ fontFamily: "Georgia,serif", fontSize: 22 }}>{month.toLocaleDateString(displayLocale, { month: "long", year: "numeric", timeZone: "UTC" })}</span>
             <button type="button" style={navButton} aria-label={t("nextMonth")} onClick={() => setMonth(new Date(Date.UTC(year, monthIndex + 1, 1)))}>{locale === "ar" ? "←" : "→"}</button>
           </div>
+          <div data-testid="rental-selected-dates" aria-live="polite" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12, padding: "12px", marginBottom: 16, border: `1px solid ${border}`, background: "#211c15", overflowWrap: "anywhere" }}>
+            <div><span style={{ display: "block", color: muted, fontSize: 12 }}>{t("p108")}</span><strong style={{ color: checkIn ? gold : muted }}>{checkIn ? displayDate(checkIn) : t("p109")}</strong></div>
+            <div><span style={{ display: "block", color: muted, fontSize: 12 }}>{t("p110")}</span><strong style={{ color: checkOut ? gold : muted }}>{checkOut ? displayDate(checkOut) : t("p109")}</strong></div>
+          </div>
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 5 }}>
             {weekdays.map((day, i) => <span key={i} style={{ textAlign: "center", color: gold, fontSize: 12, padding: "8px 0" }}>{day}</span>)}
             {cells.map((day, i) => {
