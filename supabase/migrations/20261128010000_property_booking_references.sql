@@ -3,7 +3,7 @@ alter table public.rental_bookings add column booking_reference text unique;
 create sequence mzs_private.la_nucia_booking_seq start with 2422;
 create sequence mzs_private.marina_botafoc_booking_seq;
 
-update public.rental_bookings b set booking_reference='LN-' || s.original_booking_number
+update public.rental_bookings b set booking_reference=s.source_key
 from public.mzs_booking_legacy_sources s join public.projects p on p.id=s.project_id
 where b.id=s.booking_id and b.project_id=p.id and p.slug='villa-la-nucia';
 
