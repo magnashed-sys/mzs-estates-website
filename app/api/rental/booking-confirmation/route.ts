@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     const [{ data: guest, error: guestError }, { data: property, error: propertyError }] = await Promise.all([
       service.from("profiles").select("email,full_name").eq("id", booking.user_id).single(),
-      service.from("projects").select("title").eq("id", booking.project_id).single(),
+      service.from("projects").select("title,slug").eq("id", booking.project_id).single(),
     ]);
     if (guestError || propertyError || !guest?.email || !property?.title) throw new Error("Booking details unavailable");
     const host = process.env.MZS_SMTP_HOST || process.env.SMTP_HOST;
@@ -93,6 +93,11 @@ export async function POST(request: NextRequest) {
         checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
         reference:booking.id}, "https://www.mzsgroup.com", guestLocale)
       : {subject:"Your reservation is confirmed | MZS Group",text,html};
+    const blindCopies = property.slug === "villa-la-nucia"
+      ? (process.env.MZS_LA_NUCIA_CONFIRMATION_BCC || "").split(",").map(address => address.trim().toLowerCase()).filter(Boolean)
+      : [];
+    const guestAddress = guest.email.trim().toLowerCase();
+    const bcc = Array.from(new Set(blindCopies.filter(address => address !== guestAddress)));
     const transport = nodemailer.createTransport({
       host, port, secure: port === 465, requireTLS: port === 587,
       auth: { user, pass }, tls: { minVersion: "TLSv1.2" },
@@ -100,9 +105,11 @@ export async function POST(request: NextRequest) {
     });
     try {
       const sent = await transport.sendMail({
-        from, to: guest.email, ...message,
+        from, to: guest.email, bcc, ...message,
       });
-      if (!sent.accepted?.some((address: string | { address: string }) => (typeof address === "string" ? address : address.address).toLowerCase() === guest.email.toLowerCase()))
+      const accepted = new Set(sent.accepted.map((address: string | { address: string }) =>
+        (typeof address === "string" ? address : address.address).toLowerCase()));
+      if ([guestAddress, ...bcc].some(address => !accepted.has(address)))
         throw new Error("Message not accepted by SMTP server");
     } finally { transport.close(); }
     await service.from("rental_confirmation_mail_claims").update({
