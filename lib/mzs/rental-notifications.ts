@@ -40,7 +40,7 @@ const date = (value: string) => new Intl.DateTimeFormat("en-GB", { dateStyle: "l
   .format(new Date(value + "T12:00:00Z"));
 
 /** Explicit projection only: never serialize a booking, audit record or reason into email. */
-export function rentalChangeTemplate(event: RentalEvent, site: string, locale: unknown = "en") {
+export function rentalChangeTemplate(event: RentalEvent, site: string, locale: unknown = "en", reference = event.booking_id) {
   const p = event.payload;
   const cancelled = event.kind === "cancelled";
   if (!["modified", "cancelled"].includes(event.kind) || !p.property ||
@@ -49,7 +49,7 @@ export function rentalChangeTemplate(event: RentalEvent, site: string, locale: u
     throw new Error("Invalid notification snapshot");
   if (isLocalizedRentalLocale(locale)) return localizedRentalMail(event.kind, {
     property:p.property, checkIn:p.check_in, checkOut:p.check_out, guests:p.guests,
-    total:p.total_eur, reference:event.booking_id,
+    total:p.total_eur, reference,
   }, site, locale);
   const headline = cancelled ? "Your reservation is cancelled." : "Your reservation has been updated.";
   const intro = cancelled
@@ -61,7 +61,7 @@ export function rentalChangeTemplate(event: RentalEvent, site: string, locale: u
     ["Nights", String(Math.round((Date.parse(p.check_out) - Date.parse(p.check_in)) / 86400000))],
     ["Guests", String(p.guests)],
     [cancelled ? "Previously confirmed amount" : "Confirmed amount", new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR" }).format(Number(p.total_eur))],
-    ["Booking reference", event.booking_id],
+    ["Booking reference", reference],
   ];
   const footer = cancelled
     ? "Any payment or refund arrangements will be handled separately. Contact MZS Group if you need assistance."
@@ -121,7 +121,7 @@ export async function deliverRentalChange(bookingId?: string): Promise<RentalDel
   try {
     // Resolve against the actual booking owner, never a browser-supplied recipient.
     const [{ data: booking, error: bookingError }, { data: auth, error: userError }] = await Promise.all([
-      db.from("rental_bookings").select("user_id,is_test").eq("id", event.booking_id).single(),
+      db.from("rental_bookings").select("user_id,is_test,booking_reference").eq("id", event.booking_id).single(),
       db.auth.admin.getUserById(event.recipient_user_id),
     ]);
     const email = auth?.user?.email?.trim().toLowerCase();
@@ -129,7 +129,7 @@ export async function deliverRentalChange(bookingId?: string): Promise<RentalDel
     if (!booking || booking.is_test || booking.user_id !== event.recipient_user_id || !email ||
         email !== event.recipient_email || !/^[^@\s<>;,]+@[^@\s<>;,]+\.[^@\s<>;,]+$/.test(email))
       return await finish("failed", "recipient_requires_review");
-    message = rentalChangeTemplate(event, environment.site, auth.user?.user_metadata?.preferred_language);
+    message = rentalChangeTemplate(event, environment.site, auth.user?.user_metadata?.preferred_language, booking.booking_reference || event.booking_id);
   } catch { return await finish("failed", "invalid_notification"); }
 
   const env = process.env;

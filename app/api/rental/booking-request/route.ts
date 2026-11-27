@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     if (!serviceKey || !url) throw new Error("service configuration");
     const service = serviceClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const [{ data: booking, error: bookingError }, { data: admins, error: adminError }] = await Promise.all([
-      service.from("rental_bookings").select("id,project_id,user_id,check_in,check_out,guest_count,quoted_total_eur,pool_heating_requested,guest_notes,status")
+      service.from("rental_bookings").select("id,booking_reference,project_id,user_id,check_in,check_out,guest_count,quoted_total_eur,pool_heating_requested,guest_notes,status")
         .eq("id", bookingId).eq("user_id", auth.user.id).single(),
       service.from("profiles").select("email").eq("role", "admin").eq("is_active", true),
     ]);
@@ -108,7 +108,9 @@ export async function POST(request: NextRequest) {
 
     const nights = Math.round((Date.parse(booking.check_out + "T12:00:00Z") -
       Date.parse(booking.check_in + "T12:00:00Z")) / 86400000);
+    const reference = booking.booking_reference || bookingId;
     const details = [
+      ["Booking reference", reference],
       ["Property", project.title],
       ["Check-in", date(booking.check_in)],
       ["Check-out", date(booking.check_out)],
@@ -141,12 +143,12 @@ export async function POST(request: NextRequest) {
       "MZS Group will contact you after individual review and approval.\n\n" + lines;
     const adminText = "A new private rental request has been registered. It is awaiting approval.\n" +
       "Requester: " + (profile.full_name || "Private client") + "\nEmail: " + clientEmail +
-      "\nReference: " + bookingId + "\n\n" + lines;
+      "\n\n" + lines;
     const clientLocale = auth.user.user_metadata?.preferred_language;
     const clientMessage = isLocalizedRentalLocale(clientLocale)
       ? localizedRentalMail("requested", {property:project.title, checkIn:booking.check_in,
         checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
-        reference:bookingId, heating:body.mode === "villa" ? booking.pool_heating_requested : undefined,
+        reference, heating:body.mode === "villa" ? booking.pool_heating_requested : undefined,
         notes:booking.guest_notes}, "https://www.mzsgroup.com", clientLocale)
       : {subject:"Booking request received | MZS Group", text:clientText,
         html:html("Your booking request.", "We have received your request. This is not a confirmed reservation. You will receive a separate confirmation after approval.", "https://www.mzsgroup.com/private/reservations")};
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
       transport.sendMail({
         from, to: adminEmails, subject: "New rental booking request | MZS Group",
         text: adminText, html: html("A new booking request.", "A new request requires your review. Requester: " +
-          (profile.full_name || "Private client") + " (" + clientEmail + "). Reference: " + bookingId, "https://www.mzsgroup.com/admin"),
+          (profile.full_name || "Private client") + " (" + clientEmail + ")", "https://www.mzsgroup.com/admin"),
       }),
     ]);
     transport.close();

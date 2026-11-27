@@ -128,7 +128,7 @@ export default async function AdminBookings({searchParams}:{searchParams:Promise
      <table style={{width:"100%",minWidth:1020,borderCollapse:"collapse",textAlign:"left"}}>
       <thead style={{background:"#ffffff"}}><tr>{["Reservation","Guest / contact","Invoice recipient","Property","Type","Check-in","Check-out","Total amount","Paid","Outstanding","Payment status"].map(h=><th key={h} style={{padding:"13px 9px",borderBottom:"1px solid #dce3d9",fontWeight:500,color:"#28543f"}}>{adminT(h)}</th>)}</tr></thead>
       <tbody>{rows.map((r,index)=><Fragment key={r.category+r.id}>{index===boundary&&todayLine}<tr style={{borderBottom:"1px solid #e0e7dd"}}>
-       <td style={{padding:"10px 9px"}}><Link href={dossierHref(r)} style={linkStyle}>{r.category==="Owner stay"&&!ownerBookings.get(r.id)?adminT("Manage request →"):adminT("Open dossier →")}</Link></td>
+       <td style={{padding:"10px 9px"}}><Link href={dossierHref(r)} style={linkStyle}>{r.sourceRef && <span style={{display:"block"}}>{r.sourceRef}</span>}{r.category==="Owner stay"&&!ownerBookings.get(r.id)?adminT("Manage request →"):adminT("Open dossier →")}</Link></td>
        <td style={{padding:"10px 9px"}}>{r.guestName}</td>
        <td style={{padding:"10px 9px"}}>{r.invoiceRecipient||"—"}</td>
        <td style={{padding:"10px 9px"}}>{r.property}</td>

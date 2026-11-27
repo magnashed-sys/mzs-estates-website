@@ -48,7 +48,7 @@ export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
  const bookedOn=legacy.data?legacy.data.confirmation_date:(b.created_at?new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Madrid",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(b.created_at)):null);
  const bytes=await bookingInvoicePdf({
   issuer:{...issuer.data,tax_id:issuer.data.tax_id||""},recipient,recipientAddress,
-  property:property.data.title,reference:String(legacy.data?.original_booking_number||id),
+  property:property.data.title,reference:String(b.booking_reference||legacy.data?.original_booking_number||id),
   checkIn:b.check_in,checkOut:b.check_out,bookedOn,total:Number(b.quoted_total_eur),paid:paidCents/100,receiptDates:[...receiptDates].sort()
  });
  return new Response(new Uint8Array(bytes),{headers:{...headers,"Content-Type":"application/pdf","Content-Disposition":'inline; filename="booking-invoice-draft-'+id+'.pdf"'}});
