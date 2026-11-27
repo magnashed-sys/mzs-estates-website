@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   if (!url || !serviceKey) return response(503, { error: "Mail service unavailable" });
   const service = adminClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: booking, error: bookingError } = await service.from("rental_bookings")
-    .select("id,user_id,project_id,check_in,check_out,guest_count,quoted_total_eur,status,is_test")
+    .select("id,booking_reference,user_id,project_id,check_in,check_out,guest_count,quoted_total_eur,status,is_test")
     .eq("id", bookingId).single();
   if (bookingError || !booking || booking.status !== "confirmed" || booking.is_test)
     return response(409, { error: "A confirmed live booking is required" });
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       ["Property", property.title], ["Check-in", displayDate(booking.check_in)],
       ["Check-out", displayDate(booking.check_out)], ["Nights", String(nights)],
       ["Guests", String(booking.guest_count)], ["Confirmed amount", euro(Number(booking.quoted_total_eur))],
-      ["Booking reference", booking.id],
+      ["Booking reference", booking.booking_reference || booking.id],
     ];
     const rows = details.map(([name, value]) => "<tr><td style='padding:12px;color:#d5c09a'>" + escape(name) +
       "</td><td style='padding:12px;color:#eeeae2!important;background-color:#151411;font-family:Arial,sans-serif'>" + escape(value) + "</td></tr>").join("");
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     const message = isLocalizedRentalLocale(guestLocale)
       ? localizedRentalMail("confirmed", {property:property.title, checkIn:booking.check_in,
         checkOut:booking.check_out, guests:booking.guest_count, total:Number(booking.quoted_total_eur),
-        reference:booking.id}, "https://www.mzsgroup.com", guestLocale)
+        reference:booking.booking_reference || booking.id}, "https://www.mzsgroup.com", guestLocale)
       : {subject:"Your reservation is confirmed | MZS Group",text,html};
     const blindCopies = property.slug === "villa-la-nucia"
       ? (process.env.MZS_LA_NUCIA_CONFIRMATION_BCC || "").split(",").map(address => address.trim().toLowerCase()).filter(Boolean)

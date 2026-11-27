@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Form
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/client";
 type Booking = {
+    booking_reference: string | null;
     id: string;
     project_id: string;
     rental_configuration_id: string | null;
@@ -134,7 +135,7 @@ export default function MyReservationsPage() {
             // Limit both queries to the authenticated owner. Database RLS remains in force.
             const [bookingResult, cancellationResult] = await Promise.all([
                 supabase.from("rental_bookings")
-                    .select("id,project_id,rental_configuration_id,check_in,check_out,guest_count,status,is_test,quoted_total_eur,created_at", { count: "exact" })
+                    .select("id,booking_reference,project_id,rental_configuration_id,check_in,check_out,guest_count,status,is_test,quoted_total_eur,created_at", { count: "exact" })
                     .eq("user_id", auth.user.id).order("created_at", { ascending: false }),
                 supabase.from("rental_cancellation_requests")
                     .select("id,booking_id,reason,status,created_at,reviewed_at", { count: "exact" })
@@ -307,6 +308,7 @@ export default function MyReservationsPage() {
                     {booking.is_test ? t("testBooking") : t("privateRental")} · {statusLabel(booking.status)}
                   </p>
                   <h2 style={{ fontFamily: "Georgia, serif", fontWeight: 400, fontSize: 32 }}>{project?.title ?? t("privateProperty")}</h2>
+                  {booking.booking_reference && <p>{booking.booking_reference}</p>}
                   {configuration && <p style={{ color: muted }}>{configuration.title}</p>}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 25, margin: "30px 0" }}>
                     {fields.map(([label, value]) => (<div key={label}><p style={{ color: muted, fontSize: 12 }}>{label}</p><strong>{value}</strong></div>))}

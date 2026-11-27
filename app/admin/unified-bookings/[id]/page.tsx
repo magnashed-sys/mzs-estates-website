@@ -65,7 +65,7 @@ export default async function BookingDossier({params,searchParams}:{params:Promi
   <Link href={returnHref} style={{color:"#28543f"}}>{adminT("← Back to bookings")}</Link>
   <p style={{color:"#28543f",letterSpacing:3,fontSize:11,marginTop:30}}>{adminT("MZS ESTATES / RESERVATION DOSSIER")}</p>
   <h1 style={{fontFamily:"Georgia,serif",fontWeight:400}}>{property?.title||adminT("Rental property")}</h1>
-  <p style={{color:"#5d7064"}}>{adminT("Booking reference:")} {b.id}</p>
+  <p style={{color:"#5d7064"}}>{adminT("Booking reference:")} {b.booking_reference || b.id}</p>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,marginBottom:22}}>
     <section style={card}><small>{adminT("Reservation type")}</small><h2 style={{fontWeight:400}}>{owner?adminT("Owner stay"):b.status==="blocked"?adminT("Unavailable period"):adminT("Guest booking")}</h2><p>{adminT("Status:")} {adminT(b.status)}</p></section>
     <section style={card}><small>{adminT("Stay")}</small><h2 style={{fontWeight:400}}>{b.check_in} – {b.check_out}</h2><p>{b.guest_count??adminT("Unspecified")}  {adminT("guests")}</p></section>
