@@ -15,6 +15,7 @@ import {nuciaExtraCopy} from "./nuciaExtraCopy";
 import {nuciaVideoNotes} from "./nuciaVideoNotes";
 import {localizedPhotoChapters} from "./localizedPhotoChapters";
 import styles from "./propertyPresentation.module.css";
+import investmentStyles from "./villaDesColomsInvestment.module.css";
 import VillaCanJuanInvestment from "./VillaCanJuanInvestment";
 import VillaDesColomsInvestment from "./VillaDesColomsInvestment";
 import AmsterdamFlorawegInvestment from "./AmsterdamFlorawegInvestment";
@@ -224,6 +225,9 @@ export default async function PrivateProjectPage({ params }: Props) {
     .in("id", offeringIds);
   if (offeringError || !offerings?.length) notFound();
   const visibleOfferings = offerings as Offering[];
+  const estateOffering = slug === "sa-creu-private-estate" && visibleOfferings.find(o => o.offering_type === "investment");
+  const estateMedia = estateOffering ? (await supabase.from("offerings").select("content")
+    .eq("id", estateOffering.id).single()).data?.content : null;
   const isIJmuiden = ["multi-tenant-building-ijmuiden","multi-unit-building-ijmuiden"].includes(slug);
   let propertyPhotos:{caption:string;webp:string}[] = [];
   const isAndromedastraat = slug === "multi-unit-building-ijmuiden";
@@ -326,7 +330,35 @@ export default async function PrivateProjectPage({ params }: Props) {
         <Link href="/private" className={styles.headerBack}>{t("p388")}</Link>
       </header>
 
-      {slug === "amsterdam-floraweg" ? (
+      {estateOffering && estateMedia ? (
+        <article lang="en" className={investmentStyles.investment}>
+          <section className={investmentStyles.hero}>
+            {estateMedia.cover_jpeg && <Image src={`data:image/jpeg;base64,${estateMedia.cover_jpeg}`} alt={property.title} fill priority className={investmentStyles.heroImage} />}
+            <div className={investmentStyles.heroShade} />
+            <div className={investmentStyles.heroCopy}>
+              <p className={investmentStyles.eyebrow}>Private investment · {property.location}</p>
+              <h1>{property.title}</h1><p className={investmentStyles.lead}>{property.subtitle}</p>
+              <div className={investmentStyles.actions}>
+                <a className={investmentStyles.goldButton} href="https://vimeo.com/238681647" target="_blank" rel="noopener noreferrer">Watch the estate film</a>
+                {estateMedia.brochure && <a className={investmentStyles.outlineButton} download="Sa-Creu-Private-Estate-EN.pdf" href={`data:application/pdf;base64,${estateMedia.brochure}`}>Download the brochure</a>}
+              </div>
+            </div>
+          </section>
+          <section className={investmentStyles.galleryBlock}>
+            <h2>The estate in pictures</h2>
+            {Array.isArray(estateMedia.gallery) && <PropertyGallery photos={estateMedia.gallery} title={property.title} />}
+            <p>Film stills from Mountain-View by Adam Johnston Photography.</p>
+          </section>
+          <section className={investmentStyles.galleryBlock}>
+            <h2>Location on Ibiza</h2>
+            <iframe loading="lazy" title="Sa Creu Private Estate on Ibiza" src="https://maps.google.com/maps?q=38.949574,1.475591&ll=38.99,1.41&z=10&output=embed" style={{width:"100%",height:420,border:0}} />
+            <div className={investmentStyles.actions}>
+              <a className={investmentStyles.outlineButton} href="https://maps.google.com/?q=38.949574,1.475591" target="_blank" rel="noopener noreferrer">Open Google Maps</a>
+              <a className={investmentStyles.outlineButton} href="https://www.airbnb.com/rooms/590510306329160910" target="_blank" rel="noopener noreferrer">Villa Monochrome on Airbnb</a>
+            </div>
+          </section>
+        </article>
+      ) : slug === "amsterdam-floraweg" ? (
         <AmsterdamFlorawegInvestment allowInvestment={visibleOfferings.some((o) => o.offering_type === "investment")} allowAcquisition={visibleOfferings.some((o) => o.offering_type === "sale")} />
       ) : slug === "villa-des-coloms-ibiza" ? (
         <VillaDesColomsInvestment />
