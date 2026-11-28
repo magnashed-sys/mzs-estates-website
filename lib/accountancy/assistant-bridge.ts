@@ -7,16 +7,28 @@ const STAGING='https://senonkpxdtlhyhrubicg.supabase.co';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SHA=/^[a-f0-9]{64}$/;
 export type BridgeHeaders={draftId:string;filename:string;sha256:string;token:string};
+export function isAssistantBridgeEnvironment(env:NodeJS.ProcessEnv=process.env):boolean {
+ return env.VERCEL_ENV==='preview'&&env.NEXT_PUBLIC_SUPABASE_URL===STAGING;
+}
 export function isAssistantBridgeStaging(env:NodeJS.ProcessEnv=process.env):boolean {
- return env.VERCEL_ENV==='preview'&&
-  env.NEXT_PUBLIC_SUPABASE_URL===STAGING&&
+ return isAssistantBridgeEnvironment(env)&&
   env.MZS_ASSISTANT_PDF_BRIDGE_ENABLED==='true';
+}
+// Cookie authorization is accepted only for a same-origin browser fetch.
+// No CORS, cookie extraction, bearer-token export or service-role fallback.
+export function isSameOriginBridgeRequest(request:Request):boolean {
+ return request.headers.get('origin')===new URL(request.url).origin&&
+  request.headers.get('sec-fetch-site')==='same-origin'&&
+  !request.headers.has('authorization');
 }
 export function bridgeHeaders(headers:Headers):BridgeHeaders{
  const auth=headers.get('authorization')??'';
  // A publishable/secret Supabase API key is NOT a user JWT.
  const match=/^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.exec(auth);
  if(!match||match[1].length<80||match[1].length>8192)throw Error('unauthenticated');
+ return {...bridgeFileHeaders(headers),token:match[1]};
+}
+export function bridgeFileHeaders(headers:Headers):Omit<BridgeHeaders,'token'>{
  const draftId=headers.get('x-mzs-cost-draft-id')??'';
  const sha256=headers.get('x-mzs-file-sha256')??'';
  if(!UUID.test(draftId)||!SHA.test(sha256))throw Error('invalid_headers');
@@ -24,7 +36,7 @@ export function bridgeHeaders(headers:Headers):BridgeHeaders{
  try{filename=decodeURIComponent(headers.get('x-mzs-file-name')??'');}catch{throw Error('invalid_headers');}
  if(filename.length<5||filename.length>160||!filename.toLowerCase().endsWith('.pdf')||
   /[\x00-\x1f\x7f\/\\]/.test(filename))throw Error('invalid_headers');
- return {draftId,filename,sha256,token:match[1]};
+ return {draftId,filename,sha256};
 }
 export async function boundedPdf(request:Request):Promise<Uint8Array>{
  if(!/^application\/pdf(?:\s*;\s*[^;]+)?$/i.test(request.headers.get('content-type')??''))

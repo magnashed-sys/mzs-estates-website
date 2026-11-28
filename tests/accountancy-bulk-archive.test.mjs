@@ -19,6 +19,9 @@ test('historical Gamaservi original filenames map to correct legal years without
  }
 });
 test('tax PDFs remain reference only and file names are validated',()=>{
+ assert.equal(classify('INV_2024_00003.pdf',2026).fiscal_year,2024);
+ assert.equal(classify('INV_2025_00001.pdf',2026).fiscal_year,2025);
+ assert.equal(classify('document-2024110710493.pdf',2025).fiscal_year,2025);
  assert.equal(classify('70932 MZS ESTATES, S.L. - MOD.303 1º TRIM.2024.pdf',2026).category,'vat_return');
  assert.equal(classify('70932 MZS ESTATES, S.L. - MOD.200 2023.pdf',2026).category,'corporate_tax');
  assert.equal(classify('70932 MZS ESTATES, S.L. - MOD.390 0A 2023.pdf',2026).category,'vat_summary');

@@ -12,7 +12,7 @@ export function classifyPrivateAccountancyPdf(filename:string,defaultYear:number
    notes:'Original supplier invoice archived from a supplied PDF. Invoice date, amount, VAT and payment status must be checked against the original before any financial entry. No invoice, payment or VAT deduction is posted by this archival action.'
   };
  }
- const a=/\b(20\d{2})\b/g,years=[...base.matchAll(a)].map(m=>Number(m[1]));
+ const a=/(?<!\d)(20\d{2})(?!\d)/g,years=[...base.matchAll(a)].map(m=>Number(m[1]));
  const fiscal_year=years.find(y=>y>=2000&&y<=2199)??defaultYear;
  if(!Number.isInteger(fiscal_year)||fiscal_year<1900||fiscal_year>2199)throw Error('invalid_year');
  const type=/MOD[. _-]*200\b/i.test(base)?'corporate_tax':
