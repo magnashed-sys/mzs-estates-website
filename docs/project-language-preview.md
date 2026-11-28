@@ -1,6 +1,6 @@
 # Project presentations and rental calendars — Preview
 
-Extends the existing authenticated EN/NL/ES account language to the five private project presentations: Villa La Nucia, Marina Botafoch Apartment, Villa Can Juan Ibiza, Villa des Coloms Ibiza and Amsterdam Floraweg. Includes static project narratives, documented terms, photo captions and galleries, milestones, document controls, and both rental calendars.
+Extends the existing authenticated EN/NL/ES account language to the five private project presentations: Villa La Nucia, Marina Botafoc Apartment, Villa Can Juan Ibiza, Villa des Coloms Ibiza and Amsterdam Floraweg. Includes static project narratives, documented terms, photo captions and galleries, milestones, document controls, and both rental calendars.
 
 Calendar display dates, weekday/month labels, euro amounts, plural counts, validation and request results follow the account language. ISO date keys, Europe/Madrid day boundaries, pricing arithmetic, minimum stays, unavailable periods, configuration IDs and booking API payloads remain unchanged. The villa calendar's obsolete “Test mode only” label is replaced with the existing approval-pending explanation. Its minimum-stay error now displays the configured minimum rather than a hardcoded one night.
 
